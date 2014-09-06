@@ -1,0 +1,43 @@
+<h1>Ulyxes TclApi documentation</h1>
+TclApi consist of a couple of <a href="http://www.tcl.tk/" target="_top">Tcl</a>
+(Tool Command Language) files/procs which
+give a higher level interface to drive RTS (Robotic Total Station) from your
+computer. This API hides the differences among the different RTS.
+Ulyxes TclAPI is released under GNU GPL V2.0.
+&copy; Zoltan Siki siki (at) agt.bme.hu
+<p>It has been tested with the following type of instruments:
+<ul>
+<li>Leica TCA1800</li>
+<li>Leica TPS120x</li>
+<li>Leica TPS110x</li>
+<li>Leica DNA03</li>
+<li>Trimble 550x</li>
+<li>Garmin GPS18</li>
+<li>Leica GPS 500</li>
+</ul>
+
+<h2>Developers</h2>
+<ul>
+	<li>Zoltan Siki (2010-)</li>
+	<li>Daniel Moka (2012-)</li>
+	<li>Tamas Kiraly (2013-)</li>
+</ul>
+
+<h2>Supported OS (Operating System)</h2>
+<ul>
+<li>Linux (probably any distro, tested on Fedora and Ubuntu)</li>
+<li>Windows XP/Vista/7 (32 and 64 bit) (tested on XP/7)</li>
+<li>any other OS with Tcl installed (not tested)</li>
+</ul>
+<h2>Requirements</h2>
+<ul>
+<li>Tcl (Tool Command Language) 8.3 or newer must be installed</li>
+<li>at least one serial port or USB to serial converter (tested with Prolific)
+<li>serial cabel to connect the instrument to the computer</li>
+</ul>
+<h2>Files</h2>
+Besides the Tcl source files of the API (common.tcl, global.tcl, etc.)
+some sample applications are presented (robot.tcl, measureToPrism.tcl, etc.).
+<h2>Connection to the Ulyxes</h2>
+Ulyxes TclApi is part of a larger system, here is the overwiev of the whole
+system:<br /> <img src="ulyxes.png" />
