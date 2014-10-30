@@ -1,12 +1,22 @@
 #!/usr/bin/env python
 
 """
-only for testing purposes
-using leica GeoCom commands
+.. module:: localinterface.py
+   :platform: Unix, Windows
+   :synopsis: Ulyxes - an open source project to drive total stations and
+           publish observation results.
+           GPL v2.0 license
+           Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
+
+.. moduleauthor:: dr. Siki Zoltan <siki@agt.bme.hu>, Moka Daniel <mokadaniel@citromail.hu>
+
 """
 from interface import *
 
 class LocalInterface(Interface):
+    """
+    This local interface stands for using PyAPI wihtout any instrument. It is mainly for develping, not for testing or debugging.
+    """
     def __init__(self, name = 'Local'):
         super(LocalInterface, self).__init__(name)
         self.atr = 0

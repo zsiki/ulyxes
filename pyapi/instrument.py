@@ -38,7 +38,7 @@ class Instrument(object):
     
     def GetName(self):
         """
-        Get the name of the Instriment
+        Get the name of the Instrument
         """
         return self.name
 

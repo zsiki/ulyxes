@@ -1,22 +1,27 @@
 #!/usr/bin/env python
 """
-    <p>Ulyxes - an open source project to drive total stations and
-           publish observation results</p>
-    <p>GPL v2.0 license</p>
-    <p>Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu></p>
-    @author Zoltan Siki
-    @author Daniel Moka
-    @version 1.1
+.. module:: serialinterface.py
+   :platform: Unix, Windows
+   :synopsis: Ulyxes - an open source project to drive total stations and
+           publish observation results.
+           GPL v2.0 license
+           Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
+
+.. moduleauthor:: dr. Siki Zoltan <siki@agt.bme.hu>, Moka Daniel <mokadaniel@citromail.hu>
+
 """
 
 from interface import *
 import serial
+import re
 
 class SerialInterface(Interface):
-
+    """
+        This class contains ...
+    """
     def __init__(self, name, port, baud=9600, byteSize=8, parity=serial.PARITY_NONE, stop=1, timeout=12):
         self.state = self.IF_OK
-	self.name = name
+        self.name = name
         # open serial port
         try:
             self.ser = serial.Serial(port, baud, byteSize, parity, stop, timeout)
@@ -67,16 +72,20 @@ class SerialInterface(Interface):
         return 0
 
     def Send(self, msg):
-	if self.PutLine(msg) == 0:
-            return self.GetLine()
-        else:
-            return b''
+        msglist = re.split("\|", msg)
+        res = b""
+        #sending
+        for m in msglist:
+            if self.PutLine(m) == 0:
+                res += self.GetLine() + b"|"
+        if res.endswith(b"|"):
+            res = res[:-1]
+        w = ''.join(chr(x) for x in res)
+        return w
 
 if __name__ == "__main__":
     a = SerialInterface('test', 'COM4')
-    print a.GetName()
-    print a.GetState()
-    #print a.Send("%R1Q,9027:0,0,0,0,0")
-    while 1:
-        print a.GetLine()
-        print a.GetState()
+    print (a.GetName())
+    print (a.GetState())
+    print (a.Send('%R1Q,2008:1,0'))
+
