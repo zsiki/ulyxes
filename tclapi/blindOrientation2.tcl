@@ -84,7 +84,7 @@ if {[llength $lp] > 1} {
 }
 # Set Search Area
 set mer [::GetAngles]
-set dCenterHz [expr [GetVal 7 $mer] + $PI]
+set dCenterHz [expr {[GetVal 7 $mer] + $PI}]
 while {$dCenterHz >= $PI2} { set dCenterHz [expr {$dCenterHz - $PI2}] }
 set dCenterV [expr {($vma+$vmi)/2.0}]
 set dRangeHz [expr {$PI2-0.001}]
@@ -110,7 +110,7 @@ while {$found < 1} {
 	MoveRel 0.3 0
 	set mer [::GetAngles]
 	# Set search area again
-	set dCenterHz [expr [GetVal 7 $mer] + $PI]
+	set dCenterHz [expr {[GetVal 7 $mer] + $PI}]
 	while {$dCenterHz >= $PI2} { set dCenterHz [expr {$dCenterHz - $PI2}] }
 	if {[set res [::Send "%R1Q,9043:$dCenterHz,$dCenterV,$dRangeHz,$dRangeV,$bEnabled"]] != 0} {return $res}
 }
