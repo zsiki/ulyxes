@@ -116,11 +116,10 @@ while {1} {
 			puts $fgeo "{5 $id} {112 1} $res"
 		}
 		if {[info exist ftca]} {
-			puts $ftca "$id,[DMS [GetVal 7 $res]],[DMS [GetVal 8 $res]],[GetVal 9 $res],1,$atr"
+			puts $ftca "$id,[string trim [DMS [GetVal 7 $res]]],[string trim [DMS [GetVal 8 $res]]],[format "%.4f" [GetVal 9 $res]],1,$atr"
 		}
 		if {[info exists fcoo]} {
 			set res [Coords]
-puts $res
 			if {[llength $res]} { puts $fcoo "{5 $id} $res" }
 		}
 	}
