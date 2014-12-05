@@ -109,6 +109,31 @@ proc LockIn {} {
 	return $res
 }
 
+# Set fine adjust mode
+#	@param mode 0/1 angle tolerance or point tolerance
+#	@return mode or error code
+proc SetFineAdjust {{mode 0}} {
+	global buf
+	if {[set res [Send "%R1Q,9031:$mode"]] != 0} {
+		return $res
+	}
+	# process input buffer
+	set buflist [split $buf ",:"]
+	return [lrange $buflist 4 end]
+}
+
+# Get fine adjust mode
+#	@return mode 0/1 angle/point
+proc GetFineAdjust {} {
+	global buf
+	if {[set res [Send "%R1Q,9030:"]] != 0} {
+		return $res
+	}
+	# process input buffer
+	set buflist [split $buf ",:"]
+	return [lrange $buflist 4 end]
+}
+
 # Get atmospheric correction settings
 #	@return atmospheric settings as a list {lambda pressure drytemp wettemp}
 proc GetAtmCorr {} {
