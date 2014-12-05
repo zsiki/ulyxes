@@ -79,7 +79,7 @@ proc GetATR {} {
 proc SetLock {lock} {
 	if {[set res [Send "%R1Q,18007:$lock"]] != 0} {
 		# try old command for old instruments
-		if {[set res [Send "%R1Q,9018:$lock"]] != 0} {
+		if {[set res [Send "%R1Q,9020:$lock"]] != 0} {
 			return $res
 		}
 	}
