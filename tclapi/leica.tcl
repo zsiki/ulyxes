@@ -101,6 +101,14 @@ proc GetLock {} {
 	return [lindex $buflist 4]
 }
 
+# Start target locking
+#	@return 0 on success
+proc LockIn {} {
+	global buf
+	set res [Send "%R1Q,9013:"]
+	return $res
+}
+
 # Get atmospheric correction settings
 #	@return atmospheric settings as a list {lambda pressure drytemp wettemp}
 proc GetAtmCorr {} {
