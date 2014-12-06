@@ -109,6 +109,20 @@ proc LockIn {} {
 	return $res
 }
 
+# Automatic target positioning
+#	@param srchz search range horizontal in radian, default 5gon
+#	@param srcv search range vertical in radian, default 5gon
+#	@return 0 on success
+proc FineAdjust {{srchz 0.008} {srcv 0.008}} {
+	global buf
+	if {[set res [Send "%R1Q,9037:${srchz},${srcv}"]] != 0} {
+		return $res
+	}
+	# process input buffer
+	set buflist [split $buf ",:"]
+	return [lindex $buflist 4]
+}
+
 # Set fine adjust mode
 #	@param mode 0/1 angle tolerance or point tolerance
 #	@return mode or error code

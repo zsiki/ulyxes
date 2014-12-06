@@ -64,6 +64,7 @@ if {$dist} {
 		SetLock 1	;# lock on target
 		LockIn
 #		MoveRel 0 0 "RAD" 1	;# target on prism with ATR
+#		TODO FineAdjust????
 	}
 } else {
 	SetATR 0
