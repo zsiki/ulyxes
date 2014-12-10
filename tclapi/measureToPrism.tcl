@@ -94,7 +94,7 @@ while {1} {
 	}
 	# write data to standard output
 	if {[llength $res] >= 2} {
-		if {[GetVal 9 $res] == ""} {
+		if {[GetVal 9 $res] != ""} {
 			set sd [GetVal 9 $res]
 		}
 		set dy [format "%10.4f" [expr {$sd * sin([GetVal 8 $res]) * sin([GetVal 7 $res])}]]
