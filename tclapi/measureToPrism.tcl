@@ -99,7 +99,7 @@ while {1} {
 		}
 		set dy [format "%10.4f" [expr {$sd * sin([GetVal 8 $res]) * sin([GetVal 7 $res])}]]
 		set dx [format "%10.4f" [expr {$sd * sin([GetVal 8 $res]) * cos([GetVal 7 $res])}]]
-		puts "$dy $dx [DMS [GetVal 7 $res]] [DMS [GetVal 8 $res]] [format "%10.4f" [GetVal 9 $res]] [clock format $systemTime -format %H:%M:%S]"
+		puts "$dy $dx [DMS [GetVal 7 $res]] [DMS [GetVal 8 $res]] [format "%10.4f" $sd] [clock format $systemTime -format %H:%M:%S]"
 	} else {
 		puts "*** $res [clock format $systemTime -format %H:%M:%S]"
 	}
