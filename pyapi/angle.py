@@ -215,6 +215,21 @@ class Angle(object):
         """
         self.value += a.GetAngle('RAD')
 
+    def __sub__(self, a):
+        """ substract angles
+
+            :param a: Angle to substract
+            :returns: difference of the two angles (Angle)
+        """
+        return Angle(self.value - a.GetAngle('RAD'), 'RAD')
+
+    def __isub__(self, a):
+        """ substract an agle from current
+
+            :param a: Angle to substract
+        """
+        self.value -= a.GetAngle('RAD')
+
 
 if __name__ == "__main__":
     a = Angle("152-23-45", "DMS")
@@ -224,3 +239,4 @@ if __name__ == "__main__":
     print b.GetAngle("DMS")
     c = a + b
     print c.GetAngle("DMS")
+    print (a-b).GetAngle("DMS")
