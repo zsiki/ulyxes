@@ -220,3 +220,7 @@ if __name__ == "__main__":
     a = Angle("152-23-45", "DMS")
     for unit in ['RAD', 'DMS', 'GON', 'NMEA', 'DEG', 'PDEG', 'MIL']:
         print a.GetAngle(unit)
+    b = Angle(1.1111, 'PDEG')
+    print b.GetAngle("DMS")
+    c = a + b
+    print c.GetAngle("DMS")
