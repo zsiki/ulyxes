@@ -31,7 +31,7 @@ class Interface(object):
         """
         return self.name
 
-    def GetState(self):û
+    def GetState(self):
         """
         Get the state of the interface being used.
         """
