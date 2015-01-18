@@ -7,23 +7,28 @@
            GPL v2.0 license
            Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
 
-.. moduleauthor:: dr. Siki Zoltan <siki@agt.bme.hu>, Moka Daniel <mokadaniel@citromail.hu>
+.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokadaniel@citromail.hu>
 
 """
 
-from measureunit import *
-from angle import *
+from measureunit import MeasureUnit
+from angle import Angle
 import re
 
 class LeicaMeasureUnit(MeasureUnit):
-    """
-        This class contains the Leica TCA1800/RTS1101 specific functions
+    """ This class contains the Leica robotic total station specific functions
+        common to all leica robot TS
     """
     def __init__(self, name = 'Leica generic', type = 'TPS'):
+		""" Constructor to leica generic ts
+
+			:param name: name of ts
+			:param type: type od ts
+		"""
         # call super class init
         super(LeicaMeasureUnit, self).__init__(name, type)
 
-    def Result(self, msgs, anss):
+    def Result(self, msgs, ans):
         """
         This function ....
         """
@@ -323,5 +328,3 @@ class LeicaMeasureUnit(MeasureUnit):
 
         """
         return '%R1Q,9028:'
-
-
