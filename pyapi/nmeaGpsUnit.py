@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-    Leica TCA1800/RTS1200 specific functions
+    NMEA GPS meausre unit
     <p>Ulyxes - an open source project to drive total stations and
            publish observation results</p>
     <p>GPL v2.0 license</p>
@@ -10,11 +10,17 @@
     @version 1.1
 """
 
-from angle import *
-from measureunit import *
+from measureunit import MeasureUnit
 
 class NmeaGpsUnit(MeasureUnit):
+	""" NMEA measure unit
+	"""
     def __init__(self, name = 'Nmea Gps', type = '-'):
+		""" constructor for nmea gps
+
+			:param name: name of nmea unit
+			:param type: type of nmea unit
+		"""
         # call super class init
         super(NmeaGpsUnit, self).__init__(name, type)
 

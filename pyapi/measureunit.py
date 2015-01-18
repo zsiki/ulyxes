@@ -8,29 +8,35 @@
            GPL v2.0 license
            Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
 
-.. moduleauthor:: dr. Siki Zoltán <siki@agt.bme.hu>, Moka Dániel <mokbme@gmail.com>
+.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokbme@gmail.com>
 
 """
 
 class MeasureUnit(object):
-    """
-        This class contains general functions for Measure Units.
+    """ Virtual base clase for measure units
     """
     def __init__(self, name = 'None', type = 'None'):
+        """ constructor for measure unit
+
+            :param name: name of measure unit
+            :param type: type of measure unit
+        """
         self.name = name
         self.type = type
 
     def GetName(self):
+        """ Get name of measure unit
+
+            :returns: name of measure unit
+        """
         return self.name
 
     def GetType(self):
+        """ Get type of measure unit
+
+            :returns: type of measure unit
+        """
         return self.type
-
-    def Result(self, msg, ans):
-        return None
-
-    def Move(self, hz, v, units='RAD', atr=0):
-        pass
 
 if __name__ == "__main__":
     a = MeasureUnit()

@@ -8,25 +8,30 @@
            GPL v2.0 license
            Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
 
-.. moduleauthor:: dr. Siki Zoltan <siki@agt.bme.hu>, Moka Daniel <mokadaniel@citromail.hu>
+.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokadaniel@citromail.hu>
 
 """
-from interface import *
+from interface import Interface
 
 class LocalInterface(Interface):
     """
-    This local interface stands for using PyAPI wihtout any instrument. It is mainly for develping, not for testing or debugging.
+    This local interface stands for using PyAPI wihtout any instrument. It is mainly for developing or testing
     """
     def __init__(self, name = 'Local'):
         super(LocalInterface, self).__init__(name)
         self.atr = 0
-	self.lock = 0
+        self.lock = 0
         self.edmmode = 0
 
     def Send(self, msg):
+        """ Implements few messages few messages and returns random result
+
+            :param msg: message to send
+            :returns: message specific answer
+        """
         id = int(msg.split(',')[1].split(':')[0])
         ans = '%R1P,0,0:0'
-	if id == 9027:
+        if id == 9027:
             # move
             ans = '%R1P,0,0:0'
         elif id == 18005:

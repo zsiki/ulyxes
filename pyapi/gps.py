@@ -9,10 +9,16 @@
     @author Daniel Moka
     @version 1.1
 """
-from instrument import *
+from instrument import Instrument
 
 class GPS(Instrument):
     def __init__(self, name, measureUnit, measureInterf):
+        """ constructor for gps
+
+            :param name: name of gps instrument
+            :param measureUnit: reference to measure unit
+            :param measureInterf: reference to measure interface
+        """
     # call super class init
         super(GPS, self).__init__(name, measureUnit, measureInterf)
 

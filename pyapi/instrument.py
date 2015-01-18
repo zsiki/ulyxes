@@ -11,8 +11,6 @@
 
 """
 
-from interface import *
-from measureunit import *
 import re
 
 class Instrument(object):
@@ -25,24 +23,30 @@ class Instrument(object):
         self.measureInterf = measureInterf
 
     def GetInterface(self):
-        """
-        Get the measure interface
+        """ Get the measure interface
+
+            :returns: reference to interface
         """
         return self.measureInterf
 
     def GetMeasureUnit(self):
-        """
-        Get the measure unit
+        """ Get the measure unit
+
+            :returns: reference to measure unit
         """
         return self.measureUnit
     
     def GetName(self):
-        """
-        Get the name of the Instrument
+        """ Get the name of the Instrument
+        
+            :returns: instrument name
         """
         return self.name
 
 if __name__ == "__main__":
+    from interface import Interface
+    from measureunit import MeasureUnit
+
     mu = MeasureUnit('Test', 'Proba')
     iface = Interface('interf')
     print mu.GetName()
