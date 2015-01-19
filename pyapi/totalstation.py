@@ -123,8 +123,13 @@ class TotalStation(Instrument):
         ans = self.measureInterf.Send(msg)
         return self.measureUnit.Result(msg, ans)
 
-    def Measure(self, prg = 1, wait = 12000, incl = 0):
-        msg = self.measureUnit.MeasureMsg(prg, wait, incl)
+    def Measure(self, prg = 1, incl = 0):
+        msg = self.measureUnit.MeasureMsg(prg, incl)
+        ans = self.measureInterf.Send(msg)
+        return self.measureUnit.Result(msg, ans)
+
+    def GetMeasure(self, wait = 12000, incl = 0):
+        msg = self.measureUnit.GetMeasureMsg(wait, incl)
         ans = self.measureInterf.Send(msg)
         return self.measureUnit.Result(msg, ans)
 
@@ -178,4 +183,13 @@ if __name__ == "__main__":
     mu = LeicaMeasureUnit("TCA 1800")
     iface = SerialInterface("rs-232", "/dev/ttyUSB0")
     ts = TotalStation("Leica", mu, iface)
-    print (ts.Move(Angle(0), Angle(0)))
+    print (ts.GetATR())
+    print (ts.SetATR(1))
+    print (ts.GetATR())
+    if ts.GetATR()['atrStatus'] == 0:
+        ts.SetATR(1)
+    print (ts.GetAngles())
+    ts.Measure()
+    print ts.GetMeasure()
+    #print (ts.Move(Angle(0), Angle(90, 'DEG')))
+    #print (ts.ChangeFace())
