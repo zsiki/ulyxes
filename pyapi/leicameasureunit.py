@@ -42,8 +42,9 @@ class LeicaMeasureUnit(MeasureUnit):
         'CHANGEFACE': 9028
     }
 
-    # TODO
-    edmMode = {'0': 'IR Std', '1': 'IR Fast', '2': 'LO Std', '3': 'RL Std', '4': 'IR Trk', '6': 'RL Trk', '7': 'IR Avg', '8': 'LO Avg', '9': 'RL Avg'}
+    # TODO use these codes
+    edmMode = {'STANDARD': 0, 'PRECISE': 1, 'FAST': 2, 'TRACKING': 3, 
+        'AVERAGING': 4, 'FASTTRACKING': 5}
 
     def __init__(self, name = 'Leica generic', type = 'TPS'):
         """ Constructor to leica generic ts
@@ -223,24 +224,21 @@ class LeicaMeasureUnit(MeasureUnit):
         return '%R1Q,{0:d}:'.format(self.codes['GETSTN'])
 
     def SetEDMModeMsg(self, mode):
-        """
-        Message function for set ATR status on/off
+        """ Set EDM mode
         
-        :param atr: 0/1 = off/on
-        :rtype: 0 or error code
-          
+        :param mode: string name 
+        :returns: set edm mode message
         """
-        #2 = IR
-        #5 = Rl
-        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETEDMMODE'], mode)
+        if type(mode) is str:
+            imode = self.edmMode[mode]
+        else:
+            imode = mode
+        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETEDMMODE'], imode)
 
     def GetEDMModeMsg(self):
-        """
-        Message function for set ATR status on/off
+        """ Get EDM mode
         
-        :param atr: 0/1 = off/on
-        :rtype: 0 or error code
-          
+            :returns: get edm mode message
         """
         return '%R1Q,{0:d}:'.format(self.codes['GETEDMMODE'])
 
@@ -269,7 +267,7 @@ class LeicaMeasureUnit(MeasureUnit):
         
             :param hz: horizontal direction (Angle)
             :param v: zenith angle (Angle)
-            :param atr: 0/1 atr off/on
+            :param atr: 0/1 atr off/on, default off
             :returns: rotate message
 
         """
@@ -279,7 +277,7 @@ class LeicaMeasureUnit(MeasureUnit):
         return '%R1Q,{0:d}:{1:f},{2:f},0,{3:d},0'.format(self.codes['MOVE'], \
             hz_rad, v_rad, atr)
 
-    def MeasureMsg(self, prg = 1, incl = 0):
+    def MeasureMsg(self, prg = 0, incl = 0):
         """ Measure distance
         
             :param prg: measure program 1/2/3/... = default/track/clear..., optional (default 1)
