@@ -19,18 +19,45 @@ class LeicaMeasureUnit(MeasureUnit):
     """ This class contains the Leica robotic total station specific functions
         common to all leica robot TS
     """
-    def __init__(self, name = 'Leica generic', type = 'TPS'):
-		""" Constructor to leica generic ts
 
-			:param name: name of ts
-			:param type: type od ts
-		"""
+    codes = {
+        'SETATR': 9018,
+        'GETATR': 9019,
+        'SETLOCK': 9020,
+        'GETLOCK': 9021,
+        'SETATMCORR': 2028,
+        'GETATMCORR': 2029,
+        'SETREFCORR': 2030,
+        'GETREFCORR': 2031,
+        'GETSTN': 2009,
+        'SETSTN': 2010,
+        'SETEDMMODE': 2020,
+        'GETEDMMODE': 2021,
+        'SETORI': 2113,
+        'MOVE': 9027,
+        'MEASURE': 2008,
+        'GETMEASURE': 2108,
+        'GETDIST': 2108,
+        'COORDS': 2082,
+        'GETANGLES': 2003,
+        'CHANGEFACE': 9028
+    }
+
+    def __init__(self, name = 'Leica generic', type = 'TPS'):
+        """ Constructor to leica generic ts
+
+            :param name: name of ts
+            :param type: type od ts
+        """
         # call super class init
         super(LeicaMeasureUnit, self).__init__(name, type)
 
-    def Result(self, msgs, ans):
-        """
-        This function ....
+    def Result(self, msgs, anss):
+        """ Parse answer from message
+
+            :param msgs: messages sent to instrument
+            :param anss: aswers got from instrument
+            :returns: dictionary
         """
         msgList = re.split('\|', msgs)
         ansList = re.split('\|', anss)
@@ -39,90 +66,86 @@ class LeicaMeasureUnit(MeasureUnit):
             # get command id form message
             msgBufflist = re.split(':|,',msg)
             commandID = msgBufflist[1]
-        # get error code from answer
+            # get error code from answer
             ansBufflist = re.split(':|,',ans)
             errCode = ansBufflist[3]
             if errCode != '0':
                 # ??? TODO ?Logging?
                 return {'errorCode': errCode}
-            else:
-                res['errorCode'] = 0
-                #Measure()
-
-                if commandID == '2108':
-                    hz = Angle(float(ansBufflist[4]))
-                    v = Angle(float(ansBufflist[5]))
-                    dist = ansBufflist[6]
-                    res['hz'] = hz.GetAngle('DMS')
-                    res['v'] = v.GetAngle('DMS')
-                    res['distance'] = dist
-                #MeasureDistAng
-                elif commandID == '17017':
-                    hz = Angle(float(ansBufflist[4]))
-                    v = Angle(float(ansBufflist[5]))
-                    dist = ansBufflist[6]
-                    res['hz'] =hz.GetAngle('DMS')
-                    res['v'] =v.GetAngle('DMS')
-                    res['distance'] = dist
-                #GetATR()
-                elif commandID == '9019':
-                    atrStat = ansBufflist[4]
-                    res['atrStatus'] = atrStat
-                #GetLockStatus()
-                elif commandID == '9021':
-                    lockStat = ansBufflist[4]
-                    res['lockStat'] = lockStat
-                #GetAtmCorr()
-                elif commandID == '2029':
-                    res['lambda']= ansBufflist[4]
-                    res['pressure'] = ansBufflist[5]
-                    res['dryTemp'] = ansBufflist[6]
-                    res['wetTemp'] = ansBufflist[7]
-                #GetRefCorr()
-                elif commandID == '2031':
-                    res['status'] = ansBufflist[4]
-                    res['earthRadius'] = ansBufflist[5]
-                    res['refractiveScale'] = ansBufflist[6]
-                #GetStation()
-                elif commandID == '2009':
-                    res['easting'] = ansBufflist[4]
-                    res['northing'] = ansBufflist[5]
-                    res['elevation'] = ansBufflist[6]
-                # GetEDMMode()
-                #PASTE the hashed(commented) part TO 1200 UNIT
-                elif commandID == '2021':
-                    res['edmMode'] = ansBufflist[4]
-                    #edmModeMap={'0': 'IR Std', '1': 'IR Fast', '2': 'LO Std', '3': 'RL Std', '4': 'IR Trk', '6': 'RL Trk', '7': 'IR Avg', '8': 'LO Avg', '9': 'RL Avg'}
-                #Coords()
-                elif commandID == '2082':
-                    res['y'] = ansBufflist[4]
-                    res['x'] = ansBufflist[5]
-                    res['z'] = ansBufflist[6]
-                #GetAngles()
-                elif commandID == '2003':
-                    hz = Angle(float(ansBufflist[4]))
-                    v = Angle(float(ansBufflist[5]))
-                    res['hz'] = hz.GetAngle('DMS')
-                    res['v'] = v.GetAngle('DMS')
+            #Measure()
+            if commandID == '2108':
+                hz = Angle(float(ansBufflist[4]))
+                v = Angle(float(ansBufflist[5]))
+                dist = ansBufflist[6]
+                res['hz'] = hz.GetAngle('DMS')
+                res['v'] = v.GetAngle('DMS')
+                res['distance'] = dist
+            #MeasureDistAng
+            elif commandID == '17017':
+                hz = Angle(float(ansBufflist[4]))
+                v = Angle(float(ansBufflist[5]))
+                dist = ansBufflist[6]
+                res['hz'] =hz.GetAngle('DMS')
+                res['v'] =v.GetAngle('DMS')
+                res['distance'] = dist
+            #GetATR()
+            elif commandID == '9019':
+                atrStat = ansBufflist[4]
+                res['atrStatus'] = atrStat
+            #GetLockStatus()
+            elif commandID == '9021':
+                lockStat = ansBufflist[4]
+                res['lockStat'] = lockStat
+            #GetAtmCorr()
+            elif commandID == '2029':
+                res['lambda']= ansBufflist[4]
+                res['pressure'] = ansBufflist[5]
+                res['dryTemp'] = ansBufflist[6]
+                res['wetTemp'] = ansBufflist[7]
+            #GetRefCorr()
+            elif commandID == '2031':
+                res['status'] = ansBufflist[4]
+                res['earthRadius'] = ansBufflist[5]
+                res['refractiveScale'] = ansBufflist[6]
+            #GetStation()
+            elif commandID == '2009':
+                res['easting'] = ansBufflist[4]
+                res['northing'] = ansBufflist[5]
+                res['elevation'] = ansBufflist[6]
+            # GetEDMMode()
+            #PASTE the hashed(commented) part TO 1200 UNIT
+            elif commandID == '2021':
+                res['edmMode'] = ansBufflist[4]
+                #edmModeMap={'0': 'IR Std', '1': 'IR Fast', '2': 'LO Std', '3': 'RL Std', '4': 'IR Trk', '6': 'RL Trk', '7': 'IR Avg', '8': 'LO Avg', '9': 'RL Avg'}
+            #Coords()
+            elif commandID == '2082':
+                res['y'] = ansBufflist[4]
+                res['x'] = ansBufflist[5]
+                res['z'] = ansBufflist[6]
+            #GetAngles()
+            elif commandID == '2003':
+                hz = Angle(float(ansBufflist[4]))
+                v = Angle(float(ansBufflist[5]))
+                res['hz'] = hz.GetAngle('DMS')
+                res['v'] = v.GetAngle('DMS')
         return res
 
     def SetATRMsg(self, atr):
-        """
-        Message function for set ATR status on/off
+        """ Set ATR status on/off
         
         :param atr: 0/1 = off/on
-        :rtype: 0 or error code
+        :return: set atr message string
           
         """
-        return '%%R1Q,9018:%d' % (atr)
+        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETATR'], atr)
 
     def GetATRMsg(self):
-        """
-        Message function for get ATR status
-        :rtype: 0 or error code
+        """ Get ATR status
+
+        :returns: get atr message
           
         """
-        return '%R1Q,9019:'
+        return '%R1Q,{0:d}:'.format(self.codes['GETATR'])
 
     def SetLockMsg(self, lock):
         """
@@ -132,7 +155,7 @@ class LeicaMeasureUnit(MeasureUnit):
         :rtype: 0 or error code
           
         """
-        return '%%R1Q,9020:%d' % (lock)
+        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETLOCK'], lock)
 
     def GetLockMsg(self):
         """
@@ -141,7 +164,7 @@ class LeicaMeasureUnit(MeasureUnit):
         :rtype: 0 or error code
           
         """
-        return '%R1Q,9021:'
+        return '%R1Q,{0:d}:'.format(self.codes['GETLOCK'])
 
     def SetAtmCorrMsg(self, valueOfLambda, pres, dry, wet):
         """
@@ -154,7 +177,8 @@ class LeicaMeasureUnit(MeasureUnit):
         :rtype: 0 or error code
           
         """
-        return '%%R1Q,2028:%f,%f,%f,%f' % (valueOfLambda, pres, dry, wet)
+        return '%R1Q,{0:d}:{1:f},{2:f},{3:f},{4:f}'.format( \
+            self.codes['SETATMCORR'], valueOfLambda, pres, dry, wet)
 
     def GetAtmCorrMsg(self):
         """
@@ -163,7 +187,7 @@ class LeicaMeasureUnit(MeasureUnit):
         :rtype: atmospheric settings as a dictionary
           
         """
-        return '%R1Q,2029:'
+        return '%R1Q,{0:d}:'.format(self.codes['GETATMCORR'])
 
     def SetRefCorrMsg(self, status, earthRadius, refracticeScale):
         """
@@ -175,7 +199,8 @@ class LeicaMeasureUnit(MeasureUnit):
         :rtype: 0 or error code
           
         """
-        return '%%R1Q,2030:%d,%f,%f' % (status, earthRadius, refracticeScale)
+        return '%R1Q,{0:d}:{1:d},{2:f},{3:f}'.format(self.codes['SETREFCORR'], \
+            status, earthRadius, refracticeScale)
 
     def GetRefCorrMsg(self):
         """
@@ -184,7 +209,7 @@ class LeicaMeasureUnit(MeasureUnit):
         :rtype: refraction correction as a dictionary
           
         """
-        return '%R1Q,2031:'
+        return '%R1Q,{0:d}:'.format(self.codes['GETREFCORR'])
 
     def SetStationMsg(self, e, n, z):
         """
@@ -196,7 +221,8 @@ class LeicaMeasureUnit(MeasureUnit):
         :rtype: 0 or error code
           
         """
-        return '%%R1Q,2010:%f,%f,%f' % (e, n, z)
+        return '%R1Q,{0:d}:{1:f},{2:f},{3:f}'.format(self.codes['SETSTN'], \
+            e, n, z)
 
     def GetStationMsg(self):
         """
@@ -205,7 +231,7 @@ class LeicaMeasureUnit(MeasureUnit):
         :rtype: list {{37 N} {38 E} {39 Z}}
           
         """
-        return '%R1Q,2009:'
+        return '%R1Q,{0:d}:'.format(self.codes['GETSTN'])
 
     def SetEDMModeMsg(self, mode):
         """
@@ -217,7 +243,7 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         #2 = IR
         #5 = Rl
-        return '%%R1Q,2020:%d' % (mode)
+        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETEDMMODE'], mode)
 
     def GetEDMModeMsg(self):
         """
@@ -227,68 +253,64 @@ class LeicaMeasureUnit(MeasureUnit):
         :rtype: 0 or error code
           
         """
-        return '%R1Q,2021:'
+        return '%R1Q,{0:d}:'.format(self.codes['GETEDMMODE'])
 
-    def SetOriMsg(self, ori, units ='RAD'):
-        """
-        Message function for set ATR status on/off
+    def SetOriMsg(self, ori):
+        """ Set orientation angle
         
-        :param atr: 0/1 = off/on
+        :param ori: bearing of direction (Angle)
         :rtype: 0 or error code
           
         """
-        ori_rad = Angle(ori, units).GetAngle('RAD')
-        return '%%R1Q,2113:%f' % (ori_rad)
+        ori_rad = ori.GetAngle('RAD')
+        return '%R1Q,{0:d}:{1:f}'.format(self.codes['SETORI'], ori_rad)
 
+    # TODO remove from generic
     def SetRCSMsg(self, rcs):
-        """
-        Message function for set ATR status on/off
+        """ Set remote control
         
-        :param atr: 0/1 = off/on
-        :rtype: 0 or error code
+        :param rcs: 0/1 = off/on
+        :returns: set remote control message
           
         """
         return '%%R1Q,18009:%f' % (rcs)
 
-    def MoveMsg(self, hz, v, units='RAD', atr=0):
-        """
-        Message function to rotate instrument to given direction
+    def MoveMsg(self, hz, v, atr=0):
+        """ Rotate instrument to direction with ATR or without ATR
         
-        :param hz: horizontal direction
-        :param v: zenith angle
-        :param units: units for angles, optional (default RAD)
-        
-        
-        :rtype: 0 or error code   
-
-        Example::
-
-        >>> mu = LeicaMeasureUnit("TCA 1800")
-        >>> iface = SerialInterface("rs-232", "COM4")
-        >>> ts = TotalStation("Leica", mu, iface)
-        >>> print (ts.Move())
+            :param hz: horizontal direction (Angle)
+            :param v: zenith angle (Angle)
+            :param atr: 0/1 atr off/on
+            :returns: rotate message
 
         """
-        
-        hz_rad = ChangeAngle(hz,units,'RAD')
-        v_rad = ChangeAngle(v,units,'RAD')
         # change angles to radian
-        hz_rad = Angle(hz, units).GetAngle('RAD')
-        v_rad = Angle(v, units).GetAngle('RAD')
-        return '%%R1Q,9027:%f,%f,0,%d,0' % (hz_rad, v_rad, atr)
+        hz_rad = hz.GetAngle('RAD')
+        v_rad = v.GetAngle('RAD')
+        return '%R1Q,{0:d}:{1:f},{2:f},0,{3:d},0'.format(self.codes['MOVE'], \
+            hz_rad, v_rad, atr)
 
-    def MeasureMsg(self, prg = 2, wait = 12000, incl = 0):
-        """
-        Message function for measuring distance
+    def MeasureMsg(self, prg = 1, incl = 0):
+        """ Measure distance
         
-        :param prg: measure program 1/2/3/... = default/track/clear..., optional (default 1)
-        :param wait: time in ms, optional (default 12000)
-        :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
+            :param prg: measure program 1/2/3/... = default/track/clear..., optional (default 1)
+            :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
        
-        :rtype: -  
+            :returns: measure message
         """
-        return '%%R1Q,2008:%d,%d|%%R1Q,2108:%d,%d' % (prg, incl, wait, incl)
+        return '%R1Q,{0:d}:{1:d},{2:d}'.format(self.codes['MEASURE'], prg, incl)
+        
+    def GetMeasureMsg(self, wait = 12000, incl = 0):
+        """ Get measured distance
 
+            :param wait: time in ms, optional (default 12000)
+            :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
+            :returns: get simple measurement message
+        """
+        return '%R1Q,{0:d}:{1:d},{2:d}'.format(self.codes['GETMEASURE'], \
+            prg, incl, wait, incl)
+
+    # TODO remove from generic
     def MeasureDistAngMsg(self):
         """
         Message function for
@@ -297,24 +319,23 @@ class LeicaMeasureUnit(MeasureUnit):
         return '%R1Q,17017:2'
 
     def CoordsMsg (self, wait = 1000, incl = 0):
-        """
-        Message function for reading coordinates from instrument calculated from last distance measurement
+        """ Get coordinates
         
-        :param wait: wait-time in ms, optional (default 1000)
-        :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
-        :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
-       
-        :rtype: -  
+            :param wait: wait-time in ms, optional (default 1000)
+            :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
+            :returns: get coordinates message
         """
-        return '%%R1Q,2082:%d,%d' % (wait, incl)
+        return '%R1Q,{0:d}:{1:d},{2:d}'.format(self.codes['COORDS'], \
+            wait, incl)
 
     def GetAnglesMsg(self):
-        """
-        Message function for reading angles from instrument
+        """ Get angles
 
+                :returns: get angles message
         """
-        return '%R1Q,2003:0'
+        return '%R1Q,{0:d}:0'.format(self.codes['GETANGLES'])
 
+    # TODO
     def ClearDistanceMsg(self):
         """
         Message for clearing distance
@@ -323,8 +344,8 @@ class LeicaMeasureUnit(MeasureUnit):
         return '%R1Q,2082:1000,1'
 
     def ChangeFaceMsg(self):
-        """
-        Message for changing the face of instrument
+        """ Change face
 
+            :returns: change face message
         """
-        return '%R1Q,9028:'
+        return '%R1Q,{0:d}:'.format(self.codes['CHANGEFACE'])
