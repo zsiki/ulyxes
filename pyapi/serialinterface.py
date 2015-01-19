@@ -104,13 +104,10 @@ class SerialInterface(Interface):
                 res += self.GetLine() + b"|"
         if res.endswith(b"|"):
             res = res[:-1]
-        # TODO str?
-        w = ''.join(chr(x) for x in res)
-        return w
+        return res
 
 if __name__ == "__main__":
-    a = SerialInterface('test', 'COM4')
+    a = SerialInterface('test', '/dev/ttyUSB0')
     print (a.GetName())
     print (a.GetState())
     print (a.Send('%R1Q,2008:1,0'))
-
