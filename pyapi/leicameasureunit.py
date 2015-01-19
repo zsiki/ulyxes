@@ -23,8 +23,8 @@ class LeicaMeasureUnit(MeasureUnit):
     codes = {
         'SETATR': 9018,
         'GETATR': 9019,
-        'SETLOCK': 9020,
-        'GETLOCK': 9021,
+        'SETLOCK': 18007,
+        'GETLOCK': 18008,
         'SETATMCORR': 2028,
         'GETATMCORR': 2029,
         'SETREFCORR': 2030,
@@ -37,11 +37,13 @@ class LeicaMeasureUnit(MeasureUnit):
         'MOVE': 9027,
         'MEASURE': 2008,
         'GETMEASURE': 2108,
-        'GETDIST': 2108,
         'COORDS': 2082,
         'GETANGLES': 2003,
         'CHANGEFACE': 9028
     }
+
+    # TODO
+    edmMode = {'0': 'IR Std', '1': 'IR Fast', '2': 'LO Std', '3': 'RL Std', '4': 'IR Trk', '6': 'RL Trk', '7': 'IR Avg', '8': 'LO Avg', '9': 'RL Avg'}
 
     def __init__(self, name = 'Leica generic', type = 'TPS'):
         """ Constructor to leica generic ts
@@ -65,22 +67,18 @@ class LeicaMeasureUnit(MeasureUnit):
         for msg, ans in zip(msgList, ansList):
             # get command id form message
             msgBufflist = re.split(':|,',msg)
-            commandID = msgBufflist[1]
+            commandID = int(msgBufflist[1])
             # get error code from answer
             ansBufflist = re.split(':|,',ans)
-            errCode = ansBufflist[3]
-            if errCode != '0':
+            errCode = int(ansBufflist[3])
+            if errCode != 0:
                 # ??? TODO ?Logging?
                 return {'errorCode': errCode}
-            #Measure()
-            if commandID == '2108':
-                hz = Angle(float(ansBufflist[4]))
-                v = Angle(float(ansBufflist[5]))
-                dist = ansBufflist[6]
-                res['hz'] = hz.GetAngle('DMS')
-                res['v'] = v.GetAngle('DMS')
-                res['distance'] = dist
-            #MeasureDistAng
+            if commandID == self.codes['GETMEASURE']:
+                res['hz'] = Angle(float(ansBufflist[4]))
+                res['v'] = Angle(float(ansBufflist[5]))
+                res['distance'] = float(ansBufflist[6])
+            # TODO MeasureDistAng
             elif commandID == '17017':
                 hz = Angle(float(ansBufflist[4]))
                 v = Angle(float(ansBufflist[5]))
@@ -88,46 +86,37 @@ class LeicaMeasureUnit(MeasureUnit):
                 res['hz'] =hz.GetAngle('DMS')
                 res['v'] =v.GetAngle('DMS')
                 res['distance'] = dist
-            #GetATR()
-            elif commandID == '9019':
-                atrStat = ansBufflist[4]
-                res['atrStatus'] = atrStat
+            elif commandID == self.codes['GETATR']:
+                res['atrStatus'] = int(ansBufflist[4])
             #GetLockStatus()
-            elif commandID == '9021':
-                lockStat = ansBufflist[4]
-                res['lockStat'] = lockStat
+            elif commandID == self.codes['GETLOCK']:
+                res['lockStat'] = int(ansBufflist[4])
             #GetAtmCorr()
-            elif commandID == '2029':
+            elif commandID == self.codes['GETATMCORR']:
                 res['lambda']= ansBufflist[4]
-                res['pressure'] = ansBufflist[5]
-                res['dryTemp'] = ansBufflist[6]
-                res['wetTemp'] = ansBufflist[7]
+                res['pressure'] = float(ansBufflist[5])
+                res['dryTemp'] = float(ansBufflist[6])
+                res['wetTemp'] = float(ansBufflist[7])
             #GetRefCorr()
-            elif commandID == '2031':
+            elif commandID == self.codes['GETREFCORR']:
                 res['status'] = ansBufflist[4]
-                res['earthRadius'] = ansBufflist[5]
-                res['refractiveScale'] = ansBufflist[6]
-            #GetStation()
-            elif commandID == '2009':
-                res['easting'] = ansBufflist[4]
-                res['northing'] = ansBufflist[5]
-                res['elevation'] = ansBufflist[6]
-            # GetEDMMode()
-            #PASTE the hashed(commented) part TO 1200 UNIT
-            elif commandID == '2021':
-                res['edmMode'] = ansBufflist[4]
-                #edmModeMap={'0': 'IR Std', '1': 'IR Fast', '2': 'LO Std', '3': 'RL Std', '4': 'IR Trk', '6': 'RL Trk', '7': 'IR Avg', '8': 'LO Avg', '9': 'RL Avg'}
+                res['earthRadius'] = float(ansBufflist[5])
+                res['refractiveScale'] = float(ansBufflist[6])
+            elif commandID == self.codes['GETSTN']:
+                res['easting'] = float(ansBufflist[4])
+                res['northing'] = float(ansBufflist[5])
+                res['elevation'] = float(ansBufflist[6])
+            elif commandID == self.codes['GETEDMMODE']:
+                res['edmMode'] = int(ansBufflist[4])
             #Coords()
-            elif commandID == '2082':
-                res['y'] = ansBufflist[4]
-                res['x'] = ansBufflist[5]
-                res['z'] = ansBufflist[6]
+            elif commandID == self.codes['COORDS']:
+                res['y'] = float(ansBufflist[4])
+                res['x'] = float(ansBufflist[5])
+                res['z'] = float(ansBufflist[6])
             #GetAngles()
-            elif commandID == '2003':
-                hz = Angle(float(ansBufflist[4]))
-                v = Angle(float(ansBufflist[5]))
-                res['hz'] = hz.GetAngle('DMS')
-                res['v'] = v.GetAngle('DMS')
+            elif commandID == self.codes['GETANGLES']:
+                res['hz'] = Angle(float(ansBufflist[4]))
+                res['v'] = Angle(float(ansBufflist[5]))
         return res
 
     def SetATRMsg(self, atr):
@@ -308,7 +297,7 @@ class LeicaMeasureUnit(MeasureUnit):
             :returns: get simple measurement message
         """
         return '%R1Q,{0:d}:{1:d},{2:d}'.format(self.codes['GETMEASURE'], \
-            prg, incl, wait, incl)
+            wait, incl)
 
     # TODO remove from generic
     def MeasureDistAngMsg(self):
