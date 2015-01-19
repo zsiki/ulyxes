@@ -200,6 +200,13 @@ class Angle(object):
             w = None
         return w
 
+    def __str__(self):
+        """ GON string representation of angle
+
+            :returns: GON string
+        """
+        return "{0:.4f}".format(self.GetAngle('GON'))
+
     def __add__(self, a):
         """ add angles
 
@@ -239,4 +246,5 @@ if __name__ == "__main__":
     print b.GetAngle("DMS")
     c = a + b
     print c.GetAngle("DMS")
+    print c
     print (a-b).GetAngle("DMS")
