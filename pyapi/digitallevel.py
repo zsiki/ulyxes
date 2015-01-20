@@ -54,5 +54,14 @@ class DigitalLevel(Instrument):
         ans = self.measureInterf.Send(msg)
         return self.measureUnit.Result(msg, ans)
 
+    def Temperature(self):
+        """ Get temperature
+
+            :returns: internal temperature
+        """
+        msg = self.measureUnit.TemperatureMsg()
+        ans = self.measureInterf.Send(msg)
+        return self.measureUnit.Result(msg, ans)
+
 if __name__ == "__main__":
     pass
