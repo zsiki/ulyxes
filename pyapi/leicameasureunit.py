@@ -71,7 +71,10 @@ class LeicaMeasureUnit(MeasureUnit):
             commandID = int(msgBufflist[1])
             # get error code from answer
             ansBufflist = re.split(':|,',ans)
-            errCode = int(ansBufflist[3])
+            try:
+                errCode = int(ansBufflist[3])
+            except:
+                errCode = -1   # invalid answer
             if errCode != 0:
                 # ??? TODO ?Logging?
                 return {'errorCode': errCode}
@@ -285,6 +288,8 @@ class LeicaMeasureUnit(MeasureUnit):
        
             :returns: measure message
         """
+        if type(prg) is str:
+            prg = edmMode[prg]
         return '%R1Q,{0:d}:{1:d},{2:d}'.format(self.codes['MEASURE'], prg, incl)
         
     def GetMeasureMsg(self, wait = 12000, incl = 0):
