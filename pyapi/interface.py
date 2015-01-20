@@ -17,29 +17,27 @@ class Interface(object):
     """
     
     IF_OK = 0
-    ERR_OPEN = 1
-    ERR_WRITE = 2
-    ERR_TIMEOUT = 3
-    ERR_READ = 4
+    ERR_OPEN = -1
+    ERR_WRITE = -2
+    ERR_TIMEOUT = -3
+    ERR_READ = -4
+
     def __init__(self, name = 'None'):
         self.name = name
         self.state = self.IF_OK
 
     def GetName(self):
-        """
-        Get the name of the interface being used.
+        """ Get the name of the interface being used.
         """
         return self.name
 
     def GetState(self):
-        """
-        Get the state of the interface being used.
+        """ Get the state of the interface being used.
         """
         return self.state
 
     def ClearState(self):
-        """
-        Clear the state of the interface being used.
+        """ Clear the state of the interface being used.
         """
         self.state = self.IF_OK
 
