@@ -24,6 +24,17 @@ class TotalStation(Instrument):
         # call super class init
         super(TotalStation, self).__init__(name, measureUnit, measureInterf)
 
+    def _process(self, msg):
+        """ Send message to measure unit and process answer
+
+            :param msg: message to send
+            :returns: parsed answer (dictionary)
+        """
+        ans = self.measureInterf.Send(msg)
+        if self.measureInterf.state != self.measureInterf.IF_OK:
+            return {'error': self.measureInterf.state}
+        return self.measureUnit.Result(msg, ans)
+
     def SetATR(self, atr):
         """ Set ATR on 
 
@@ -31,8 +42,7 @@ class TotalStation(Instrument):
             :returns: processed answer from instrument
         """
         msg = self.measureUnit.SetATRMsg(atr)
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def GetATR(self):
         """ Get ATR status of instrument
@@ -40,8 +50,7 @@ class TotalStation(Instrument):
             :returns: 0/1 ATR off/on
         """
         msg = self.measureUnit.GetATRMsg()
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def SetLock(self, lock):
         """ Set lock on prism
@@ -50,8 +59,7 @@ class TotalStation(Instrument):
             :returns: processed answer from instrument
         """
         msg = self.measureUnit.SetLockMsg(lock)
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def GetLock(self):
         """ Get lock status
@@ -59,8 +67,7 @@ class TotalStation(Instrument):
             :returns: lock status of the instrument 0/1 on/off
         """
         msg = self.measureUnit.GetLockMsg()
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def SetAtmCorr(self,valueOfLambda, pres, dryTemp, wetTemp):
         """ Set atmospheric correction
@@ -71,8 +78,7 @@ class TotalStation(Instrument):
             :param wetTemp: wet temperature
         """
         msg = self.measureUnit.SetAtmCorrMsg(valueOfLambda, pres, dryTemp, wetTemp)
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def GetAtmCorr(self):
         """ Get atmospheric correction
@@ -80,8 +86,7 @@ class TotalStation(Instrument):
             :returns: atmospheric corrections (dictionary)
         """
         msg = self.measureUnit.GetAtmCorrMsg()
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def SetRefCorr(self, status, earthRadius, refracticeScale):
         """ Set refraction correction
@@ -91,8 +96,7 @@ class TotalStation(Instrument):
             :param refracticeScale: ???
         """
         msg = self.measureUnit.SetRefCorrMsg(status, earthRadius, refracticeScale)
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def GetRefCorr(self):
         """ Get refraction correction
@@ -100,8 +104,7 @@ class TotalStation(Instrument):
             :returns: refraction correction (dictionary)
         """
         msg = self.measureUnit.GetRefCorrMsg()
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def SetStation(self, easting, northing, elevation):
         """ Set station coordinates
@@ -111,9 +114,8 @@ class TotalStation(Instrument):
             :param elevation: elevation of station
             :returns: ???
         """
-        msg = self.measureUnit.SetStationMsg(easting, northing, zenith)
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        msg = self.measureUnit.SetStationMsg(easting, northing, elevation)
+        return self._process(msg)
 
     def    GetStation(self):
         """ Get station coordinates
@@ -121,8 +123,7 @@ class TotalStation(Instrument):
             :returns: station coordinates (dictionary)
         """
         msg = self.measureUnit.GetStationMsg()
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def SetEDMMode(self, mode):
         """ Set EDM mode
@@ -131,8 +132,7 @@ class TotalStation(Instrument):
             :returns: ???
         """
         msg = self.measureUnit.SetEDMModeMsg(mode)
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def GetEDMMode(self):
         """ Get EDM mode
@@ -140,8 +140,7 @@ class TotalStation(Instrument):
             :returns: actual EDM mode
         """
         msg = self.measureUnit.GetEDMModeMsg()
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def SetOri(self, ori):
         """ Set orientation
@@ -149,19 +148,12 @@ class TotalStation(Instrument):
             :param ori: bearing to direction (Angle)
             :returns: ???
         """
-        clMsg = self.measureUnit.ClearDistanceMsg()  # TODO is it neccessary?
-        ans = self.measureInterf.Send(clMsg)
-        errorCode = self.measureUnit.Result(clMsg, ans)
-        if errorCode['errorCode'] != 0:
-            return errorCode
-        msg = self.measureUnit.SetOriMsg()
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        msg = self.measureUnit.SetOriMsg(ori)
+        return self._process(msg)
 
     def SetRCS(self, rcs):
         msg = self.measureUnit.SetRCSMsg(rcs)
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def Move(self, hz, v, atr=0):
         """ Rotate instrument to a given direction
@@ -171,8 +163,7 @@ class TotalStation(Instrument):
             :param atr: 0/1 ATR on/off
         """
         msg = self.measureUnit.MoveMsg(hz, v, atr)
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def Measure(self, prg='DEFAULT', incl=0):
         """ Measure distance
@@ -182,10 +173,9 @@ class TotalStation(Instrument):
             :returns: ???
         """
         if prg == 'DEFAULT':
-            prg = GetEDMMode()['edmMode']
+            prg = self.GetEDMMode()['edmMode']
         msg = self.measureUnit.MeasureMsg(prg, incl)
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def GetMeasure(self, wait = 12000, incl = 0):
         """ Get measured values
@@ -195,15 +185,13 @@ class TotalStation(Instrument):
             :returns: observations in a dictionary
         """
         msg = self.measureUnit.GetMeasureMsg(wait, incl)
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def MeasureDistAng(self):
         """ ???
         """
         msg = self.measureUnit.MeasureDistAngMsg()
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def Coords(self, wait = 1000, incl = 0):
         """ Read coordinates from instrument
@@ -213,8 +201,7 @@ class TotalStation(Instrument):
             :returns: coordinates in a dictionary
         """
         msg = self.measureUnit.CoordsMsg(wait, incl)
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def GetAngles(self):
         """ Get angles from instrument
@@ -222,15 +209,13 @@ class TotalStation(Instrument):
             :returns: angles in a dictionary
         """
         msg = self.measureUnit.GetAnglesMsg()
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def ClearDistance(self):
         """ Clear measured distance on instrument
         """
         msg = self.measureUnit.ClearDistanceMsg()
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def ChangeFace(self):
         """ Change face
@@ -238,10 +223,9 @@ class TotalStation(Instrument):
             :returns: ???
         """
         msg = self.measureUnit.ChangeFaceMsg()
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
-    def MoveRel(hz_rel, v_rel, atr=0):
+    def MoveRel(self, hz_rel, v_rel, atr=0):
         """ Rotate the instrument relative to actual direction
 
             :param hz_rel: relative horizontal rotation (Angle)
@@ -250,24 +234,21 @@ class TotalStation(Instrument):
         """
         #get the actual direction
         msg = self.measureUnit.GetAnglesMsg()
-        ans = self.measureInterf.Send(msg)
-        res = self.measureUnit.Result(msg, ans)
+        return self._process(msg)
         return self.Move(res['hz'] + hz_rel, res['v'] + v_rel, atr)
 
 if __name__ == "__main__":
     from leicameasureunit import *
     from serialinterface import *
     mu = LeicaMeasureUnit("TCA 1800")
-    iface = SerialInterface("rs-232", "/dev/ttyUSB0")
+    iface = SerialInterface("rs-232", "/dev/ttyUSB1")
     ts = TotalStation("Leica", mu, iface)
+    ts.SetATR(1)
+    print (ts.Move(Angle(0), Angle(90, 'DEG')))
+    print (ts.ChangeFace())
     print (ts.GetEDMMode())
-    print (ts.GetATR())
-    print (ts.SetATR(1))
-    print (ts.GetATR())
     if ts.GetATR()['atrStatus'] == 0:
         ts.SetATR(1)
     print (ts.GetAngles())
     #ts.Measure()
     #print ts.GetMeasure()
-    #print (ts.Move(Angle(0), Angle(90, 'DEG')))
-    #print (ts.ChangeFace())
