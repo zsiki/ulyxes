@@ -2,11 +2,7 @@
 """
 .. module:: leicameasureunit.py
    :platform: Unix, Windows
-   :synopsis: Ulyxes - an open source project to drive total stations and
-           publish observation results.
-           GPL v2.0 license
-           Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
-
+   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results. GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokadaniel@citromail.hu>
 
 """
@@ -19,7 +15,7 @@ class LeicaMeasureUnit(MeasureUnit):
     """ This class contains the Leica robotic total station specific functions
         common to all leica robot TS
     """
-
+    # Constants for message codes
     codes = {
         'SETATR': 9018,
         'GETATR': 9019,
@@ -37,12 +33,13 @@ class LeicaMeasureUnit(MeasureUnit):
         'MOVE': 9027,
         'MEASURE': 2008,
         'GETMEASURE': 2108,
+        'MEASUREANGDIST': 17017,
         'COORDS': 2082,
         'GETANGLES': 2003,
         'CHANGEFACE': 9028
     }
 
-    # TODO use these codes
+    # Constants for EMD modes
     edmMode = {'STANDARD': 0, 'PRECISE': 1, 'FAST': 2, 'TRACKING': 3, 
         'AVERAGING': 4, 'FASTTRACKING': 5}
 
@@ -82,14 +79,11 @@ class LeicaMeasureUnit(MeasureUnit):
                 res['hz'] = Angle(float(ansBufflist[4]))
                 res['v'] = Angle(float(ansBufflist[5]))
                 res['distance'] = float(ansBufflist[6])
-            # TODO MeasureDistAng
-            elif commandID == '17017':
-                hz = Angle(float(ansBufflist[4]))
-                v = Angle(float(ansBufflist[5]))
-                dist = ansBufflist[6]
-                res['hz'] =hz.GetAngle('DMS')
-                res['v'] =v.GetAngle('DMS')
-                res['distance'] = dist
+            # MeasureDistAng
+            elif commandID == self.codes['MEASUREANGDIST']:
+                res['hz'] = Angle(float(ansBufflist[4]))
+                res['v'] = Angle(float(ansBufflist[5]))
+                res['distance'] = float(ansBufflist[6])
             elif commandID == self.codes['GETATR']:
                 res['atrStatus'] = int(ansBufflist[4])
             #GetLockStatus()
@@ -302,13 +296,16 @@ class LeicaMeasureUnit(MeasureUnit):
         return '%R1Q,{0:d}:{1:d},{2:d}'.format(self.codes['GETMEASURE'], \
             wait, incl)
 
-    # TODO remove from generic
-    def MeasureDistAngMsg(self):
-        """
-        Message function for
+    def MeasureDistAngMsg(self, prg):
+        """ Measure angles and distance
+
+			:param prg: EDM program
+			:returns: measure angle distance message
 
         """
-        return '%R1Q,17017:2'
+        if type(prg) is str:
+            prg = edmMode[prg]
+        return '%R1Q,{0:d}:{1:d}'.format(self.codes['MEASUREANGDIST'], prg)
 
     def CoordsMsg (self, wait = 1000, incl = 0):
         """ Get coordinates

@@ -131,7 +131,7 @@ class TotalStation(Instrument):
         """ Set EDM mode
 
             :param mode: mode name/id as listed in measure unit
-            :returns: ???
+            :returns: empty dictionary
         """
         msg = self.measureUnit.SetEDMModeMsg(mode)
         return self._process(msg)
@@ -148,7 +148,7 @@ class TotalStation(Instrument):
         """ Set orientation
 
             :param ori: bearing to direction (Angle)
-            :returns: ???
+            :returns: empty dictionary
         """
         msg = self.measureUnit.SetOriMsg(ori)
         return self._process(msg)
@@ -172,7 +172,7 @@ class TotalStation(Instrument):
 
             :param prg: EDM program, DEFAULT use actual
             :param incl: inclination ...
-            :returns: ???
+            :returns: empty dictionary
         """
         if prg == 'DEFAULT':
             prg = self.GetEDMMode()['edmMode']
@@ -189,10 +189,15 @@ class TotalStation(Instrument):
         msg = self.measureUnit.GetMeasureMsg(wait, incl)
         return self._process(msg)
 
-    def MeasureDistAng(self):
-        """ ???
+    def MeasureDistAng(self, prg='DEFAULT'):
+        """ Measure distance and return observations
+
+			:returns: observations in a dictionary
         """
-        msg = self.measureUnit.MeasureDistAngMsg()
+        # TODO prg param is not OK!
+        if prg == 'DEFAULT':
+            prg = self.GetEDMMode()['edmMode']
+        msg = self.measureUnit.MeasureDistAngMsg(prg)
         return self._process(msg)
 
     def Coords(self, wait = 1000, incl = 0):
@@ -222,7 +227,7 @@ class TotalStation(Instrument):
     def ChangeFace(self):
         """ Change face
 
-            :returns: ???
+            :returns: empty dictionary
         """
         msg = self.measureUnit.ChangeFaceMsg()
         return self._process(msg)
@@ -230,7 +235,7 @@ class TotalStation(Instrument):
     def GetFace(self):
         """ Get face left or face right
 
-            :returns: 0/1 face left/face right
+            :returns: 0/1 face left/face right in a dictionary
         """
         a = self.GetAngles()
         if 'v' in a:
