@@ -192,7 +192,7 @@ class TotalStation(Instrument):
     def MeasureDistAng(self, prg='DEFAULT'):
         """ Measure distance and return observations
 
-			:returns: observations in a dictionary
+            :returns: observations in a dictionary
         """
         # TODO prg param is not OK!
         if prg == 'DEFAULT':
