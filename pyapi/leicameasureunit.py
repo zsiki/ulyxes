@@ -45,14 +45,14 @@ class LeicaMeasureUnit(MeasureUnit):
     edmMode = {'STANDARD': 0, 'PRECISE': 1, 'FAST': 2, 'TRACKING': 3, 
         'AVERAGING': 4, 'FASTTRACKING': 5}
 
-    def __init__(self, name = 'Leica generic', type = 'TPS'):
+    def __init__(self, name = 'Leica generic', typ = 'TPS'):
         """ Constructor to leica generic ts
 
             :param name: name of ts
             :param type: type od ts
         """
         # call super class init
-        super(LeicaMeasureUnit, self).__init__(name, type)
+        super(LeicaMeasureUnit, self).__init__(name, typ)
 
     def Result(self, msgs, anss):
         """ Parse answer from message
@@ -66,10 +66,10 @@ class LeicaMeasureUnit(MeasureUnit):
         res = {}
         for msg, ans in zip(msgList, ansList):
             # get command id form message
-            msgBufflist = re.split(':|,',msg)
+            msgBufflist = re.split(':|,', msg)
             commandID = int(msgBufflist[1])
             # get error code from answer
-            ansBufflist = re.split(':|,',ans)
+            ansBufflist = re.split(':|,', ans)
             try:
                 errCode = int(ansBufflist[3])
             except:
@@ -93,7 +93,7 @@ class LeicaMeasureUnit(MeasureUnit):
                 res['lockStat'] = int(ansBufflist[4])
             #GetAtmCorr()
             elif commandID == self.codes['GETATMCORR']:
-                res['lambda']= ansBufflist[4]
+                res['lambda'] = ansBufflist[4]
                 res['pressure'] = float(ansBufflist[5])
                 res['dryTemp'] = float(ansBufflist[6])
                 res['wetTemp'] = float(ansBufflist[7])
@@ -330,7 +330,7 @@ class LeicaMeasureUnit(MeasureUnit):
                 :returns: clear distance message
 
         """
-        return MeasureMsg(self, prg = 3)
+        return self.MeasureMsg(self, prg = 3)
 
     def ChangeFaceMsg(self):
         """ Change face
