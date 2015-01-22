@@ -1,13 +1,9 @@
 #!/usr/bin/env python
 """
-    Leica TCA1800/RTS1200 specific functions
-    <p>Ulyxes - an open source project to drive total stations and
-           publish observation results</p>
-    <p>GPL v2.0 license</p>
-    <p>Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu></p>
-    @author Zoltan Siki
-    @author Daniel Moka
-    @version 1.1
+.. module:: totalstation.py
+   :platform: Unix, Windows
+   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results.  GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>.
+.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokadaniel@citromail.hu>
 """
 from instrument import Instrument
 
@@ -19,11 +15,27 @@ class GPS(Instrument):
             :param measureUnit: reference to measure unit
             :param measureInterf: reference to measure interface
         """
-    # call super class init
         super(GPS, self).__init__(name, measureUnit, measureInterf)
 
-    def Measure():
-        pass
+    def _process(self, msg=''):
+        """ Get a line from measure unit and process answer
+
+            :param msg: empty string, not used
+            :returns: parsed answer (dictionary)
+        """
+        ans = self.measureInterf.GetLine()
+        if self.measureInterf.state != self.measureInterf.IF_OK:
+            return {'error': self.measureInterf.state}
+        return self.measureUnit.Result(msg, ans)
+
+    def Measure(self):
+		""" Get position from nmea stream
+		"""
+		ans = self.measureInterf.GetLine()
+		while len(ans):
+			ret = _process(ans)
+		# TODO which messages to process?
+		return 
 
 
 if __name__ == '__main__':

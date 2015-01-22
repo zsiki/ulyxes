@@ -5,7 +5,6 @@
    :synopsis: Ulyxes - an open source project to drive total stations and publish observation results.  GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
 
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokadaniel@citromail.hu>
-
 """
 
 from instrument import Instrument
@@ -75,7 +74,7 @@ class TotalStation(Instrument):
     def SetAtmCorr(self,valueOfLambda, pres, dryTemp, wetTemp):
         """ Set atmospheric correction
 
-            :param valueOfLambda: ????
+            :param valueOfLambda: TODO
             :param pres: air presure
             :param dryTemp: dry temperature
             :param wetTemp: wet temperature
