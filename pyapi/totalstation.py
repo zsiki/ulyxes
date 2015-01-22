@@ -14,6 +14,9 @@ from angle import Angle
 class TotalStation(Instrument):
     """ Generic total station instrument
     """
+    FACE_LEFT = 0
+    FACE_RIGHT = 1
+
     def __init__(self, name, measureUnit, measureInterf):
         """ Constructor
 
@@ -225,6 +228,19 @@ class TotalStation(Instrument):
         msg = self.measureUnit.ChangeFaceMsg()
         return self._process(msg)
 
+    def GetFace(self):
+        """ Get face left or face right
+
+            :returns: 0/1 face left/face right
+        """
+        a = self.GetAngles()
+        if 'v' in a:
+            if a['v'].GetAngle('GON') < 200:
+                face = self.FACE_LEFT
+            else:
+                face = self.FACE_RIGHT
+        return {'face': 1}
+
     def MoveRel(self, hz_rel, v_rel, atr=0):
         """ Rotate the instrument relative to actual direction
 
@@ -250,5 +266,6 @@ if __name__ == "__main__":
     if ts.GetATR()['atrStatus'] == 0:
         ts.SetATR(1)
     print (ts.GetAngles())
+    print (ts.GetFace())
     #ts.Measure()
     #print ts.GetMeasure()
