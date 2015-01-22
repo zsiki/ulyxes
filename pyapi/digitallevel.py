@@ -34,7 +34,7 @@ class DigitalLevel(Instrument):
         """ set automatic turning off to on/off
 
             :param par: 1/0 on/off
-            :returns: TODO
+            :returns: empty dictionary
         """
         msg = self.measureUnit.SetAutoOffMsg(par)
         ans = self.measureInterf.Send(msg)
