@@ -12,6 +12,7 @@
 from interface import Interface
 import serial
 import re
+import logging
 
 class SerialInterface(Interface):
     """ Interface to communicate through serial interface
@@ -35,6 +36,7 @@ class SerialInterface(Interface):
             self.ser = serial.Serial(port, baud, byteSize, parity, stop, timeout)
         except:
             self.state = self.ERR_OPEN
+            logging.error(" cannot open serial line")
 
     def __del__(self):
         """ Destructor for serial interface
@@ -58,13 +60,16 @@ class SerialInterface(Interface):
                 ch = self.ser.read(1)
             except:
                 self.state = self.ERR_READ
+                logging.error(" cannot read serial line")
             if ch == b'':
                 # timeout exit loop
                 self.state = self.ERR_TIMEOUT
+                logging.error(" timeout on serial line")
                 break
             ans += ch
         # remove end of line
         ans = ans.strip(b'\r\n')
+        logging.debug(" message got: %s", ans)
         return ans
 
     def PutLine(self, msg):
@@ -83,10 +88,12 @@ class SerialInterface(Interface):
         # remove special characters
         msg = msg.encode('ascii', 'ignore')
         # send message to serial interface
+        logging.debug(" message sent: %s", msg)
         try:
             self.ser.write(msg)
         except:
             self.state = self.ERR_WRITE
+            logging.error(" cannot write serial line")
             return -1
         return 0
 
