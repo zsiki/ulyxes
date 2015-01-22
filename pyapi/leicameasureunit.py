@@ -10,6 +10,7 @@
 from measureunit import MeasureUnit
 from angle import Angle
 import re
+import logging
 
 class LeicaMeasureUnit(MeasureUnit):
     """ This class contains the Leica robotic total station specific functions
@@ -36,7 +37,8 @@ class LeicaMeasureUnit(MeasureUnit):
         'MEASUREANGDIST': 17017,
         'COORDS': 2082,
         'GETANGLES': 2003,
-        'CHANGEFACE': 9028
+        'CHANGEFACE': 9028,
+        'CLEARDIST': 2082
     }
 
     # Constants for EMD modes
@@ -73,7 +75,7 @@ class LeicaMeasureUnit(MeasureUnit):
             except:
                 errCode = -1   # invalid answer
             if errCode != 0:
-                # ??? TODO ?Logging?
+                logging.error(" error from instument: %d", errCode)
                 return {'errorCode': errCode}
             if commandID == self.codes['GETMEASURE']:
                 res['hz'] = Angle(float(ansBufflist[4]))
@@ -274,16 +276,14 @@ class LeicaMeasureUnit(MeasureUnit):
         return '%R1Q,{0:d}:{1:f},{2:f},0,{3:d},0'.format(self.codes['MOVE'], \
             hz_rad, v_rad, atr)
 
-    def MeasureMsg(self, prg = 0, incl = 0):
+    def MeasureMsg(self, prg = 1, incl = 0):
         """ Measure distance
         
-            :param prg: measure program 1/2/3/... = default/track/clear..., optional (default 1)
+            :param prg: measure program 1/2/3/... = default/track/clear..., optional (default 1, mode set before)
             :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
        
             :returns: measure message
         """
-        if type(prg) is str:
-            prg = edmMode[prg]
         return '%R1Q,{0:d}:{1:d},{2:d}'.format(self.codes['MEASURE'], prg, incl)
         
     def GetMeasureMsg(self, wait = 12000, incl = 0):
@@ -299,8 +299,8 @@ class LeicaMeasureUnit(MeasureUnit):
     def MeasureDistAngMsg(self, prg):
         """ Measure angles and distance
 
-			:param prg: EDM program
-			:returns: measure angle distance message
+            :param prg: EDM program
+            :returns: measure angle distance message
 
         """
         if type(prg) is str:
@@ -324,13 +324,13 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         return '%R1Q,{0:d}:0'.format(self.codes['GETANGLES'])
 
-    # TODO
     def ClearDistanceMsg(self):
-        """
-        Message for clearing distance
+        """ Clearing distance
+
+                :returns: clear distance message
 
         """
-        return '%R1Q,2082:1000,1'
+        return MeasureMsg(self, prg = 3)
 
     def ChangeFaceMsg(self):
         """ Change face
