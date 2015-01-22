@@ -16,7 +16,7 @@ class LeicaDnaUnit(MeasureUnit):
     TEMPERATURE = "GET/M/WI95"
     SETAUTOOFF = "SET/95/"
     GETAUTOOFF = "CONF/95"
-    unitDiv = [1000.0, 1000.0 / 0.3048, 10000.0, 10000.0 / 0.3048, 100000.0]
+    unitDiv = [1000.0, 1000.0 / 0.3048, None, None, None, None, 10000.0, 10000.0 / 0.3048, 100000.0]
 
     def __init__(self, name = 'Leica level', typ = 'Level'):
         """ Construnctor for leica dna unit
@@ -34,25 +34,25 @@ class LeicaDnaUnit(MeasureUnit):
             :param ans: answer to message
             :returns: observation results (dictionary)
         """
-        m = re.search("^@[EW]([0-9]+)$")
+        m = re.search("^@[EW]([0-9]+)$", ans)
         res = {}
         if m is not None:
             res["error"] = int(m.group(0))
             return res    # error
-        ansBuflist = re.split(' ', ans)
+        ansBuflist = re.split(' ', ans.strip('*'))
         if msg == self.MEASURE:
             for item in ansBuflist:
                 if re.search("^32\.", item):
                     # distance
-                    res["distance"] = float(item[7:]) / unitDiv[int(item[5])]
+                    res["distance"] = float(item[7:]) / self.unitDiv[int(item[5])]
                 elif re.search("^330", item):
                     # staff reading
-                    res["staff"] = float(item[7:]) / unitDiv[int(item[5])]
+                    res["staff"] = float(item[7:]) / self.unitDiv[int(item[5])]
         elif msg == self.TEMPERATURE:
             for item in ansBuflist:
                 if re.search("^95", item):
                     # temperature
-                    res["temperature"] = float(item[7:]) / unitDiv[int(item[5])]
+                    res["temperature"] = float(item[7:]) / self.unitDiv[int(item[5])]
         elif msg == self.SETAUTOOFF:
             if len(ans):
                 res["error"] = ans

@@ -1,14 +1,9 @@
 #!/usr/bin/python
 """
 .. module:: digitallevel.py
-
    :platform: Unix, Windows
-      :synopsis: Ulyxes - an open source project to drive total stations and
-             publish observation results.
-            GPL v2.0 license
-           Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
-
-  .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokbme@gmail.com>
+   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results.  GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
+.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokbme@gmail.com>
 """
 
 from instrument import Instrument
@@ -38,10 +33,10 @@ class DigitalLevel(Instrument):
     def SetAutoOff(self, par):
         """ set automatic turning off to on/off
 
-            :param par: 0/1 on/off
+            :param par: 1/0 on/off
             :returns: TODO
         """
-        msg = self.measureUnit.SetAutoOffMsg()
+        msg = self.measureUnit.SetAutoOffMsg(par)
         ans = self.measureInterf.Send(msg)
         return self.measureUnit.Result(msg, ans)
 
@@ -50,7 +45,7 @@ class DigitalLevel(Instrument):
 
             :returns: auto off state
         """
-        msg = self.measureUnit.SetAutoOnMsg()
+        msg = self.measureUnit.GetAutoOffMsg()
         ans = self.measureInterf.Send(msg)
         return self.measureUnit.Result(msg, ans)
 
@@ -64,4 +59,14 @@ class DigitalLevel(Instrument):
         return self.measureUnit.Result(msg, ans)
 
 if __name__ == "__main__":
-    pass
+    from leicadnaunit import LeicaDnaUnit
+    from digitallevel import DigitalLevel
+    from serialinterface import SerialInterface
+
+    mu = LeicaDnaUnit()
+    iface = SerialInterface('x', '/dev/ttyS0')
+    dna = DigitalLevel('DNA03', mu, iface)
+    dna.SetAutoOff(0)
+    print (dna.GetAutoOff())
+    print (dna.Temperature())
+    print (dna.Measure())
