@@ -14,6 +14,9 @@ class Writer(object):
     """ Base class for different writer (virtual)
     """
     WR_OK = 0
+    WR_OPEN = -1
+    WR_WRITE = -2
+
 
     def __init__(self, name = 'None'):
         """ Constructor

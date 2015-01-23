@@ -17,19 +17,23 @@ import logging
 class FileWriter(Writer):
     """ Class to write observations to file
     """
-    WR_OPEN = -1
-    WR_WRITE = -2
 
-    def __init__(self, name = 'None', fname = 'ulyxes.txt', mode = 'a', angle = 'DMS', dist = '.3f'):
+    def __init__(self, name = 'None', fname = 'ulyxes.txt', mode = 'a', angle = 'DMS', dist = '.3f', filt = None):
         """ Constructor
 
-            :param name: name of writer
+            :param name: name of writer (str)
+            :param fname: name of text file to write to (str)
+            :param mode: mode of file open (a or w) (str)
+            :param angle: angle unit to use (str)
+            :param dist: distance and coordinate format (str)
+            :param filt: list of allowed keys (list)
         """
         super(FileWriter, self).__init__(name)
         self.fname = fname
         self.mode = mode
         self.angleFormat = angle
         self.distFormat = dist
+        self.filt = filt
         try:
             self.fp = open(fname, mode)
             self.fp.flush()
@@ -55,15 +59,16 @@ class FileWriter(Writer):
             logging.warning(" empty data not written")
             return
         for key, val in data.iteritems():
-            if type(val) is Angle:
-                sval = val.GetAngle(self.angleFormat)
-            elif type(val) is float:
-                sval = ("{0:" + self.distFormat + "}").format(val)
-            elif type(val) is int:
-                sval = str(val)
-            else:
-                sval = val
-            line += key + "=" + sval + ";"
+            if self.filt is None or key in selt.filt:
+                if type(val) is Angle:
+                    sval = val.GetAngle(self.angleFormat)
+                elif type(val) is float:
+                    sval = ("{0:" + self.distFormat + "}").format(val)
+                elif type(val) is int:
+                    sval = str(val)
+                else:
+                    sval = val
+                line += key + "=" + sval + ";"
         try:
             self.fp.write(line + "\n")
         except:
