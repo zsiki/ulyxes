@@ -10,12 +10,6 @@ Angles
 .. automodule:: angle
    :members:
 
-Log
-===
-
-.. automodule:: resultlog
-   :members:
-
 Interfaces
 ==========
 
@@ -37,8 +31,8 @@ Serial Interface
 .. automodule:: serialinterface
    :members:
 
-Measure Unit
-============
+Measure Units
+=============
 
 .. automodule:: measureunit
    :members:
@@ -87,3 +81,19 @@ Digital Level
 
 .. automodule:: digitallevel
    :members:
+
+Writers
+=======
+
+Base Writer
+:::::::::::
+
+.. automodule:: writer
+   :members:
+
+File Writer
+:::::::::::
+
+.. automodule:: filewriter
+   :members:
+
