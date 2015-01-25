@@ -20,7 +20,7 @@ class LeicaTPS1200(LeicaMeasureUnit):
             :param type: type od ts (str), default=TPS
         """
         # call super class init
-        super(LeicaMeasureUnit, self).__init__(name, typ)
+        super(LeicaTPS1200, self).__init__(name, typ)
 
     # Constants for message codes
     codes = {
@@ -44,7 +44,9 @@ class LeicaTPS1200(LeicaMeasureUnit):
         'COORDS': 2082,
         'GETANGLES': 2003,
         'CHANGEFACE': 9028,
-        'CLEARDIST': 2082
+        'CLEARDIST': 2082,
+        'POWERSEARCH': 9052,
+        'SEARCHNEXT': 9051
     }
 
     # Constants for EMD modes
@@ -52,3 +54,17 @@ class LeicaTPS1200(LeicaMeasureUnit):
     edmMode = {'STANDARD': 0, 'PRECISE': 1, 'FAST': 2, 'TRACKING': 3,
         'AVERAGING': 4, 'FASTTRACKING': 5}
 
+    @staticmethod
+    def GetCapabilities():
+        """ Get instrument specialities
+
+            :returns: List of specialities
+        """
+        return ['ROBOT', 'ANGLE', 'EDM', 'ATR', 'LOCK', 'RL', 'POWERSEARCH']
+
+    def GetPowerSearchMsg(self):
+        """ Power search
+        
+            :returns: Power search message
+        """
+        return '%R1Q,{0:d}'.format(self.codes['POWERSEARCH'])
