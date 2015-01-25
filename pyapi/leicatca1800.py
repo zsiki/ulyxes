@@ -21,3 +21,16 @@ class LeicaTCA1800(LeicaMeasureUnit):
         """
         # call super class init
         super(LeicaTCA1800, self).__init__(name, typ)
+
+    @staticmethod
+    def GetCapabilities():
+        """ Get instrument specialities
+
+            :returns: List of specialities
+        """
+        return ['ROBOT', 'ANGLE', 'EDM', 'ATR', 'LOCK']
+
+if __name__ == "__main__":
+    print LeicaTCA1800.GetCapabilities()
+    tca = LeicaTCA1800()
+    print tca.GetCapabilities()
