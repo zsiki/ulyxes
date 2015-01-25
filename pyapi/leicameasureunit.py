@@ -38,7 +38,9 @@ class LeicaMeasureUnit(MeasureUnit):
         'COORDS': 2082,
         'GETANGLES': 2003,
         'CHANGEFACE': 9028,
-        'CLEARDIST': 2082
+        'CLEARDIST': 2082,
+        'POWERSEARCH': 9052,
+        'SEARCHNEXT': 9051
     }
 
     # Constants for EMD modes
@@ -53,6 +55,14 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         # call super class init
         super(LeicaMeasureUnit, self).__init__(name, typ)
+
+    @staticmethod
+    def GetCapabilities()
+        """ Get instrument specialities
+
+            :returns: empty list, do not use generic instrument
+        """
+        return []
 
     def Result(self, msgs, anss):
         """ Parse answer from message
@@ -117,6 +127,9 @@ class LeicaMeasureUnit(MeasureUnit):
             elif commandID == self.codes['GETANGLES']:
                 res['hz'] = Angle(float(ansBufflist[4]))
                 res['v'] = Angle(float(ansBufflist[5]))
+            # PowerSearch
+            elif commandID == self.codes['POWERSEARCH']:
+                pass
         return res
 
     def SetATRMsg(self, atr):
