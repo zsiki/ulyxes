@@ -21,6 +21,8 @@ class Interface(object):
     ERR_WRITE = -2
     ERR_TIMEOUT = -3
     ERR_READ = -4
+    ERR_FILE = -5
+    ERR_SOURCE = -6
 
     def __init__(self, name = 'None'):
         self.name = name
