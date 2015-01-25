@@ -17,7 +17,7 @@ class GPS(Instrument):
         """
         super(GPS, self).__init__(name, measureUnit, measureInterf)
 
-    def _process(self, msg=''):
+    def _process(self, msg):
         """ Get a line from measure unit and process answer
 
             :param msg: empty string, not used
@@ -29,13 +29,14 @@ class GPS(Instrument):
         return self.measureUnit.Result(msg, ans)
 
     def Measure(self):
-		""" Get position from nmea stream
-		"""
-		ans = self.measureInterf.GetLine()
-		while len(ans):
-			ret = _process(ans)
-		# TODO which messages to process?
-		return 
+        """ Get position from nmea stream
+        """
+        ret = None
+        while ret is None:
+            if self.measureInterf.state != IF_OK:
+                break
+            ret = _process(ans)
+        return ret
 
 
 if __name__ == '__main__':
