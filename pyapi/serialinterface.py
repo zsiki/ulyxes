@@ -29,8 +29,7 @@ class SerialInterface(Interface):
             :param stop: number of stop bits
             :param timeout: communication timeout seconds
         """
-        self.state = self.IF_OK
-        self.name = name
+        super(SerialInterface, self).__init(name)
         # open serial port
         try:
             self.ser = serial.Serial(port, baud, byteSize, parity, stop, timeout)
