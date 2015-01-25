@@ -28,7 +28,7 @@ class LeicaTCA1800(LeicaMeasureUnit):
 
             :returns: List of specialities
         """
-        return ['ROBOT', 'ANGLE', 'EDM', 'ATR', 'LOCK']
+        return ['ROBOT', 'ANGLE', 'EDM', 'ATR', 'LOCK', 'POSITION']
 
 if __name__ == "__main__":
     print LeicaTCA1800.GetCapabilities()

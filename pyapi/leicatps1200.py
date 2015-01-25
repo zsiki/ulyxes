@@ -60,7 +60,8 @@ class LeicaTPS1200(LeicaMeasureUnit):
 
             :returns: List of specialities
         """
-        return ['ROBOT', 'ANGLE', 'EDM', 'ATR', 'LOCK', 'RL', 'POWERSEARCH']
+        return ['ROBOT', 'ANGLE', 'EDM', 'ATR', 'LOCK', 'RL', 'POWERSEARCH', \
+            'POSITION']
 
     def GetPowerSearchMsg(self):
         """ Power search
