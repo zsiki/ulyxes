@@ -20,8 +20,8 @@ class LeicaMeasureUnit(MeasureUnit):
     codes = {
         'SETATR': 9018,
         'GETATR': 9019,
-        'SETLOCK': 18007,
-        'GETLOCK': 18008,
+        'SETLOCK': 9020,
+        'GETLOCK': 9021,
         'SETATMCORR': 2028,
         'GETATMCORR': 2029,
         'SETREFCORR': 2030,
