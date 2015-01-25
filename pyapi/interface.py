@@ -41,9 +41,6 @@ class Interface(object):
         """
         self.state = self.IF_OK
 
-    def Send(self, msg):
-        pass
-
 if __name__ == "__main__":
     a = Interface()
     print a.GetName()
