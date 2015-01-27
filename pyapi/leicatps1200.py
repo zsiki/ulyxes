@@ -50,9 +50,10 @@ class LeicaTPS1200(LeicaMeasureUnit):
     }
 
     # Constants for EMD modes
-    # TODO check codes
-    edmMode = {'STANDARD': 0, 'PRECISE': 1, 'FAST': 2, 'TRACKING': 3,
-        'AVERAGING': 4, 'FASTTRACKING': 5}
+    # RL = Reflectorless, LR = Long Range
+    edmMode = {'STANDARD': 2, 'FAST': 3, 'RLSTANDARD': 5, 'LRSTANDARD': 4, \
+               'RLFOLLOW': 8, 'FOLLOW': 9, 'AVERAGING': 10, 'RLAVERAGING': 11, \
+               'LRAVERAGING': 12}
 
     @staticmethod
     def GetCapabilities():
@@ -61,11 +62,20 @@ class LeicaTPS1200(LeicaMeasureUnit):
             :returns: List of specialities
         """
         return ['ROBOT', 'ANGLE', 'EDM', 'ATR', 'LOCK', 'RL', 'POWERSEARCH', \
-            'POSITION']
+            'LASER', 'POSITION']
 
-    def GetPowerSearchMsg(self):
+    def PowerSearchMsg(self):
         """ Power search
         
             :returns: Power search message
         """
         return '%R1Q,{0:d}'.format(self.codes['POWERSEARCH'])
+
+    def SetRedLaser(self, on):
+        """ Set red laser on/off
+
+                :param on: 0/1 turn off/on read laser
+            :returns: red laser on/off message
+        """
+        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETREDLASER'], on)
+
