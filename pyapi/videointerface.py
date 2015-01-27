@@ -8,6 +8,7 @@
 """
 
 import cv
+import logging
 import os.path
 from interface import Interface
 
@@ -18,7 +19,7 @@ class VideoInterface(Interface):
         """ Constructor
 
             :param name: name of interface
-            :param source: id of device or file name
+            :param source: id of device or file name, default = 0
         """
         super(VideoInterface, self).__init__(name)
         self.source = source
@@ -29,17 +30,17 @@ class VideoInterface(Interface):
             # try to read stream
             if cv.QueryFrame(self.video) is None:
                 self.state = self.ERR_SOURCE
+                logging.error(" error opening video camera")
         elif type(source) is str:
             # video file source
             if os.path.exists(name) and os.path.isfile(name):
                 self.video = cv.CaptureFromFile(name)
             else:
                 self.state = self.ERR_FILE
-
+                logging.error(" error opening video file")
         else:
-            self.state = ERR_SOURCE
-            self.video = None
-            self.state = self.ERR_OPEN
+            self.state = self.ERR_SOURCE
+            logging.error(" error opening video source")
 
     def __del__(self):
         """ Destructor
@@ -55,16 +56,20 @@ class VideoInterface(Interface):
 
             :returns: an image or None
         """
-        if self.state != self.IF_OK:
+        print self.state
+        if self.state == self.IF_OK:
             img = cv.QueryFrame(self.video)
             if img is None:
                 self.state = self.ERR_READ
+                logging.error(" error reading video source")
             return img
         return None
 
 if __name__ == "__main__":
-    stream = VideoInterface("webcam", 1)
-    img = stream.GetImage()
-    print stream.state
-    print img
-    print cv.GetSize(img)
+    stream = VideoInterface("webcam", 0)
+    if stream.state != stream.IF_OK:
+        print "error opening video stream"
+    else:
+        img = stream.GetImage()
+        print type(img)
+        print cv.GetSize(img)
