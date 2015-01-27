@@ -31,6 +31,12 @@ Serial Interface
 .. automodule:: serialinterface
    :members:
 
+Video Interface
+:::::::::::::::
+
+.. automodule:: videointerface
+   :members:
+
 Measure Units
 =============
 
@@ -53,6 +59,12 @@ NMEA GPS Unit
 :::::::::::::
 
 .. automodule:: nmeagpsunit
+   :members:
+
+Video Unit
+::::::::::
+
+.. automodule:: videomeasureunit
    :members:
 
 Sensors
@@ -96,4 +108,3 @@ File Writer
 
 .. automodule:: filewriter
    :members:
-
