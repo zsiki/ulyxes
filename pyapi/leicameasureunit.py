@@ -40,7 +40,8 @@ class LeicaMeasureUnit(MeasureUnit):
         'CHANGEFACE': 9028,
         'CLEARDIST': 2082,
         'POWERSEARCH': 9052,
-        'SEARCHNEXT': 9051
+        'SEARCHNEXT': 9051,
+        'SETREDLASER': 1004
     }
 
     # Constants for EMD modes
@@ -57,7 +58,7 @@ class LeicaMeasureUnit(MeasureUnit):
         super(LeicaMeasureUnit, self).__init__(name, typ)
 
     @staticmethod
-    def GetCapabilities()
+    def GetCapabilities():
         """ Get instrument specialities
 
             :returns: empty list, do not use generic instrument
