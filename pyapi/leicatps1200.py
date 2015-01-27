@@ -71,7 +71,7 @@ class LeicaTPS1200(LeicaMeasureUnit):
         """
         return '%R1Q,{0:d}'.format(self.codes['POWERSEARCH'])
 
-    def SetRedLaser(self, on):
+    def SetRedLaserMsg(self, on):
         """ Set red laser on/off
 
                 :param on: 0/1 turn off/on read laser

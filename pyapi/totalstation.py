@@ -232,10 +232,27 @@ class TotalStation(Instrument):
         msg = self.measureUnit.ChangeFaceMsg()
         return self._process(msg)
 
+    def SetRedLaser(self, on):
+        """ Set on/off red laser
+
+            :param on: 0/1 off/on
+            :returns: empty dictionary or error
+        """
+        msg = self.measureUnit.SetRedLaserMsg(on)
+        return self._process(msg)
+
+    def PowerSearch(self):
+        """ Start power search
+
+            :returns: TODO
+        """
+        msg = self.measureUnit.PowerSearchMsg()
+        return self._process(msg)
+
     def GetFace(self):
         """ Get face left or face right
 
-            :returns: 0/1 face left/face right in a dictionary
+            :returns: 0/1 face left/face right in a dictionary or None in case of error
         """
         a = self.GetAngles()
         if 'v' in a:
@@ -243,7 +260,9 @@ class TotalStation(Instrument):
                 face = self.FACE_LEFT
             else:
                 face = self.FACE_RIGHT
-        return {'face': 1}
+            return {'face': face}
+        logging.error(" Getngles failed")
+        return None
 
     def MoveRel(self, hz_rel, v_rel, atr=0):
         """ Rotate the instrument relative to actual direction
