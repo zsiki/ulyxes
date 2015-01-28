@@ -39,6 +39,7 @@ class LeicaMeasureUnit(MeasureUnit):
         'GETANGLES': 2003,
         'CHANGEFACE': 9028,
         'CLEARDIST': 2082,
+        'SETSEARCHAREA': 9043,
         'POWERSEARCH': 9052,
         'SEARCHNEXT': 9051,
         'SETREDLASER': 1004
@@ -128,6 +129,12 @@ class LeicaMeasureUnit(MeasureUnit):
             elif commandID == self.codes['GETANGLES']:
                 res['hz'] = Angle(float(ansBufflist[4]))
                 res['v'] = Angle(float(ansBufflist[5]))
+                res['crossincline'] = Angle(float(ansBufflist[8]))
+                res['lengthincline'] = Angle(float(ansBufflist[9]))
+                # TODO incline angles
+            # Set search area
+            elif commandID == self.codes['SETSEARCHAREA']:
+                pass
             # PowerSearch
             elif commandID == self.codes['POWERSEARCH']:
                 pass
