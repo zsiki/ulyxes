@@ -45,15 +45,17 @@ class LeicaTPS1200(LeicaMeasureUnit):
         'GETANGLES': 2003,
         'CHANGEFACE': 9028,
         'CLEARDIST': 2082,
+        'SETSEARCHAREA': 9043,
         'POWERSEARCH': 9052,
-        'SEARCHNEXT': 9051
+        'SEARCHNEXT': 9051,
+        'SETREDLASER': 1004
     }
 
     # Constants for EMD modes
-    # RL = Reflectorless, LR = Long Range
-    edmMode = {'STANDARD': 2, 'FAST': 3, 'RLSTANDARD': 5, 'LRSTANDARD': 4, \
-               'RLFOLLOW': 8, 'FOLLOW': 9, 'AVERAGING': 10, 'RLAVERAGING': 11, \
-               'LRAVERAGING': 12}
+    # RT = Reflector Tape, RL = Reflectorless, LR = Long Range
+    edmMode = {'RTSTANDARD': 1, 'STANDARD': 2, 'FAST': 3, 'LRSTANDARD': 4, \
+                'RLSTANDARD': 5, 'TRACK': 6, 'RLTRACK': 8, 'TRACK2': 9, \
+                'AVERAGING': 10, 'RLAVERAGING': 11, 'LRAVERAGING': 12}
 
     @staticmethod
     def GetCapabilities():
@@ -63,6 +65,17 @@ class LeicaTPS1200(LeicaMeasureUnit):
         """
         return ['ROBOT', 'ANGLE', 'EDM', 'ATR', 'LOCK', 'RL', 'POWERSEARCH', \
             'LASER', 'POSITION']
+
+    def SetSearchAreaMsg(self, hzCenter, vCenter, hzRange, vRange, on = 1):
+        """ set search area for power search
+
+            :param hzCenter: center direction (Angle)
+            :param vCenter: center direction (Angle)
+            :param hzRange: horizontal range to search (Angle)
+            :param vRange: vertical range to search (Angle)
+            :param on: 0/1 off/on
+        """
+        return '%R1Q,{0:d}:{1:f},{2:f},{3:f},{4:f},{5:d}'.format(self.codes['SETSEARCHAREA'], hzCenter.GetAngle(), vCenter.GetAngle(), hzRange.GetAngle(), vRange.GetAngle(), on)
 
     def PowerSearchMsg(self):
         """ Power search
