@@ -241,6 +241,29 @@ class TotalStation(Instrument):
         msg = self.measureUnit.SetRedLaserMsg(on)
         return self._process(msg)
 
+    def SetSearchArea(self, hzCenter = None, vCenter = None, \
+        hzRange = None, vRange = None, on = 1):
+        """ Set range for power search
+
+            :param hzCenter: center direction (Angle)
+            :param vCenter: center direction (Angle)
+            :param hzRange: horizontal range to search (default full circle) (Angle)
+            :param vRange: vertical range to search (default 95 degree) (Angle)
+            :param on: 0/1 off/on
+        """
+        if hzCenter is None or vCenter is None:
+            angles = self.GetAngles()
+            if hzCenter is None:
+                hzCenter = angles['hz']
+            if vCenter is None:
+                vCenter = angles['v']
+            if hzRange is None:
+                hzRange = Angle(399.9999, 'GON')
+            if vRange is None:
+                vRange = Angle(95, 'DEG')
+        msg = self.measureUnit.SetSearchAreaMsg(hzCenter, vCenter, hzRange, vRange, on)
+        return self._process(msg)
+
     def PowerSearch(self):
         """ Start power search
 
