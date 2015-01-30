@@ -10,14 +10,14 @@
 class MeasureUnit(object):
     """ Virtual base clase for measure units
     """
-    def __init__(self, name = 'None', type = 'None'):
+    def __init__(self, name = 'None', typ = 'None'):
         """ constructor for measure unit
 
             :param name: name of measure unit
-            :param type: type of measure unit
+            :param typ: type of measure unit
         """
         self.name = name
-        self.type = type
+        self.typ = typ
 
     def GetName(self):
         """ Get name of measure unit
@@ -31,9 +31,17 @@ class MeasureUnit(object):
 
             :returns: type of measure unit
         """
-        return self.type
+        return self.typ
+
+    def Result(self, msg, ans):
+        """ Dummy function it must be implemented in inherited classes
+
+            :param msg: message sent
+            :param ans: answer got
+        """
+        return None
 
 if __name__ == "__main__":
-    a = MeasureUnit()
+    a = MeasureUnit("alma", "korte")
     print (a.GetName())
     print (a.GetType())

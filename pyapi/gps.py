@@ -8,14 +8,14 @@
 from instrument import Instrument
 
 class GPS(Instrument):
-    def __init__(self, name, measureUnit, measureInterf):
+    def __init__(self, name, measureUnit, measureInterf, writerUnit = None):
         """ constructor for gps
 
             :param name: name of gps instrument
             :param measureUnit: reference to measure unit
             :param measureInterf: reference to measure interface
         """
-        super(GPS, self).__init__(name, measureUnit, measureInterf)
+        super(GPS, self).__init__(name, measureUnit, measureInterf, writerUnit)
 
     def _process(self, msg):
         """ Get a line from measure unit and process answer
@@ -25,8 +25,11 @@ class GPS(Instrument):
         """
         ans = self.measureInterf.GetLine()
         if self.measureInterf.state != self.measureInterf.IF_OK:
-            return {'error': self.measureInterf.state}
-        return self.measureUnit.Result(msg, ans)
+            return {'error': self.measureInterf.state}   # TODO logical???
+        res = self.measureUnit.Result(msg, ans)
+        if res is not None and len(res) > 0:
+            self.writerUnit.WriteData(res)
+        return res
 
     def Measure(self):
         """ Get position from nmea stream

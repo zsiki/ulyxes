@@ -30,6 +30,7 @@ class NmeaGpsUnit(MeasureUnit):
             :returns: list of capabilities
         """
         return ['POSITION']
+
     def Result(self, msg, ans):
         """ process the answer from GPS
 

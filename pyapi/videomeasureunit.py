@@ -6,20 +6,19 @@
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 
 """
-import cv
 from measureunit import MeasureUnit
 
 class VideoMeasureUnit(MeasureUnit):
     """ Read from video stream or video file
     """
-    def __init__(self, name = 'webcam', typ = 'video', source = 0):
+    def __init__(self, name = 'webcam', typ = 'video'):
         """ Constructor
 
             :param name: name of measure unit
             :param typ: type of measure unit
             :param source: id of device or file name
         """
-        super(VideoMeasureUnit).__init__(name, typ)
+        super(VideoMeasureUnit, self).__init__(name, typ)
 
     @staticmethod
     def GetCapabilities():
@@ -28,3 +27,7 @@ class VideoMeasureUnit(MeasureUnit):
             :returns: list of capabilities
         """
         return ['IMAGE']
+
+if __name__ == "__main__":
+    mu = VideoMeasureUnit()
+    print mu.GetName()

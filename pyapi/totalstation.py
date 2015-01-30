@@ -16,26 +16,16 @@ class TotalStation(Instrument):
     FACE_LEFT = 0
     FACE_RIGHT = 1
 
-    def __init__(self, name, measureUnit, measureInterf):
+    def __init__(self, name, measureUnit, measureInterf, writerUnit = None):
         """ Constructor
 
             :param name: name of instrument
             :param measureUnit: measure unit part of instrument 
-            :param measureInterf: interface to measure unit
+            :param measureInterf: interface to physical unit
+            :param writerUnit: store data
         """
         # call super class init
-        super(TotalStation, self).__init__(name, measureUnit, measureInterf)
-
-    def _process(self, msg):
-        """ Send message to measure unit and process answer
-
-            :param msg: message to send
-            :returns: parsed answer (dictionary)
-        """
-        ans = self.measureInterf.Send(msg)
-        if self.measureInterf.state != self.measureInterf.IF_OK:
-            return {'error': self.measureInterf.state}
-        return self.measureUnit.Result(msg, ans)
+        super(TotalStation, self).__init__(name, measureUnit, measureInterf, writerUnit)
 
     def SetATR(self, atr):
         """ Set ATR on 
@@ -302,9 +292,11 @@ class TotalStation(Instrument):
 if __name__ == "__main__":
     from leicameasureunit import *
     from serialinterface import *
+    from filewriter import *
     mu = LeicaMeasureUnit("TCA 1800")
     iface = SerialInterface("rs-232", "/dev/ttyUSB1")
-    ts = TotalStation("Leica", mu, iface)
+    wrt = FileWriter()
+    ts = TotalStation("Leica", mu, iface, wrt)
     ts.SetATR(1)
     print (ts.Move(Angle(0), Angle(90, 'DEG')))
     print (ts.ChangeFace())

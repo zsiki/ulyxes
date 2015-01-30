@@ -34,9 +34,9 @@ class FileWriter(Writer):
         self.angleFormat = angle
         self.distFormat = dist
         self.filt = filt
+        self.state = self.WR_OK
         try:
             self.fp = open(fname, mode)
-            self.fp.flush()
         except:
             self.state = self.WR_OPEN
             logging.error(" cannot open file %s", self.fname)

@@ -13,12 +13,13 @@ class DigitalLevel(Instrument):
     """ Class to handle Leica DNA digital level
     """
 
-    def __init__(self, name, measureUnit, measureInterf):
+    def __init__(self, name, measureUnit, measureInterf, writerUnit = None):
         """ Constructor to Leica DNA level
 
             :param name: name of digital lvel instrument
             :param measureUnit: reference to measure unit
             :param measureInterf: reference to measure interface
+            :param writerUnit: store data
         """
         # call super class init
         super(DigitalLevel, self).__init__(name, measureUnit, measureInterf)
@@ -27,8 +28,7 @@ class DigitalLevel(Instrument):
         """ Start reading on staff
         """
         msg = self.measureUnit.MeasureMsg()
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def SetAutoOff(self, par):
         """ set automatic turning off to on/off
@@ -37,8 +37,7 @@ class DigitalLevel(Instrument):
             :returns: empty dictionary
         """
         msg = self.measureUnit.SetAutoOffMsg(par)
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def GetAutoOff(self):
         """ Query auto off state
@@ -46,8 +45,7 @@ class DigitalLevel(Instrument):
             :returns: auto off state
         """
         msg = self.measureUnit.GetAutoOffMsg()
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
     def Temperature(self):
         """ Get temperature
@@ -55,8 +53,7 @@ class DigitalLevel(Instrument):
             :returns: internal temperature
         """
         msg = self.measureUnit.TemperatureMsg()
-        ans = self.measureInterf.Send(msg)
-        return self.measureUnit.Result(msg, ans)
+        return self._process(msg)
 
 if __name__ == "__main__":
     from leicadnaunit import LeicaDnaUnit

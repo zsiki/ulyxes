@@ -17,7 +17,6 @@ class Writer(object):
     WR_OPEN = -1
     WR_WRITE = -2
 
-
     def __init__(self, name = 'None'):
         """ Constructor
 
