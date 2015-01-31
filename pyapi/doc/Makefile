@@ -128,3 +128,8 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
+
+graph:
+	pyreverse -o pdf -p ulyxes ../../pyapi
+	mkdir build/pdf
+	mv classes_ulyxes.pdf packages_ulyxes.pdf build/pdf
