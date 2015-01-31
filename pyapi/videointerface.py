@@ -29,17 +29,17 @@ class VideoInterface(Interface):
             self.video = cv.CaptureFromCAM(source)
             # try to read stream
             if cv.QueryFrame(self.video) is None:
-                self.state = self.ERR_SOURCE
+                self.state = self.IF_SOURCE
                 logging.error(" error opening video camera")
         elif type(source) is str:
             # video file source
             if os.path.exists(name) and os.path.isfile(name):
                 self.video = cv.CaptureFromFile(name)
             else:
-                self.state = self.ERR_FILE
+                self.state = self.IF_FILE
                 logging.error(" error opening video file")
         else:
-            self.state = self.ERR_SOURCE
+            self.state = self.IF_SOURCE
             logging.error(" error opening video source")
 
     def __del__(self):
@@ -60,7 +60,7 @@ class VideoInterface(Interface):
         if self.state == self.IF_OK:
             img = cv.QueryFrame(self.video)
             if img is None:
-                self.state = self.ERR_READ
+                self.state = self.IF_READ
                 logging.error(" error reading video source")
             return img
         return None

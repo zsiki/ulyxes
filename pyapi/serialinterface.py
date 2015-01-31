@@ -34,7 +34,7 @@ class SerialInterface(Interface):
         try:
             self.ser = serial.Serial(port, baud, byteSize, parity, stop, timeout)
         except:
-            self.state = self.ERR_OPEN
+            self.state = self.IF_OPEN
             logging.error(" cannot open serial line")
 
     def __del__(self):
@@ -58,11 +58,11 @@ class SerialInterface(Interface):
             try:
                 ch = self.ser.read(1)
             except:
-                self.state = self.ERR_READ
+                self.state = self.IF_READ
                 logging.error(" cannot read serial line")
             if ch == b'':
                 # timeout exit loop
-                self.state = self.ERR_TIMEOUT
+                self.state = self.IF_TIMEOUT
                 logging.error(" timeout on serial line")
                 break
             ans += ch
@@ -91,7 +91,7 @@ class SerialInterface(Interface):
         try:
             self.ser.write(msg)
         except:
-            self.state = self.ERR_WRITE
+            self.state = self.IF_WRITE
             logging.error(" cannot write serial line")
             return -1
         return 0
