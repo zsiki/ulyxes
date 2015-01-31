@@ -40,4 +40,5 @@ if __name__ == "__main__":
     iface = VideoInterface(source=0)
     wrt = ImageWriter("test", "tmp")
     wc = WebCam('test', mu, iface, wrt)
-    wc.GetImage()
+    for i in range(100):
+        wc.GetImage()
