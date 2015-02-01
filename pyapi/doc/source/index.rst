@@ -4,16 +4,23 @@ Ulyxes PyAPI developer's documentation
 .. toctree::
     :maxdepth: 2
 
+Ulyxes PyAPI provides several classes to handle surveyor's sensors e.g. totalstations, NMEA GNSS receivers, etc.
+
+GENERIC MODULES
+===============
+
 Angles
-======
+::::::
 
 .. automodule:: angle
    :members:
 
-Interfaces
+INTERFACES
 ==========
 
-Generic interface
+Interfaces handle the connection to the physical sensor.
+
+Generic Interface
 :::::::::::::::::
 
 .. automodule:: interface
@@ -37,8 +44,13 @@ Video Interface
 .. automodule:: videointerface
    :members:
 
-Measure Units
+MEASURE UNITS
 =============
+
+Measure units are responsible for the specific instrument features.
+
+Generic Measure Unit
+::::::::::::::::::::
 
 .. automodule:: measureunit
    :members:
@@ -47,6 +59,18 @@ Leica Measure Unit
 ::::::::::::::::::
 
 .. automodule:: leicameasureunit
+   :members:
+
+Leica TCA 1800 Unit
+:::::::::::::::::::
+
+.. automodule:: leicatca1800
+   :members:
+
+Leica TPS 1200 Unit
+:::::::::::::::::::
+
+.. automodule:: leicatps1200
    :members:
 
 Leica DNA Unit
@@ -67,11 +91,16 @@ Video Unit
 .. automodule:: videomeasureunit
    :members:
 
-Sensors
-=======
+SENSORS/INSTRUMENTS
+===================
 
-Instrument
-::::::::::
+Sensors or instruments integrate the interface, the measure unit and an 
+optional writer. Interface is responsible for the communication with the
+physical device, measure unit gives the specific features of intruments,
+the writer adds the storing logic to observed data.
+
+Generic Instrument
+::::::::::::::::::
 
 .. automodule:: instrument
    :members:
@@ -94,11 +123,19 @@ Digital Level
 .. automodule:: digitallevel
    :members:
 
-Writers
+Web Camera
+::::::::::
+
+.. automodule:: webcam
+   :members:
+
+WRITERS
 =======
 
-Base Writer
-:::::::::::
+Writers are responsible to store observed data on different media.
+
+Generic Writer
+::::::::::::::
 
 .. automodule:: writer
    :members:
@@ -108,3 +145,16 @@ File Writer
 
 .. automodule:: filewriter
    :members:
+
+CSV Writer
+::::::::::
+
+.. automodule:: csvwriter
+   :members:
+
+Image Writer
+::::::::::::
+
+.. automodule:: imagewriter
+   :members:
+

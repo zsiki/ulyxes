@@ -2,7 +2,7 @@
 """
 .. module:: videointeface.py
    :platform: Unix, Windows
-   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results.  GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>. This module depends on OpenCV.
+   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results.  GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>.
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 
 """
@@ -13,7 +13,7 @@ import os.path
 from interface import Interface
 
 class VideoInterface(Interface):
-    """ Read from video stream or video file
+    """ Read from video stream or video file. This class depends on OpenCV.
     """
     def __init__(self, name = 'webcam', source = 0):
         """ Constructor

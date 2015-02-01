@@ -3,7 +3,7 @@
 """
 .. module:: serialinterface.py
    :platform: Unix, Windows
-   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results. GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>. This module depends on pyserial.
+   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results. GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>.
 
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Danieli Moka <mokadaniel@citromail.hu>
 
@@ -15,7 +15,7 @@ import re
 import logging
 
 class SerialInterface(Interface):
-    """ Interface to communicate through serial interface
+    """ Interface to communicate through serial interface. This class depends on pyserial.
     """
     def __init__(self, name, port, baud=9600, byteSize=8, \
         parity=serial.PARITY_NONE, stop=1, timeout=12):
@@ -48,7 +48,7 @@ class SerialInterface(Interface):
     def GetLine(self):
         """ read from serial interface until end of line
             
-        :returns: line read from serial or empty string on timeout state is set in case of error or timeout
+        :returns: line read from serial (str) or empty string on timeout or error, state is set also
         """
         # read answer till end of line
         ans = b''
@@ -74,7 +74,7 @@ class SerialInterface(Interface):
     def PutLine(self, msg):
         """ send message through the serial line
 
-            :param msg: message to send
+            :param msg: message to send (str)
             :returns: 0 - on OK, -1 on error or interface is in error state
         """
         ans = b''
@@ -99,8 +99,8 @@ class SerialInterface(Interface):
     def Send(self, msg):
         """ send message to serial line and read answer
 
-            :param msg: message to send, it can be multipart message separated by '|'
-            :returns: answer from instrument
+            :param msg: message to send, it can be multipart message separated by '|' (str)
+            :returns: answer from instrument (str)
         """
         msglist = re.split("\|", msg)
         res = b""

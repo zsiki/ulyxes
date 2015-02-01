@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 """
-.. module:: measureunit.py
+.. module:: videomeasureunit.py
    :platform: Unix, Windows
-   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results.  GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>. This module depends on OpenCV
+   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results.  GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>.
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 
 """
 from measureunit import MeasureUnit
 
 class VideoMeasureUnit(MeasureUnit):
-    """ Read from video stream or video file
+    """ Video device specific features.
     """
     def __init__(self, name = 'webcam', typ = 'video'):
         """ Constructor

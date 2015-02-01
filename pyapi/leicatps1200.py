@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-.. module:: leicatca1800.py
+.. module:: leicatps1200.py
    :platform: Unix, Windows
    :synopsis: Ulyxes - an open source project to drive total stations and publish observation results. GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokadaniel@citromail.hu>
@@ -87,7 +87,7 @@ class LeicaTPS1200(LeicaMeasureUnit):
     def SetRedLaserMsg(self, on):
         """ Set red laser on/off
 
-                :param on: 0/1 turn off/on read laser
+            :param on: 0/1 turn off/on read laser
             :returns: red laser on/off message
         """
         return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETREDLASER'], on)

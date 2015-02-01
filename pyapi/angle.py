@@ -1,5 +1,15 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+"""
+.. module:: angle.py 
+  :platform: Unix, Windows
+  :synopsis: Ulyxes - an open source project to drive total stations and
+      publish observation results.
+      GPL v2.0 license
+      Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
+
+.. moduleauthor:: dr. Zoltan Siki <siki@agt.bme.hu>
+"""
 
 import math
 import re
@@ -7,7 +17,24 @@ import re
 RO = 180 * 60 * 60 / math.pi
 
 class Angle(object):
-    """ Angle class, value stored in radian internally
+    """ Angle class, value stored in radian internally. Angle units supported:
+
+* RAD  radians (e.g. 1.54678432)
+* DMS sexagesimal (Degree-Minit-Second, e.g. 123-54-24)
+* DEG decimal degree (e.g. 25.87659)
+* GON gradian whole circle is 400g (e.g. 387.7857)
+* NMEA ddmm.mmmm used in NMEA sentences (e.g. 47.338765)
+* PDEG pseudo sexagesimal (e.g. 156.2745 = 156-27-45)
+* SEC sexagesimal seconds
+* MIL mills the whole circle is 6400 mills
+
+Operators supported:
+
+* \+ add two angles (e.g. c = Angle(180, 'DEG') + Angle('12-34-56', 'DMS'))
+* \- substract two angles (e.g. d = Angle(180, 'DEG') - Angle('12-34-56', 'DMS'))
+* += increment angle (e.g. c += Angle(1, 'GON'))
+* -= decrement angle (e.g. d -= Angle(1, 'GON'))
+* str() convert angle to GON string, used in print
     """
     def __init__(self, value, unit='RAD'):
         """ Constructor for an angle instance.
@@ -221,6 +248,7 @@ class Angle(object):
             :param a: Angle to add
         """
         self.value += a.GetAngle('RAD')
+        return self
 
     def __sub__(self, a):
         """ substract angles
@@ -236,7 +264,7 @@ class Angle(object):
             :param a: Angle to substract
         """
         self.value -= a.GetAngle('RAD')
-
+        return self
 
 if __name__ == "__main__":
     a = Angle("152-23-45", "DMS")
