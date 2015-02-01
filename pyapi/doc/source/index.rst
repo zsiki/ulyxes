@@ -140,6 +140,12 @@ Generic Writer
 .. automodule:: writer
    :members:
 
+Echo Writer
+:::::::::::
+
+.. automodule:: echowriter
+   :members:
+
 File Writer
 :::::::::::
 
