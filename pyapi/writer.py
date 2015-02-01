@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 .. module:: writer.py
    :platform: Unix, Windows
@@ -11,7 +12,7 @@
 """
 
 class Writer(object):
-    """ Base class for different writer (virtual)
+    """ Base class for different writers (virtual)
     """
     WR_OK = 0
     WR_OPEN = -1
@@ -36,6 +37,6 @@ class Writer(object):
         return self.state
 
     def ClearState(self):
-        """ Clear the state of the interface being used.
+        """ Clear the state of the writer being used.
         """
         self.state = self.WR_OK
