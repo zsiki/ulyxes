@@ -7,6 +7,7 @@ __all__ = [
 "measureunit", "leicameasureunit", "leicatca1800", "leicatps1200",
 "leicadnaunit", "nmeagpsunit", "videomeasureunit",
 # writers
-"writer", "filewriter", "csvwriter", "imagewriter", "videowriter",
+"writer", "echowriter", "filewriter", "csvwriter", "imagewriter", 
+"videowriter",
 # instruments/sensors
 "instrument", "totalstation", "digitallevel", "webcam", "gps"]
