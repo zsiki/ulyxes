@@ -18,7 +18,7 @@ class EchoWriter(Writer):
     """ Class to write observations to consol
     """
 
-    def __init__(self, name = 'None', angle = 'DMS', dist = '.3f', filt = None):
+    def __init__(self, name = 'None', angle = 'GON', dist = '.3f', filt = None):
         """ Constructor
 
             :param name: name of writer (str)
@@ -30,7 +30,6 @@ class EchoWriter(Writer):
         self.angleFormat = angle
         self.distFormat = dist
         self.filt = filt
-        self.state = self.WR_OK
 
     def WriteData(self, data):
         """ Write observation data to consol
@@ -44,7 +43,7 @@ class EchoWriter(Writer):
         for key, val in data.iteritems():
             if self.filt is None or key in selt.filt:
                 if type(val) is Angle:
-                    sval = val.GetAngle(self.angleFormat)
+                    sval = str(val.GetAngle(self.angleFormat))
                 elif type(val) is float:
                     sval = ("{0:" + self.distFormat + "}").format(val)
                 elif type(val) is int:
@@ -52,7 +51,7 @@ class EchoWriter(Writer):
                 else:
                     sval = val
                 line += key + "=" + sval + ";"
-		print (line + "\n")
+        print (line + "\n")
 
 if __name__ == "__main__":
    my = EchoWriter()

@@ -18,7 +18,7 @@ class FileWriter(EchoWriter):
     """ Class to write observations to file
     """
 
-    def __init__(self, name = 'None', fname = 'ulyxes.txt', mode = 'a', angle = 'DMS', dist = '.3f', filt = None):
+    def __init__(self, name = 'None', fname = 'ulyxes.txt', mode = 'a', angle = 'GON', dist = '.3f', filt = None):
         """ Constructor
 
             :param name: name of writer (str)
@@ -58,7 +58,7 @@ class FileWriter(EchoWriter):
         for key, val in data.iteritems():
             if self.filt is None or key in selt.filt:
                 if type(val) is Angle:
-                    sval = val.GetAngle(self.angleFormat)
+                    sval = str(val.GetAngle(self.angleFormat))
                 elif type(val) is float:
                     sval = ("{0:" + self.distFormat + "}").format(val)
                 elif type(val) is int:
