@@ -131,5 +131,5 @@ doctest:
 
 graph:
 	pyreverse -o pdf -p ulyxes ../../pyapi
-	mkdir build/pdf
+	mkdir -p build/pdf
 	mv classes_ulyxes.pdf packages_ulyxes.pdf build/pdf
