@@ -41,7 +41,7 @@ class EchoWriter(Writer):
             logging.warning(" empty data not written")
             return
         for key, val in data.iteritems():
-            if self.filt is None or key in selt.filt:
+            if self.filt is None or key in self.filt:
                 if type(val) is Angle:
                     sval = str(val.GetAngle(self.angleFormat))
                 elif type(val) is float:
@@ -54,7 +54,7 @@ class EchoWriter(Writer):
         print (line + "\n")
 
 if __name__ == "__main__":
-   my = EchoWriter()
-   data = {'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'dist': 123.6581}
-   my.WriteData(data)
+    my = EchoWriter()
+    data = {'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'dist': 123.6581}
+    my.WriteData(data)
 

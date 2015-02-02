@@ -6,7 +6,7 @@
 
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokadaniel@citromail.hu>
 """
-
+import logging
 from instrument import Instrument
 from angle import Angle
 
@@ -61,7 +61,7 @@ class TotalStation(Instrument):
         msg = self.measureUnit.GetLockMsg()
         return self._process(msg)
 
-    def SetAtmCorr(self,valueOfLambda, pres, dryTemp, wetTemp):
+    def SetAtmCorr(self, valueOfLambda, pres, dryTemp, wetTemp):
         """ Set atmospheric correction
 
             :param valueOfLambda: TODO
@@ -144,6 +144,8 @@ class TotalStation(Instrument):
         return self._process(msg)
 
     def SetRCS(self, rcs):
+        """ Remote control
+		"""
         msg = self.measureUnit.SetRCSMsg(rcs)
         return self._process(msg)
 
@@ -274,7 +276,7 @@ class TotalStation(Instrument):
             else:
                 face = self.FACE_RIGHT
             return {'face': face}
-        logging.error(" Getngles failed")
+        logging.error(" Getangles failed")
         return None
 
     def MoveRel(self, hz_rel, v_rel, atr=0):
@@ -286,18 +288,17 @@ class TotalStation(Instrument):
         """
         #get the actual direction
         msg = self.measureUnit.GetAnglesMsg()
-        return self._process(msg)
+        res = self._process(msg)
         return self.Move(res['hz'] + hz_rel, res['v'] + v_rel, atr)
 
 if __name__ == "__main__":
-    from leicameasureunit import *
-    from serialinterface import *
-    from filewriter import *
-    mu = LeicaMeasureUnit("TCA 1800")
+    from leicatca1800 import LeicaTCA1800
+    from serialinterface import SerialInterface
+    from echowriter import EchoWriter
+    mu = LeicaTCA1800()
     iface = SerialInterface("rs-232", "/dev/ttyUSB1")
-    wrt = FileWriter()
+    wrt = EchoWriter()
     ts = TotalStation("Leica", mu, iface, wrt)
-    ts.SetATR(1)
     print (ts.Move(Angle(0), Angle(90, 'DEG')))
     print (ts.ChangeFace())
     print (ts.GetEDMMode())

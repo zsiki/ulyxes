@@ -7,7 +7,6 @@
 """
 
 from instrument import Instrument
-from measureunit import MeasureUnit
 
 class DigitalLevel(Instrument):
     """ Class to handle Leica DNA digital level

@@ -33,9 +33,9 @@ class WebCam(Instrument):
         return img
 
 if __name__ == "__main__":
-    from videointerface import *
-    from videomeasureunit import *
-    from imagewriter import *
+    from videointerface import VideoInterface
+    from videomeasureunit import VideoMeasureUnit
+    from imagewriter import ImageWriter
     mu = VideoMeasureUnit()
     iface = VideoInterface(source=0)
     wrt = ImageWriter("test", "tmp")

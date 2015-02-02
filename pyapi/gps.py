@@ -8,6 +8,8 @@
 from instrument import Instrument
 
 class GPS(Instrument):
+    """ GNSS receiver sending NMEA messages
+    """
     def __init__(self, name, measureUnit, measureInterf, writerUnit = None):
         """ constructor for gps
 
@@ -36,9 +38,10 @@ class GPS(Instrument):
         """
         ret = None
         while ret is None:
-            if self.measureInterf.state != IF_OK:
+            if self.measureInterf.state != self.measureInterf.IF_OK:
                 break
-            ret = _process(ans)
+            ans = self.measureInterf.GetLine()
+            ret = self._process(ans)
         return ret
 
 

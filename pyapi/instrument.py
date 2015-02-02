@@ -12,8 +12,6 @@
 
 """
 
-import re
-
 class Instrument(object):
     """
         Base class for different instruments

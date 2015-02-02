@@ -56,7 +56,7 @@ class FileWriter(EchoWriter):
             logging.warning(" empty data not written")
             return
         for key, val in data.iteritems():
-            if self.filt is None or key in selt.filt:
+            if self.filt is None or key in self.filt:
                 if type(val) is Angle:
                     sval = str(val.GetAngle(self.angleFormat))
                 elif type(val) is float:
@@ -72,7 +72,7 @@ class FileWriter(EchoWriter):
             logging.error(" file write failed")
 
 if __name__ == "__main__":
-   myfile = FileWriter()
-   data = {'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'dist': 123.6581}
-   myfile.WriteData(data)
+    myfile = FileWriter()
+    data = {'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'dist': 123.6581}
+    myfile.WriteData(data)
 

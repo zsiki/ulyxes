@@ -32,7 +32,7 @@ class VideoWriter(Writer):
         if codec is None:
             codec = self.codecs['JPEG']
         self.wp = cv.CreateVideoWriter(fname, codec, fps, size)
-        if self.fp is None:
+        if self.wp is None:
             self.state = self.WR_OPEN
             logging.error("cannot open video file %s", fname)
 
@@ -60,9 +60,9 @@ class VideoWriter(Writer):
             logging.warning(" cannot write image to video file")
 
 if __name__ == "__main__":
-    from webcam import *
-    from videointerface import *
-    from videomeasureunit import *
+    from webcam import WebCam
+    from videointerface import VideoInterface
+    from videomeasureunit import VideoMeasureUnit
     vw = VideoWriter("vw", "video_file", None)
     mu = VideoMeasureUnit()
     vi = VideoInterface()

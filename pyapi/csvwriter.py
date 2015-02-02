@@ -77,6 +77,6 @@ class CSVWriter(FileWriter):
             logging.error(" file write failed")
 
 if __name__ == "__main__":
-   myfile = CSVWriter(header=1)
-   data = {'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'dist': 123.6581}
-   myfile.WriteData(data)
+    myfile = CSVWriter(header=1)
+    data = {'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'dist': 123.6581}
+    myfile.WriteData(data)
