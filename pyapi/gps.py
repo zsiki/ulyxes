@@ -46,4 +46,14 @@ class GPS(Instrument):
 
 
 if __name__ == '__main__':
-    pass
+    from echowriter import EchoWriter
+    from serialinterface import SerialInterface
+    from nmeagpsunit import NmeaGpsUnit
+    import logging
+    iface = SerialInterface("", "COM5")
+    mu = NmeaGpsUnit()
+    wrt = EchoWriter()
+    gps = GPS('', mu, iface, wrt)
+    logging.getLogger().setLevel(logging.DEBUG)
+    for i in range(10):
+        gps.Measure()
