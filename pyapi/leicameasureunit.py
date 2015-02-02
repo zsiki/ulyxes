@@ -131,7 +131,6 @@ class LeicaMeasureUnit(MeasureUnit):
                 res['v'] = Angle(float(ansBufflist[5]))
                 res['crossincline'] = Angle(float(ansBufflist[8]))
                 res['lengthincline'] = Angle(float(ansBufflist[9]))
-                # TODO incline angles
             # Set search area
             elif commandID == self.codes['SETSEARCHAREA']:
                 pass
@@ -325,7 +324,7 @@ class LeicaMeasureUnit(MeasureUnit):
 
         """
         if type(prg) is str:
-            prg = edmMode[prg]
+            prg = self.edmMode[prg]
         return '%R1Q,{0:d}:{1:d}'.format(self.codes['MEASUREANGDIST'], prg)
 
     def CoordsMsg (self, wait = 1000, incl = 0):
@@ -351,7 +350,7 @@ class LeicaMeasureUnit(MeasureUnit):
                 :returns: clear distance message
 
         """
-        return self.MeasureMsg(self, prg = 3)
+        return self.MeasureMsg(self, 3)
 
     def ChangeFaceMsg(self):
         """ Change face
