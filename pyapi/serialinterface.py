@@ -31,19 +31,36 @@ class SerialInterface(Interface):
         """
         super(SerialInterface, self).__init__(name)
         # open serial port
-        try:
-            self.ser = serial.Serial(port, baud, byteSize, parity, stop, timeout)
-        except:
-            self.state = self.IF_OPEN
-            logging.error(" cannot open serial line")
+        self.ser = None
+        self.Open(port, baud, byteSize, parity, stop, timeout)
 
     def __del__(self):
         """ Destructor for serial interface
         """
+        self.Close()
+
+    def Open(self, port, baud=9600, byteSize=8, \
+            parity=serial.PARITY_NONE, stop=1, timeout=12):
+        """ Open searial line
+        """
+        try:
+            self.ser = serial.Serial(port, baud, byteSize, parity, stop, timeout)
+            self.opened = True
+            self.state = self.IF_OK
+        except:
+            self.opened = False
+            self.state = self.IF_ERROR
+            logging.error(" cannot open serial line")
+
+    def Close(self):
+        """ Close serial line
+        """
         try:
             self.ser.close()
+            self.opened = False
+            self.state = self.IF_OK
         except:
-            pass
+            self.state = self.IF_ERROR
 
     def GetLine(self):
         """ read from serial interface until end of line

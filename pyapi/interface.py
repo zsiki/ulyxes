@@ -17,16 +17,17 @@ class Interface(object):
     """
     
     IF_OK = 0
-    IF_OPEN = -1
-    IF_WRITE = -2
-    IF_TIMEOUT = -3
-    IF_READ = -4
-    IF_FILE = -5
-    IF_SOURCE = -6
+    IF_WRITE = -3
+    IF_TIMEOUT = -4
+    IF_READ = -5
+    IF_FILE = -6
+    IF_SOURCE = -7
+    IF_ERROR = -8
 
     def __init__(self, name = 'None'):
         self.name = name
         self.state = self.IF_OK
+        self.opened = False
 
     def GetName(self):
         """ Get the name of the interface being used.
