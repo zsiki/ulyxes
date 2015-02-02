@@ -106,6 +106,8 @@ Operators supported:
                 self.value += 2.0 * math.pi
 
     def _deg2rad(self, angle):
+        """ Convert DEG to RAD
+        """
         try:
             a = math.radians(angle)
         except (ValueError, TypeError):
@@ -113,6 +115,8 @@ Operators supported:
         return a
 
     def _gon2rad(self, angle):
+        """ Convert GON to RAD
+        """
         try:
             a = angle / 200.0 * math.pi
         except (ValueError, TypeError):
@@ -120,11 +124,13 @@ Operators supported:
         return a
 
     def _dms2rad(self, dms):
+        """ Convert DMS to RAD
+        """
         if re.search('^[0-9]{1,3}(-[0-9]{1,2}){0,2}$', dms):
             items = [float(item) for item in dms.split('-')]
             div = 1.0
             a = 0.0
-            for i, val in enumerate(items):
+            for val in items:
                 a += val / div
                 div *= 60.0
             a = math.radians(a)
@@ -133,7 +139,8 @@ Operators supported:
         return a
 
     def _dm2rad(self, angle):
-        "DDMM.nnnnnn NMEA angle to radian"
+        """ Convert DDMM.nnnnnn NMEA angle to radian"
+        """
         try:
             w = angle / 100.0
             d = int(w)
@@ -143,7 +150,8 @@ Operators supported:
         return a
 
     def _pdeg2rad(self, angle):
-        "dd.mmss to radian"
+        """ Convert dd.mmss to radian
+        """
         try:
             d = math.floor(angle)
             angle = round((angle - d) * 100, 10)
@@ -155,6 +163,8 @@ Operators supported:
         return a
 
     def _sec2rad(self, angle):
+        """ Convert seconds to radian
+        """
         try:
             a = angle / RO
         except (ValueError, TypeError):
@@ -162,6 +172,8 @@ Operators supported:
         return a
 
     def _mil2rad(self, angle):
+        """ Convert mills to radian
+        """
         try:
             a = angle / 6400.0 * 2.0 * math.pi
         except (ValueError, TypeError):
@@ -169,6 +181,8 @@ Operators supported:
         return a
 
     def _rad2gon(self):
+        """ Convert radian to GON
+        """
         try:
             a = self.value / math.pi * 200.0
         except (ValueError, TypeError):
@@ -176,6 +190,8 @@ Operators supported:
         return a
 
     def _rad2sec(self):
+        """ Convert radian to seconds
+        """
         try:
             a = self.value * RO
         except (ValueError, TypeError):
@@ -183,6 +199,8 @@ Operators supported:
         return a
 
     def _rad2deg(self):
+        """ Convert radian to decimal degrees
+        """
         try:
             a = math.degrees(self.value)
         except (ValueError, TypeError):
@@ -190,17 +208,21 @@ Operators supported:
         return a
 
     def _dms(self):
+        """ Convert radian to DMS
+        """
         try:
             secs = round(self._rad2sec())
-            min, sec = divmod(secs, 60)
-            deg, min = divmod(min, 60)
+            mi, sec = divmod(secs, 60)
+            deg, mi = divmod(mi, 60)
             deg = int(deg)
-            dms = "%d-%02d-%02d" % (deg, min, sec)
+            dms = "%d-%02d-%02d" % (deg, mi, sec)
         except (ValueError, TypeError):
             dms = None
         return dms
 
     def _rad2dm(self):
+        """ Convert radian to NMEA DDDMM.nnnnn
+        """
         try:
             w = self.value / math.pi * 180.0
             d = int(w)
@@ -210,17 +232,21 @@ Operators supported:
         return a
 
     def _rad2pdeg(self):
+        """ Convert radian to pseudo DMS ddd.mmss
+        """
         try:
             secs = round(self._rad2sec())
-            min, sec = divmod(secs, 60)
-            deg, min = divmod(min, 60)
+            mi, sec = divmod(secs, 60)
+            deg, mi = divmod(mi, 60)
             deg = int(deg)
-            pdeg = deg + min / 100.0 + sec / 10000.0
+            pdeg = deg + mi / 100.0 + sec / 10000.0
         except (ValueError, TypeError):
             pdeg = None
         return pdeg
 
     def _rad2mil(self):
+        """ Convert radian to mills
+        """
         try:
             w = self.value / math.pi / 2.0 * 6400.0
         except (ValueError, TypeError):
@@ -267,12 +293,12 @@ Operators supported:
         return self
 
 if __name__ == "__main__":
-    a = Angle("152-23-45", "DMS")
-    for unit in ['RAD', 'DMS', 'GON', 'NMEA', 'DEG', 'PDEG', 'MIL']:
-        print a.GetAngle(unit)
-    b = Angle(1.1111, 'PDEG')
-    print b.GetAngle("DMS")
-    c = a + b
-    print c.GetAngle("DMS")
-    print c
-    print (a-b).GetAngle("DMS")
+    a1 = Angle("152-23-45", "DMS")
+    for u in ['RAD', 'DMS', 'GON', 'NMEA', 'DEG', 'PDEG', 'MIL']:
+        print a1.GetAngle(u)
+    b1 = Angle(1.1111, 'PDEG')
+    print b1.GetAngle("DMS")
+    c1 = a1 + b1
+    print c1.GetAngle("DMS")
+    print c1
+    print (a1-b1).GetAngle("DMS")
