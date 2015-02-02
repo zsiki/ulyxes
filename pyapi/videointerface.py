@@ -31,10 +31,13 @@ class VideoInterface(Interface):
             if cv.QueryFrame(self.video) is None:
                 self.state = self.IF_SOURCE
                 logging.error(" error opening video camera")
+            else:
+                self.opened = True
         elif type(source) is str:
             # video file source
             if os.path.exists(name) and os.path.isfile(name):
                 self.video = cv.CaptureFromFile(name)
+                self.opened = True
             else:
                 self.state = self.IF_FILE
                 logging.error(" error opening video file")
