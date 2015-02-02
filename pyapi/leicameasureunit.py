@@ -49,6 +49,9 @@ class LeicaMeasureUnit(MeasureUnit):
     edmMode = {'STANDARD': 0, 'PRECISE': 1, 'FAST': 2, 'TRACKING': 3, 
         'AVERAGING': 4, 'FASTTRACKING': 5}
 
+    # Constants for EDM programs
+    edmProg = {'STOP': 0, 'DEFAULT': 1, 'TRACKING': 2, 'CLEAR': 3}
+
     def __init__(self, name = 'Leica generic', typ = 'TPS'):
         """ Constructor to leica generic ts
 

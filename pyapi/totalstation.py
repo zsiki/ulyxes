@@ -145,7 +145,7 @@ class TotalStation(Instrument):
 
     def SetRCS(self, rcs):
         """ Remote control
-		"""
+        """
         msg = self.measureUnit.SetRCSMsg(rcs)
         return self._process(msg)
 
@@ -166,8 +166,8 @@ class TotalStation(Instrument):
             :param incl: inclination ...
             :returns: empty dictionary
         """
-        if prg == 'DEFAULT':
-            prg = self.GetEDMMode()['edmMode']
+        if type(prg) is str:
+            prg = self.measureUnit.edmProg[prg]
         msg = self.measureUnit.MeasureMsg(prg, incl)
         return self._process(msg)
 
@@ -186,9 +186,8 @@ class TotalStation(Instrument):
 
             :returns: observations in a dictionary
         """
-        # TODO prg param is not OK!
-        if prg == 'DEFAULT':
-            prg = self.GetEDMMode()['edmMode']
+        if type(prg) is str:
+            prg = self.measureUnit.edmProg[prg]
         msg = self.measureUnit.MeasureDistAngMsg(prg)
         return self._process(msg)
 
@@ -295,6 +294,7 @@ if __name__ == "__main__":
     from leicatca1800 import LeicaTCA1800
     from serialinterface import SerialInterface
     from echowriter import EchoWriter
+    logging.getLogger().setLevel(logging.DEBUG)
     mu = LeicaTCA1800()
     iface = SerialInterface("rs-232", "/dev/ttyUSB1")
     wrt = EchoWriter()
