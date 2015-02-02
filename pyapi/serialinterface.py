@@ -67,6 +67,9 @@ class SerialInterface(Interface):
             
         :returns: line read from serial (str) or empty string on timeout or error, state is set also
         """
+        if self.ser is None or not self.opened or self.state != self.IF_OK:
+            logging.error(" serial line not opened")
+            return None
         # read answer till end of line
         ans = b''
         ch = b''
@@ -94,10 +97,11 @@ class SerialInterface(Interface):
             :param msg: message to send (str)
             :returns: 0 - on OK, -1 on error or interface is in error state
         """
-        ans = b''
         # do nothing if interface is in error state
-        if self.state != self.IF_OK:
+        if self.ser is None or not self.opened or self.state != self.IF_OK:
+            logging.error(" serial line not opened or in error state")
             return -1
+        ans = b''
         # add CR/LF to message end
         if (msg[-2:] != '\r\n'):
             msg += '\r\n'
