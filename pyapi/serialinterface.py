@@ -18,7 +18,8 @@ class SerialInterface(Interface):
     """ Interface to communicate through serial interface. This class depends on pyserial.
     """
     def __init__(self, name, port, baud=9600, byteSize=8, \
-        parity=serial.PARITY_NONE, stop=1, timeout=12):
+        parity=serial.PARITY_NONE, stop=1, timeout=12, eomRead=b'\n', \
+        eomWrite=b'\r\n'):
         """ Constructor for serial interface
 
             :param name: name of serial interface
@@ -28,11 +29,15 @@ class SerialInterface(Interface):
             :param parity: parity of bytes even/odd/none
             :param stop: number of stop bits
             :param timeout: communication timeout seconds
+            :param eomRead: end of message char from instrument
+            :param eomWrite: end of message char from computer
         """
         super(SerialInterface, self).__init__(name)
         # open serial port
         self.ser = None
         self.Open(port, baud, byteSize, parity, stop, timeout)
+        self.eomRead = eomRead
+        self.eomWrite = eomWrite
 
     def __del__(self):
         """ Destructor for serial interface
@@ -73,7 +78,7 @@ class SerialInterface(Interface):
         # read answer till end of line
         ans = b''
         ch = b''
-        while (ch != b'\n'):
+        while (ch != self.eomRead):
             ch = b''
             try:
                 ch = self.ser.read(1)
@@ -87,7 +92,7 @@ class SerialInterface(Interface):
                 break
             ans += ch
         # remove end of line
-        ans = ans.strip(b'\r\n')
+        ans = ans.strip(self.eomWrite)
         logging.debug(" message got: %s", ans)
         return ans
 
@@ -103,8 +108,8 @@ class SerialInterface(Interface):
             return -1
         ans = b''
         # add CR/LF to message end
-        if (msg[-2:] != '\r\n'):
-            msg += '\r\n'
+        if (msg[-2:] != self.eomWrite):
+            msg += self.eomWrite
         # remove special characters
         msg = msg.encode('ascii', 'ignore')
         # send message to serial interface
