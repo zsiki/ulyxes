@@ -27,6 +27,23 @@ class TotalStation(Instrument):
         # call super class init
         super(TotalStation, self).__init__(name, measureUnit, measureInterf, writerUnit)
 
+    def SetPc(self, pc):
+        """ Set prism constant
+
+            :param pc: prism constant [mm]
+            :returns: processed answer from instrument
+        """
+        msg = self.measureUnit.SetPcMsg(atr)
+        return self._process(msg)
+            
+    def GetPc(self, pc):
+        """ Get prism constant
+
+            :returns: processed answer from instrument
+        """
+        msg = self.measureUnit.GetPcMsg(atr)
+        return self._process(msg)
+            
     def SetATR(self, atr):
         """ Set ATR on 
 
@@ -291,20 +308,15 @@ class TotalStation(Instrument):
         return self.Move(res['hz'] + hz_rel, res['v'] + v_rel, atr)
 
 if __name__ == "__main__":
-    from leicatca1800 import LeicaTCA1800
+    from leicatps1200 import LeicaTPS1200
     from serialinterface import SerialInterface
     from echowriter import EchoWriter
     logging.getLogger().setLevel(logging.DEBUG)
-    mu = LeicaTCA1800()
-    iface = SerialInterface("rs-232", "/dev/ttyUSB1")
+    mu = LeicaTPS1200()
+    iface = SerialInterface("rs-232", "/dev/ttyS0")
     wrt = EchoWriter()
     ts = TotalStation("Leica", mu, iface, wrt)
-    print (ts.Move(Angle(0), Angle(90, 'DEG')))
-    print (ts.ChangeFace())
-    print (ts.GetEDMMode())
-    if ts.GetATR()['atrStatus'] == 0:
-        ts.SetATR(1)
-    print (ts.GetAngles())
-    print (ts.GetFace())
-    #ts.Measure()
-    #print ts.GetMeasure()
+    ts.SetEDMMode(5)
+    ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
+    ts.Measure()
+    print (ts.GetMeasure())

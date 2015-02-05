@@ -18,6 +18,8 @@ class LeicaMeasureUnit(MeasureUnit):
     """
     # Constants for message codes
     codes = {
+        'SETPC': 2024,
+        'GETPC': 2023,
         'SETATR': 9018,
         'GETATR': 9019,
         'SETLOCK': 9020,
@@ -101,6 +103,8 @@ class LeicaMeasureUnit(MeasureUnit):
                 res['hz'] = Angle(float(ansBufflist[4]))
                 res['v'] = Angle(float(ansBufflist[5]))
                 res['distance'] = float(ansBufflist[6])
+            elif commandID == self.codes['GETPC']:
+                res['pc'] = int(ansBufflist[4])
             elif commandID == self.codes['GETATR']:
                 res['atrStatus'] = int(ansBufflist[4])
             #GetLockStatus()
@@ -141,6 +145,21 @@ class LeicaMeasureUnit(MeasureUnit):
             elif commandID == self.codes['POWERSEARCH']:
                 pass
         return res
+
+    def SetPcMsg(self, pc):
+        """ Set prism constant
+
+            :param pc: prism constant [mm]
+            :returns: set prism constant message
+        """
+        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETPC'], pc)
+
+    def GetPcMsg(self):
+        """ Get prism constant
+
+            :returns: get prism constant message
+        """
+        return '%R1Q,{0:d}:'.format(self.codes['GETPC'])
 
     def SetATRMsg(self, atr):
         """ Set ATR status on/off
