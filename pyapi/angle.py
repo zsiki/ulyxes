@@ -42,6 +42,7 @@ Operators supported:
             :param value: angle value
             :param unit: angle unit (available units RAD/DMS/DEG/GON/NMEA/PDEG/SEC/MIL)
         """
+        self.value = None
         self.SetAngle(value, unit)
 
     def GetAngle(self, out='RAD'):
