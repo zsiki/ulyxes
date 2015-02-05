@@ -92,8 +92,8 @@ class SerialInterface(Interface):
                 break
             ans += ch
         # remove end of line
-        ans = ans.strip(self.eomWrite)
         logging.debug(" message got: %s", ans)
+        ans = ans.strip(self.eomRead)
         return ans
 
     def PutLine(self, msg):
