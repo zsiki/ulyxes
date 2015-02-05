@@ -33,15 +33,15 @@ class TotalStation(Instrument):
             :param pc: prism constant [mm]
             :returns: processed answer from instrument
         """
-        msg = self.measureUnit.SetPcMsg(atr)
+        msg = self.measureUnit.SetPcMsg(pc)
         return self._process(msg)
             
-    def GetPc(self, pc):
+    def GetPc(self):
         """ Get prism constant
 
             :returns: processed answer from instrument
         """
-        msg = self.measureUnit.GetPcMsg(atr)
+        msg = self.measureUnit.GetPcMsg()
         return self._process(msg)
             
     def SetATR(self, atr):
@@ -176,11 +176,11 @@ class TotalStation(Instrument):
         msg = self.measureUnit.MoveMsg(hz, v, atr)
         return self._process(msg)
 
-    def Measure(self, prg='DEFAULT', incl=0):
+    def Measure(self, prg='DEFAULT', incl=None):
         """ Measure distance
 
-            :param prg: EDM program, DEFAULT use actual
-            :param incl: inclination ...
+            :param prg: EDM program, DEFAULT is the only reasonable value
+            :param incl: not used, only for compability
             :returns: empty dictionary
         """
         if type(prg) is str:
@@ -238,6 +238,11 @@ class TotalStation(Instrument):
             :returns: empty dictionary
         """
         msg = self.measureUnit.ChangeFaceMsg()
+        if msg is None:
+            angles = self.GetAngles()
+            angles['hz'] += Angle(180, 'DEG')
+            angles['v'] = Angle(360, 'DEG') - angles['v']
+            return self.Move(angles['hz'], angles['v'])
         return self._process(msg)
 
     def SetRedLaser(self, on):
