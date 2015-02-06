@@ -2,7 +2,10 @@
 """
 .. module:: trimble5500.py
    :platform: Unix, Windows
-   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results. GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
+   :synopsis: Ulyxes - an open source project to drive total stations and
+       publish observation results. GPL v2.0 license Copyright (C)
+       2010-2013 Zoltan Siki <siki@agt.bme.hu>
+
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 
 """
@@ -10,10 +13,10 @@
 from measureunit import MeasureUnit
 from angle import Angle
 import re
-import logging
 
 class Trimble5500(MeasureUnit):
-    """ This class contains the Trimble 5500 robotic total station specific functions
+    """ This class contains the Trimble 5500 robotic total station specific
+        functions
     """
     # Constants for message codes
     codes = {
@@ -71,7 +74,7 @@ class Trimble5500(MeasureUnit):
             if len(msg.strip()) == 0:
                 continue
             # get command id form message
-            ansBufflist = re.split('\n=', msg)
+            ansBufflist = re.split('\n=', ans)
             commandID = ansBufflist[0]
             if commandID == self.codes['HA']:
                 res['hz'] = Angle(float(ansBufflist[1]), 'PDEG')
@@ -93,7 +96,7 @@ class Trimble5500(MeasureUnit):
             :param pc: prism constant [mm]
             :returns: set prism constant message
         """
-        return 'WG,{0:d}={1:d}'.format(self.codes['PC'])
+        return 'WG,{0:d}={1:.3f}'.format(self.codes['PC'], pc / 1000.0)
 
     def SetAtmCorrMsg(self, valueOfLambda, pres, dry, wet):
         """
@@ -149,7 +152,8 @@ class Trimble5500(MeasureUnit):
           
         """
         # TODO SEASTING
-        msg = 'WG,{0:d}={1:.3f}|WG,{2:d}={3:.3f}'.format(self.codes['SEASTING'], e, self.codes['SNORTHING'], n)
+        msg = 'WG,{0:d}={1:.3f}|WG,{2:d}={3:.3f}'.format(
+            self.codes['SEASTING'], e, self.codes['SNORTHING'], n)
         if z is not None:
             msg += '|WG,{0:d}={1:.3f}'.format(self.codes['SELE'], z)
         return msg
@@ -161,7 +165,7 @@ class Trimble5500(MeasureUnit):
           
         """
         # TODO SEASTING
-        msg = 'RG,{0:d}|RG,{1:d}|RG,{0:d}'.format(self.codes['SEASTING'], self.codes['SNORTHING'], self.codes['SELE'])
+        pass
 
     def SetEDMModeMsg(self, mode):
         """ Set EDM mode
@@ -185,7 +189,8 @@ class Trimble5500(MeasureUnit):
         :returns: set orientation angle message
           
         """
-        return 'WG,{0:d}={1:.4f}'.format(self.codes['HAREF'], ori.GetAngle('PDEG'))
+        return 'WG,{0:d}={1:.4f}'.format(self.codes['HAREF'],
+            ori.GetAngle('PDEG'))
 
     def MoveMsg(self, hz, v, dummy=None):
         """ Rotate instrument to direction

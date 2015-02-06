@@ -2,15 +2,20 @@
 """
 .. module:: leicatps1200.py
    :platform: Unix, Windows
-   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results. GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
-.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokadaniel@citromail.hu>
+   :synopsis: Ulyxes - an open source project to drive total stations and
+       publish observation results. GPL v2.0 license Copyright (C)
+       2010-2013 Zoltan Siki <siki@agt.bme.hu>
+
+.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>,
+    Daniel Moka <mokadaniel@citromail.hu>
 
 """
 
 from leicameasureunit import LeicaMeasureUnit
 
 class LeicaTPS1200(LeicaMeasureUnit):
-    """ This class contains the Leica TPS1200 robotic total station specific functions
+    """ This class contains the Leica TPS1200 robotic total station specific
+        functions
     """
 
     def __init__(self, name = 'Leica TPS1200', typ = 'TPS'):
@@ -77,7 +82,9 @@ class LeicaTPS1200(LeicaMeasureUnit):
             :param vRange: vertical range to search (Angle)
             :param on: 0/1 off/on
         """
-        return '%R1Q,{0:d}:{1:f},{2:f},{3:f},{4:f},{5:d}'.format(self.codes['SETSEARCHAREA'], hzCenter.GetAngle(), vCenter.GetAngle(), hzRange.GetAngle(), vRange.GetAngle(), on)
+        return '%R1Q,{0:d}:{1:f},{2:f},{3:f},{4:f},{5:d}'.format(
+            self.codes['SETSEARCHAREA'], hzCenter.GetAngle(),
+            vCenter.GetAngle(), hzRange.GetAngle(), vRange.GetAngle(), on)
 
     def PowerSearchMsg(self):
         """ Power search

@@ -61,10 +61,10 @@ class VideoWriter(Writer):
 
 if __name__ == "__main__":
     from webcam import WebCam
-    from videointerface import VideoInterface
+    from videoiface import VideoIface
     from videomeasureunit import VideoMeasureUnit
     vw = VideoWriter("vw", "video_file", None)
     mu = VideoMeasureUnit()
-    vi = VideoInterface()
+    vi = VideoIface()
     cam = WebCam('x', mu, vi, vw)
 

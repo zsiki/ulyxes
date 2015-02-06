@@ -19,7 +19,8 @@ class CSVWriter(FileWriter):
     """
     DEFAULT_FILTER = ['hz', 'v', 'dist']
 
-    def __init__(self, name = 'None', fname = 'ulyxes.txt', mode = 'a', angle = 'DMS', dist = '.3f', filt = None, sep = ';', header = None):
+    def __init__(self, name = 'None', fname = 'ulyxes.txt', mode = 'a',
+        angle = 'DMS', dist = '.3f', filt = None, sep = ';', header = None):
         """ Constructor
 
             :param name: name of writer (str)

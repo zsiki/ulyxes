@@ -3,9 +3,9 @@
 .. module:: filewriter.py
    :platform: Unix, Windows
    :synopsis: Ulyxes - an open source project to drive total stations and
-           publish observation results.
-           GPL v2.0 license
-           Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
+       publish observation results.
+       GPL v2.0 license
+       Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
 
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 """
@@ -18,7 +18,8 @@ class FileWriter(EchoWriter):
     """ Class to write observations to file
     """
 
-    def __init__(self, name = 'None', fname = 'ulyxes.txt', mode = 'a', angle = 'GON', dist = '.3f', filt = None):
+    def __init__(self, name = 'None', fname = 'ulyxes.txt', mode = 'a',
+        angle = 'GON', dist = '.3f', filt = None):
         """ Constructor
 
             :param name: name of writer (str)

@@ -2,9 +2,12 @@
 """
 .. module:: totalstation.py
    :platform: Unix, Windows
-   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results.  GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
+   :synopsis: Ulyxes - an open source project to drive total stations and
+       publish observation results.  GPL v2.0 license Copyright (C)
+       2010-2013 Zoltan Siki <siki@agt.bme.hu>
 
-.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokadaniel@citromail.hu>
+.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>,
+    Daniel Moka <mokadaniel@citromail.hu>
 """
 import logging
 from instrument import Instrument
@@ -16,16 +19,17 @@ class TotalStation(Instrument):
     FACE_LEFT = 0
     FACE_RIGHT = 1
 
-    def __init__(self, name, measureUnit, measureInterf, writerUnit = None):
+    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
         """ Constructor
 
             :param name: name of instrument
             :param measureUnit: measure unit part of instrument 
-            :param measureInterf: interface to physical unit
+            :param measureIface: interface to physical unit
             :param writerUnit: store data
         """
         # call super class init
-        super(TotalStation, self).__init__(name, measureUnit, measureInterf, writerUnit)
+        super(TotalStation, self).__init__(name, measureUnit, measureIface,
+            writerUnit)
 
     def SetPc(self, pc):
         """ Set prism constant
@@ -86,7 +90,8 @@ class TotalStation(Instrument):
             :param dryTemp: dry temperature
             :param wetTemp: wet temperature
         """
-        msg = self.measureUnit.SetAtmCorrMsg(valueOfLambda, pres, dryTemp, wetTemp)
+        msg = self.measureUnit.SetAtmCorrMsg(valueOfLambda, pres, dryTemp,
+            wetTemp)
         return self._process(msg)
 
     def GetAtmCorr(self):
@@ -104,7 +109,8 @@ class TotalStation(Instrument):
             :param earthRadius: radius of earth
             :param refracticeScale: ???
         """
-        msg = self.measureUnit.SetRefCorrMsg(status, earthRadius, refracticeScale)
+        msg = self.measureUnit.SetRefCorrMsg(status, earthRadius,
+            refracticeScale)
         return self._process(msg)
 
     def GetRefCorr(self):
@@ -274,7 +280,8 @@ class TotalStation(Instrument):
                 hzRange = Angle(399.9999, 'GON')
             if vRange is None:
                 vRange = Angle(95, 'DEG')
-        msg = self.measureUnit.SetSearchAreaMsg(hzCenter, vCenter, hzRange, vRange, on)
+        msg = self.measureUnit.SetSearchAreaMsg(hzCenter, vCenter, hzRange,
+            vRange, on)
         return self._process(msg)
 
     def PowerSearch(self):
@@ -314,11 +321,11 @@ class TotalStation(Instrument):
 
 if __name__ == "__main__":
     from leicatps1200 import LeicaTPS1200
-    from serialinterface import SerialInterface
+    from serialiface import SerialIface
     from echowriter import EchoWriter
     logging.getLogger().setLevel(logging.DEBUG)
     mu = LeicaTPS1200()
-    iface = SerialInterface("rs-232", "/dev/ttyS0")
+    iface = SerialIface("rs-232", "/dev/ttyS0")
     wrt = EchoWriter()
     ts = TotalStation("Leica", mu, iface, wrt)
     ts.SetEDMMode(5)

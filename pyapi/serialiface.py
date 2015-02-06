@@ -1,24 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-.. module:: serialinterface.py
+.. module:: serialiface.py
    :platform: Unix, Windows
-   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results. GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>.
+   :synopsis: Ulyxes - an open source project to drive total stations and
+       publish observation results. GPL v2.0 license Copyright (C)
+       2010-2013 Zoltan Siki <siki@agt.bme.hu>.
 
-.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Danieli Moka <mokadaniel@citromail.hu>
+.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>,
+    Daniel Moka <mokadaniel@citromail.hu>
 
 """
 
-from interface import Interface
+from iface import Iface
 import serial
 import re
 import logging
 
-class SerialInterface(Interface):
-    """ Interface to communicate through serial interface. This class depends on pyserial.
+class SerialIface(Iface):
+    """ Interface to communicate through serial interface. This class depends
+        on pyserial.
     """
-    def __init__(self, name, port, baud=9600, byteSize=8, \
-        parity=serial.PARITY_NONE, stop=1, timeout=12, eomRead=b'\n', \
+    def __init__(self, name, port, baud=9600, byteSize=8,
+        parity=serial.PARITY_NONE, stop=1, timeout=12, eomRead=b'\n',
         eomWrite=b'\r\n'):
         """ Constructor for serial interface
 
@@ -32,7 +36,7 @@ class SerialInterface(Interface):
             :param eomRead: end of message char from instrument
             :param eomWrite: end of message char from computer
         """
-        super(SerialInterface, self).__init__(name)
+        super(SerialIface, self).__init__(name)
         # open serial port
         self.ser = None
         self.Open(port, baud, byteSize, parity, stop, timeout)
@@ -44,7 +48,7 @@ class SerialInterface(Interface):
         """
         self.Close()
 
-    def Open(self, port, baud=9600, byteSize=8, \
+    def Open(self, port, baud=9600, byteSize=8,
             parity=serial.PARITY_NONE, stop=1, timeout=12):
         """ Open searial line
         """
@@ -106,7 +110,6 @@ class SerialInterface(Interface):
         if self.ser is None or not self.opened or self.state != self.IF_OK:
             logging.error(" serial line not opened or in error state")
             return -1
-        ans = b''
         # add CR/LF to message end
         if (msg[-2:] != self.eomWrite):
             msg += self.eomWrite
@@ -139,7 +142,7 @@ class SerialInterface(Interface):
         return res
 
 if __name__ == "__main__":
-    a = SerialInterface('test', '/dev/ttyUSB0')
+    a = SerialIface('test', '/dev/ttyUSB0')
     print (a.GetName())
     print (a.GetState())
     print (a.Send('%R1Q,2008:1,0'))

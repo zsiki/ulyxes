@@ -1,8 +1,10 @@
+""" Ulyxes PyAPI
+"""
 __all__ = [
 # general
 "angle",
 # interfaces
-"interface", "localinterface", "serialinterface", "videointerface",
+"iface", "localiface", "serialiface", "videoiface",
 # measure units
 "measureunit", "leicameasureunit", "leicatca1800", "leicatps1200",
 "leicadnaunit", "nmeagpsunit", "videomeasureunit",

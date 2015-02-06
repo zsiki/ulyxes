@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 """
-.. module:: interface.py
+.. module:: iface.py
    :platform: Unix, Windows
    :synopsis: Ulyxes - an open source project to drive total stations and
            publish observation results.
            GPL v2.0 license
            Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
 
-.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokadaniel@citromail.hu>
+.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>,
+    Daniel Moka <mokadaniel@citromail.hu>
 
 """
 
-class Interface(object):
+class Iface(object):
     """
     Base class for different interfaces
     """
@@ -45,6 +46,6 @@ class Interface(object):
         self.state = self.IF_OK
 
 if __name__ == "__main__":
-    a = Interface()
+    a = Iface()
     print a.GetName()
     print a.GetState()

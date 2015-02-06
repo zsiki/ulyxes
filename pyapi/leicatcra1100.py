@@ -2,15 +2,20 @@
 """
 .. module:: leicatcra1100.py
    :platform: Unix, Windows
-   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results. GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
-.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokadaniel@citromail.hu>
+   :synopsis: Ulyxes - an open source project to drive total stations and
+       publish observation results. GPL v2.0 license Copyright (C)
+       2010-2013 Zoltan Siki <siki@agt.bme.hu>
+
+.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>,
+    Daniel Moka <mokadaniel@citromail.hu>
 
 """
 
 from leicameasureunit import LeicaMeasureUnit
 
 class LeicaTCRA1100(LeicaMeasureUnit):
-    """ This class contains the Leica TCRA1100 robotic total station specific functions
+    """ This class contains the Leica TCRA1100 robotic total station specific
+        functions
     """
 
     def __init__(self, name = 'Leica TCRA1100', typ = 'TPS'):

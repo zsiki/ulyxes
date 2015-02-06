@@ -2,7 +2,10 @@
 """
 .. module:: leicadnaunit.py
    :platform: Unix, Windows
-   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results.  GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>.
+   :synopsis: Ulyxes - an open source project to drive total stations and
+       publish observation results.  GPL v2.0 license Copyright (C)
+       2010-2013 Zoltan Siki <siki@agt.bme.hu>.
+
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokbme@gmail.com>
 """
 
@@ -16,7 +19,8 @@ class LeicaDnaUnit(MeasureUnit):
     TEMPERATURE = "GET/M/WI95"
     SETAUTOOFF = "SET/95/"
     GETAUTOOFF = "CONF/95"
-    unitDiv = [1000.0, 1000.0 / 0.3048, None, None, None, None, 10000.0, 10000.0 / 0.3048, 100000.0]
+    unitDiv = [1000.0, 1000.0 / 0.3048, None, None, None, None, 10000.0,
+        10000.0 / 0.3048, 100000.0]
 
     def __init__(self, name = 'Leica level', typ = 'Level'):
         """ Construnctor for leica dna unit

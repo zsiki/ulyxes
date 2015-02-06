@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 """
-.. module:: videointeface.py
+.. module:: videoiface.py
    :platform: Unix, Windows
-   :synopsis: Ulyxes - an open source project to drive total stations and publish observation results.  GPL v2.0 license Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>.
+   :synopsis: Ulyxes - an open source project to drive total stations and
+       publish observation results.  GPL v2.0 license Copyright (C)
+       2010-2013 Zoltan Siki <siki@agt.bme.hu>.
+
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 
 """
@@ -10,9 +13,9 @@
 import cv
 import logging
 import os.path
-from interface import Interface
+from iface import Iface
 
-class VideoInterface(Interface):
+class VideoIface(Iface):
     """ Read from video stream or video file. This class depends on OpenCV.
     """
     def __init__(self, name = 'webcam', source = 0):
@@ -21,7 +24,7 @@ class VideoInterface(Interface):
             :param name: name of interface
             :param source: id of device or file name, default = 0
         """
-        super(VideoInterface, self).__init__(name)
+        super(VideoIface, self).__init__(name)
         self.source = source
         self.video = None
         if type(source) is int:
@@ -69,10 +72,10 @@ class VideoInterface(Interface):
         return None
 
 if __name__ == "__main__":
-    stream = VideoInterface("webcam", 0)
+    stream = VideoIface("webcam", 0)
     if stream.state != stream.IF_OK:
         print "error opening video stream"
     else:
-        img = stream.GetImage()
-        print type(img)
-        print cv.GetSize(img)
+        im = stream.GetImage()
+        print type(im)
+        print cv.GetSize(im)
