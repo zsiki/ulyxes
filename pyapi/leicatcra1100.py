@@ -24,6 +24,8 @@ class LeicaTCRA1100(LeicaMeasureUnit):
 
     # Constants for message codes
     codes = {
+        'SETPC': 2024,
+        'GETPC': 2023,
         'SETATR': 18005,
         'GETATR': 18006,
         'SETLOCK': 18007,

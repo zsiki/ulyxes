@@ -24,6 +24,7 @@ class Trimble5500(MeasureUnit):
         'SH': 6,
         'HA': 7,
         'VA': 8,
+        'SD': 9,
         'PC': 20,
         'HAREF': 21,
         'SVA': 26,

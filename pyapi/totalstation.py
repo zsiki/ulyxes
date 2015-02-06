@@ -176,7 +176,7 @@ class TotalStation(Instrument):
         msg = self.measureUnit.MoveMsg(hz, v, atr)
         return self._process(msg)
 
-    def Measure(self, prg='DEFAULT', incl=None):
+    def Measure(self, prg='DEFAULT', incl=0):
         """ Measure distance
 
             :param prg: EDM program, DEFAULT is the only reasonable value
