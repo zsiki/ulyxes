@@ -13,13 +13,13 @@ from instrument import Instrument
 
 class GPS(Instrument):
     """ GNSS receiver sending NMEA messages
-    """
-    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
-        """ constructor for gps
 
             :param name: name of gps instrument
             :param measureUnit: reference to measure unit
             :param measureIface: reference to measure interface
+    """
+    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
+        """ constructor for gps
         """
         super(GPS, self).__init__(name, measureUnit, measureIface, writerUnit)
 

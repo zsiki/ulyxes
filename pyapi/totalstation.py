@@ -15,17 +15,17 @@ from angle import Angle
 
 class TotalStation(Instrument):
     """ Generic total station instrument
+
+            :param name: name of instrument
+            :param measureUnit: measure unit part of instrument 
+            :param measureIface: interface to physical unit
+            :param writerUnit: store data, default None
     """
     FACE_LEFT = 0
     FACE_RIGHT = 1
 
     def __init__(self, name, measureUnit, measureIface, writerUnit = None):
         """ Constructor
-
-            :param name: name of instrument
-            :param measureUnit: measure unit part of instrument 
-            :param measureIface: interface to physical unit
-            :param writerUnit: store data
         """
         # call super class init
         super(TotalStation, self).__init__(name, measureUnit, measureIface,

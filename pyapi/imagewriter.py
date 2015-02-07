@@ -15,14 +15,16 @@ import logging
 from writer import Writer
 
 class ImageWriter(Writer):
-    """ write images to single files to a directory
+    """ write images to single files to a directory, file names are ordinal
+        numbers
+
+            :param name: name for writer (str)
+            :param dirname: output directory name (str)
+            :param counter: id number for the first image (int)
     """
 
     def __init__(self, name, dirName, counter = 0):
         """ Constructor
-
-            :param name: name for writer
-            :param dirname: output directory name
         """
         super(ImageWriter, self).__init__(name)
         self.state = self.WR_OK

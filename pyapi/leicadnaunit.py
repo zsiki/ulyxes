@@ -14,6 +14,9 @@ import re
 
 class LeicaDnaUnit(MeasureUnit):
     """ Leica DNA measure unit
+
+            :param name: name of measure unit (str), default 'Leica level'
+            :param typ: type of measure unit (str), default 'Level'
     """
     MEASURE = "GET/M/WI32/WI330"
     TEMPERATURE = "GET/M/WI95"
@@ -24,9 +27,6 @@ class LeicaDnaUnit(MeasureUnit):
 
     def __init__(self, name = 'Leica level', typ = 'Level'):
         """ Construnctor for leica dna unit
-
-            :param name: name of measure unit
-            :param typ: type of measure unit
         """
         # call super class init
         super(LeicaDnaUnit, self).__init__(name, typ)

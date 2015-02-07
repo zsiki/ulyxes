@@ -184,6 +184,9 @@ Operators supported:
 * += increment angle (e.g. c += Angle(1, 'GON'))
 * -= decrement angle (e.g. d -= Angle(1, 'GON'))
 * str() convert angle to GON string, used in print
+
+:param value: angle value
+:param unit: angle unit (available units RAD/DMS/DEG/GON/NMEA/PDEG/SEC/MIL)
     """
 
     # jump table to import from
@@ -199,9 +202,6 @@ Operators supported:
 
     def __init__(self, value, unit='RAD'):
         """ Constructor for an angle instance.
-
-            :param value: angle value
-            :param unit: angle unit (available units RAD/DMS/DEG/GON/NMEA/PDEG/SEC/MIL)
         """
         self.value = None
         self.SetAngle(value, unit)

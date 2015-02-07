@@ -13,15 +13,15 @@ from instrument import Instrument
 
 class WebCam(Instrument):
     """ WebCam or video device
-    """
-
-    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
-        """ Constructor
 
             :param name: name of instrument
             :param measureUnit: measure unit part of instrument 
             :param measureIface: interface to measure unit
-            :param writerUnit: store data
+            :param writerUnit: store data, default None
+    """
+
+    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
+        """ Constructor
         """
         # call super class init
         super(WebCam, self).__init__(name, measureUnit, measureIface, writerUnit)

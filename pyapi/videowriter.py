@@ -15,6 +15,12 @@ from writer import Writer
 
 class VideoWriter(Writer):
     """ write images to video file
+
+            :param name: name for writer
+            :param fname: output file name
+            :param codec: video compression
+            :param fps: frame per sec (int), default 10
+            :param size: image size (int, int), default (640, 480)
     """
     codecs = { 'JPEG': cv.CV_FOURCC('J', 'P', 'E', 'G'),
                'MJPG': cv.CV_FOURCC('M', 'J', 'P', 'G'),
@@ -23,9 +29,6 @@ class VideoWriter(Writer):
 
     def __init__(self, name, fname, codec, fps = 10, size = (640, 480)):
         """ Constructor
-
-            :param name: name for writer
-            :param fname: output file name
         """
         super(VideoWriter, self).__init__(name)
         self.state = self.WR_OK

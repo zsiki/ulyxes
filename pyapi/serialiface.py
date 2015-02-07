@@ -9,7 +9,6 @@
 
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>,
     Daniel Moka <mokadaniel@citromail.hu>
-
 """
 
 from iface import Iface
@@ -20,21 +19,21 @@ import logging
 class SerialIface(Iface):
     """ Interface to communicate through serial interface. This class depends
         on pyserial.
+
+            :param name: name of serial interface (str)
+            :param port: port name e.g. com1: or /dev/stty1
+            :param baud: communication speed (int), default 9600
+            :param byteSize: byte size in communication (int), default 8
+            :param parity: parity of bytes even/odd/none, default none
+            :param stop: number of stop bits (int), default 1
+            :param timeout: communication timeout seconds (int), default 12
+            :param eomRead: end of message char from instrument (str), default '\\n'
+            :param eomWrite: end of message char from computer (str), default '\\r\\n'
     """
     def __init__(self, name, port, baud=9600, byteSize=8,
         parity=serial.PARITY_NONE, stop=1, timeout=12, eomRead=b'\n',
         eomWrite=b'\r\n'):
         """ Constructor for serial interface
-
-            :param name: name of serial interface
-            :param port: port name e.g. com1: or /dev/stty1
-            :param baud: communication speed
-            :param byteSize: byte ize in communication
-            :param parity: parity of bytes even/odd/none
-            :param stop: number of stop bits
-            :param timeout: communication timeout seconds
-            :param eomRead: end of message char from instrument
-            :param eomWrite: end of message char from computer
         """
         super(SerialIface, self).__init__(name)
         # open serial port

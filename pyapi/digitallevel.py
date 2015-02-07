@@ -13,15 +13,15 @@ from instrument import Instrument
 
 class DigitalLevel(Instrument):
     """ Class to handle Leica DNA digital level
-    """
-
-    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
-        """ Constructor to Leica DNA level
 
             :param name: name of digital lvel instrument
             :param measureUnit: reference to measure unit
             :param measureIface: reference to measure interface
             :param writerUnit: store data
+    """
+
+    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
+        """ Constructor to Leica DNA level
         """
         # call super class init
         super(DigitalLevel, self).__init__(name, measureUnit, measureIface)

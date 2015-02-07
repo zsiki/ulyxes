@@ -13,13 +13,12 @@ from measureunit import MeasureUnit
 
 class VideoMeasureUnit(MeasureUnit):
     """ Video device specific features.
+
+            :param name: name of measure unit (str), default 'webcam'
+            :param typ: type of measure unit (str), default 'video'
     """
     def __init__(self, name = 'webcam', typ = 'video'):
         """ Constructor
-
-            :param name: name of measure unit
-            :param typ: type of measure unit
-            :param source: id of device or file name
         """
         super(VideoMeasureUnit, self).__init__(name, typ)
 

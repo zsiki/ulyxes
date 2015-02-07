@@ -17,6 +17,9 @@ import re
 class Trimble5500(MeasureUnit):
     """ This class contains the Trimble 5500 robotic total station specific
         functions
+
+            :param name: name of ts (str), default 'Trimble 5500'
+            :param type: type of ts (str), default 'TPS'
     """
     # Constants for message codes
     codes = {
@@ -45,9 +48,6 @@ class Trimble5500(MeasureUnit):
 
     def __init__(self, name = 'Trimble 5500', typ = 'TPS'):
         """ Constructor to leica generic ts
-
-            :param name: name of ts
-            :param type: type of ts
         """
         # call super class init
         super(Trimble5500, self).__init__(name, typ)

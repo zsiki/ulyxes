@@ -16,15 +16,15 @@ import logging
 
 class EchoWriter(Writer):
     """ Class to write observations to consol
-    """
-
-    def __init__(self, name = 'None', angle = 'GON', dist = '.3f', filt = None):
-        """ Constructor
 
             :param name: name of writer (str)
             :param angle: angle unit to use (str)
             :param dist: distance and coordinate format (str)
             :param filt: list of allowed keys (list)
+    """
+
+    def __init__(self, name = 'None', angle = 'GON', dist = '.3f', filt = None):
+        """ Constructor
         """
         super(EchoWriter, self).__init__(name)
         self.angleFormat = angle

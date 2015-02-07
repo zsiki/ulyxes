@@ -16,13 +16,13 @@ from leicameasureunit import LeicaMeasureUnit
 class LeicaTPS1200(LeicaMeasureUnit):
     """ This class contains the Leica TPS1200 robotic total station specific
         functions
+
+            :param name: name of ts (str), default=TPS1200
+            :param type: type od ts (str), default=TPS
     """
 
     def __init__(self, name = 'Leica TPS1200', typ = 'TPS'):
         """ Constructor to leica generic ts
-
-            :param name: name of ts (str), default=TPS1200
-            :param type: type od ts (str), default=TPS
         """
         # call super class init
         super(LeicaTPS1200, self).__init__(name, typ)

@@ -17,12 +17,12 @@ from measureunit import MeasureUnit
 
 class NmeaGpsUnit(MeasureUnit):
     """ NMEA measure unit
-    """
-    def __init__(self, name = 'Nmea Gps', typ = '-'):
-        """ constructor for nmea measure unit
 
-            :param name: name of nmea unit
-            :param type: type of nmea unit
+            :param name: name of nmea unit (str), default 'nmea Gps'
+            :param type: type of nmea unit (str), default None
+    """
+    def __init__(self, name = 'Nmea Gps', typ = None):
+        """ constructor for nmea measure unit
         """
         # call super class init
         super(NmeaGpsUnit, self).__init__(name, typ)

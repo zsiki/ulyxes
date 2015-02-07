@@ -16,11 +16,6 @@ import logging
 
 class FileWriter(EchoWriter):
     """ Class to write observations to file
-    """
-
-    def __init__(self, name = 'None', fname = 'ulyxes.txt', mode = 'a',
-        angle = 'GON', dist = '.3f', filt = None):
-        """ Constructor
 
             :param name: name of writer (str)
             :param fname: name of text file to write to (str)
@@ -28,6 +23,11 @@ class FileWriter(EchoWriter):
             :param angle: angle unit to use (str)
             :param dist: distance and coordinate format (str)
             :param filt: list of allowed keys (list)
+    """
+
+    def __init__(self, name = 'None', fname = 'ulyxes.txt', mode = 'a',
+        angle = 'GON', dist = '.3f', filt = None):
+        """ Constructor
         """
         super(FileWriter, self).__init__(name, angle, dist, filt)
         self.fname = fname

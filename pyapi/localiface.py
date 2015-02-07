@@ -17,8 +17,12 @@ from iface import Iface
 class LocalIface(Iface):
     """
     This local interface stands for using PyAPI wihtout any instrument. It is mainly for developing or testing
+
+            :param name: name of the interface (str), default 'Local'
     """
     def __init__(self, name = 'Local'):
+        """ Constructor
+        """
         super(LocalIface, self).__init__(name)
         self.atr = 0
         self.lock = 0

@@ -16,12 +16,6 @@ import logging
 
 class CSVWriter(FileWriter):
     """ Class to write observations to csv file
-    """
-    DEFAULT_FILTER = ['hz', 'v', 'dist']
-
-    def __init__(self, name = 'None', fname = 'ulyxes.txt', mode = 'a',
-        angle = 'DMS', dist = '.3f', filt = None, sep = ';', header = None):
-        """ Constructor
 
             :param name: name of writer (str)
             :param fname: name of text file to write to (str)
@@ -31,6 +25,12 @@ class CSVWriter(FileWriter):
             :param filt: list of allowed keys (list)
             :param sep: separator character in file (str)
             :param header: add header to file if mode is 'w'
+    """
+    DEFAULT_FILTER = ['hz', 'v', 'dist']
+
+    def __init__(self, name = 'None', fname = 'ulyxes.txt', mode = 'a',
+        angle = 'DMS', dist = '.3f', filt = None, sep = ';', header = None):
+        """ Constructor
         """
         super(CSVWriter, self).__init__(name, fname, mode, angle, dist, filt)
         if filt is None:

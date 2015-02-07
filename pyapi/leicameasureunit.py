@@ -6,7 +6,8 @@
        publish observation results. GPL v2.0 license Copyright (C)
        2010-2013 Zoltan Siki <siki@agt.bme.hu>
 
-.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokadaniel@citromail.hu>
+.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>,
+    Daniel Moka <mokadaniel@citromail.hu>
 
 """
 
@@ -18,6 +19,9 @@ import logging
 class LeicaMeasureUnit(MeasureUnit):
     """ This class contains the Leica robotic total station specific functions
         common to all leica robot TS
+
+            :param name: name of ts (str), default 'Leica generic'
+            :param type: type of ts (str), default 'TPS'
     """
     # Constants for message codes
     codes = {
@@ -59,9 +63,6 @@ class LeicaMeasureUnit(MeasureUnit):
 
     def __init__(self, name = 'Leica generic', typ = 'TPS'):
         """ Constructor to leica generic ts
-
-            :param name: name of ts
-            :param type: type od ts
         """
         # call super class init
         super(LeicaMeasureUnit, self).__init__(name, typ)

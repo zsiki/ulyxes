@@ -13,15 +13,15 @@
 
 class Reader(object):
     """ Base class for different readers (virtual)
+
+            :param name: name of reader (str), default None
     """
     RD_OK = 0
     RD_OPEN = -1
     RD_READ = -2
 
-    def __init__(self, name = 'None'):
+    def __init__(self, name = None):
         """ Constructor
-
-            :param name: name of reader
         """
         self.name = name
         self.state = self.RD_OK

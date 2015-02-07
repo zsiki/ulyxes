@@ -13,26 +13,30 @@
 
 class Writer(object):
     """ Base class for different writers (virtual)
+
+            :param name: name of writer (str), default None
     """
     WR_OK = 0
     WR_OPEN = -1
     WR_WRITE = -2
 
-    def __init__(self, name = 'None'):
+    def __init__(self, name = None):
         """ Constructor
-
-            :param name: name of writer
         """
         self.name = name
         self.state = self.WR_OK
 
     def GetName(self):
         """ Get the name of the interface being used.
+
+            :returns: name of writer
         """
         return self.name
 
     def GetState(self):
         """ Get the state of the interface being used.
+
+            :returns: state of writer
         """
         return self.state
 

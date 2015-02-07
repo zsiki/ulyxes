@@ -12,12 +12,12 @@
 
 class MeasureUnit(object):
     """ Virtual base clase for measure units
-    """
-    def __init__(self, name = 'None', typ = 'None'):
-        """ constructor for measure unit
 
-            :param name: name of measure unit
-            :param typ: type of measure unit
+            :param name: name of measure unit (str), default None
+            :param typ: type of measure unit (str), default None
+    """
+    def __init__(self, name = None, typ = None):
+        """ constructor for measure unit
         """
         self.name = name
         self.typ = typ

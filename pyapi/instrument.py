@@ -14,16 +14,15 @@
 """
 
 class Instrument(object):
-    """
-        Base class for different instruments
-    """
-    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
-        """ constructor
+    """ Base class for different instruments
 
             :param name: name of instrument (str)
             :param measureUnit: measure unit of the instrument (MeasureUnit)
             :param MeasureIface: interface to physical intrument (Iface)
             :param writerUnit: unit to save observed data (Writer), optional
+    """
+    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
+        """ constructor
         """
         self.name = name
         self.measureUnit = measureUnit

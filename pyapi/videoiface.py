@@ -17,12 +17,12 @@ from iface import Iface
 
 class VideoIface(Iface):
     """ Read from video stream or video file. This class depends on OpenCV.
+
+            :param name: name of interface (str), default 'webcam'
+            :param source: id of device or file name (int/str), default = 0
     """
     def __init__(self, name = 'webcam', source = 0):
         """ Constructor
-
-            :param name: name of interface
-            :param source: id of device or file name, default = 0
         """
         super(VideoIface, self).__init__(name)
         self.source = source

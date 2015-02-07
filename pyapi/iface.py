@@ -13,8 +13,9 @@
 """
 
 class Iface(object):
-    """
-    Base class for different interfaces
+    """ Base class for different interfaces
+
+        :param name: name of the interface (str) (default None)
     """
     
     IF_OK = 0
@@ -25,7 +26,9 @@ class Iface(object):
     IF_SOURCE = -7
     IF_ERROR = -8
 
-    def __init__(self, name = 'None'):
+    def __init__(self, name = None):
+        """ Constructor
+        """
         self.name = name
         self.state = self.IF_OK
         self.opened = False
