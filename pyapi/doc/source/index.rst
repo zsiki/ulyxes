@@ -20,28 +20,28 @@ INTERFACES
 
 Interfaces handle the connection to the physical sensor.
 
-Generic Interface
-:::::::::::::::::
+Generic Iface
+:::::::::::::
 
-.. automodule:: interface
+.. automodule:: iface
    :members:
 
-Local Interface
-:::::::::::::::
+Local Iface
+:::::::::::
 
-.. automodule:: localinterface
+.. automodule:: localiface
    :members:
 
-Serial Interface
-::::::::::::::::
+Serial Iface
+::::::::::::
 
-.. automodule:: serialinterface
+.. automodule:: serialiface
    :members:
 
-Video Interface
-:::::::::::::::
+Video Iface
+:::::::::::
 
-.. automodule:: videointerface
+.. automodule:: videoiface
    :members:
 
 MEASURE UNITS
