@@ -15,6 +15,155 @@ import math
 import re
 
 RO = 180 * 60 * 60 / math.pi
+PI2 = 2 * math.pi
+
+def _deg2rad(angle):
+    """ Convert DEG to RAD
+    """
+    try:
+        a = math.radians(angle)
+    except (ValueError, TypeError):
+        a = None
+    return a
+
+def _gon2rad(angle):
+    """ Convert GON to RAD
+    """
+    try:
+        a = angle / 200.0 * math.pi
+    except (ValueError, TypeError):
+        a = None
+    return a
+
+def _dms2rad(dms):
+    """ Convert DMS to RAD
+    """
+    if re.search('^[0-9]{1,3}(-[0-9]{1,2}){0,2}$', dms):
+        items = [float(item) for item in dms.split('-')]
+        div = 1.0
+        a = 0.0
+        for val in items:
+            a += val / div
+            div *= 60.0
+        a = math.radians(a)
+    else:
+        a = None
+    return a
+
+def _dm2rad(angle):
+    """ Convert DDMM.nnnnnn NMEA angle to radian"
+    """
+    try:
+        w = angle / 100.0
+        d = int(w)
+        a = math.radians(d + (w - d) * 100.0 / 60.0)
+    except (ValueError, TypeError):
+        a = None
+    return a
+
+def _pdeg2rad(angle):
+    """ Convert dd.mmss to radian
+    """
+    try:
+        d = math.floor(angle)
+        angle = round((angle - d) * 100, 10)
+        m = math.floor(angle)
+        s = round((angle - m) * 100, 10)
+        a = math.radians(d + m / 60.0 + s / 3600.0)
+    except (ValueError, TypeError):
+        a = None
+    return a
+
+def _sec2rad(angle):
+    """ Convert seconds to radian
+    """
+    try:
+        a = angle / RO
+    except (ValueError, TypeError):
+        a = None
+    return a
+
+def _mil2rad(angle):
+    """ Convert mills to radian
+    """
+    try:
+        a = angle / 6400.0 * 2.0 * math.pi
+    except (ValueError, TypeError):
+        a = None
+    return a
+
+def _rad2gon(value):
+    """ Convert radian to GON
+    """
+    try:
+        a = value / math.pi * 200.0
+    except (ValueError, TypeError):
+        a = None
+    return a
+
+def _rad2sec(value):
+    """ Convert radian to seconds
+    """
+    try:
+        a = value * RO
+    except (ValueError, TypeError):
+        a = None
+    return a
+
+def _rad2deg(value):
+    """ Convert radian to decimal degrees
+    """
+    try:
+        a = math.degrees(value)
+    except (ValueError, TypeError):
+        a = None
+    return a
+
+def _dms(value):
+    """ Convert radian to DMS
+    """
+    try:
+        secs = round(_rad2sec(value))
+        mi, sec = divmod(secs, 60)
+        deg, mi = divmod(mi, 60)
+        deg = int(deg)
+        dms = "%d-%02d-%02d" % (deg, mi, sec)
+    except (ValueError, TypeError):
+        dms = None
+    return dms
+
+def _rad2dm(value):
+    """ Convert radian to NMEA DDDMM.nnnnn
+    """
+    try:
+        w = value / math.pi * 180.0
+        d = int(w)
+        a = d * 100 + (w - d) * 60
+    except (ValueError, TypeError):
+        a = None
+    return a
+
+def _rad2pdeg(value):
+    """ Convert radian to pseudo DMS ddd.mmss
+    """
+    try:
+        secs = round(_rad2sec(value))
+        mi, sec = divmod(secs, 60)
+        deg, mi = divmod(mi, 60)
+        deg = int(deg)
+        pdeg = deg + mi / 100.0 + sec / 10000.0
+    except (ValueError, TypeError):
+        pdeg = None
+    return pdeg
+
+def _rad2mil(value):
+    """ Convert radian to mills
+    """
+    try:
+        w = value / math.pi / 2.0 * 6400.0
+    except (ValueError, TypeError):
+        w = None
+    return w
 
 class Angle(object):
     """ Angle class, value stored in radian internally. Angle units supported:
@@ -36,6 +185,18 @@ Operators supported:
 * -= decrement angle (e.g. d -= Angle(1, 'GON'))
 * str() convert angle to GON string, used in print
     """
+
+    # jump table to import from
+    im = {'DMS': _dms2rad, 'DEG': _deg2rad,
+        'GON': _gon2rad, 'NMEA': _dm2rad,
+        'PDEG': _pdeg2rad, 'SEC': _sec2rad,
+        'MIL': _mil2rad}
+    # jump table for convert to
+    ex = {'DMS': _dms, 'DEG': _rad2deg,
+        'GON': _rad2gon, 'NMEA': _rad2dm,
+        'PDEG': _rad2pdeg, 'SEC': _rad2sec,
+        'MIL': _rad2mil}
+
     def __init__(self, value, unit='RAD'):
         """ Constructor for an angle instance.
 
@@ -51,27 +212,12 @@ Operators supported:
             :param out: output unit (str RAD/DMS/DEG/GON/NMEA/PDEG/SEC/MIL)
             :returns: value (float or string)
         """
-        if self.value is None:
-            output = None
-        elif out == 'RAD':
-            output = self.value
-        elif out == 'DMS':
-            output = self._dms()
-        elif out == 'DEG':
-            output = self._rad2deg()
-        elif out == 'GON':
-            output = self._rad2gon()
-        elif out == 'NMEA':
-            output = self._rad2dm()
-        elif out == 'PDEG':
-            # pseudo decimal DMS ddd.mmss
-            output = self._rad2pdeg()
-        elif out == 'SEC':
-            output = self._rad2sec()
-        elif out == 'MIL':
-            output = self._rad2mil()
+        if out == 'RAD' or self.value is None:
+            output = self.value  # no conversion
+        elif out in self.ex:
+            output = self.ex[out](self.value)  # call converter based on output format
         else:
-            output = None
+            output = None  # unsupported output format
         return output
 
     def SetAngle(self, value, unit='RAD'):
@@ -82,177 +228,17 @@ Operators supported:
         """
         if unit == 'RAD' or value is None:
             self.value = value
-        elif unit == 'DMS':
-            self.value = self._dms2rad(value)
-        elif unit == 'DEG':
-            self.value = self._deg2rad(value)
-        elif unit == 'GON':
-            self.value = self._gon2rad(value)
-        elif unit == 'NMEA':
-            self.value = self._dm2rad(value)
-        elif unit == 'PDEG':
-            self.value = self._pdeg2rad(value)
-        elif unit == 'SEC':
-            self.value = self._sec2rad(value)
-        elif unit == 'MIL':
-            self.value = self._mil2rad(value)
+        elif unit in self.im:
+            self.value = self.im[unit](value)
         else:
             # unknown unit
             self.value = None
         # move angle to 0 - 2*PI interval
         if self.value is not None:
-            while self.value >= 2.0 * math.pi:
-                self.value -= 2.0 * math.pi
+            while self.value >= PI2:
+                self.value -= PI2
             while self.value < 0.0:
-                self.value += 2.0 * math.pi
-
-    def _deg2rad(self, angle):
-        """ Convert DEG to RAD
-        """
-        try:
-            a = math.radians(angle)
-        except (ValueError, TypeError):
-            a = None
-        return a
-
-    def _gon2rad(self, angle):
-        """ Convert GON to RAD
-        """
-        try:
-            a = angle / 200.0 * math.pi
-        except (ValueError, TypeError):
-            a = None
-        return a
-
-    def _dms2rad(self, dms):
-        """ Convert DMS to RAD
-        """
-        if re.search('^[0-9]{1,3}(-[0-9]{1,2}){0,2}$', dms):
-            items = [float(item) for item in dms.split('-')]
-            div = 1.0
-            a = 0.0
-            for val in items:
-                a += val / div
-                div *= 60.0
-            a = math.radians(a)
-        else:
-            a = None
-        return a
-
-    def _dm2rad(self, angle):
-        """ Convert DDMM.nnnnnn NMEA angle to radian"
-        """
-        try:
-            w = angle / 100.0
-            d = int(w)
-            a = math.radians(d + (w - d) * 100.0 / 60.0)
-        except (ValueError, TypeError):
-            a = None
-        return a
-
-    def _pdeg2rad(self, angle):
-        """ Convert dd.mmss to radian
-        """
-        try:
-            d = math.floor(angle)
-            angle = round((angle - d) * 100, 10)
-            m = math.floor(angle)
-            s = round((angle - m) * 100, 10)
-            a = math.radians(d + m / 60.0 + s / 3600.0)
-        except (ValueError, TypeError):
-            a = None
-        return a
-
-    def _sec2rad(self, angle):
-        """ Convert seconds to radian
-        """
-        try:
-            a = angle / RO
-        except (ValueError, TypeError):
-            a = None
-        return a
-
-    def _mil2rad(self, angle):
-        """ Convert mills to radian
-        """
-        try:
-            a = angle / 6400.0 * 2.0 * math.pi
-        except (ValueError, TypeError):
-            a = None
-        return a
-
-    def _rad2gon(self):
-        """ Convert radian to GON
-        """
-        try:
-            a = self.value / math.pi * 200.0
-        except (ValueError, TypeError):
-            a = None
-        return a
-
-    def _rad2sec(self):
-        """ Convert radian to seconds
-        """
-        try:
-            a = self.value * RO
-        except (ValueError, TypeError):
-            a = None
-        return a
-
-    def _rad2deg(self):
-        """ Convert radian to decimal degrees
-        """
-        try:
-            a = math.degrees(self.value)
-        except (ValueError, TypeError):
-            a = None
-        return a
-
-    def _dms(self):
-        """ Convert radian to DMS
-        """
-        try:
-            secs = round(self._rad2sec())
-            mi, sec = divmod(secs, 60)
-            deg, mi = divmod(mi, 60)
-            deg = int(deg)
-            dms = "%d-%02d-%02d" % (deg, mi, sec)
-        except (ValueError, TypeError):
-            dms = None
-        return dms
-
-    def _rad2dm(self):
-        """ Convert radian to NMEA DDDMM.nnnnn
-        """
-        try:
-            w = self.value / math.pi * 180.0
-            d = int(w)
-            a = d * 100 + (w - d) * 60
-        except (ValueError, TypeError):
-            a = None
-        return a
-
-    def _rad2pdeg(self):
-        """ Convert radian to pseudo DMS ddd.mmss
-        """
-        try:
-            secs = round(self._rad2sec())
-            mi, sec = divmod(secs, 60)
-            deg, mi = divmod(mi, 60)
-            deg = int(deg)
-            pdeg = deg + mi / 100.0 + sec / 10000.0
-        except (ValueError, TypeError):
-            pdeg = None
-        return pdeg
-
-    def _rad2mil(self):
-        """ Convert radian to mills
-        """
-        try:
-            w = self.value / math.pi / 2.0 * 6400.0
-        except (ValueError, TypeError):
-            w = None
-        return w
+                self.value += PI2
 
     def __str__(self):
         """ GON string representation of angle
