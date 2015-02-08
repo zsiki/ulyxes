@@ -36,6 +36,6 @@ class LeicaTCA1800(LeicaMeasureUnit):
         return ['ROBOT', 'ANGLE', 'EDM', 'ATR', 'LOCK', 'POSITION']
 
 if __name__ == "__main__":
-    print LeicaTCA1800.GetCapabilities()
+    print (LeicaTCA1800.GetCapabilities())
     tca = LeicaTCA1800()
-    print tca.GetCapabilities()
+    print (tca.GetCapabilities())

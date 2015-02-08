@@ -32,4 +32,4 @@ class VideoMeasureUnit(MeasureUnit):
 
 if __name__ == "__main__":
     mu = VideoMeasureUnit()
-    print mu.GetName()
+    print (mu.GetName())

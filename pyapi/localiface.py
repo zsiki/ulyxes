@@ -64,6 +64,6 @@ class LocalIface(Iface):
 
 if __name__ == "__main__":
     a = LocalIface()
-    print a.GetName()
-    print a.GetState()
-    print a.Send('%R1Q,9018:1')
+    print (a.GetName())
+    print (a.GetState())
+    print (a.Send('%R1Q,9018:1'))

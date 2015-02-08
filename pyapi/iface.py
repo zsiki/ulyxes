@@ -50,5 +50,5 @@ class Iface(object):
 
 if __name__ == "__main__":
     a = Iface()
-    print a.GetName()
-    print a.GetState()
+    print (a.GetName())
+    print (a.GetState())

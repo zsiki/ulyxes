@@ -60,7 +60,7 @@ class CSVWriter(FileWriter):
             logging.warning(" empty data not written")
             return
         linelist = ['' for i in range(len(self.filt))]
-        for key, val in data.iteritems():
+        for key, val in data.items():
             if key in self.filt:
                 if type(val) is Angle:
                     sval = val.GetAngle(self.angleFormat)

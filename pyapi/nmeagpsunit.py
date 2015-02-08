@@ -74,4 +74,4 @@ class NmeaGpsUnit(MeasureUnit):
 if __name__ == '__main__':
     ans = "$GPGGA,183730,3907.356,N,12102.482,W,1,05,1.6,646.4,M,-24.1,M,,*75"
     nmeaunit = NmeaGpsUnit()
-    print nmeaunit.Result("GPGGA", ans)
+    print (nmeaunit.Result("GPGGA", ans))

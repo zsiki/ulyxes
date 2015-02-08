@@ -62,7 +62,6 @@ class VideoIface(Iface):
 
             :returns: an image or None
         """
-        print self.state
         if self.state == self.IF_OK:
             img = cv.QueryFrame(self.video)
             if img is None:
@@ -74,8 +73,8 @@ class VideoIface(Iface):
 if __name__ == "__main__":
     stream = VideoIface("webcam", 0)
     if stream.state != stream.IF_OK:
-        print "error opening video stream"
+        print ("error opening video stream")
     else:
         im = stream.GetImage()
-        print type(im)
-        print cv.GetSize(im)
+        print (type(im))
+        print (cv.GetSize(im))

@@ -282,10 +282,10 @@ Operators supported:
 if __name__ == "__main__":
     a1 = Angle("152-23-45", "DMS")
     for u in ['RAD', 'DMS', 'GON', 'NMEA', 'DEG', 'PDEG', 'MIL']:
-        print a1.GetAngle(u)
+        print (a1.GetAngle(u))
     b1 = Angle(1.1111, 'PDEG')
-    print b1.GetAngle("DMS")
+    print (b1.GetAngle("DMS"))
     c1 = a1 + b1
-    print c1.GetAngle("DMS")
-    print c1
-    print (a1-b1).GetAngle("DMS")
+    print (c1.GetAngle("DMS"))
+    print (c1)
+    print ((a1-b1).GetAngle("DMS"))

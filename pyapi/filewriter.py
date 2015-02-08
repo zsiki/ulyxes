@@ -56,7 +56,7 @@ class FileWriter(EchoWriter):
         if data is None:
             logging.warning(" empty data not written")
             return
-        for key, val in data.iteritems():
+        for key, val in data.items():
             if self.filt is None or key in self.filt:
                 if type(val) is Angle:
                     sval = str(val.GetAngle(self.angleFormat))
