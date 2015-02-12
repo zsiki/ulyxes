@@ -11,7 +11,7 @@
 """
 from instrument import Instrument
 
-class GPS(Instrument):
+class Gps(Instrument):
     """ GNSS receiver sending NMEA messages
 
             :param name: name of gps instrument
@@ -21,7 +21,7 @@ class GPS(Instrument):
     def __init__(self, name, measureUnit, measureIface, writerUnit = None):
         """ constructor for gps
         """
-        super(GPS, self).__init__(name, measureUnit, measureIface, writerUnit)
+        super(Gps, self).__init__(name, measureUnit, measureIface, writerUnit)
 
     def _process(self, msg):
         """ Get a line from measure unit and process answer
@@ -44,20 +44,22 @@ class GPS(Instrument):
         while ret is None:
             if self.measureIface.state != self.measureIface.IF_OK:
                 break
-            ans = self.measureIface.GetLine()
-            ret = self._process(ans)
+            msg = self.measureUnit.MeasureMsg()
+            ret = self._process(msg)
         return ret
 
 
 if __name__ == '__main__':
     from echowriter import EchoWriter
-    from serialiface import SerialIface
+    #from serialiface import SerialIface
+    from localiface import LocalIface
     from nmeagpsunit import NmeaGpsUnit
     import logging
-    iface = SerialIface("", "COM5")
+    #iface = SerialIface("", "COM5")
+    iface = LocalIface('test', '/home/siki/meresfeldolgozas/nmea1.txt')
     mu = NmeaGpsUnit()
     wrt = EchoWriter()
-    gps = GPS('', mu, iface, wrt)
+    gps = Gps('', mu, iface, wrt)
     logging.getLogger().setLevel(logging.DEBUG)
     for i in range(10):
         gps.Measure()
