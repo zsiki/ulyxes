@@ -50,7 +50,7 @@ class NmeaGpsUnit(MeasureUnit):
         cksum1 = 0
         for s in data[1:]:
             cksum1 ^= ord(s)
-        if '0x' + cksum != hex(cksum1):
+        if ('0x' + cksum).lower() != hex(cksum1).lower():
             logging.error(' Checksum error')
             return None
         anslist = ans.split(',')
