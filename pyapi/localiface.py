@@ -12,58 +12,66 @@
     Daniel Moka <mokadaniel@citromail.hu>
 
 """
+import re
 from iface import Iface
 
 class LocalIface(Iface):
-    """
-    This local interface stands for using PyAPI wihtout any instrument. It is mainly for developing or testing
+    """ This local interface stands for using PyAPI wihtout any instrument. 
+        A file is used to read data instread of instrument.
+        It is mainly for developing or testing
 
             :param name: name of the interface (str), default 'Local'
+            :param fname: name of the file the data read from
+            :param mode: seq/rand, seq=read the input sequentiali (NMEA GPS), leica=get given line
     """
-    def __init__(self, name = 'Local'):
+    def __init__(self, name = 'Local', fname = 'None', mode='seq'):
         """ Constructor
         """
         super(LocalIface, self).__init__(name)
-        self.atr = 0
-        self.lock = 0
-        self.edmmode = 0
+        self.mode = mode
+        self.fp = None
+        self.data = {}
+        try:
+            self.fp = open(fname, 'r')
+        except:
+            self.state = self.IF_FILE
+            raise Exception('file', 'open')
+        if mode == 'leica':
+            # load whole file
+            for line in self.fp:
+                code, ans = line.split('|')
+                self.data[code] = ans
+
+    def __del__(self):
+        """ Destructor
+        """
+        try:
+            self.fp.close()
+        except:
+            pass
 
     def Send(self, msg):
-        """ Implements few messages few messages and returns random result
+        """ Return answer from the file instead of instrument
 
             :param msg: message to send
             :returns: message specific answer
         """
-        code = int(msg.split(',')[1].split(':')[0])
-        ans = '%R1P,0,0:0'
-        if code == 9027:
-            # move
-            ans = '%R1P,0,0:0'
-        elif code == 18005:
-            # setatr
-            self.atr = int(msg.split(':')[1])
-            ans = '%R1P,0,0:0'
-        elif code == 18006:
-            # getatr
-            ans = '%%R1P,0,0:0,%d' % self.atr
-        elif code == 18007:
-            # setlock
-            self.lock = int(msg.split(':')[1])
-            ans = '%R1P,0,0:0'
-        elif code == 18008:
-            # getlock
-            ans = '%%R1P,0,0:0,%d' % self.lock
-        elif code == 2020:
-            # setedmmode
-            self.edmmode = int(msg.split(':')[1])
-            ans = '%R1P,0,0:0'
-        elif code == 2021:
-            # getedmmode
-            ans = '%%R1P,0,0:0,%d' % self.edmmode
-        return ans
+        if self.mode == 'leica':
+            code = re.split(':|,', msg)[1]
+            if code in self.data:
+                return self.data[code]
+            else:
+                return None
+        elif self.mode == 'seq':
+            return self.GetLine()
+        else:
+            return None
 
+    def GetLine(self):
+        return self.fp.readline().strip()
+        
 if __name__ == "__main__":
-    a = LocalIface()
+    a = LocalIface('test', '/home/siki/meresfeldolgozas/nmea1.txt')
     print (a.GetName())
     print (a.GetState())
-    print (a.Send('%R1Q,9018:1'))
+    print (a.GetLine())
