@@ -63,7 +63,7 @@ class CSVWriter(FileWriter):
         for key, val in data.items():
             if key in self.filt:
                 if type(val) is Angle:
-                    sval = val.GetAngle(self.angleFormat)
+                    sval = str(val.GetAngle(self.angleFormat))
                 elif type(val) is float:
                     sval = ("{0:" + self.distFormat + "}").format(val)
                 elif type(val) is int:
