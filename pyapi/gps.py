@@ -50,16 +50,17 @@ class Gps(Instrument):
 
 
 if __name__ == '__main__':
-    from echowriter import EchoWriter
+    #from echowriter import EchoWriter
     #from serialiface import SerialIface
+    from httpwriter import HttpWriter
     from localiface import LocalIface
     from nmeagpsunit import NmeaGpsUnit
-    import logging
+    #import logging
     #iface = SerialIface("", "COM5")
     iface = LocalIface('test', '/home/siki/meresfeldolgozas/nmea1.txt')
     mu = NmeaGpsUnit()
-    wrt = EchoWriter()
+    wrt = HttpWriter(url='http://localhost/get.php', angle='DEG')
     gps = Gps('', mu, iface, wrt)
-    logging.getLogger().setLevel(logging.DEBUG)
+    #logging.getLogger().setLevel(logging.DEBUG)
     for i in range(10):
         gps.Measure()
