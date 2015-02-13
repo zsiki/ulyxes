@@ -18,7 +18,7 @@ from measureunit import MeasureUnit
 class NmeaGnssUnit(MeasureUnit):
     """ NMEA measure unit
 
-            :param name: name of nmea unit (str), default 'nmea Gps'
+            :param name: name of nmea unit (str), default 'Nmea Gnss'
             :param type: type of nmea unit (str), default None
     """
     def __init__(self, name = 'Nmea Gnss', typ = None):
@@ -36,7 +36,7 @@ class NmeaGnssUnit(MeasureUnit):
         return ['POSITION']
 
     def Result(self, msg, ans):
-        """ process the answer from GPS
+        """ process the answer from GNSS
 
             :param msg: MNEA message to get
             :param ans: NMEA message from GNSS unit

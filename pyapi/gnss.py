@@ -55,11 +55,11 @@ if __name__ == '__main__':
     #from serialiface import SerialIface
     from httpwriter import HttpWriter
     from localiface import LocalIface
-    from nmeagpsunit import NmeaGpsUnit
+    from nmeagnssunit import NmeaGnssUnit
     #import logging
     #iface = SerialIface("", "COM5")
     iface = LocalIface('test', '/home/siki/meresfeldolgozas/nmea1.txt')
-    mu = NmeaGpsUnit()
+    mu = NmeaGnssUnit()
     wrt = HttpWriter(url='http://localhost/get.php', angle='DEG')
     g = Gnss('', mu, iface, wrt)
     #logging.getLogger().setLevel(logging.DEBUG)
