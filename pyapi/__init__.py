@@ -2,14 +2,14 @@
 """
 __all__ = [
 # general
-"angle",
+"angle", "reader",
 # interfaces
 "iface", "localiface", "serialiface", "videoiface",
 # measure units
 "measureunit", "leicameasureunit", "leicatca1800", "leicatps1200",
-"leicadnaunit", "nmeagpsunit", "videomeasureunit",
+"trimble5500", "leicadnaunit", "nmeagnssunit", "videomeasureunit",
 # writers
 "writer", "echowriter", "filewriter", "csvwriter", "imagewriter", 
-"videowriter",
+"videowriter", "httpwriter"
 # instruments/sensors
-"instrument", "totalstation", "digitallevel", "webcam", "gps"]
+"instrument", "totalstation", "digitallevel", "webcam", "gnss"]
