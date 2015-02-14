@@ -39,8 +39,8 @@ if __name__ == "__main__":
     from videomeasureunit import VideoMeasureUnit
     from imagewriter import ImageWriter
     mu = VideoMeasureUnit()
-    iface = VideoIface(source=0)
+    iface = VideoIface(source=1)
     wrt = ImageWriter("test", "tmp")
     wc = WebCam('test', mu, iface, wrt)
-    for i in range(100):
+    for i in range(2):
         wc.GetImage()

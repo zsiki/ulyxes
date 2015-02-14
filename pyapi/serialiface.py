@@ -69,6 +69,7 @@ class SerialIface(Iface):
             self.state = self.IF_OK
         except:
             self.state = self.IF_ERROR
+            logging.error(" cannot close serial line")
 
     def GetLine(self):
         """ read from serial interface until end of line

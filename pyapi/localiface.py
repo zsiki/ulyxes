@@ -13,6 +13,7 @@
 
 """
 import re
+import logging
 from iface import Iface
 
 class LocalIface(Iface):
@@ -35,7 +36,8 @@ class LocalIface(Iface):
             self.fp = open(fname, 'r')
         except:
             self.state = self.IF_FILE
-            raise Exception('file', 'open')
+            logging.error(" error opening file")
+            return
         if mode == 'leica':
             # load whole file
             for line in self.fp:
@@ -71,6 +73,7 @@ class LocalIface(Iface):
         w = self.fp.readline().strip()
         if len(w) == 0:
             self.state = self.IF_EOF
+            logging
         return w
         
 if __name__ == "__main__":
