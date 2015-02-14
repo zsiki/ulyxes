@@ -20,7 +20,7 @@ class HttpWriter(Writer):
     """ Class to write observations to a web server (HTTP GET/POST)
 
             :param name: name of writer (str)
-            :param url: name of text file to write to (str)
+            :param url: url to server side script (str)
             :param mode: GET/POST
             :param angle: angle unit to use (str)
             :param dist: distance and coordinate format (str)
