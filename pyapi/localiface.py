@@ -68,7 +68,10 @@ class LocalIface(Iface):
             return None
 
     def GetLine(self):
-        return self.fp.readline().strip()
+        w = self.fp.readline().strip()
+        if len(w) == 0:
+            self.state = self.IF_EOF
+        return w
         
 if __name__ == "__main__":
     a = LocalIface('test', '/home/siki/meresfeldolgozas/nmea1.txt')
