@@ -15,6 +15,12 @@ Angles
 .. automodule:: angle
    :members:
 
+Reader
+::::::
+
+.. automodule:: reader
+   :members:
+
 INTERFACES
 ==========
 
@@ -73,16 +79,22 @@ Leica TPS 1200 Unit
 .. automodule:: leicatps1200
    :members:
 
+Trimble 550x
+::::::::::::
+
+.. automodule:: trimble5500
+   :members:
+
 Leica DNA Unit
 ::::::::::::::
 
 .. automodule:: leicadnaunit
    :members:
 
-NMEA GPS Unit
-:::::::::::::
+NMEA GNSS Unit
+::::::::::::::
 
-.. automodule:: nmeagpsunit
+.. automodule:: nmeagnssunit
    :members:
 
 Video Unit
@@ -111,10 +123,10 @@ Totalstation
 .. automodule:: totalstation
    :members:
 
-GPS
-:::
+GNSS
+::::
 
-.. automodule:: gps
+.. automodule:: gnss
    :members:
 
 Digital Level
@@ -162,5 +174,11 @@ Image Writer
 ::::::::::::
 
 .. automodule:: imagewriter
+   :members:
+
+HTTP Writer
+:::::::::::
+
+.. automodule:: httpwriter
    :members:
 
