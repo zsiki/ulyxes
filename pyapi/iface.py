@@ -19,6 +19,7 @@ class Iface(object):
     """
     
     IF_OK = 0
+    IF_EOF = -1
     IF_WRITE = -3
     IF_TIMEOUT = -4
     IF_READ = -5
