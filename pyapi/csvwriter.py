@@ -14,7 +14,7 @@ from angle import Angle
 from filewriter import FileWriter
 import logging
 
-class CSVWriter(FileWriter):
+class CsvWriter(FileWriter):
     """ Class to write observations to csv file
 
             :param name: name of writer (str)
@@ -32,7 +32,7 @@ class CSVWriter(FileWriter):
         angle = 'DMS', dist = '.3f', filt = None, sep = ';', header = None):
         """ Constructor
         """
-        super(CSVWriter, self).__init__(name, fname, mode, angle, dist, filt)
+        super(CsvWriter, self).__init__(name, fname, mode, angle, dist, filt)
         if filt is None:
             self.filt = self.DEFAULT_FILTER
         self.sep = sep
@@ -78,6 +78,6 @@ class CSVWriter(FileWriter):
             logging.error(" file write failed")
 
 if __name__ == "__main__":
-    myfile = CSVWriter(header=1)
+    myfile = CsvWriter(header=1)
     data = {'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'dist': 123.6581}
     myfile.WriteData(data)
