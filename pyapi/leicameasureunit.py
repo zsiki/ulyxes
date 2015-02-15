@@ -55,7 +55,7 @@ class LeicaMeasureUnit(MeasureUnit):
     }
 
     # Constants for EMD modes
-    edmMode = {'STANDARD': 0, 'PRECISE': 1, 'FAST': 2, 'TRACKING': 3, 
+    edmModes = {'STANDARD': 0, 'PRECISE': 1, 'FAST': 2, 'TRACKING': 3, 
         'AVERAGING': 4, 'FASTTRACKING': 5}
 
     # Constants for EDM programs
@@ -275,7 +275,7 @@ class LeicaMeasureUnit(MeasureUnit):
         :returns: set edm mode message
         """
         if type(mode) is str:
-            imode = self.edmMode[mode]
+            imode = self.edmModes[mode]
         else:
             imode = mode
         return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETEDMMODE'], imode)
@@ -296,16 +296,6 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         ori_rad = ori.GetAngle('RAD')
         return '%R1Q,{0:d}:{1:f}'.format(self.codes['SETORI'], ori_rad)
-
-    # TODO remove from generic
-    def SetRCSMsg(self, rcs):
-        """ Set remote control
-        
-        :param rcs: 0/1 = off/on
-        :returns: set remote control message
-          
-        """
-        return '%%R1Q,18009:%f' % (rcs)
 
     def MoveMsg(self, hz, v, atr=0):
         """ Rotate instrument to direction with ATR or without ATR
@@ -350,7 +340,7 @@ class LeicaMeasureUnit(MeasureUnit):
 
         """
         if type(prg) is str:
-            prg = self.edmMode[prg]
+            prg = self.edmProg[prg]
         return '%R1Q,{0:d}:{1:d}'.format(self.codes['MEASUREANGDIST'], prg)
 
     def CoordsMsg (self, wait = 1000, incl = 0):

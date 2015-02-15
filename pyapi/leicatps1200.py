@@ -60,7 +60,7 @@ class LeicaTPS1200(LeicaMeasureUnit):
 
     # Constants for EMD modes
     # RT = Reflector Tape, RL = Reflectorless, LR = Long Range
-    edmMode = {'RTSTANDARD': 1, 'STANDARD': 2, 'FAST': 3, 'LRSTANDARD': 4, \
+    edmModes = {'RTSTANDARD': 1, 'STANDARD': 2, 'FAST': 3, 'LRSTANDARD': 4, \
                 'RLSTANDARD': 5, 'TRACK': 6, 'RLTRACK': 8, 'TRACK2': 9, \
                 'AVERAGING': 10, 'RLAVERAGING': 11, 'LRAVERAGING': 12}
 
