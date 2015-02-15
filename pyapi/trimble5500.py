@@ -39,11 +39,17 @@ class Trimble5500(MeasureUnit):
         'PRISMC': 32,
         'NORTHING': 37,
         'EASTING': 38,
-        'ELE': 39
+        'ELE': 39,
+        'TEMP': 56,
+        'EARAD': 58,
+        'REFRAC': 59,
+        'WETTEMP': 66,
+        'PRESS': 74
     }
 
     # Constants for EMD modes
-    edmMode = {'DEFAULT': None}
+    edmModes = {'STANDARD': 0, 'TRACKING': 1, 'D-BAR': 2, 'FAST': 3,
+               'HRD_BAR': 4}
     edmProg = {'DEFAULT': None}
 
     def __init__(self, name = 'Trimble 5500', typ = 'TPS'):
@@ -51,6 +57,7 @@ class Trimble5500(MeasureUnit):
         """
         # call super class init
         super(Trimble5500, self).__init__(name, typ)
+        self.edmMode = None
 
     @staticmethod
     def GetCapabilities():
@@ -88,6 +95,7 @@ class Trimble5500(MeasureUnit):
                 res['northing'] = float(ansBufflist[1])
             elif commandID == self.codes['ELE']:
                 res['elevation'] = float(ansBufflist[1])
+            # TODO add all codes!
         return res
 
     def SetPcMsg(self, pc):
@@ -98,95 +106,106 @@ class Trimble5500(MeasureUnit):
         """
         return 'WG,{0:d}={1:.3f}'.format(self.codes['PC'], pc / 1000.0)
 
-    def SetAtmCorrMsg(self, valueOfLambda, pres, dry, wet):
+    def GetPcMsg(self):
+        """ Get prism constant
+
+            :returns: get prism constant message
         """
-        Message function for set atmospheric correction settings
+        return 'RG,{0:d}'.format(self.codes['PC'])
+
+    def SetAtmCorrMsg(self, ppm, pres=None, dry=None, wet=None):
+        """ Set atmospheric correction settings using ppm or
+            presure, dry and wet temperature
         
-        :param valueOfLambda: Constant for the instrument not changeable, use GetAtmCorr to get value
-        :param pres: pressure value
-        :param dry: dry temperature
-        :param wet: wet temperature
-        :rtype: 0 or error code
-          
+            :param ppm: atmospheric correction [mm/km] (int)
+            :param pres: air presure (optional)
+            :param dry: dry temperature (optional)
+            :param wet: wet temperature (optional)
+            :returns: set atmospheric correction message
         """
-        pass # TODO
+        if ppm is not None:
+            return 'WG,{0:d}={1:d}'.format(self.codes['PPM'], ppm)
+        else:
+            return 'WG,{0:d}={1:d}|WG,{2:d}={3:d}|WG,{4:d}={5:d}'.format(
+                self.codes['PRESS'], pres, self.codes['TEMP'], dry,
+                self.codes['WETTEMP'], wet)
 
     def GetAtmCorrMsg(self):
-        """
-        Message function for get atmospheric correction settings
+        """ Get atmospheric correction settings
         
-        :rtype: atmospheric settings as a dictionary
-          
+            :returns: atmospheric correction message
         """
-        pass # TODO
+        return 'RG,{0:d}'.format(self.codes['PPM'])
 
-    def SetRefCorrMsg(self, status, earthRadius, refracticeScale):
-        """
-        Message function for set refraction correction settings
+    def SetRefCorrMsg(self, status, earthRadius, refrac):
+        """ Set refraction correction settings
         
-        :param status: 0/1 = off/on
-        :param earthRadius: radius ot the Earth
-        :param refracticeScale: refractice scale
-        :rtype: 0 or error code
+        :param status: not used
+        :param earthRadius: radius ot the Earth (int)
+        :param refrac: refraction (float)
+        :returns: set refraction correction message
           
         """
-        pass # TODO
+        return 'WG,{0:d}={1:d}|WG,{2:d}={3:.2f}'.format(
+                self.codes['EARAD'], earthRadius, self.codes['REFRAC'], refrac)
 
     def GetRefCorrMsg(self):
-        """
-        Message function for get refraction correction setting
+        """ Get refraction correction setting
       
-        :rtype: refraction correction as a dictionary
+            :return: refraction correction message
           
         """
-        pass # TODO
+        return 'RG,{0:d}|RG,{1:d}'.format(
+                self.codes['EARAD'], self.codes['REFRAC'])
 
     def SetStationMsg(self, e, n, z=None):
-        """
-        Message function for set station coordinates
+        """ Set station coordinates
         
-        :param e: easting
-        :param n: northing
-        :param z: elevation
-        :returns: set station coordinates message
+            :param e: easting
+            :param n: northing
+            :param z: elevation
+            :returns: set station coordinates message
           
         """
-        # TODO SEASTING
         msg = 'WG,{0:d}={1:.3f}|WG,{2:d}={3:.3f}'.format(
-            self.codes['SEASTING'], e, self.codes['SNORTHING'], n)
+            self.codes['EASTING'], e, self.codes['NORTHING'], n)
         if z is not None:
-            msg += '|WG,{0:d}={1:.3f}'.format(self.codes['SELE'], z)
+            msg += '|WG,{0:d}={1:.3f}'.format(self.codes['ELE'], z)
         return msg
 
     def GetStationMsg(self):
-        """ Message function for get station co-ordinates
+        """ Get station co-ordinates
         
-        :returns: get station coordinates message
+            :returns: get station coordinates message
           
         """
-        # TODO SEASTING
-        pass
+        return 'RG,{0:d}|RG,{1:d}|RG,{2:d}'.format(
+            self.codes['EASTING'], self.codes['NORTHING'], self.codes['ELE'])
 
     def SetEDMModeMsg(self, mode):
         """ Set EDM mode
         
-        :param mode: string name 
-        :returns: gset edm mode message
+            :param mode: mode name (str) or code (int)
+            :returns: set edm mode message
         """
-        pass # TODO
+        if type(mode) is str:
+            self.edmMode = self.edmModes[mode]
+        else:
+            self.edmMode = mode
+        return 'PG,3{0:d}'.format(self.edmMode)
 
     def GetEDMModeMsg(self):
         """ Get EDM mode
         
-            :returns: get edm mode message
+            :returns: None
         """
-        pass # TODO
+        return None
 
     def SetOriMsg(self, ori):
         """ Set orientation angle
         
-        :param ori: bearing of direction (Angle)
-        :returns: set orientation angle message
+            :param ori: bearing of direction (Angle)
+            :returns: set orientation angle message
           
         """
         return 'WG,{0:d}={1:.4f}'.format(self.codes['HAREF'],
@@ -199,7 +218,6 @@ class Trimble5500(MeasureUnit):
             :param v: zenith angle (Angle)
             :param dummy: dummy parameter for compatibility with Leica
             :returns: rotate message
-
         """
         # change angles to pseudo DMS
         hz_pdms = hz.GetAngle('PDEG')
@@ -224,10 +242,10 @@ class Trimble5500(MeasureUnit):
         """
         return 'RG'
 
-    def MeasureDistAngMsg(self, prg):
+    def MeasureDistAngMsg(self, dummy=None):
         """ Measure angles and distance
 
-            :param prg: EDM program
+            :param prg: dummy parameter for compatibility with Leica
             :returns: measure angle distance message
 
         """
@@ -240,8 +258,8 @@ class Trimble5500(MeasureUnit):
             :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
             :returns: get coordinates message
         """
-        return 'RG,{0:d}|RG{1:d}|RG{2:d}'.format(self.codes['NORTHING'],
-            self.codes['EASTING'], self.codes['ELE'])
+        # Coords must be calculated from observations
+        return None
 
     def GetAnglesMsg(self):
         """ Get angles
