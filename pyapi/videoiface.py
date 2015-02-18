@@ -38,8 +38,8 @@ class VideoIface(Iface):
                 self.opened = True
         elif type(source) is str:
             # video file source
-            if os.path.exists(name) and os.path.isfile(name):
-                self.video = cv.CaptureFromFile(name)
+            if os.path.exists(source) and os.path.isfile(source):
+                self.video = cv.CaptureFromFile(source)
                 self.opened = True
             else:
                 self.state = self.IF_FILE
