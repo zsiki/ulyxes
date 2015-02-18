@@ -10,7 +10,10 @@
 
 """
 
-import cv
+try:
+    import cv2 as cv
+except ImportError:
+    import cv
 import logging
 import os.path
 from iface import Iface
