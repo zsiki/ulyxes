@@ -9,10 +9,7 @@
 
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 """
-try:
-    import cv2 as cv
-except ImportError:
-    import cv
+import cv
 import logging
 from writer import Writer
 

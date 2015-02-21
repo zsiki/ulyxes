@@ -10,10 +10,7 @@
 
 """
 
-try:
-    import cv2 as cv
-except ImportError:
-    import cv
+import cv
 import logging
 import os.path
 from iface import Iface
@@ -68,8 +65,8 @@ class VideoIface(Iface):
         if self.state == self.IF_OK:
             img = cv.QueryFrame(self.video)
             if img is None:
-                self.state = self.IF_READ
-                logging.error(" error reading video source")
+                self.state = self.IF_EOF
+                logging.warning(" eof on video source")
             return img
         return None
 
