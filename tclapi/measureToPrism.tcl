@@ -56,7 +56,7 @@ if {$dist} {
 	set systemTime [clock seconds]  ;# set current time
 	if {[llength $res] > 2} {
 		set sd [GetVal 9 $res]	;# initial slope distance
-		puts "[DMS [GetVal 7 $res]] [DMS [GetVal 8 $res]] [GetVal 9 $res] [clock format $systemTime -format %H:%M:%S]"
+		puts "    0.0000     0.0000 [DMS [GetVal 7 $res]] [DMS [GetVal 8 $res]] [format "%10.4f" $sd] [clock format $systemTime -format %H:%M:%S]"
 	} else {
 		puts "*** $res [clock format $systemTime -format %H:%M:%S]"
 	}
