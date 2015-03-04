@@ -20,23 +20,22 @@ class HttpWriter(Writer):
     """ Class to write observations to a web server (HTTP GET/POST)
 
             :param name: name of writer (str)
-            :param url: url to server side script (str)
-            :param mode: GET/POST
             :param angle: angle unit to use (str)
             :param dist: distance and coordinate format (str)
+            :param dt: date/time format (str), default ansi
             :param filt: list of allowed keys (list)
+            :param url: url to server side script (str)
+            :param mode: GET/POST
     """
 
-    def __init__(self, name = 'None', url = 'http://localhost/get.php', mode = 'GET',
-        angle = 'GON', dist = '.3f', filt = None):
+    def __init__(self, name = None, angle = 'GON', dist = '.3f', 
+                dt = '%Y-%m-%d %H:%M:%S', filt = None,
+                url = 'http://localhost/get.php', mode = 'GET'):
         """ Constructor
         """
-        super(HttpWriter, self).__init__(name)
+        super(HttpWriter, self).__init__(name, angle, dist, dt, filt)
         self.url = url
         self.mode = mode
-        self.angleFormat = angle
-        self.distFormat = dist
-        self.filt = filt
 
     def WriteData(self, data):
         """ Write observation data to server
@@ -45,23 +44,17 @@ class HttpWriter(Writer):
         """
         line = ""
         par = {}
-        if data is None:
-            logging.warning(" empty data not written")
+        if data is None or self.DropData(data):
+            logging.warning(" empty or inappropiate data not written")
             return
+        # add datetime and/or id
+        data = self.ExtendData(data)
         for key, val in data.items():
             if self.filt is None or key in self.filt:
-                if type(val) is Angle:
-                    sval = str(val.GetAngle(self.angleFormat))
-                elif type(val) is float:
-                    sval = ("{0:" + self.distFormat + "}").format(val)
-                elif type(val) is int:
-                    sval = str(val)
-                else:
-                    sval = val
                 if self.mode == 'GET':
-                    line += key + "=" + sval + "&"
+                    line += key + "=" + self.StrVal(val) + "&"
                 else:
-                    par[key] = sval
+                    par[key] = self.StrVal(val)
         if self.mode == 'GET':
             res = urllib.urlopen(self.url + '?' + line).read()
         else:
