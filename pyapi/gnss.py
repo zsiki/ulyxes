@@ -56,12 +56,14 @@ if __name__ == '__main__':
     from httpwriter import HttpWriter
     from localiface import LocalIface
     from nmeagnssunit import NmeaGnssUnit
-    #import logging
+    import logging
+    logging.basicConfig()
     #iface = SerialIface("", "COM5")
     iface = LocalIface('test', '/home/siki/meresfeldolgozas/nmea1.txt')
     mu = NmeaGnssUnit()
+    #wrt = EchoWriter()
     wrt = HttpWriter(url='http://localhost/get.php', angle='DEG')
     g = Gnss('', mu, iface, wrt)
-    #logging.getLogger().setLevel(logging.DEBUG)
-    for i in range(10):
+    logging.getLogger().setLevel(logging.DEBUG)
+    while g.measureIface.state == g.measureIface.IF_OK:
         g.Measure()
