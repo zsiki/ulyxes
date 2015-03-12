@@ -82,6 +82,14 @@ class TotalStation(Instrument):
         msg = self.measureUnit.GetLockMsg()
         return self._process(msg)
 
+    def LockIn(self):
+        """ Turn on lock
+
+            :returns: empty
+        """
+        msg = self.measureUnit.LockInMsg()
+        return self._process(msg)
+
     def SetAtmCorr(self, valueOfLambda, pres, dryTemp, wetTemp):
         """ Set atmospheric correction
 
@@ -317,7 +325,9 @@ class TotalStation(Instrument):
         #get the actual direction
         msg = self.measureUnit.GetAnglesMsg()
         res = self._process(msg)
-        return self.Move(res['hz'] + hz_rel, res['v'] + v_rel, atr)
+        if len(res):
+            return self.Move(res['hz'] + hz_rel, res['v'] + v_rel, atr)
+        return None
 
 if __name__ == "__main__":
     from leicatps1200 import LeicaTPS1200
