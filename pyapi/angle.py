@@ -237,7 +237,7 @@ Operators supported:
         if self.value is not None:
             while self.value >= PI2:
                 self.value -= PI2
-            while self.value < 0.0:
+            while self.value < -PI2:
                 self.value += PI2
 
     def __str__(self):
