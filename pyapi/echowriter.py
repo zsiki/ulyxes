@@ -42,7 +42,7 @@ class EchoWriter(Writer):
         for key, val in data.items():
             if self.filt is None or key in self.filt:
                 line += key + "=" + self.StrVal(val) + ";"
-        print (line + "\n")
+        print (line)
 
 if __name__ == "__main__":
     my = EchoWriter()
