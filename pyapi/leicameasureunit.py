@@ -31,6 +31,7 @@ class LeicaMeasureUnit(MeasureUnit):
         'GETATR': 9019,
         'SETLOCK': 9020,
         'GETLOCK': 9021,
+        'LOCKIN': 9013,
         'SETATMCORR': 2028,
         'GETATMCORR': 2029,
         'SETREFCORR': 2030,
@@ -168,102 +169,93 @@ class LeicaMeasureUnit(MeasureUnit):
     def SetATRMsg(self, atr):
         """ Set ATR status on/off
         
-        :param atr: 0/1 = off/on
-        :return: set atr message string
-          
+            :param atr: 0/1 = off/on
+            :returns: set atr message string
         """
         return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETATR'], atr)
 
     def GetATRMsg(self):
         """ Get ATR status
 
-        :returns: get atr message
-          
+            :returns: get atr message
         """
         return '%R1Q,{0:d}:'.format(self.codes['GETATR'])
 
     def SetLockMsg(self, lock):
-        """
-        Message function for get Lock status on/off
+        """ Set Lock status
         
-        :param lock: 0/1 = off/on
-        :rtype: 0 or error code
-          
+            :param lock: 0/1 = off/on
+            :returns: set lock status message
         """
         return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETLOCK'], lock)
 
     def GetLockMsg(self):
-        """
-        Message function for get Lock status
+        """ Get Lock status
        
-        :rtype: 0 or error code
-          
+            :returns: get lock status message
         """
         return '%R1Q,{0:d}:'.format(self.codes['GETLOCK'])
 
-    def SetAtmCorrMsg(self, valueOfLambda, pres, dry, wet):
+    def LockIn(self):
+        """ Activate lock
+       
+            :returns: active lock message
         """
-        Message function for set atmospheric correction settings
+        return '%R1Q,{0:d}:'.format(self.codes['LOCKIN'])
+
+    def SetAtmCorrMsg(self, valueOfLambda, pres, dry, wet):
+        """ Set atmospheric correction settings
         
-        :param valueOfLambda: Constant for the instrument not changeable, use GetAtmCorr to get value
-        :param pres: pressure value
-        :param dry: dry temperature
-        :param wet: wet temperature
-        :rtype: 0 or error code
-          
+            :param valueOfLambda: Constant for the instrument not changeable, use GetAtmCorr to get value
+            :param pres: pressure value
+            :param dry: dry temperature
+            :param wet: wet temperature
+            :returns: set atmospheric correction message
         """
         return '%R1Q,{0:d}:{1:f},{2:f},{3:f},{4:f}'.format( \
             self.codes['SETATMCORR'], valueOfLambda, pres, dry, wet)
 
     def GetAtmCorrMsg(self):
-        """
-        Message function for get atmospheric correction settings
+        """ Get atmospheric correction settings
         
-        :rtype: atmospheric settings as a dictionary
-          
+            :returns: iget atmospheric settings message
         """
         return '%R1Q,{0:d}:'.format(self.codes['GETATMCORR'])
 
     def SetRefCorrMsg(self, status, earthRadius, refracticeScale):
-        """
-        Message function for set refraction correction settings
+        """ Set refraction correction settings
         
-        :param status: 0/1 = off/on
-        :param earthRadius: radius ot the Earth
-        :param refracticeScale: refractice scale
-        :rtype: 0 or error code
-          
+            :param status: 0/1 = off/on
+            :param earthRadius: radius ot the Earth
+            :param refracticeScale: refractice scale
+            :returns: set refraction message
         """
         return '%R1Q,{0:d}:{1:d},{2:f},{3:f}'.format(self.codes['SETREFCORR'], \
             status, earthRadius, refracticeScale)
 
     def GetRefCorrMsg(self):
-        """
-        Message function for get refraction correction setting
+        """ Get refraction correction setting
       
-        :rtype: refraction correction as a dictionary
+            :returns: get refraction correction message
           
         """
         return '%R1Q,{0:d}:'.format(self.codes['GETREFCORR'])
 
     def SetStationMsg(self, e, n, z):
-        """
-        Message function for set station coordinates
+        """ Set station coordinates
         
-        :param e: easting
-        :param n: northing
-        :param z: elevation
-        :rtype: 0 or error code
-          
+            :param e: easting
+            :param n: northing
+            :param z: elevation
+            :returns: 0 or error code
         """
         return '%R1Q,{0:d}:{1:f},{2:f},{3:f}'.format(self.codes['SETSTN'], \
             e, n, z)
 
     def GetStationMsg(self):
-        """
-        Message function for get station co-ordinates
+        """ Get station coordinates
         
-        :rtype: list {{37 N} {38 E} {39 Z}}
+        :returns: TODO
           
         """
         return '%R1Q,{0:d}:'.format(self.codes['GETSTN'])
@@ -271,8 +263,8 @@ class LeicaMeasureUnit(MeasureUnit):
     def SetEDMModeMsg(self, mode):
         """ Set EDM mode
         
-        :param mode: string name 
-        :returns: set edm mode message
+            :param mode: string name 
+            :returns: set edm mode message
         """
         if type(mode) is str:
             imode = self.edmModes[mode]
@@ -290,8 +282,8 @@ class LeicaMeasureUnit(MeasureUnit):
     def SetOriMsg(self, ori):
         """ Set orientation angle
         
-        :param ori: bearing of direction (Angle)
-        :rtype: 0 or error code
+            :param ori: bearing of direction (Angle)
+            :returns: 0 or error code
           
         """
         ori_rad = ori.GetAngle('RAD')
