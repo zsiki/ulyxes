@@ -65,6 +65,7 @@ class FileWriter(EchoWriter):
                 line += key + "=" + self.StrVal(val) + ";"
         try:
             self.fp.write(line + "\n")
+            self.fp.flush()
         except:
             logging.error(" file write failed")
 

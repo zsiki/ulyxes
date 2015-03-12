@@ -69,6 +69,7 @@ class CsvWriter(FileWriter):
                 linelist[index] = self.StrVal(val)
         try:
             self.fp.write(self.sep.join(linelist) + "\n")
+            self.fp.flush()
         except:
             logging.error(" file write failed")
 
