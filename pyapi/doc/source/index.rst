@@ -79,6 +79,12 @@ Leica TPS 1200 Unit
 .. automodule:: leicatps1200
    :members:
 
+Leica TCRA 1100 Unit
+:::::::::::::::::::
+
+.. automodule:: leicatcra1100
+   :members:
+
 Trimble 550x
 ::::::::::::
 
