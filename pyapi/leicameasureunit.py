@@ -196,7 +196,7 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         return '%R1Q,{0:d}:'.format(self.codes['GETLOCK'])
 
-    def LockIn(self):
+    def LockInMsg(self):
         """ Activate lock
        
             :returns: active lock message
