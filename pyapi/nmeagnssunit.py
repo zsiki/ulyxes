@@ -56,12 +56,18 @@ class NmeaGnssUnit(MeasureUnit):
         anslist = ans.split(',')
         if msg == 'GPGGA':
             # no fix
-            if anslist[4] == 0:
+            if int(anslist[6]) == 0:
                 return None
-            res['latitude'] = Angle(float(anslist[2]), 'NMEA')
-            res['longitude'] = Angle(float(anslist[4]), 'NMEA')
-            res['hdop'] = float(anslist[8])
-            res['altitude'] = float(anslist[9])
+            try:
+                res['latitude'] = Angle(float(anslist[2]), 'NMEA')
+                res['longitude'] = Angle(float(anslist[4]), 'NMEA')
+            except ValueError:
+                return None
+            try:
+                res['altitude'] = float(anslist[9])
+                res['hdop'] = float(anslist[8])
+            except ValueError:
+                pass # not fatal if no altitude or hdop
         return res
 
     def MeasureMsg(self):
