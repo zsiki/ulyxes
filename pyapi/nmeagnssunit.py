@@ -58,9 +58,9 @@ class NmeaGnssUnit(MeasureUnit):
             # no fix
             if int(anslist[6]) == 0:
                 return None
-            mul = 1 if anslist[3] == 'S' else -1
+            mul = 1 if anslist[3] == 'N' else -1
             res['latitude'] = Angle(mul * float(anslist[2]), 'NMEA')
-            mul = 1 if anslist[5] == 'W' else -1
+            mul = 1 if anslist[5] == 'E' else -1
             res['longitude'] = Angle(mul * float(anslist[4]), 'NMEA')
             res['altitude'] = float(anslist[9])
             res['hdop'] = float(anslist[8])
