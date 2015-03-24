@@ -10,6 +10,7 @@
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 """
 
+import sys
 from angle import Angle
 from echowriter import EchoWriter
 import logging
@@ -20,14 +21,14 @@ class FileWriter(EchoWriter):
             :param name: name of writer (str)
             :param angle: angle unit to use (str)
             :param dist: distance and coordinate format (str)
-			:param dt: date/time format (str), default ansi
+            :param dt: date/time format (str), default ansi
             :param filt: list of allowed keys (list)
             :param fname: name of text file to write to (str)
             :param mode: mode of file open (a or w) (str)
     """
 
     def __init__(self, name = 'None', angle = 'GON', dist = '.3f',
-                dt = '%Y-%m-%d %H:%M:%S', filt = None, fname = 'ulyxes.txt',
+                dt = '%Y-%m-%d %H:%M:%S', filt = None, fname = None,
                 mode = 'a'):
         """ Constructor
         """
@@ -35,11 +36,14 @@ class FileWriter(EchoWriter):
         self.fname = fname
         self.mode = mode
         self.fp = None
-        try:
-            self.fp = open(fname, mode)
-        except:
-            self.state = self.WR_OPEN
-            logging.error(" cannot open file %s", self.fname)
+        if fname is None or fname == 'stdout':
+            self.fp = sys.stdout
+        else:
+            try:
+                self.fp = open(fname, mode)
+            except:
+                self.state = self.WR_OPEN
+                logging.error(" cannot open file %s", self.fname)
 
     def __del__(self):
         """ Destructor

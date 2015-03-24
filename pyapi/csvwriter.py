@@ -29,7 +29,7 @@ class CsvWriter(FileWriter):
 
     def __init__(self, name = 'None', angle = 'GON', dist = '.3f',
                 dt = '%Y-%m-%d %H:%M:%S', filt = None,
-                fname = 'ulyxes.txt', mode = 'a', sep = ';', header = None):
+                fname = None, mode = 'a', sep = ';', header = None):
         """ Constructor
         """
         super(CsvWriter, self).__init__(name, angle, dist, dt, filt, fname, mode)
