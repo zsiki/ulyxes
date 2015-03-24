@@ -46,7 +46,7 @@ class NmeaGnssUnit(MeasureUnit):
         if ans[1:len(msg)+1] != msg:
             return None
         # check checksum 
-        data, cksum = re.split('\*', ans)
+        data, cksum = re.split('\*', ans.strip())
         cksum1 = 0
         for s in data[1:]:
             cksum1 ^= ord(s)
@@ -58,16 +58,12 @@ class NmeaGnssUnit(MeasureUnit):
             # no fix
             if int(anslist[6]) == 0:
                 return None
-            try:
-                res['latitude'] = Angle(float(anslist[2]), 'NMEA')
-                res['longitude'] = Angle(float(anslist[4]), 'NMEA')
-            except ValueError:
-                return None
-            try:
-                res['altitude'] = float(anslist[9])
-                res['hdop'] = float(anslist[8])
-            except ValueError:
-                pass # not fatal if no altitude or hdop
+            mul = 1 if anslist[3] == 'S' else -1
+            res['latitude'] = Angle(mul * float(anslist[2]), 'NMEA')
+            mul = 1 if anslist[5] == 'W' else -1
+            res['longitude'] = Angle(mul * float(anslist[4]), 'NMEA')
+            res['altitude'] = float(anslist[9])
+            res['hdop'] = float(anslist[8])
         return res
 
     def MeasureMsg(self):
