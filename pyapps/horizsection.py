@@ -17,7 +17,7 @@ import logging
 
 sys.path.append('../pyapi/')
 
-from angle import Angle,PI2
+from angle import Angle, PI2
 from serialiface import SerialIface
 from csvwriter import CsvWriter
 from totalstation import TotalStation
@@ -52,16 +52,12 @@ iface = SerialIface("rs-232", port)
 wrt = CsvWriter(angle = 'DMS', dist = '.3f', filt = ['id','hz','v','distance','east','north','elev'], fname = 'stdout', mode = 'a', sep = ';')
 ts = TotalStation(stationtype, mu, iface)
 ts.SetEDMMode('RLSTANDARD')
-print ts.GetEDMMode()
 ts.Measure()
 startp = ts.GetMeasure()
-if ts.measureIface.state != ts.measureIface.IF_OK:
+if ts.measureIface.state != ts.measureIface.IF_OK or 'errorCode' in startp:
     print 'Start again!'
     exit(1)
-if 'errorCode' in startp:
-    print 'Start again!'
-    exit(1)
-print startp
+
 act = Angle(0)
 height0 = math.cos(startp['v'].GetAngle()) * startp['distance']
 w = True
