@@ -27,11 +27,11 @@ class SerialIface(Iface):
             :param parity: parity of bytes even/odd/none, default none
             :param stop: number of stop bits (int), default 1
             :param timeout: communication timeout seconds (int), default 12
-            :param eomRead: end of message char from instrument (str), default '\\n'
+            :param eomRead: end of message char from instrument (str), default '\\r\\n'
             :param eomWrite: end of message char from computer (str), default '\\r\\n'
     """
     def __init__(self, name, port, baud=9600, byteSize=8,
-        parity=serial.PARITY_NONE, stop=1, timeout=12, eomRead=b'\n',
+        parity=serial.PARITY_NONE, stop=1, timeout=12, eomRead=b'\r\n',
         eomWrite=b'\r\n'):
         """ Constructor for serial interface
         """
