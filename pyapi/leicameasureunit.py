@@ -335,10 +335,10 @@ class LeicaMeasureUnit(MeasureUnit):
             prg = self.edmProg[prg]
         return '%R1Q,{0:d}:{1:d}'.format(self.codes['MEASUREANGDIST'], prg)
 
-    def CoordsMsg (self, wait = 1000, incl = 0):
+    def CoordsMsg (self, wait = 12000, incl = 0):
         """ Get coordinates
         
-            :param wait: wait-time in ms, optional (default 1000)
+            :param wait: wait-time in ms, optional (default 12000)
             :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
             :returns: get coordinates message
         """
