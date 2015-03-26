@@ -134,9 +134,9 @@ class LeicaMeasureUnit(MeasureUnit):
                 res['edmMode'] = int(ansBufflist[4])
             #Coords()
             elif commandID == self.codes['COORDS']:
-                res['y'] = float(ansBufflist[4])
-                res['x'] = float(ansBufflist[5])
-                res['z'] = float(ansBufflist[6])
+                res['east'] = float(ansBufflist[4])
+                res['north'] = float(ansBufflist[5])
+                res['elev'] = float(ansBufflist[6])
             #GetAngles()
             elif commandID == self.codes['GETANGLES']:
                 res['hz'] = Angle(float(ansBufflist[4]))
