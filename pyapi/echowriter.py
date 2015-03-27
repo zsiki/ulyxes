@@ -11,11 +11,11 @@
 """
 
 from angle import Angle
-from writer import Writer
+from filewriter import FileWriter
 import logging
 import datetime
 
-class EchoWriter(Writer):
+class EchoWriter(FileWriter):
     """ Class to write observations to consol
 
             :param name: name of writer (str)
@@ -26,23 +26,7 @@ class EchoWriter(Writer):
                  dt = '%Y-%m-%d %H:%M:%S', filt = None):
         """ Constructor
         """
-        super(EchoWriter, self).__init__(name, angle, dist, dt, filt)
-
-    def WriteData(self, data):
-        """ Write observation data to consol
-
-            :param data: dictionary with observation data
-        """
-        line = ""
-        if data is None or self.DropData(data):
-            logging.warning(" empty or inappropiate data not written")
-            return
-        # add datetime and/or id
-        data = self.ExtendData(data)
-        for key, val in data.items():
-            if self.filt is None or key in self.filt:
-                line += key + "=" + self.StrVal(val) + ";"
-        print (line)
+        super(FileWriter, self).__init__(name, angle, dist, dt, filt)
 
 if __name__ == "__main__":
     my = EchoWriter()
