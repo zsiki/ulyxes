@@ -12,10 +12,10 @@
 
 import sys
 from angle import Angle
-from echowriter import EchoWriter
+from writer import Writer
 import logging
 
-class FileWriter(EchoWriter):
+class FileWriter(Writer):
     """ Class to write observations to file
 
             :param name: name of writer (str)
