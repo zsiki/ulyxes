@@ -19,15 +19,15 @@ class CsvReader(FileReader):
             :param name: name of reader (str), default None
             :param fname: name of input file
             :param separator: field separator, default ;
-            :param filter: list of fields to use, default None (use all)
+            :param filt: list of fields to use, default None (use all)
     """
 
-    def __init__(self, name = None, fname = None, separator = ';', filter = None):
+    def __init__(self, name = None, fname = None, separator = ';', filt = None):
         """ Constructor
         """
         super(CsvReader, self).__init__(name, fname)        
         self.separator = separator
-        self.filter = filter
+        self.filt = filt
         # get field name from header line
         self.fields = [x.strip() for x in self.GetLine().split(self.separator)]
 
@@ -40,12 +40,12 @@ class CsvReader(FileReader):
             pass
 
     def GetNext(self):
-        """ Get fields in adictionary from next line considering filter
+        """ Get fields in dictionary from next line considering filter
         """
         w = [x.strip() for x in self.GetLine().split(self.separator)]
         res = {}
         for i in range(len(self.fields)):
-            if self.filter is None or self.fields[i] in self.filter:
+            if self.filt is None or self.fields[i] in self.filt:
                 res[self.fields[i]] = w[i]
         return res
 
