@@ -21,6 +21,18 @@ Reader
 .. automodule:: reader
    :members:
 
+FileReader
+::::::::::
+
+.. automodule:: filereader
+   :members:
+
+CsvReader
+::::::::::
+
+.. automodule:: csvreader
+   :members:
+
 INTERFACES
 ==========
 
@@ -80,13 +92,13 @@ Leica TPS 1200 Unit
    :members:
 
 Leica TCRA 1100 Unit
-:::::::::::::::::::
+::::::::::::::::::::
 
 .. automodule:: leicatcra1100
    :members:
 
-Trimble 550x
-::::::::::::
+Trimble 5500 Unit
+:::::::::::::::::
 
 .. automodule:: trimble5500
    :members:
