@@ -26,7 +26,7 @@ class EchoWriter(FileWriter):
                  dt = '%Y-%m-%d %H:%M:%S', filt = None):
         """ Constructor
         """
-        super(FileWriter, self).__init__(name, angle, dist, dt, filt)
+        super(EchoWriter, self).__init__(name, angle, dist, dt, filt, None, 'w')
 
 if __name__ == "__main__":
     my = EchoWriter()
