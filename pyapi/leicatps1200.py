@@ -35,6 +35,7 @@ class LeicaTPS1200(LeicaMeasureUnit):
         'GETATR': 18006,
         'SETLOCK': 18007,
         'GETLOCK': 18008,
+        'LOCKIN': 9013,
         'SETATMCORR': 2028,
         'GETATMCORR': 2029,
         'SETREFCORR': 2030,
