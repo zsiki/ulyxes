@@ -16,14 +16,14 @@ from writer import Writer
 import logging
 
 class FileWriter(Writer):
-    """ Class to write observations to file
+    """ Class to write observations to file, in the form key=value;key=value,...
 
-            :param name: name of writer (str)
-            :param angle: angle unit to use (str)
-            :param dist: distance and coordinate format (str)
+            :param name: name of writer (str), default None
+            :param angle: angle unit to use (str), default GON
+            :param dist: distance and coordinate format (str), default 3 decimals
             :param dt: date/time format (str), default ansi
-            :param filt: list of allowed keys (list)
-            :param fname: name of text file to write to (str)
+            :param filt: list of allowed keys (list), default None
+            :param fname: name of text file to write to (str), default None (write to stdout)
             :param mode: mode of file open (a or w) (str)
     """
 
@@ -37,6 +37,7 @@ class FileWriter(Writer):
         self.mode = mode
         self.fp = None
         if fname is None or fname == 'stdout':
+            # write to stdout
             self.fp = sys.stdout
         else:
             try:
@@ -74,7 +75,6 @@ class FileWriter(Writer):
             logging.error(" file write failed")
 
 if __name__ == "__main__":
-    myfile = FileWriter()
+    myfile = FileWriter()   # write to stdout
     data = {'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'dist': 123.6581}
     myfile.WriteData(data)
-
