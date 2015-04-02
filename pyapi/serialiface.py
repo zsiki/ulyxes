@@ -81,8 +81,8 @@ class SerialIface(Iface):
             return None
         # read answer till end of line
         ans = b''
-        ch = b''
-        while (ch != self.eomRead):
+        w = -1 * len(self.eomRead)
+        while (ans[w:] != self.eomRead):
             ch = b''
             try:
                 ch = self.ser.read(1)
@@ -111,7 +111,8 @@ class SerialIface(Iface):
             logging.error(" serial line not opened or in error state")
             return -1
         # add CR/LF to message end
-        if (msg[-2:] != self.eomWrite):
+        w = -1 * len(self.eomWrite)
+        if (msg[w:] != self.eomWrite):
             msg += self.eomWrite
         # remove special characters
         msg = msg.encode('ascii', 'ignore')
