@@ -112,7 +112,7 @@ class I2CIface(Iface):
     def Send(self, msg):
         """ send message to device
 
-            :param msg: message (tuple)
+            :param msg: message (tuple), one item in tuble is a read/write/sleep/op operation. For read and write a register must be specified, the operation name can be any read.../write... method of the class, to read/write 8/16 bit values. After sleep specify time in seconds. After op specify an avaluatable string on the previously read data, data are stored in data list in the order of reading.
         """
         i = 0
         data = []
