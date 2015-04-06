@@ -120,6 +120,9 @@ class I2CIface(Iface):
         for op in msg:
             if op[0][:5] == 'write':
                 getattr(self, op[0])(op[1], op[2])
+            elif op[0][:8] == 'readList':
+                data.append(getattr(self, op[0])(op[1], op[2]))
+                i += op[2]
             elif op[0][:4] == 'read':
                 data.append(getattr(self, op[0])(op[1]))
                 i += 1
