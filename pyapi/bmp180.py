@@ -75,14 +75,24 @@ class BMP180(Instrument):
         return 44330.0 * (1.0 - pow(pressure / self.p0, (1.0 / 5.255)))
 
 if __name__ == "__main__":
+    import time
+    import sys
     from bmp180measureunit import BMP180MeasureUnit
     from i2ciface import I2CIface
-    from echowriter import EchoWriter
+    from filewriter import FileWriter
+    if len(sys.argv) > 1:
+        n = int(argv[1]
+    else:
+        n = 1
     mu = BMP180MeasureUnit()
     i2c = I2CIface(None, 0x77)
-    ew = EchoWriter()
-    bmp = BMP180('BMP180', mu, i2c, ew)
-    bmp.GetTemp()
-    bmp.GetPressure()
+    fw = FileWriter(fname = 'bmp180.log', filt=['elev', 'pressure', 'datetime'])
+    bmp = BMP180('BMP180', mu, i2c)
     bmp.SetSealevel(105.0)
-    print bmp.GetAltitude()
+    #bmp.GetTemp()
+    for i in range(n):
+        data = bmp.GetPressure()
+        data['elev'] = bmp.GetAltitude()
+        fw.WriteData(data)
+        print data
+        time.sleep(30)
