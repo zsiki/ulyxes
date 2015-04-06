@@ -68,12 +68,12 @@ class Writer(object):
             sval = str(val.GetAngle(self.angleFormat))
         elif type(val) is float:
             sval = ("{0:" + self.distFormat + "}").format(val)
-        elif type(val) is int:
+        elif type(val) is int or type(val) is long:
             sval = str(val)
         elif type(val) is type(datetime.datetime.now()):
             sval = val.strftime("%Y-%m-%d %H:%M:%S")
         else:
-            sval = val
+            sval = str(val)
         return sval
 
     def DropData(self, data):
