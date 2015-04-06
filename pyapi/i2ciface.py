@@ -19,7 +19,13 @@ from iface import Iface
 class I2CIface(Iface):
     """Class for communicating with an I2C device using the smbus library.
     Allows reading and writing 8-bit, 16-bit, and byte array values to registers
-    on the device."""
+    on the device.
+
+        :param name: name of interface (str)
+        :param address: address on i2c bus (int)
+        :param busnum: i2c bus number (int), default 1 (Raspberry PI B/B+)
+    """
+
     def __init__(self, name, address, busnum = 1):
         """Create an instance of the I2C device at the specified address on the
         specified I2C bus number."""
