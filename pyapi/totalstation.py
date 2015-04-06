@@ -325,7 +325,7 @@ class TotalStation(Instrument):
         #get the actual direction
         msg = self.measureUnit.GetAnglesMsg()
         res = self._process(msg)
-        if len(res):
+        if 'hz' in res and 'v' in res:
             return self.Move(res['hz'] + hz_rel, res['v'] + v_rel, atr)
         return None
 

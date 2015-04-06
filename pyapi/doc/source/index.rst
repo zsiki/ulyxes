@@ -62,6 +62,12 @@ Video Iface
 .. automodule:: videoiface
    :members:
 
+I2C Iface
+:::::::::
+
+.. automodule:: i2ciface
+   :members:
+
 MEASURE UNITS
 =============
 
@@ -121,6 +127,12 @@ Video Unit
 .. automodule:: videomeasureunit
    :members:
 
+BMP180 Unit
+:::::::::::
+
+.. automodule:: bmp180measureunit
+   :members:
+
 SENSORS/INSTRUMENTS
 ===================
 
@@ -157,6 +169,12 @@ Web Camera
 ::::::::::
 
 .. automodule:: webcam
+   :members:
+
+BMP180 Air Pressure Sensor
+::::::::::::::::::::::::::
+
+.. automodule:: bmp180
    :members:
 
 WRITERS

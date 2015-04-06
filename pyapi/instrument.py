@@ -67,7 +67,7 @@ class Instrument(object):
         if self.measureIface.state != self.measureIface.IF_OK:
             return {}
         res = self.measureUnit.Result(msg, ans)
-        if self.writerUnit is not None and len(res) > 0:
+        if self.writerUnit is not None and res is not None and len(res) > 0:
             self.writerUnit.WriteData(res)
         return res
 
