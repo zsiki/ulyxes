@@ -85,4 +85,6 @@ if __name__ == '__main__':
     wunit = EchoWriter()
 
     s9dof = LSM9DS0('9 DOF', munit, [i1d, i6b], wunit)
-
+    s9dof.GetAccel()
+    s9dof.GetMag()
+    s9dof.GetGyro()
