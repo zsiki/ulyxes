@@ -181,12 +181,18 @@ Operators supported:
         else:
             # unknown unit
             self.value = None
-        # move angle to 0 - 2*PI interval
+        # move angle to -2*PI : 2*PI interval
         if self.value is not None:
             while self.value >= PI2:
                 self.value -= PI2
             while self.value < -PI2:
                 self.value += PI2
+
+    def Positive(self):
+        """ Change stored value to positive
+        """
+        if self.value < 0:
+            self.value += PI2
 
     def __str__(self):
         """ GON string representation of angle
@@ -237,3 +243,6 @@ if __name__ == "__main__":
     print (c1.GetAngle("DMS"))
     print (c1)
     print ((a1-b1).GetAngle("DMS"))
+    a2 = Angle(-90, 'DEG')
+    a2.Positive()
+    print (a2)
