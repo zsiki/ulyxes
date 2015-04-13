@@ -187,6 +187,8 @@ class TotalStation(Instrument):
             :param v: zenith (Angle)
             :param atr: 0/1 ATR on/off
         """
+        hz.Positive()    # negative angles are not accepted by totalstations
+        v.Positive()
         msg = self.measureUnit.MoveMsg(hz, v, atr)
         return self._process(msg)
 
