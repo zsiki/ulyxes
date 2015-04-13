@@ -81,7 +81,7 @@ if __name__ == "__main__":
     from i2ciface import I2CIface
     from filewriter import FileWriter
     if len(sys.argv) > 1:
-        n = int(argv[1]
+        n = int(argv[1])
     else:
         n = 1
     mu = BMP180MeasureUnit()
