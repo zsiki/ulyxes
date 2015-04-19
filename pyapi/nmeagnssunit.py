@@ -19,7 +19,7 @@ class NmeaGnssUnit(MeasureUnit):
     """ NMEA measure unit
 
             :param name: name of nmea unit (str), default 'Nmea Gnss'
-            :param type: type of nmea unit (str), default None
+            :param typ: type of nmea unit (str), default None
     """
     def __init__(self, name = 'Nmea Gnss', typ = None):
         """ constructor for nmea measure unit
