@@ -133,6 +133,12 @@ BMP180 Unit
 .. automodule:: bmp180measureunit
    :members:
 
+Wifi Unit
+:::::::::
+
+.. automodule:: wifiunit
+   :members:
+
 SENSORS/INSTRUMENTS
 ===================
 
@@ -175,6 +181,12 @@ BMP180 Air Pressure Sensor
 ::::::::::::::::::::::::::
 
 .. automodule:: bmp180
+   :members:
+
+WiFi Collector
+::::::::::::::
+
+.. automodule:: wificollector
    :members:
 
 WRITERS
