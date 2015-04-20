@@ -14,6 +14,7 @@ from instrument import Instrument
 
 class WifiCollector(Instrument):
     """ Wifi collector collects information about available wifi networks
+        This modul depends on https://github.com/rockymeza/wifi
 
             :param name: name of instrument
             :param measureUnit: measure unit part of instrument 
