@@ -20,6 +20,7 @@ class I2CIface(Iface):
     """Class for communicating with an I2C device using the smbus library.
     Allows reading and writing 8-bit, 16-bit, and byte array values to registers
     on the device.
+    This modul depends on smbus.
 
         :param name: name of interface (str)
         :param address: address on i2c bus (int)
