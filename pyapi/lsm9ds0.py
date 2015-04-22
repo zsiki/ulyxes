@@ -20,14 +20,14 @@ class LSM9DS0(Instrument):
     def _process(self, msg, i):
         """ Send message to measure unit and process answer
 
-            :param i: iface index using to send message (int) 0/1
             :param msg: message to send
+            :param i: iface index using to send message (int) 0/1
             :returns: parsed answer (dictionary)
         """
         ans = self.measureIface[i].Send(msg)
         if self.measureIface[i].state != self.measureIface[i].IF_OK:
             return {}
-        res = self.measureUnit.Result(msg, ans)
+        res = self.measureUnit.Result(msg, ans, ['accel', 'gyro'][i])
         if self.writerUnit is not None and res is not None and len(res) > 0:
             self.writerUnit.WriteData(res)
         return res
@@ -85,6 +85,9 @@ if __name__ == '__main__':
     wunit = EchoWriter()
 
     s9dof = LSM9DS0('9 DOF', munit, [i1d, i6b], wunit)
+    print "Accelerometer"
     s9dof.GetAccel()
+    print "Magnetometer"
     s9dof.GetMag()
+    print "Gyro"
     s9dof.GetGyro()

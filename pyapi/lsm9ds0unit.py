@@ -256,11 +256,13 @@ class LSM9DS0Unit(MeasureUnit):
     def Result(self, msg, ans, part = 'gyro'):
         """ Process answer got from sensor
 
+            :param msg: message sent to device
+            :param ans: answer got from device
             :param part: gyro/accel answer from gyro or accel
             :returns: processed values in dict
         """
         res = {}
-        if msg[0][1] == OUT_X_L_G:
+        if msg[0][1] == OUT_X_L_G and part == 'gyro':
             # scale gyro
             res['gyro_x'] = (ans['data'][1] << 8) | ans['data'][0]
             res['gyro_y'] = (ans['data'][3] << 8) | ans['data'][2]
