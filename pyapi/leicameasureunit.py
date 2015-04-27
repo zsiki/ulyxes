@@ -98,7 +98,9 @@ class LeicaMeasureUnit(MeasureUnit):
                 errCode = -1   # invalid answer
             if errCode != 0:
                 logging.error(" error from instrument: %d", errCode)
-                return {'errorCode': errCode}
+                res['errCode'] = errCode
+                if not errCode in (1283, 1284):
+                    return res
             if commandID == self.codes['GETMEASURE']:
                 res['hz'] = Angle(float(ansBufflist[4]))
                 res['v'] = Angle(float(ansBufflist[5]))
