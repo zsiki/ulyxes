@@ -7,7 +7,7 @@
    Sample application of Ulyxes PyAPI to measure to a moving prism
    
    :param argv[1] (sensor): 110n/180n/120n, default 1200
-   :param argv[2] (mode): 0/1/2/3/4 without ATR/with ATR/with ATR no distance/lock single distance/lock with distance, default 1
+   :param argv[2] (mode): 0/1/2/3/4/5 without ATR/with ATR/with ATR no distance/lock single distance/lock with distance/store if stopped, default 1
    :param argv[3] (edm): edm mode STANDARD/FAST, default STANDARD
    :param argv[4] (port): serial port, use a filename for local iface, default COM4
    :param argv[5] (file): output file, default None
@@ -40,19 +40,18 @@ if len(sys.argv) > 1:
         from leicatps1200 import LeicaTPS1200
         mu = LeicaTPS1200()
 else:
-    # default TPS 1200
-    from leicatps1200 import LeicaTPS1200
-    mu = LeicaTPS1200()
+    from leicatca1800 import LeicaTCA1800
+    mu = LeicaTCA1800()
 # measure mode
-mode = 1
+mode = 5
 if len(sys.argv) > 2:
     mode = int(sys.argv[2])
 # EDM mode
-edm = 0
+edm = 'FAST'
 if len(sys.argv) > 3:
     edm = sys.argv[3]
 # serial port
-com = 'COM4'
+com = 'COM7'
 if len(sys.argv) > 4:
     com = sys.argv[4]
 if re.search('^COM[0-9]+', com) or re.search('^/dev/.*tty', com):
@@ -62,24 +61,39 @@ else:
 
 if len(sys.argv) > 5:
     from csvwriter import CsvWriter
-    wrt = CsvWriter(fname = sys.argv[5])
+    wrt = CsvWriter(angle = 'DMS', dist = '.3f',
+                filt = ['id','hz','v','distance','east','north','elev'],
+                fname = sys.argv[5], mode = 'a', sep = ';')
 else:
     from echowriter import EchoWriter
     wrt = EchoWriter()
 
-ts = TotalStation("Leica", mu, iface, wrt)
 
+# no writer to instrument, handle writing separatelly
+ts = TotalStation("Leica", mu, iface)
+
+slopeDist = 0
 ts.SetEDMMode(edm)
 if mode > 0:
     ts.SetLock(0)
     ts.SetATR(1)
-    ts.SetEDMMode(4) #TCA 1800 EDM mode for tracking the target TODO
+    #ts.SetEDMMode('FAST') # EDM mode for tracking
     ts.MoveRel(Angle(0), Angle(0), 1)
     ts.Measure()
-    ts.GetMeasure()
-    if mode in (3, 4):
+    measurement = ts.GetMeasure()
+    if 'distance' in measurement:
+        slopeDist = measurement['distance']
+    if mode in (3, 4, 5):
         ts.SetLock(1)
         ts.LockIn()
+        if mode == 5:
+            last_hz = measurement['hz'] # direction of last stored point
+            last_v = measurement['v']
+            prev_hz = measurement['hz'] # direction of last examined point
+            prev_v = measurement['v']
+            moving = True
+            limit = Angle('0-03-00', 'DMS')
+            n = 0
 else:
     ts.SetATR(0)
 
@@ -99,7 +113,38 @@ while ts.measureIface.state == ts.measureIface.IF_OK:
     elif mode == 4:
         ts.Measure()
         measurement = ts.GetMeasure()
-
+    elif mode == 5:
+        measurement = ts.GetAngles()
+        print last_hz
+        print measurement['hz']
+        if moving:
+            if abs(prev_hz.GetAngle() - measurement['hz'].GetAngle()) < limit.GetAngle() and \
+               abs(prev_v.GetAngle() - measurement['v'].GetAngle()) < limit.GetAngle():
+                n  += 1
+                if n <= 3:
+                    print n
+                    # still moving
+                    continue
+                ts.Measure()
+                measurement = ts.GetMeasure()
+                moving = False
+                print moving
+                last_hz = measurement['hz']
+                last_v = measurement['v']
+                prev_hz = measurement['hz']
+                prev_v = measurement['v']
+                n = 0
+                print measurement
+            else:
+                prev_hz = measurement['hz']
+                prev_v = measurement['v']
+                continue
+        else:
+            if abs(last_hz.GetAngle() - measurement['hz'].GetAngle()) >= limit.GetAngle() or \
+               abs(last_v.GetAngle() - measurement['v'].GetAngle()) >= limit.GetAngle():
+                moving = True
+                print moving
+            continue
     #  Get each measurement data
     if 'distance' in measurement:  # Check existence of 'distance' key
         slopeDist = measurement['distance']
@@ -108,15 +153,14 @@ while ts.measureIface.state == ts.measureIface.IF_OK:
     if 'v' in measurement:  # Check existence of 'v' key
         v = measurement['v']
 
-    # Compute relative coordinates
-    #if('distance' in measurement and 'hz' in measurement and 'v' in measurement):
-    try:
-        dx = slopeDist * math.sin(v.GetAngle()) * math.sin(hz.GetAngle())
-        dy = slopeDist * math.sin(v.GetAngle()) * math.sin(v.GetAngle())
-        # Print results for testing purpose
-        print "dx  " + str(dx)
-        print "dy  " + str(dy)
-    except ValueError:
+    # Compute relative coordinates according to the instrument origin
+    if('hz' in measurement and 'v' in measurement):
+        measurement['east'] = slopeDist * math.sin(v.GetAngle()) * math.sin(hz.GetAngle())
+        measurement['north'] = slopeDist * math.sin(v.GetAngle()) * math.cos(hz.GetAngle())
+        measurement['elev'] = slopeDist * math.cos(v.GetAngle())
+        
+        # Print measurements
+        print measurement
+        wrt.WriteData(measurement)
+    else:
         print "Some measurement data(s) are missing..."
-
-
