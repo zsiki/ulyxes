@@ -75,24 +75,44 @@ class BMP180(Instrument):
         return 44330.0 * (1.0 - pow(pressure / self.p0, (1.0 / 5.255)))
 
 if __name__ == "__main__":
+    """ bmp180 demo logger
+        command line parameters
+        argv[1]: name of log file, default bmp180.log
+        argv[2]: number of repeated observations, default 10
+        argv[3]: delay between observations, default 30 sec
+        argv[4]: elevation of start point, default 100
+    """
     import time
     import sys
     from bmp180measureunit import BMP180MeasureUnit
     from i2ciface import I2CIface
     from filewriter import FileWriter
     if len(sys.argv) > 1:
-        n = int(argv[1])
+        log = sys.argv[1]       # name of log file
     else:
-        n = 1
+        log = 'bmp180.log'      # default log file
+    if len(sys.argv) > 2:
+        n = int(sys.argv[2])    # number of observations
+    else:
+        n = 10                  # default single observation
+    if len(sys.argv) > 3:
+        delay = int(sys.argv[3]) # delay between observations (sec)
+    else:
+        delay = 30               # default delay 30 sec
+    if len(sys.argv) > 4:
+        elevation = float(sys.argv[4]) # elevation of start point
+    else:
+        elevation = 100                # default elevation for start point
     mu = BMP180MeasureUnit()
     i2c = I2CIface(None, 0x77)
-    fw = FileWriter(fname = 'bmp180.log', filt=['elev', 'pressure', 'datetime'])
+    fw = FileWriter(fname = 'bmp180.log', filt=['elev', 'pressure', 'temp', 'datetime'])
     bmp = BMP180('BMP180', mu, i2c)
-    bmp.SetSealevel(105.0)
+    bmp.SetSealevel(elevation)
     #bmp.GetTemp()
     for i in range(n):
         data = bmp.GetPressure()
         data['elev'] = bmp.GetAltitude()
+        data['temp'] = bmp.GetTemp()['temp']
         fw.WriteData(data)
         print data
-        time.sleep(30)
+        time.sleep(delay)
