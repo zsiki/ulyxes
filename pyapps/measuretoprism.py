@@ -7,9 +7,9 @@
    Sample application of Ulyxes PyAPI to measure to a moving prism
    
    :param argv[1] (sensor): 110n/180n/120n, default 1200
-   :param argv[2] (mode): 0/1/2/3/4/5 without ATR/with ATR/with ATR no distance/lock single distance/lock with distance/store if stopped, default 1
+   :param argv[2] (mode): 0/1/2/3/4/5 without ATR/with ATR/with ATR no distance/lock single distance/lock with distance/store if stopped, default 5
    :param argv[3] (edm): edm mode STANDARD/FAST, default STANDARD
-   :param argv[4] (port): serial port, use a filename for local iface, default COM4
+   :param argv[4] (port): serial port, use a filename for local iface, default COM7
    :param argv[5] (file): output file, default None
 """
 import re
@@ -25,10 +25,10 @@ from serialiface import SerialIface
 from totalstation import TotalStation
 from localiface import LocalIface
 
-print len(sys.argv)
-print sys.argv[0]
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.ERROR)
 
+# Process command line parameters
+# Instrument type
 if len(sys.argv) > 1:
     if re.search('110[0-9]$', sys.argv[1]):
         from leicatcra1100 import LeicaTCRA1100
@@ -42,7 +42,8 @@ if len(sys.argv) > 1:
 else:
     from leicatca1800 import LeicaTCA1800
     mu = LeicaTCA1800()
-# measure mode
+
+# Measure mode
 mode = 5
 if len(sys.argv) > 2:
     mode = int(sys.argv[2])
@@ -50,7 +51,7 @@ if len(sys.argv) > 2:
 edm = 'FAST'
 if len(sys.argv) > 3:
     edm = sys.argv[3]
-# serial port
+# Serial port
 com = 'COM7'
 if len(sys.argv) > 4:
     com = sys.argv[4]
@@ -59,30 +60,30 @@ if re.search('^COM[0-9]+', com) or re.search('^/dev/.*tty', com):
 else:
     iface = LocalIface("testIface", com) # Local iface for testing the module
 
+# Writer
 if len(sys.argv) > 5:
     from csvwriter import CsvWriter
-    wrt = CsvWriter(angle = 'DMS', dist = '.3f',
-                filt = ['id','hz','v','distance','east','north','elev'],
-                fname = sys.argv[5], mode = 'a', sep = ';')
+    wrt = CsvWriter(angle = 'DMS', dist = '.3f', dt = '%Y-%m-%d %H:%M:%S',
+                    filt = ['id','hz','v','distance','east','north','elev'],
+                    fname = sys.argv[5], mode = 'w', sep = ';')
 else:
     from echowriter import EchoWriter
     wrt = EchoWriter()
 
 
-# no writer to instrument, handle writing separatelly
 ts = TotalStation("Leica", mu, iface)
-
 slopeDist = 0
 ts.SetEDMMode(edm)
+
 if mode > 0:
     ts.SetLock(0)
     ts.SetATR(1)
-    #ts.SetEDMMode('FAST') # EDM mode for tracking
     ts.MoveRel(Angle(0), Angle(0), 1)
     ts.Measure()
     measurement = ts.GetMeasure()
     if 'distance' in measurement:
         slopeDist = measurement['distance']
+        
     if mode in (3, 4, 5):
         ts.SetLock(1)
         ts.LockIn()
@@ -99,42 +100,37 @@ else:
 
 while ts.measureIface.state == ts.measureIface.IF_OK:
     if mode == 0:
-        ts.Measure() # distance measurement
+        ts.Measure() # distance measurement without ATR
         measurement = ts.GetMeasure()
     elif mode == 1:
         ts.MoveRel(Angle(0), Angle(0), 1)  # aim on target with ATR
         ts.Measure()
         measurement = ts.GetMeasure()
     elif mode == 2:
-        ts.MoveRel(Angle(0), Angle(0), 1) # aim on target with ATR
+        ts.MoveRel(Angle(0), Angle(0), 1) # aim on target with ATR without distance measurements
         measurement = ts.GetAngles()
     elif mode == 3:
         measurement = ts.GetAngles() # get angles only
     elif mode == 4:
         ts.Measure()
-        measurement = ts.GetMeasure()
+        measurement = ts.GetMeasure() # get distance measurement with targeting mode
     elif mode == 5:
-        measurement = ts.GetAngles()
-        print last_hz
-        print measurement['hz']
+        measurement = ts.GetAngles() # go and stop, store full measurements within the limitation
+
         if moving:
             if abs(prev_hz.GetAngle() - measurement['hz'].GetAngle()) < limit.GetAngle() and \
                abs(prev_v.GetAngle() - measurement['v'].GetAngle()) < limit.GetAngle():
                 n  += 1
-                if n <= 3:
-                    print n
-                    # still moving
+                if n <= 3: # store if the measured values within the angle limitation three times
                     continue
                 ts.Measure()
                 measurement = ts.GetMeasure()
-                moving = False
-                print moving
-                last_hz = measurement['hz']
+                moving = False # approximately standing
+                last_hz = measurement['hz'] # direction of last stored point
                 last_v = measurement['v']
-                prev_hz = measurement['hz']
+                prev_hz = measurement['hz'] # direction of last examined point
                 prev_v = measurement['v']
-                n = 0
-                print measurement
+                n = 0 # start counting again if the last examind point is stored
             else:
                 prev_hz = measurement['hz']
                 prev_v = measurement['v']
@@ -142,11 +138,11 @@ while ts.measureIface.state == ts.measureIface.IF_OK:
         else:
             if abs(last_hz.GetAngle() - measurement['hz'].GetAngle()) >= limit.GetAngle() or \
                abs(last_v.GetAngle() - measurement['v'].GetAngle()) >= limit.GetAngle():
-                moving = True
-                print moving
+                moving = True # still moving
             continue
+        
     #  Get each measurement data
-    if 'distance' in measurement:  # Check existence of 'distance' key
+    if 'distance' in measurement:  # Check existance of 'distance' key
         slopeDist = measurement['distance']
     if 'hz' in measurement:  # Check existence of 'hz' key
         hz = measurement['hz']
@@ -159,8 +155,8 @@ while ts.measureIface.state == ts.measureIface.IF_OK:
         measurement['north'] = slopeDist * math.sin(v.GetAngle()) * math.cos(hz.GetAngle())
         measurement['elev'] = slopeDist * math.cos(v.GetAngle())
         
-        # Print measurements
-        print measurement
+        # Store in file the measurements
         wrt.WriteData(measurement)
+        print measurement
     else:
         print "Some measurement data(s) are missing..."
