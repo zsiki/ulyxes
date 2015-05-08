@@ -204,7 +204,7 @@ class TotalStation(Instrument):
         msg = self.measureUnit.MeasureMsg(prg, incl)
         return self._process(msg)
 
-    def GetMeasure(self, wait = 12000, incl = 0):
+    def GetMeasure(self, wait = 15000, incl = 0):
         """ Get measured values
 
             :param wait: waiting time in ms
@@ -224,7 +224,7 @@ class TotalStation(Instrument):
         msg = self.measureUnit.MeasureDistAngMsg(prg)
         return self._process(msg)
 
-    def Coords(self, wait = 12000, incl = 0):
+    def Coords(self, wait = 15000, incl = 0):
         """ Read coordinates from instrument
 
             :param wait: waiting time ms

@@ -31,7 +31,7 @@ class SerialIface(Iface):
             :param eomWrite: end of message char from computer (str), default '\\r\\n'
     """
     def __init__(self, name, port, baud=9600, byteSize=8,
-        parity=serial.PARITY_NONE, stop=1, timeout=12, eomRead=b'\r\n',
+        parity=serial.PARITY_NONE, stop=1, timeout=15, eomRead=b'\r\n',
         eomWrite=b'\r\n'):
         """ Constructor for serial interface
         """

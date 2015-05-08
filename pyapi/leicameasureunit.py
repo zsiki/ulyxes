@@ -99,8 +99,8 @@ class LeicaMeasureUnit(MeasureUnit):
             if errCode != 0:
                 logging.error(" error from instrument: %d", errCode)
                 res['errorCode'] = errCode
-                if errCode in (1283, 1284, 1285, 1288): # do not stop if accuracy is not perfect
-                    return res
+                #if not errCode in (1283, 1284, 1285, 1288): # do not stop if accuracy is not perfect
+                return res
             if commandID == self.codes['GETMEASURE']:
                 res['hz'] = Angle(float(ansBufflist[4]))
                 res['v'] = Angle(float(ansBufflist[5]))
@@ -316,10 +316,10 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         return '%R1Q,{0:d}:{1:d},{2:d}'.format(self.codes['MEASURE'], prg, incl)
         
-    def GetMeasureMsg(self, wait = 12000, incl = 0):
+    def GetMeasureMsg(self, wait = 15000, incl = 0):
         """ Get measured distance
 
-            :param wait: time in ms, optional (default 12000)
+            :param wait: time in ms, optional (default 15000), it must be greater than 12000, the default on the instrument
             :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
             :returns: get simple measurement message
         """
@@ -337,10 +337,10 @@ class LeicaMeasureUnit(MeasureUnit):
             prg = self.edmProg[prg]
         return '%R1Q,{0:d}:{1:d}'.format(self.codes['MEASUREANGDIST'], prg)
 
-    def CoordsMsg (self, wait = 12000, incl = 0):
+    def CoordsMsg (self, wait = 15000, incl = 0):
         """ Get coordinates
         
-            :param wait: wait-time in ms, optional (default 12000)
+            :param wait: wait-time in ms, optional (default 15000), it must be greater than 12000, the default on instrument
             :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
             :returns: get coordinates message
         """
