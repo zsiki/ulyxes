@@ -129,9 +129,9 @@ class LeicaMeasureUnit(MeasureUnit):
                 res['earthRadius'] = float(ansBufflist[5])
                 res['refractiveScale'] = float(ansBufflist[6])
             elif commandID == self.codes['GETSTN']:
-                res['easting'] = float(ansBufflist[4])
-                res['northing'] = float(ansBufflist[5])
-                res['elevation'] = float(ansBufflist[6])
+                res['east'] = float(ansBufflist[4])
+                res['north'] = float(ansBufflist[5])
+                res['elev'] = float(ansBufflist[6])
             elif commandID == self.codes['GETEDMMODE']:
                 res['edmMode'] = int(ansBufflist[4])
             #Coords()
