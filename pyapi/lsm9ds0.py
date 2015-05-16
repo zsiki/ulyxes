@@ -43,6 +43,7 @@ class LSM9DS0(Instrument):
         if whoami_a['data'] != 0b01001001 or \
             whoami_g['data'] != 0b11010100:
             raise IOError('Sensor not found')
+            return
         msg = self.measureUnit.InitAccelMsg(a_sc, a_odr)
         accel = self._process(msg, 0)
         msg = self.measureUnit.InitMagMsg(m_sc, m_odr)

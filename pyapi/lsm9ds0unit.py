@@ -154,6 +154,12 @@ class LSM9DS0Unit(MeasureUnit):
         """ Constructor
         """
         super(LSM9DS0Unit, self).__init__(name, typ)
+        self.accel_scale = None
+        self.accel_odr = None
+        self.mag_scale = None
+        self.mag_odr = None
+        self.gyro_scale = None
+        self.gyro_odr = None
 
     def WhoAmIMsg(self):
         """ get who am i reg
@@ -170,6 +176,8 @@ class LSM9DS0Unit(MeasureUnit):
             :param accel_odr: output data range (int), default 3.125 Hz
             :returns: initialize message of accelerometer
         """
+        self.accel_scale = accel_scale
+        self.accel_odr = accel_odr
         reg0 = 0    # normal, no fifo, bypass
         reg1 = 0b1000 | 0b0111 | (accel_odr << 4) # refresh after read, three axes
         reg2 = accel_scale << 3 # +/-2g, normal
@@ -186,6 +194,8 @@ class LSM9DS0Unit(MeasureUnit):
             :param mag_odr: output data range (int), default 3.125
             :returns: initialize message of magnetometer
         """
+        self.mag_scale = mag_scale
+        self.mag_odr = mag_odr
         reg5 = mag_odr << 2 # no temp, lowres
         reg6 = mag_scale << 5
         reg7 = 0
@@ -203,6 +213,8 @@ class LSM9DS0Unit(MeasureUnit):
             :param gyro_odr: output data range (int), default 95 Hz
             :returns: initialize message of gyroscope
         """
+        self.gyro_scale = gyro_scale
+        self.gyro_odr = gyro_odr
         reg1 = 0b1000 | 0b0111 | (gyro_odr << 4) # normal mode enable all axes
         reg2 = 0 # Normal mode, high cutoff frequency
         reg3 = 0
@@ -264,19 +276,44 @@ class LSM9DS0Unit(MeasureUnit):
         res = {}
         if msg[0][1] == OUT_X_L_G and part == 'gyro':
             # scale gyro
-            res['gyro_x'] = (ans['data'][1] << 8) | ans['data'][0]
-            res['gyro_y'] = (ans['data'][3] << 8) | ans['data'][2]
-            res['gyro_z'] = (ans['data'][5] << 8) | ans['data'][4]
+            if self.gyro_scale == G_SCALE_245DPS:
+                scale = 8.75
+            elif self.gyro_scale == G_SCALE_500DPS:
+                scale = 17.5
+            else:
+                scale = 70
+            res['gyro_x'] = ((ans['data'][1] << 8) | ans['data'][0]) * scale
+            res['gyro_y'] = ((ans['data'][3] << 8) | ans['data'][2]) * scale
+            res['gyro_z'] = ((ans['data'][5] << 8) | ans['data'][4]) * scale
         elif msg[0][1] == OUT_X_L_A:
             # scale accel
-            res['acc_x'] = (ans['data'][1] << 8) | ans['data'][0]
-            res['acc_y'] = (ans['data'][3] << 8) | ans['data'][2]
-            res['acc_z'] = (ans['data'][5] << 8) | ans['data'][4]
+            if self accel_scale == A_SCALE_2G:
+                scale = 0.061
+            elif self accel_scale == A_SCALE_4G:
+                scale = 0.122
+            elif self accel_scale == A_SCALE_6G:
+                scale = 0.183
+            elif self accel_scale == A_SCALE_8G:
+                scale = 0.244
+            else:
+                scale = 0.732
+            res['acc_x'] = ((ans['data'][1] << 8) | ans['data'][0]) * scale
+            res['acc_y'] = ((ans['data'][3] << 8) | ans['data'][2]) * scale
+            res['acc_z'] = ((ans['data'][5] << 8) | ans['data'][4]) * scale
         elif msg[0][1] == OUT_X_L_M:
             # scale mag
-            res['mag_x'] = (ans['data'][1] << 8) | ans['data'][0]
-            res['mag_y'] = (ans['data'][3] << 8) | ans['data'][2]
-            res['mag_z'] = (ans['data'][5] << 8) | ans['data'][4]
+            if self mag_scale == M_SCALE_2GS:
+                scale = 0.008
+            elif self mag_scale == M_SCALE_4GS:
+                scale = 0.016
+            elif self mag_scale == M_SCALE_8GS:
+                scale = 0.032
+            else:
+                scale = 0.048
+
+            res['mag_x'] = ((ans['data'][1] << 8) | ans['data'][0]) * scale
+            res['mag_y'] = ((ans['data'][3] << 8) | ans['data'][2]) * scale
+            res['mag_z'] = ((ans['data'][5] << 8) | ans['data'][4]) * scale
         else:
             res = ans
         return res
