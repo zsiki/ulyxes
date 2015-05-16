@@ -3,16 +3,16 @@
 """
     module:: measurematrix.py
 
-    moduleauthor:: Jankó József Attila, dr. Takács Bence
+    moduleauthor:: Janko Jozsef Attila, dr. Takacs Bence
 
     Sample application of Ulyxes PyAPI to measure within a rectangular pyramid
    
-   :param argv[1] (angle): horizontal angle start direction, default None
-   :param argv[2] (angle): horizontal angle end direction, default None
-   :param argv[3] (angle): vertical angle start direction, default None
-   :param argv[4] (angle): vertical angle end direction, default None
-   :param argv[5] (angle): number of horizontal intervals (between measurements), default 1 (perimeter only)
-   :param argv[6] (angle): number of vertical intervals(between measurements), default 1 (perimeter only)
+   :param argv[1] (degree): horizontal angle start direction
+   :param argv[2] (degree): horizontal angle end direction
+   :param argv[3] (degree): vertical angle start direction
+   :param argv[4] (degree): vertical angle end direction
+   :param argv[5] (int): number of horizontal intervals (between measurements), default 1 (perimeter only)
+   :param argv[6] (int): number of vertical intervals(between measurements), default 1 (perimeter only)
    :param argv[7] (sensor): 1100/1800/1200, default 1100
    :param argv[8] (port): serial port, default COM5
    
@@ -20,26 +20,21 @@
 """
 import re
 import sys
-import datetime
-import logging
-import math
 sys.path.append('../pyapi/')
 
 from angle import Angle
-from leicatcra1100 import LeicaTCRA1100
 from serialiface import SerialIface
 from totalstation import TotalStation
-from localiface import LocalIface
-
-from echowriter import EchoWriter
 from filewriter import FileWriter
 
-measure_box=[0,1,2,3,4] # set array for measurement pyramid rectangular 'corners' ([0] unused)
+# set array for measurement pyramid rectangular 'corners' ([0] unused)
+measure_box = [0,1,2,3,4]
 for a in range(1, 5): # 1-4 arguments
     if len(sys.argv) > a:
-        measure_box[a] = float(sys.argv[a]) # set measurement pyramid rectangular's edge direction
+        # set measurement pyramid rectangular edge direction
+        measure_box[a] = float(sys.argv[a])
     else:
-        print "argument", a, "must be set (numeric)"
+        print "missing argument ", a, " (numeric)"
         exit(1)
 
 ## set delta horizontal dh
@@ -86,35 +81,23 @@ else:
     port = 'COM5'
 iface = SerialIface("test", port)
 
-##mu=LeicaTCRA1100() # test
-##iface=SerialIface('test', 'COM6') # test
-
-wrt = FileWriter(angle='DEG', dist = '.3f', fname='measmtrx.txt') # write out measurements # angle='DMS'
-##wrt = FileWriter(angle = 'DMS', dist = '.3f', filt = ['id','hz','v','distance','east','north','elev'], fname = 'stdout', mode = 'a', sep = ';') # test from example
+# write out measurements # angle='DMS'
+wrt = FileWriter(angle='DEG', dist = '.3f', fname='measmtrx.txt')
 ts = TotalStation(stationtype, mu, iface, wrt)
-print ts.GetEDMMode() # for testing SetEDMMode effectiveness
-ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
-##ts.SetEDMMode(5) # reflectorless distance measurement
-print ts.GetEDMMode() # for testing SetEDMMode effectiveness
-ts.SetRedLaser(1) # turn red laser on
 ts.SetATR(0) # turn ATR off
+ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
+ts.SetRedLaser(1) # turn red laser on
 ### measurement loops
 for i in range(0, dh_nr): # horizontal loop
-    measdir = i%2 # check modulo
+    measdir = i % 2 # check modulo
     for j in range(0, dv_nr): # vertical loop
         if measdir == 0:
             # move downward at odd steps to right
-            ts.Move(Angle(measure_box[1]+i*dh, 'DEG'), Angle(measure_box[3]+j*dv, 'DEG'))
-#            print "downward", measure_box[1]+i*dh, measure_box[3]+j*dv
+            ts.Move(Angle(measure_box[1]+i*dh, 'DEG'), \
+                Angle(measure_box[3]+j*dv, 'DEG'))
         else:
             # move upward at event steps to right
-            ts.Move(Angle(measure_box[1]+i*dh, 'DEG'), Angle(measure_box[4]-j*dv, 'DEG'))
-#            print "upward", measure_box[1]+i*dh, measure_box[4]-j*dv
+            ts.Move(Angle(measure_box[1]+i*dh, 'DEG'), \
+                Angle(measure_box[4]-j*dv, 'DEG'))
         ts.Measure()
         a = ts.GetMeasure()
-        ang_hz = a['hz']
-        ang_v = a['v']
-        dist = a['distance']
-        print dist,ang_hz.GetAngle('DMS'),ang_v.GetAngle('DMS')
-
-
