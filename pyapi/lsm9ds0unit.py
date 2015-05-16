@@ -265,6 +265,23 @@ class LSM9DS0Unit(MeasureUnit):
                 ('readU8', OUT_X_L_M + 4), \
                 ('readU8', OUT_X_L_M + 5)]
     
+	def _convert(byte1, byte0):
+		""" Convert 2 bytes 2nd complement to int
+
+			:param byte1: most significant byte
+			:param byte0: less significant byte
+			:returns: integer value
+		"""
+		w = ('0000000' + bin(byte1)[2:])[-8:] + \
+            ('0000000' + bin(byte0)[2:])[-8:]
+		if w[0] == '1':
+			# negative value
+			i = int(w, 2) - (1<<16)
+		else:
+			# positive value
+			i = int(w, 2)
+		return i
+
     def Result(self, msg, ans, part = 'gyro'):
         """ Process answer got from sensor
 
@@ -282,9 +299,9 @@ class LSM9DS0Unit(MeasureUnit):
                 scale = 17.5
             else:
                 scale = 70
-            res['gyro_x'] = ((ans['data'][1] << 8) | ans['data'][0]) * scale
-            res['gyro_y'] = ((ans['data'][3] << 8) | ans['data'][2]) * scale
-            res['gyro_z'] = ((ans['data'][5] << 8) | ans['data'][4]) * scale
+            res['gyro_x'] = self._convert(ans['data'][1], ans['data'][0]) * scale
+            res['gyro_y'] = self._convert(ans['data'][3], ans['data'][2]) * scale
+            res['gyro_z'] = self._convert(ans['data'][5], ans['data'][4]) * scale
         elif msg[0][1] == OUT_X_L_A:
             # scale accel
             if self accel_scale == A_SCALE_2G:
@@ -297,9 +314,9 @@ class LSM9DS0Unit(MeasureUnit):
                 scale = 0.244
             else:
                 scale = 0.732
-            res['acc_x'] = ((ans['data'][1] << 8) | ans['data'][0]) * scale
-            res['acc_y'] = ((ans['data'][3] << 8) | ans['data'][2]) * scale
-            res['acc_z'] = ((ans['data'][5] << 8) | ans['data'][4]) * scale
+            res['acc_x'] = self._convert(ans['data'][1], ans['data'][0]) * scale
+            res['acc_y'] = self._convert(ans['data'][3], ans['data'][2]) * scale
+            res['acc_z'] = self._convert(ans['data'][5], ans['data'][4]) * scale
         elif msg[0][1] == OUT_X_L_M:
             # scale mag
             if self mag_scale == M_SCALE_2GS:
@@ -311,9 +328,9 @@ class LSM9DS0Unit(MeasureUnit):
             else:
                 scale = 0.048
 
-            res['mag_x'] = ((ans['data'][1] << 8) | ans['data'][0]) * scale
-            res['mag_y'] = ((ans['data'][3] << 8) | ans['data'][2]) * scale
-            res['mag_z'] = ((ans['data'][5] << 8) | ans['data'][4]) * scale
+            res['mag_x'] = self._convert(ans['data'][1], ans['data'][0]) * scale
+            res['mag_y'] = self._convert(ans['data'][3], ans['data'][2]) * scale
+            res['mag_z'] = self._convert(ans['data'][5], ans['data'][4]) * scale
         else:
             res = ans
         return res
