@@ -19,7 +19,7 @@
     :param argv[2] (mode): 0/1/2/3/4/5 without ATR/with ATR/with ATR no distance/lock single distance/lock with distance/store if stopped, default 4
     :param argv[3] (edm): edm mode STANDARD/FAST, default FAST
     :param argv[4] (port): serial port, use a filename for local iface, default COM7
-    :param argv[5] (file): output file
+    :param argv[5] (file): output file, data are appended to the end of the file
 """
 import re
 import sys
