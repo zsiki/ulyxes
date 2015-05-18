@@ -1,26 +1,33 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 """
 .. module:: measuretoprism.py
 
-.. moduleauthor:: dr. Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokadaniel@citromail.hu>
+.. moduleauthor:: dr. Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokadaniel@citromail.hu>, Viktoria Zubaly
 
-   Sample application of Ulyxes PyAPI to measure to a moving prism
+    Sample application of Ulyxes PyAPI to measure to a moving prism/object.
+    Select different modes for different scenarios<br>
+    0 - determine the horizontal movement of a bridge pylon without prism using 
+    edm mode RLSTANDARD<br>
+    1 - determine the movement of a sloly moving prism to determine 3D defomation<br>
+    2 - determine vetical movement of a prism, deflection of a bridge, we suppose horizontal distance is not changed<br>
+    3 - determine vertical movement of a moving prism on a car/machine, we suppose horizontal distance is not changed<br>
+    4 - determine 3D movement of a moving prism on a car/machine<br>
+    5 - measure points if the prism stopped for 3-5 seconds<br>
    
-   :param argv[1] (sensor): 110n/180n/120n, default 1200
-   :param argv[2] (mode): 0/1/2/3/4/5 without ATR/with ATR/with ATR no distance/lock single distance/lock with distance/store if stopped, default 5
-   :param argv[3] (edm): edm mode STANDARD/FAST, default STANDARD
-   :param argv[4] (port): serial port, use a filename for local iface, default COM7
-   :param argv[5] (file): output file, default None
+    :param argv[1] (sensor): 110n/180n/120n, default 1200
+    :param argv[2] (mode): 0/1/2/3/4/5 without ATR/with ATR/with ATR no distance/lock single distance/lock with distance/store if stopped, default 4
+    :param argv[3] (edm): edm mode STANDARD/FAST, default FAST
+    :param argv[4] (port): serial port, use a filename for local iface, default COM7
+    :param argv[5] (file): output file
 """
 import re
 import sys
-import datetime
 import logging
 import math
 sys.path.append('../pyapi/')
 
 from angle import Angle
-from leicatcra1100 import LeicaTCRA1100
 from serialiface import SerialIface
 from totalstation import TotalStation
 from localiface import LocalIface
@@ -40,11 +47,11 @@ if len(sys.argv) > 1:
         from leicatps1200 import LeicaTPS1200
         mu = LeicaTPS1200()
 else:
-    from leicatca1800 import LeicaTCA1800
-    mu = LeicaTCA1800()
+    from leicatps1200 import LeicaTPS1200
+    mu = LeicaTPS1200()
 
 # Measure mode
-mode = 5
+mode = 4   # lock with distance measurement
 if len(sys.argv) > 2:
     mode = int(sys.argv[2])
 # EDM mode
@@ -65,7 +72,7 @@ if len(sys.argv) > 5:
     from csvwriter import CsvWriter
     wrt = CsvWriter(angle = 'DMS', dist = '.3f', dt = '%Y-%m-%d %H:%M:%S',
                     filt = ['id','hz','v','distance','east','north','elev'],
-                    fname = sys.argv[5], mode = 'w', sep = ';')
+                    fname = sys.argv[5], mode = 'a', sep = ';')
 else:
     from echowriter import EchoWriter
     wrt = EchoWriter()
@@ -74,7 +81,7 @@ else:
 ts = TotalStation("Leica", mu, iface)
 slopeDist = 0
 ts.SetEDMMode(edm)
-
+# initialize instrument and variables
 if mode > 0:
     ts.SetLock(0)
     ts.SetATR(1)
@@ -88,16 +95,17 @@ if mode > 0:
         ts.SetLock(1)
         ts.LockIn()
         if mode == 5:
-            last_hz = measurement['hz'] # direction of last stored point
+            last_hz = measurement['hz'] # direction of last measured point
             last_v = measurement['v']
-            prev_hz = measurement['hz'] # direction of last examined point
+            prev_hz = measurement['hz'] # direction of last measured point
             prev_v = measurement['v']
             moving = True
-            limit = Angle('0-03-00', 'DMS')
+            limit = Angle('0-03-00', 'DMS') # minimal angle change to measure
             n = 0
 else:
     ts.SetATR(0)
 
+# infinite loop of measuring
 while ts.measureIface.state == ts.measureIface.IF_OK:
     if mode == 0:
         ts.Measure() # distance measurement without ATR
