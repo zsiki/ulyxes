@@ -265,22 +265,22 @@ class LSM9DS0Unit(MeasureUnit):
                 ('readU8', OUT_X_L_M + 4), \
                 ('readU8', OUT_X_L_M + 5)]
     
-	def _convert(byte1, byte0):
-		""" Convert 2 bytes 2nd complement to int
+    def _convert(self, byte1, byte0):
+        """ Convert 2 bytes 2nd complement to int
 
-			:param byte1: most significant byte
-			:param byte0: less significant byte
-			:returns: integer value
-		"""
-		w = ('0000000' + bin(byte1)[2:])[-8:] + \
+            :param byte1: most significant byte
+            :param byte0: less significant byte
+            :returns: integer value
+        """
+        w = ('0000000' + bin(byte1)[2:])[-8:] + \
             ('0000000' + bin(byte0)[2:])[-8:]
-		if w[0] == '1':
-			# negative value
-			i = int(w, 2) - (1<<16)
-		else:
-			# positive value
-			i = int(w, 2)
-		return i
+        if w[0] == '1':
+            # negative value
+            i = int(w, 2) - (1<<16)
+        else:
+            # positive value
+            i = int(w, 2)
+        return i
 
     def Result(self, msg, ans, part = 'gyro'):
         """ Process answer got from sensor
@@ -304,13 +304,13 @@ class LSM9DS0Unit(MeasureUnit):
             res['gyro_z'] = self._convert(ans['data'][5], ans['data'][4]) * scale
         elif msg[0][1] == OUT_X_L_A:
             # scale accel
-            if self accel_scale == A_SCALE_2G:
+            if self.accel_scale == A_SCALE_2G:
                 scale = 0.061
-            elif self accel_scale == A_SCALE_4G:
+            elif self.accel_scale == A_SCALE_4G:
                 scale = 0.122
-            elif self accel_scale == A_SCALE_6G:
+            elif self.accel_scale == A_SCALE_6G:
                 scale = 0.183
-            elif self accel_scale == A_SCALE_8G:
+            elif self.accel_scale == A_SCALE_8G:
                 scale = 0.244
             else:
                 scale = 0.732
@@ -319,11 +319,11 @@ class LSM9DS0Unit(MeasureUnit):
             res['acc_z'] = self._convert(ans['data'][5], ans['data'][4]) * scale
         elif msg[0][1] == OUT_X_L_M:
             # scale mag
-            if self mag_scale == M_SCALE_2GS:
+            if self.mag_scale == M_SCALE_2GS:
                 scale = 0.008
-            elif self mag_scale == M_SCALE_4GS:
+            elif self.mag_scale == M_SCALE_4GS:
                 scale = 0.016
-            elif self mag_scale == M_SCALE_8GS:
+            elif self.mag_scale == M_SCALE_8GS:
                 scale = 0.032
             else:
                 scale = 0.048

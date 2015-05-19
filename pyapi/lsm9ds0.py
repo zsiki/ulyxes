@@ -77,6 +77,7 @@ class LSM9DS0(Instrument):
         return self._process(msg, 0)
 
 if __name__ == '__main__':
+    import math
     from i2ciface import I2CIface
     from echowriter import EchoWriter
 
@@ -86,9 +87,13 @@ if __name__ == '__main__':
     wunit = EchoWriter()
 
     s9dof = LSM9DS0('9 DOF', munit, [i1d, i6b], wunit)
-    print "Accelerometer"
-    s9dof.GetAccel()
-    print "Magnetometer"
-    s9dof.GetMag()
-    print "Gyro"
-    s9dof.GetGyro()
+    for i in range(5):
+        print "Accelerometer"
+        w = s9dof.GetAccel()
+        print math.sqrt(w['acc_x']**2 + w['acc_y']**2 + w['acc_z']**2)
+        print "Magnetometer"
+        w = s9dof.GetMag()
+        print math.sqrt(w['mag_x']**2 + w['mag_y']**2 + w['mag_z']**2)
+        #print "Gyro"
+        #w = s9dof.GetGyro()
+        #print math.sqrt(w['gyro_x']**2 + w['gyro_y']**2 + w['gyro_z']**2)
