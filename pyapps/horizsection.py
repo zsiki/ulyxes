@@ -11,6 +11,7 @@
     :param argv[1] (angle step): angle step between points in DEG, default 45
     :param argv[2] (sensor): 1100/1800/1200, default 1200
     :param argv[3] (port): serial port, default COM7
+	:param argv[4] (max angle): stop at this direction, default 360 degree
 """
 import sys
 import re
@@ -50,6 +51,10 @@ if len(sys.argv) > 3:
     port = sys.argv[3]
 else:
     port = 'COM7'
+if len(sys.argv) > 4:
+    maxa = float(sys.argv[4]) / 180.0 * math.pi
+else:
+    maxa = PI2
 MAXITER = 10    # number of iterations to find point on horizontal plan
 iface = SerialIface("rs-232", port)
 wrt = CsvWriter(angle = 'DMS', dist = '.3f', filt = ['id','hz','v','distance','east','north','elev'], fname = 'stdout', mode = 'a', sep = ';')
@@ -65,7 +70,11 @@ act = Angle(0)  # actual angle from startpoint
 # height of startpoint above the horizontal axis
 height0 = math.cos(startp['v'].GetAngle()) * startp['distance']
 w = True
-while act.GetAngle() < PI2: # go around the whole circle
+try:
+    ts.SetRedLaser(1)
+except:
+    pass
+while act.GetAngle() < maxa: # go around the whole circle
     ts.Measure() # measure distance0
     if ts.measureIface.state != ts.measureIface.IF_OK:
         ts.measureIface.state = ts.measureIface.IF_OK
@@ -101,3 +110,5 @@ while act.GetAngle() < PI2: # go around the whole circle
         wrt.WriteData(res)
     ts.MoveRel(stepinterval, Angle(0))
     act += stepinterval
+# rotate back to start
+ts.Move(startp['hz'], startp['v'])
