@@ -9,7 +9,8 @@
     :param argv[1] input file with directions
     :param argv[2] output file with observations, default stdout
     :param argv[3] (sensor): 1100/1800/1200, default 1200
-    :param argv[4] (port): serial port, default COM7
+    :param argv[4] (prism type): 0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini, default -1/instrument default
+    :param argv[5] (port): serial port, default COM7
 """
 import sys
 import re
@@ -53,6 +54,10 @@ else:
     print "unsupported instrument type"
     exit(1)
 if len(sys.argv) > 4:
+    pt = sys.argv[4]
+else:
+    pt = -1
+if len(sys.argv) > 4:
     port = sys.argv[4]
 else:
     port = 'COM7'
@@ -77,6 +82,7 @@ while 1:
     if 'faces' in w and max_faces < w['faces']:
         max_faces = w['faces']
 
+maxtry = 3 # number of retry if failed
 n = 0  # number of faces measured fo far
 while n < max_faces:
     if n % 2 == 0:   # face left
@@ -98,32 +104,41 @@ while n < max_faces:
                 hz = hz - math.pi if hz > math.pi else hz + math.pi 
                 v = PI2 - v
             j = 0   # try count
-            if directions[i]['code'] == 'ATR':
-                ts.SetATR(1)
-                ts.SetEDMMode('STANDARD')
-                ts.Move(Angle(hz), Angle(v), 1)
-                ts.Measure()
-            elif directions[i]['code'] == 'PRISM':
-                ts.SetATR(0)
-                ts.SetEDMMode('STANDARD')
-                ts.Move(Angle(hz), Angle(v), 0)
-                # wait for user to target on point
-                raw_input("Target on %d point and press enter" % (pn))
-                ts.Measure()
-            elif directions[i]['code'] == 'RL':
-                ts.SetATR(0)
-                ts.SetEDMMode('RLSTANDARD')
-                ts.Move(Angle(hz), Angle(v), 0)
-                # wait for user to target on point
-                raw_input("Target on %s point in face %d and press enter" % (pn, n % 2 + 1))
-                ts.Measure()
-            else:
-                print ("Unknow code")
-                continue
-            obs = ts.GetMeasure()
-            if ts.measureIface.state != ts.measureIface.IF_OK or \
-                'errorCode' in obs:
-                ts.measureIface.state = ts.measureIface.IF_OK
+            while j < maxtry:
+                if directions[i]['code'] == 'ATR':
+                    ts.SetATR(1)
+                    ts.SetEDMMode('STANDARD')
+                    if pt > -1: # set prism type if not default
+                        ts.SetPrismType(pt)
+                    ts.Move(Angle(hz), Angle(v), 1)
+                    ts.Measure()
+                elif directions[i]['code'] == 'PR':
+                    ts.SetATR(0)
+                    ts.SetEDMMode('STANDARD')
+                    if pt > -1: # set prism type if not default
+                        ts.SetPrismType(pt)
+                    ts.Move(Angle(hz), Angle(v), 0)
+                    # wait for user to target on point
+                    raw_input("Target on %s point in face %d and press enter" % (pn, n % 2 + 1))
+                    ts.Measure()
+                elif directions[i]['code'] == 'RL':
+                    ts.SetATR(0)
+                    ts.SetEDMMode('RLSTANDARD')
+                    ts.Move(Angle(hz), Angle(v), 0)
+                    # wait for user to target on point
+                    raw_input("Target on %s point in face %d and press enter" % (pn, n % 2 + 1))
+                    ts.Measure()
+                else:
+                    print ("Unknow code")
+                    j = maxtry
+                    break
+                obs = ts.GetMeasure()
+                if ts.measureIface.state != ts.measureIface.IF_OK or \
+                    'errorCode' in obs:
+                    ts.measureIface.state = ts.measureIface.IF_OK
+                    j = j + 1
+                    continue
+            if j >= maxtry:
                 print "Cannot measure point %s" % pn
                 continue
             obs['id'] = pn
