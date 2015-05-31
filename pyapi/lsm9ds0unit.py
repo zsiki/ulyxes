@@ -143,6 +143,27 @@ M_ODR_25         = 3 # 25 Hz (0x03)
 M_ODR_50         = 4 #  50 (0x04)
 M_ODR_100        = 5 # 100 Hz (0x05)
     
+gyro_scales = {
+	G_SCALE_245DPS:   8.75,
+	G_SCALE_500DPS:  17.5,
+	G_SCALE_2000DPS: 70
+}
+
+accel_scales = {
+	A_SCALE_2G: 0.061,
+	A_SCALE_4G: 0.122,
+	A_SCALE_6G: 0.183,
+	A_SCALE_8G: 0.244,
+	A_SCALE_16G: 0.732
+}
+
+mag_scales = {
+	M_SCALE_2GS: 0.008,
+	M_SCALE_4GS: 0.016,
+	M_SCALE_8GS: 0.032,
+	M_SCALE_12GS: 0.048
+}
+
 class LSM9DS0Unit(MeasureUnit):
     """ LSM9DS0 9 DOF sensor
 
@@ -293,41 +314,22 @@ class LSM9DS0Unit(MeasureUnit):
         res = {}
         if msg[0][1] == OUT_X_L_G and part == 'gyro':
             # scale gyro
-            if self.gyro_scale == G_SCALE_245DPS:
-                scale = 8.75
-            elif self.gyro_scale == G_SCALE_500DPS:
-                scale = 17.5
-            else:
-                scale = 70
+            scale = gyro_scales[self.gyro_scale]
             res['gyro_x'] = self._convert(ans['data'][1], ans['data'][0]) * scale
             res['gyro_y'] = self._convert(ans['data'][3], ans['data'][2]) * scale
             res['gyro_z'] = self._convert(ans['data'][5], ans['data'][4]) * scale
         elif msg[0][1] == OUT_X_L_A:
             # scale accel
-            if self.accel_scale == A_SCALE_2G:
-                scale = 0.061
-            elif self.accel_scale == A_SCALE_4G:
-                scale = 0.122
-            elif self.accel_scale == A_SCALE_6G:
-                scale = 0.183
-            elif self.accel_scale == A_SCALE_8G:
-                scale = 0.244
-            else:
-                scale = 0.732
-            res['acc_x'] = self._convert(ans['data'][1], ans['data'][0]) * scale
-            res['acc_y'] = self._convert(ans['data'][3], ans['data'][2]) * scale
-            res['acc_z'] = self._convert(ans['data'][5], ans['data'][4]) * scale
+            scale = accel_scales[self.accel_scale]
+            res['acc_x'] = self._convert(ans['data'][1], ans['data'][0]) * \
+				scale/ 1000. * 9.81
+            res['acc_y'] = self._convert(ans['data'][3], ans['data'][2]) * \
+				scale/ 1000. * 9.81
+            res['acc_z'] = self._convert(ans['data'][5], ans['data'][4]) * \
+				scale/ 1000. * 9.81
         elif msg[0][1] == OUT_X_L_M:
             # scale mag
-            if self.mag_scale == M_SCALE_2GS:
-                scale = 0.008
-            elif self.mag_scale == M_SCALE_4GS:
-                scale = 0.016
-            elif self.mag_scale == M_SCALE_8GS:
-                scale = 0.032
-            else:
-                scale = 0.048
-
+            scale = mag_scales[self.mag_scale]
             res['mag_x'] = self._convert(ans['data'][1], ans['data'][0]) * scale
             res['mag_y'] = self._convert(ans['data'][3], ans['data'][2]) * scale
             res['mag_z'] = self._convert(ans['data'][5], ans['data'][4]) * scale
