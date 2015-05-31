@@ -65,6 +65,14 @@ class TotalStation(Instrument):
         msg = self.measureUnit.GetATRMsg()
         return self._process(msg)
 
+    def SetPrismType(self, typ):
+        msg = self.measureUnit.SetPrismTypeMsg(typ)
+        return self._process(msg)
+        
+    def GetPrismType(self, typ):
+        msg = self.measureUnit.GetPrismTypeMsg(lock)
+        return self._process(msg)
+
     def SetLock(self, lock):
         """ Set lock on prism
 
