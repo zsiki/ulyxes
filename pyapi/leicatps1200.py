@@ -56,7 +56,9 @@ class LeicaTPS1200(LeicaMeasureUnit):
         'SETSEARCHAREA': 9043,
         'POWERSEARCH': 9052,
         'SEARCHNEXT': 9051,
-        'SETREDLASER': 1004
+        'SETREDLASER': 1004,
+        'GETPT': 17009,
+        'SETPT': 17008
     }
 
     # Constants for EMD modes
@@ -86,6 +88,20 @@ class LeicaTPS1200(LeicaMeasureUnit):
         return '%R1Q,{0:d}:{1:f},{2:f},{3:f},{4:f},{5:d}'.format(
             self.codes['SETSEARCHAREA'], hzCenter.GetAngle(),
             vCenter.GetAngle(), hzRange.GetAngle(), vRange.GetAngle(), on)
+
+    def SetPrismTypeMsg(self, typ):
+        """ Set prism type
+
+            :param typ: prism type (0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini)
+        """
+        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETPT'], typ)        
+
+    def GetPrismTypeMsg(self):
+        """ Get prism type
+
+            :returns: prism type (0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini)
+        """
+        return '%R1Q,{0:d}:'.format(self.codes['GETPT'])
 
     def PowerSearchMsg(self):
         """ Power search

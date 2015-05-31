@@ -52,7 +52,9 @@ class LeicaMeasureUnit(MeasureUnit):
         'SETSEARCHAREA': 9043,
         'POWERSEARCH': 9052,
         'SEARCHNEXT': 9051,
-        'SETREDLASER': 1004
+        'SETREDLASER': 1004,
+        'GETPT': 17009,
+        'SETPT': 17008
     }
 
     # Constants for EMD modes
@@ -110,8 +112,13 @@ class LeicaMeasureUnit(MeasureUnit):
                 res['hz'] = Angle(float(ansBufflist[4]))
                 res['v'] = Angle(float(ansBufflist[5]))
                 res['distance'] = float(ansBufflist[6])
+            # Prism constant
             elif commandID == self.codes['GETPC']:
                 res['pc'] = int(ansBufflist[4])
+            # Prism type
+            elif commandID == self.codes['GETPT']:
+                res['pt'] = int(ansBufflist[4])           
+            # ATR
             elif commandID == self.codes['GETATR']:
                 res['atrStatus'] = int(ansBufflist[4])
             #GetLockStatus()
