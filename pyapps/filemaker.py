@@ -71,7 +71,7 @@ while 1:
     t_id = raw_input("Target id: ")
     if len(t_id) == 0:
         break
-    t_mode = raw_input("Target mode(ATR/PR/RL): ")
+    t_mode = raw_input("Target mode(ATR/PR/RL/OR): ")
     raw_input("Target on point and press enter")
     angles = ts.GetAngles()
     fgeo.write("{5 %s} {7 %.6f} {8 %.6f} {4 %s} {112 %d}\n" % \
