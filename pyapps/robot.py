@@ -9,8 +9,7 @@
     :param argv[1] input file with directions
     :param argv[2] output file with observations, default stdout
     :param argv[3] (sensor): 1100/1800/1200, default 1200
-    :param argv[4] (prism type): 0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini, default -1/instrument default
-    :param argv[5] (port): serial port, default COM7
+    :param argv[4] (port): serial port, default COM7
 """
 import sys
 import re
@@ -54,10 +53,6 @@ else:
     print "unsupported instrument type"
     exit(1)
 if len(sys.argv) > 4:
-    pt = sys.argv[4]
-else:
-    pt = -1
-if len(sys.argv) > 4:
     port = sys.argv[4]
 else:
     port = 'COM7'
@@ -66,7 +61,8 @@ iface = SerialIface("rs-232", port)
 dmp_wrt = CsvWriter(angle = 'DMS', dist = '.4f', \
     filt = ['station', 'id','hz','v','distance', 'datetime'], \
     fname = ofname + '.dmp', mode = 'a', sep = ';')
-coo_wrt = CsvWriter(dist = '.4f', filt = ['id','east','north','elev', 'datetime'], \
+coo_wrt = CsvWriter(dist = '.4f', \
+    filt = ['id', 'east', 'north', 'elev', 'datetime'], \
     fname = ofname + '.csv', mode = 'a', sep = ';')
 ts = TotalStation(stationtype, mu, iface)
 
@@ -105,53 +101,64 @@ while n < max_faces:
                 v = PI2 - v
             j = 0   # try count
             while j < maxtry:
-                if directions[i]['code'] == 'ATR':
+                if directions[i]['code'][0:3] == 'ATR':
                     ts.SetATR(1)
                     ts.SetEDMMode('STANDARD')
-                    if pt > -1: # set prism type if not default
-                        ts.SetPrismType(pt)
+                    if len(directions[i]['code']) > 3:
+                        ts.SetPrismType(int(directions[i]['code'][3:]))
                     ts.Move(Angle(hz), Angle(v), 1)
                     ts.Measure()
-                elif directions[i]['code'] == 'PR':
+                elif directions[i]['code'][0:2] == 'PR':
+                    # prism type: 0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini
                     ts.SetATR(0)
                     ts.SetEDMMode('STANDARD')
-                    if pt > -1: # set prism type if not default
-                        ts.SetPrismType(pt)
+                    if len(directions[i]['code']) > 2:
+                        ts.SetPrismType(int(directions[i]['code'][2:]))
                     ts.Move(Angle(hz), Angle(v), 0)
                     # wait for user to target on point
-                    raw_input("Target on %s point in face %d and press enter" % (pn, n % 2 + 1))
+                    raw_input("Target on %s point(%s) in face %d and press enter" % (pn, directions[i]['code'], n % 2 + 1))
                     ts.Measure()
                 elif directions[i]['code'] == 'RL':
                     ts.SetATR(0)
                     ts.SetEDMMode('RLSTANDARD')
                     ts.Move(Angle(hz), Angle(v), 0)
                     # wait for user to target on point
-                    raw_input("Target on %s point in face %d and press enter" % (pn, n % 2 + 1))
+                    raw_input("Target on %s point(%s) in face %d and press enter" % (pn, directions[i]['code'], n % 2 + 1))
                     ts.Measure()
+                elif directions[i]['code'] == 'OR':
+                    ts.Move(Angle(hz), Angle(v), 0)
+                    # wait for user to target on point
+                    raw_input("Target on %s point(%s) in face %d and press enter" % (pn, directions[i]['code'], n % 2 + 1))
                 else:
                     print ("Unknow code")
                     j = maxtry
                     break
-                obs = ts.GetMeasure()
+                if directions[i]['code'] == 'OR':
+                    obs = ts.GetAngles()
+                else:
+                    obs = ts.GetMeasure()
                 if ts.measureIface.state != ts.measureIface.IF_OK or \
                     'errorCode' in obs:
                     ts.measureIface.state = ts.measureIface.IF_OK
                     j = j + 1
                     continue
+                else:
+                    break   # observation OK
             if j >= maxtry:
                 print "Cannot measure point %s" % pn
                 continue
             obs['id'] = pn
             obs['station'] = directions[0]['station']
-            coo = {}
-            coo['id'] = pn
-            coo['east'] = obs['distance'] * math.sin(obs['v'].GetAngle()) * \
-                math.sin(obs['hz'].GetAngle())
-            coo['north'] = obs['distance'] * math.sin(obs['v'].GetAngle()) * \
-                math.cos(obs['hz'].GetAngle())
-            coo['elev'] = obs['distance'] * math.cos(obs['v'].GetAngle())
             dmp_wrt.WriteData(obs)
-            coo_wrt.WriteData(coo)
+            if directions[i]['code'] != 'OR':
+                coo = {}
+                coo['id'] = pn
+                coo['east'] = obs['distance'] * math.sin(obs['v'].GetAngle()) * \
+                    math.sin(obs['hz'].GetAngle())
+                coo['north'] = obs['distance'] * math.sin(obs['v'].GetAngle()) * \
+                    math.cos(obs['hz'].GetAngle())
+                coo['elev'] = obs['distance'] * math.cos(obs['v'].GetAngle())
+                coo_wrt.WriteData(coo)
     n = n + 1
 # rotate back to first point
 ts.Move(directions[1]['hz'], directions[1]['v'], 0)
