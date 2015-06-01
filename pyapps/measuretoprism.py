@@ -115,21 +115,25 @@ while ts.measureIface.state == ts.measureIface.IF_OK:
         ts.Measure()
         measurement = ts.GetMeasure()
     elif mode == 2:
-        ts.MoveRel(Angle(0), Angle(0), 1) # aim on target with ATR without distance measurements
+        # aim on target with ATR without distance measurements
+        ts.MoveRel(Angle(0), Angle(0), 1)
         measurement = ts.GetAngles()
     elif mode == 3:
         measurement = ts.GetAngles() # get angles only
     elif mode == 4:
+        # get distance measurement with targeting mode
         ts.Measure()
-        measurement = ts.GetMeasure() # get distance measurement with targeting mode
+        measurement = ts.GetMeasure()
     elif mode == 5:
-        measurement = ts.GetAngles() # go and stop, store full measurements within the limitation
+        # go and stop, store full measurements within the limitation
+        measurement = ts.GetAngles()
 
         if moving:
             if abs(prev_hz.GetAngle() - measurement['hz'].GetAngle()) < limit.GetAngle() and \
                abs(prev_v.GetAngle() - measurement['v'].GetAngle()) < limit.GetAngle():
                 n  += 1
-                if n <= 3: # store if the measured values within the angle limitation three times
+                # store if the measured values within the angle limitation three times
+                if n <= 3:
                     continue
                 ts.Measure()
                 measurement = ts.GetMeasure()
@@ -159,8 +163,10 @@ while ts.measureIface.state == ts.measureIface.IF_OK:
 
     # Compute relative coordinates according to the instrument origin
     if('hz' in measurement and 'v' in measurement):
-        measurement['east'] = slopeDist * math.sin(v.GetAngle()) * math.sin(hz.GetAngle())
-        measurement['north'] = slopeDist * math.sin(v.GetAngle()) * math.cos(hz.GetAngle())
+        measurement['east'] = slopeDist * math.sin(v.GetAngle()) * \
+            math.sin(hz.GetAngle())
+        measurement['north'] = slopeDist * math.sin(v.GetAngle()) * \
+            math.cos(hz.GetAngle())
         measurement['elev'] = slopeDist * math.cos(v.GetAngle())
         
         # Store in file the measurements
