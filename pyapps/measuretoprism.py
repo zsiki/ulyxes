@@ -53,7 +53,10 @@ else:
 # Measure mode
 mode = 4   # lock with distance measurement
 if len(sys.argv) > 2:
-    mode = int(sys.argv[2])
+    try:
+        mode = int(sys.argv[2])
+    except ValueError:
+        mode = 4
 # EDM mode
 edm = 'FAST'
 if len(sys.argv) > 3:
