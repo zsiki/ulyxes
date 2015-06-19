@@ -10,6 +10,26 @@
     :param argv[2] output file with observations, default stdout
     :param argv[3] (sensor): 1100/1800/1200, default 1200
     :param argv[4] (port): serial port, default COM7
+
+    Input file is a GeoEasy geo file (can be created by filemaker.py).
+	Sample::
+
+	{2 S2} {3 0.0}									# station id & istrumnt h.
+	{5 2} {7 6.283145} {8 1.120836} {4 PR0} {112 2}  # target id, hz, v, code,
+	{5 T1} {7 2.022707} {8 1.542995} {4 RL} {112 2} # number of faces
+	{5 3} {7 3.001701} {8 1.611722} {4 OR} {112 2}
+	{5 T2} {7 3.006678} {8 1.550763} {4 ATRn} {112 2}
+	{5 4} {7 3.145645} {8 1.610680} {4 PR2} {112 2}
+	{5 1} {7 6.002123} {8 1.172376} {4 PR} {112 2}
+
+    Codes describe target type::
+
+	ATRn - prism and automatic targeting, n referes to prism type 0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini
+	PRn - prism, n referes to prism type 0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini
+	RL - refrectorless observation
+	OR - do not measure distance (orientation)
+
+	In case of PR/RL/OR the program stops and the user have to aim at the target
 """
 import sys
 import re
