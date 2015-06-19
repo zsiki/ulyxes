@@ -16,6 +16,7 @@ import sys, os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
+sys.path.insert(0, os.path.abspath('../../../pyapps'))
 sys.path.insert(0, os.path.abspath('../../'))
 
 # -- General configuration -----------------------------------------------------
@@ -164,7 +165,7 @@ html_last_updated_fmt = '%b %d, %Y'
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'LandSurveyingCalculationdoc'
+htmlhelp_basename = 'Ulyxes'
 
 
 # -- Options for LaTeX output --------------------------------------------------

@@ -230,3 +230,42 @@ HTTP Writer
 .. automodule:: httpwriter
    :members:
 
+SAMPLE APPLICATIONS
+===================
+
+Measure to Prism
+::::::::::::::::
+
+.. automodule:: measuretoprism
+   :members:
+
+NMEA Demo
+:::::::::
+
+.. automodule:: nmea_demo
+   :members:
+
+Horizontal section
+::::::::::::::::::
+
+.. automodule:: horizsection
+   :members:
+
+Robot
+:::::
+
+.. automodule:: robot
+   :members:
+
+Filemaker
+:::::::::
+
+.. automodule:: filemaker
+   :members:
+
+Measure matrix
+::::::::::::::
+
+.. automodule:: measurematrix
+   :members:
+

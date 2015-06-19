@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """
-.. module:: webcam.py
-   :platform: Unix, Windows
-   :synopsis: Ulyxes - an open source project to drive total stations and
+.. module:: wificollector
+
+:platform: Unix, Windows
+:synopsis: Ulyxes - an open source project to drive total stations and
        publish observation results.  GPL v2.0 license Copyright (C)
        2010-2015 Zoltan Siki <siki@agt.bme.hu>
 
