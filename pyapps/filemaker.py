@@ -42,6 +42,9 @@ if __name__ == "__main__":
     elif re.search('110[0-9]$', stationtype):
         from leicatcra1100 import LeicaTCRA1100
         mu = LeicaTCRA1100()
+    elif re.search('180[0-9]$', stationtype):
+        from leicatca1800 import LeicaTCA1800
+        mu = LeicaTCA1800()
     elif re.search('550[0-9]$', stationtype):
         from trimble5500 import Trimble5500
         mu = Trimble5500()
