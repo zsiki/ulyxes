@@ -21,6 +21,7 @@ sys.path.append('../pyapi/')
 
 from serialiface import SerialIface
 from geowriter import GeoWriter
+from csvwriter import CsvWriter
 from totalstation import TotalStation
 
 logging.getLogger().setLevel(logging.WARNING)
@@ -32,8 +33,15 @@ if __name__ == "__main__":
     else:
         print ("Usage: filemaker.py output_file [sensor] [serial_port]")
         exit(-1)
-    if ofname[-4:] == '.geo' or ofname[-4:] == '.coo':
+    if ofname[-4:] == '.csv' or ofname[-4:] == '.dmp':
         ofname = ofname[:-4]
+        otype = 'csv'
+    elif ofname[-4:] == '.geo' or ofname[-4:] == '.coo':
+        ofname = ofname[:-4]
+        otype = 'geo'
+    else:
+        print "invalid output type, allowed types: .geo, .coo, .csv, .dmp"
+        exit(-1)
     if len(sys.argv) > 2:
         stationtype = sys.argv[2]
     else:
@@ -59,8 +67,14 @@ if __name__ == "__main__":
         port = 'COM7'
 
     iface = SerialIface("rs-232", port)
-    geo_wrt = GeoWriter(dist = '.4f', fname = ofname + '.geo')
-    coo_wrt = GeoWriter(dist = '.4f', fname = ofname + '.coo')
+    if otype == 'geo':
+        geo_wrt = GeoWriter(dist = '.4f', fname = ofname + '.geo')
+        coo_wrt = GeoWriter(dist = '.4f', fname = ofname + '.coo')
+    else:
+        geo_wrt = CsvWriter(dist = '.4f', fname = ofname + '.dmp', \
+            header = True, filt = ['station', 'id', 'hz', 'v', 'faces'])
+        coo_wrt = CsvWriter(dist = '.4f', fname = ofname + '.csv', \
+            header = True, filt = ['id', 'east', 'north', 'elev'])
     ts = TotalStation(stationtype, mu, iface)
 
     # get station data
@@ -71,9 +85,10 @@ if __name__ == "__main__":
     coo['elev'] = float(raw_input("Station  elev: "))
     coo_wrt.WriteData(coo)
     geo = {}
-    geo['id'] = coo['id']
-    geo['ih'] = 0.0
-    geo_wrt.WriteData(geo)
+    if otype == 'geo':
+        geo['id'] = coo['id']
+        geo['ih'] = 0.0
+        geo_wrt.WriteData(geo)
 
     faces = int(raw_input("Number of faces: "))
     while 1:
@@ -83,6 +98,8 @@ if __name__ == "__main__":
         t_mode = raw_input("Target mode(ATR/PR/RL/OR): ")
         raw_input("Target on point and press enter")
         angles = ts.GetAngles()
+        if otype == 'csv':
+            angles['station'] = coo['id']
         angles['id'] = t_id
         angles['code'] = t_mode
         angles['faces'] = faces
