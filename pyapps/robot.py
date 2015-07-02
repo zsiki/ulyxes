@@ -7,11 +7,11 @@
 Sample application of Ulyxes PyAPI to measure a series of points
 
     :param argv[1] input file with directions
-    :param argv[2] output file with observations, default stdout
+    :param argv[2] output file with observations
     :param argv[3] (sensor): 1100/1800/1200, default 1200
     :param argv[4] (port): serial port, default COM7
 
-Input file is a GeoEasy geo file (can be created by filemaker.py).
+Input file is a GeoEasy geo file or a dmp (can be created by filemaker.py).
 Sample::
 
     {2 S2} {3 0.0}                                    # station id & istrumnt h.
@@ -48,16 +48,16 @@ logging.getLogger().setLevel(logging.WARNING)
 
 if __name__ == "__main__":
     # process commandline parameters
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
         ifname = sys.argv[1]
+        if ifname[-4:] != '.geo':
+            ifname = ifname + '.geo'
+        ofname = sys.argv[2]
+        if ofname[-4:] == '.dmp' or ofname[-4:] == 'csv':
+            ofname = ofname[:-4]
     else:
         print ("Usage: robot.py input_file [output_file] [sensor] [serial_port]")
         exit(-1)
-        #ifname = 'robot.geo'
-    if len(sys.argv) > 2:
-        ofname = sys.argv[2]
-    else:
-        ofname = 'stdout'
     if len(sys.argv) > 3:
         stationtype = sys.argv[3]
     else:
@@ -141,34 +141,39 @@ if __name__ == "__main__":
                             ts.SetPrismType(int(directions[i]['code'][2:]))
                         ts.Move(Angle(hz), Angle(v), 0)
                         # wait for user to target on point
-                        raw_input("Target on %s point(%s) in face %d and press enter" % (pn, directions[i]['code'], n % 2 + 1))
-                        ts.Measure()
+                        ans = raw_input("Target on %s point(%s) in face %d and press enter or press 's' to skip the point" % (pn, directions[i]['code'], n % 2 + 1))
+                        if ans != 's':
+                            ts.Measure()
                     elif directions[i]['code'] == 'RL':
                         ts.SetATR(0)
                         ts.SetEDMMode('RLSTANDARD')
                         ts.Move(Angle(hz), Angle(v), 0)
                         # wait for user to target on point
-                        raw_input("Target on %s point(%s) in face %d and press enter" % (pn, directions[i]['code'], n % 2 + 1))
-                        ts.Measure()
+                        ans = raw_input("Target on %s point(%s) in face %d and press enter" % (pn, directions[i]['code'], n % 2 + 1))
+                        if ans != 's':
+                            ts.Measure()
                     elif directions[i]['code'] == 'OR':
                         ts.Move(Angle(hz), Angle(v), 0)
                         # wait for user to target on point
-                        raw_input("Target on %s point(%s) in face %d and press enter" % (pn, directions[i]['code'], n % 2 + 1))
+                        ans = raw_input("Target on %s point(%s) in face %d and press enter or press 's' to skip the point" % (pn, directions[i]['code'], n % 2 + 1))
                     else:
                         print ("Unknow code")
                         j = maxtry
                         break
-                    if directions[i]['code'] == 'OR':
-                        obs = ts.GetAngles()
+                    if ans != 's':
+                        if directions[i]['code'] == 'OR':
+                            obs = ts.GetAngles()
+                        else:
+                            obs = ts.GetMeasure()
+                        if ts.measureIface.state != ts.measureIface.IF_OK or \
+                            'errorCode' in obs:
+                            ts.measureIface.state = ts.measureIface.IF_OK
+                            j = j + 1
+                            continue
+                        else:
+                            break   # observation OK
                     else:
-                        obs = ts.GetMeasure()
-                    if ts.measureIface.state != ts.measureIface.IF_OK or \
-                        'errorCode' in obs:
-                        ts.measureIface.state = ts.measureIface.IF_OK
-                        j = j + 1
-                        continue
-                    else:
-                        break   # observation OK
+                        j = maxtry
                 if j >= maxtry:
                     print "Cannot measure point %s" % pn
                     continue
