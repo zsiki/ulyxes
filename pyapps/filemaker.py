@@ -5,22 +5,22 @@
 .. moduleauthor:: Zoltan Siki
 
 Sample application of Ulyxes PyAPI to create input file for robot
+Output file uses GeoEasy geo format
 
-    :param argv[1] output file with observations, default stdout
+    :param argv[1] output file with observations
     :param argv[2] (sensor): 1100/1800/1200, default 1200
     :param argv[3] (port): serial port, default COM7
+
+For each target point the point id and a type is 
 """
 import sys
 import re
-import math
 import logging
 
 sys.path.append('../pyapi/')
 
-from angle import Angle, PI2
 from serialiface import SerialIface
-from csvwriter import CsvWriter
-from georeader import GeoReader
+from geowriter import GeoWriter
 from totalstation import TotalStation
 
 logging.getLogger().setLevel(logging.WARNING)
@@ -32,6 +32,8 @@ if __name__ == "__main__":
     else:
         print ("Usage: filemaker.py output_file [sensor] [serial_port]")
         exit(-1)
+    if ofname[-4:] == '.geo' or ofname[-4:] == '.coo':
+        ofname = ofname[:-4]
     if len(sys.argv) > 2:
         stationtype = sys.argv[2]
     else:
@@ -57,19 +59,21 @@ if __name__ == "__main__":
         port = 'COM7'
 
     iface = SerialIface("rs-232", port)
-    fgeo = open(ofname + '.geo', 'w')
-    coo_wrt = CsvWriter(dist = '.3f', filt = ['id','east','north','elev'], \
-        fname = ofname + '.csv', mode = 'a', sep = ';')
+    geo_wrt = GeoWriter(dist = '.4f', fname = ofname + '.geo')
+    coo_wrt = GeoWriter(dist = '.4f', fname = ofname + '.coo')
     ts = TotalStation(stationtype, mu, iface)
 
     # get station data
     coo = {}
     coo['id'] = raw_input("Station id: ")
-    fgeo.write("{2 %s} {3 0.0}\n" % coo['id'])
     coo['east'] = float(raw_input("Station  east: "))
     coo['north'] = float(raw_input("Station north: "))
     coo['elev'] = float(raw_input("Station  elev: "))
     coo_wrt.WriteData(coo)
+    geo = {}
+    geo['id'] = coo['id']
+    geo['ih'] = 0.0
+    geo_wrt.WriteData(geo)
 
     faces = int(raw_input("Number of faces: "))
     while 1:
@@ -79,7 +83,7 @@ if __name__ == "__main__":
         t_mode = raw_input("Target mode(ATR/PR/RL/OR): ")
         raw_input("Target on point and press enter")
         angles = ts.GetAngles()
-        fgeo.write("{5 %s} {7 %.6f} {8 %.6f} {4 %s} {112 %d}\n" % \
-            (t_id, angles['hz'].GetAngle(), angles['v'].GetAngle(), \
-             t_mode, faces))
-    fgeo.close()
+        angles['id'] = t_id
+        angles['code'] = t_mode
+        angles['faces'] = faces
+        geo_wrt.WriteData(angles)
