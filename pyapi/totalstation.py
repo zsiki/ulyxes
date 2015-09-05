@@ -9,11 +9,28 @@
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>,
     Daniel Moka <mokadaniel@citromail.hu>
 """
+from __future__ import print_function
 import logging
 from instrument import Instrument
 from angle import Angle
 
-class TotalStation(Instrument):
+#Import weakref module due to memory leak problem
+import weakref
+
+class IterableTotalStation(type):
+    """ Iterable TotalStation Class
+
+    """
+    # Make WeakSet to avoid memory leak
+    _totalStations = weakref.WeakSet()
+
+    def __iter__(cls):
+        return iter(cls._totalStations)
+
+    def add_totalStation(cls, ts):
+        cls._totalStations.add(ts)
+
+class TotalStation(Instrument, metaclass=IterableTotalStation):
     """ Generic total station instrument
 
             :param name: name of instrument
@@ -30,6 +47,18 @@ class TotalStation(Instrument):
         # call super class init
         super(TotalStation, self).__init__(name, measureUnit, measureIface,
             writerUnit)
+
+        self.__class__.add_totalStation(self)
+
+    def __str__(self):
+        return '<{} object from {} module at {} address | MeasureUnit: {} | MeasureInterface: {} >'\
+            .format( type(self).__name__,self.__module__, hex(id(self)),
+                    self.measureUnit.GetName(), self.measureIface.name)
+
+    def __repr__(self):
+        muString = self.measureUnit.GetName()
+        muString = muString.replace(' ', '') + '()'
+        return "{}('{}',{},'{}')".format(type(self).__name__,self.name,muString,self.measureIface.GetName())
 
     def SetPc(self, pc):
         """ Set prism constant
