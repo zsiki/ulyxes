@@ -233,7 +233,7 @@ The PyAPI is a part of Ulyxes system. In order to install the API, the whole Uly
 
 
 PyAPI Modules
-################
+#############
 
 (For more detailed information and sources codes about modules of PyAPI, please visit the `official developer documentation <http://www.agt.bme.hu/ulyxes/pyapi_doc/>`_ of PyAPI  )
 
@@ -363,7 +363,6 @@ Use the SerialInterface
     from serialiface import SerialIface
     si = SerialIface('test', 'COMx')
     si.Send('%R1Q,9028:0,0,0')
-    
     %R1P,0,0:
 
 Sensor Creation
@@ -373,7 +372,7 @@ PyAPI Applications Tutorials
 ############################
 
 MeasureToPrism
-*******************
+**************
 
 FileMaker
 *********

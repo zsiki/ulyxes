@@ -14,26 +14,7 @@ import logging
 from instrument import Instrument
 from angle import Angle
 
-#Import weakref module due to memory leak problem
-import weakref
-
-class MetaTotalStation(type):
-    """ Iterable TotalStation Class
-
-    """
-    # Make WeakSet to avoid memory leak
-    _totalStations = weakref.WeakSet()
-
-    # This function returns an iterator object filled with instances of TotalStation class
-    def __iter__(cls):
-        return iter(cls._totalStations)
-
-    # Add-function used in TotalStation Class constructor
-    # in order to fill the _totalStations set with instances of TotalStation
-    def add_totalStation(cls, ts):
-        cls._totalStations.add(ts)
-
-class TotalStation(Instrument, metaclass=IterableTotalStation):
+class TotalStation(Instrument):
     """ Generic total station instrument
 
             :param name: name of instrument
@@ -50,8 +31,6 @@ class TotalStation(Instrument, metaclass=IterableTotalStation):
         # call super class init
         super(TotalStation, self).__init__(name, measureUnit, measureIface,
             writerUnit)
-
-        self.__class__.add_totalStation(self)
 
     def __str__(self):
         return '<{} object from {} module at {} address | MeasureUnit: {} | MeasureInterface: {} >'\
