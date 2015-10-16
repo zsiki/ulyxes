@@ -26,6 +26,7 @@ class NmeaGnssUnit(MeasureUnit):
         """
         # call super class init
         super(NmeaGnssUnit, self).__init__(name, typ)
+        self.date_time = None
 
     @staticmethod
     def GetCapabilities():
@@ -66,6 +67,11 @@ class NmeaGnssUnit(MeasureUnit):
             res['nsat'] = int(anslist[7])
             res['altitude'] = float(anslist[9])
             res['hdop'] = float(anslist[8])
+            if self.date_time is None:
+                res['datetime'] = self.date_time
+                self.date_time = None
+        elif msg == 'GPZDA':
+            pass
         return res
 
     def MeasureMsg(self):

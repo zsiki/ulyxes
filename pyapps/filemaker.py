@@ -5,7 +5,7 @@
 .. moduleauthor:: Zoltan Siki
 
 Sample application of Ulyxes PyAPI to create input file for robot
-Output file uses GeoEasy geo format
+Output file uses GeoEasy geo format or simple csv
 
     :param argv[1] output file with observations
     :param argv[2] (sensor): 1100/1800/1200, default 1200

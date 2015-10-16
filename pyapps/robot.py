@@ -12,15 +12,25 @@ Sample application of Ulyxes PyAPI to measure a series of points
     :param argv[4] (port): serial port, default COM7
 
 Input file is a GeoEasy geo file or a dmp (can be created by filemaker.py).
-Sample::
+Sample geo::
 
     {2 S2} {3 0.0}                                    # station id & istrumnt h.
     {5 2} {7 6.283145} {8 1.120836} {4 PR0} {112 2}  # target id, hz, v, code,
     {5 T1} {7 2.022707} {8 1.542995} {4 RL} {112 2} # number of faces
     {5 3} {7 3.001701} {8 1.611722} {4 OR} {112 2}
-    {5 T2} {7 3.006678} {8 1.550763} {4 ATRn} {112 2}
+    {5 T2} {7 3.006678} {8 1.550763} {4 ATR1} {112 2}
     {5 4} {7 3.145645} {8 1.610680} {4 PR2} {112 2}
     {5 1} {7 6.002123} {8 1.172376} {4 PR} {112 2}
+
+Sample dmp::
+
+	station; id; hz; v; code;faces
+	S2;2;6.283145;1.120836;PR0;2
+	S2;T1;2.022707;1.542995;RL;2
+	S2;3;3.001701;1.611722;OR;2
+	S2;T2;3.006678;1.550763;ATR1;2
+	S2;4;3.145645;1.610680;PR2;2
+	S2;1;6.002123;1.172376;PR;2
 
 Codes describe target type::
 
