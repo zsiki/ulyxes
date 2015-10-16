@@ -56,7 +56,9 @@ class LeicaTCRA1100(LeicaMeasureUnit):
         'SETSEARCHAREA': 9043,
         'POWERSEARCH': 9052,
         'SEARCHNEXT': 9051,
-        'SETREDLASER': 1004
+        'SETREDLASER': 1004,
+		'GETPT': 17009,
+		'SETPT': 17008
     }
 
     # Constants for EMD modes
