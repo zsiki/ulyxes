@@ -78,18 +78,18 @@ w1 = ts.GetAngles()
 w = raw_input("Target on upper right corner and press Enter")
 w2 = ts.GetAngles()
 
-dh = (w2['hz'] - w1['hz']) / dh_nr
-dv = (w2['v'] - w1['v']) / dv_nr
+dh = (w2['hz'].GetAngle() - w1['hz'].GetAngle()) / dh_nr
+dv = (w2['v'].GetAngle() - w1['v'].GetAngle()) / dv_nr
 # measurement loops
 for i in range(dh_nr+1): # horizontal loop
     measdir = i % 2 # check modulo
-    hz = Angle(w1['hz'] + i * dh, 'RAD')
+    hz = Angle(w1['hz'].GetAngle() + i * dh, 'RAD')
     for j in range(dv_nr+1): # vertical loop
         if measdir == 0:
             # move downward at odd steps to right
-            ts.Move(hz, Angle(w1['v'] - j * dv, 'RAD'))
+            ts.Move(hz, Angle(w1['v'].GetAngle() + j * dv, 'RAD'))
         else:
             # move upward at event steps to right
-            ts.Move(hz, Angle(w2['v'] + j * dv, 'RAD'))
+            ts.Move(hz, Angle(w2['v'].GetAngle() - j * dv, 'RAD'))
         ts.Measure()
         ts.GetMeasure()
