@@ -63,7 +63,7 @@ else:
     numberOfPoints = 2   
 
 MAXITER = 10   # Number of iterations to find point on the chosen plane
-iface = SerialIface("rs-232", "COM7")   ## eomRead='\n'
+iface = SerialIface("rs-232", port)   ## eomRead='\n'
 wrt = CsvWriter(angle = 'DMS', dist = '.3f',
                 filt = ['id','east','north','elev'],
                 fname = '20140429_6.txt', mode = 'w', sep = ';')
@@ -146,13 +146,13 @@ while act.GetAngle() < PI2:   # Going around a whole circle
     nextp['north'] = nextp['distance'] * math.sin(nextp['v'].GetAngle()) * math.cos(nextp['hz'].GetAngle())
     nextp['elev'] = nextp['distance'] * math.cos(nextp['v'].GetAngle())
     
-	index = 0
+    index = 0
     intp = {}
     # Distance between the nextp and the plane
-	dist = nextp['east'] * plane[0] + nextp['north'] * plane[1] + nextp['elev'] * plane[2] + plane[3]
-	logging.debug("Distance  between the point and the plane: %d - %.3f" % dist)
+    dist = nextp['east'] * plane[0] + nextp['north'] * plane[1] + nextp['elev'] * plane[2] + plane[3]
+    logging.debug("Distance  between the point and the plane: %d - %.3f" % dist)
     #print "dist=%.3f" % dist
-	while abs(dist) > 0.01:   # Acceptable distance from the plane has to be lower than 1 centimeter
+    while abs(dist) > 0.01:   # Acceptable distance from the plane has to be lower than 1 centimeter
         w = True
         # Calculation of the nadir point(intp) on the plane
         intp['east'] = nextp['east'] - plane[0] * dist
@@ -161,7 +161,7 @@ while act.GetAngle() < PI2:   # Going around a whole circle
         dd = intp['east'] * plane[0] + intp['north'] * plane[1] + intp['elev'] * plane[2] + plane[3]
         logging.debug("Checking the distance for the nadir point: %.3f" % dd)
         
-		# Calculating the zenith angle difference between nextp and it's nadir point
+        # Calculating the zenith angle difference between nextp and it's nadir point
         zenith = nextp['v'].GetAngle()
         hdist = math.sin(zenith)*nextp['distance']
         hdist1 = math.sqrt(intp['east']**2 + intp['north']**2)
@@ -184,12 +184,12 @@ while act.GetAngle() < PI2:   # Going around a whole circle
         nextp = ts.GetMeasure()
         if not 'v' in nextp or not 'distance' in nextp:
             break
-			
+            
         # Calculating the coordinates of the nextp point
         nextp['east'] = nextp['distance'] * math.sin(nextp['v'].GetAngle()) * math.sin(nextp['hz'].GetAngle())
         nextp['north'] = nextp['distance'] * math.sin(nextp['v'].GetAngle()) * math.cos(nextp['hz'].GetAngle())
         nextp['elev'] = nextp['distance'] * math.cos(nextp['v'].GetAngle())
-		# Checking the nextp whether on the plane within the given tolerance 
+        # Checking the nextp whether on the plane within the given tolerance 
         dist = nextp['east'] * plane[0] + nextp['north'] * plane[1] + nextp['elev'] * plane[2] + plane[3]
     if 'distance' in nextp and w:
         wrt.WriteData(nextp)
@@ -201,10 +201,10 @@ while act.GetAngle() < PI2:   # Going around a whole circle
         nextp['elev'] = nextq[2]
 
     act += stepinterval # In case of success measurement, the instrument is rotating again with the stepinterval
-	
-	# Definition of the next point Q on the plane from the nextp
+    
+    # Definition of the next point Q on the plane from the nextp
     # Rotating the normal vector into the plane
-	rotationDelta = math.atan2(plane[0],plane[1]) # horizontal angle
+    rotationDelta = math.atan2(plane[0],plane[1]) # horizontal angle
 
     rotationZenith = math.atan2(math.sqrt(plane[0]**2 + plane[1]**2),plane[2]) # zenith angle
 
@@ -221,20 +221,20 @@ while act.GetAngle() < PI2:   # Going around a whole circle
                               [0.0, 0.0, 1.0]]) # Rotation matrix with the stepinterval angle
 
     #print np.array([nextp['east'], nextp['north'], nextp['elev']])
-	
-	# Rotation of the normal vector into the plane
+    
+    # Rotation of the normal vector into the plane
     nextpvar = np.dot(np.array([nextp['east'], nextp['north'], nextp['elev']]), np.dot(MZ,MEast))
-	
-	# Rotation with the stepinterval angle to the next point Q
+    
+    # Rotation with the stepinterval angle to the next point Q
     nextqvar = np.dot(nextpvar, Mstepinterval)
-	
-	# Defining the normal vector of the next point Q with rotation 
+    
+    # Defining the normal vector of the next point Q with rotation 
     nextq = np.dot(nextqvar,np.dot(np.linalg.inv(MEast),np.linalg.inv(MZ)))
-	
-	# Calculation of the horizontal and vertical angle of the next point Q for the actual rotation
+    
+    # Calculation of the horizontal and vertical angle of the next point Q for the actual rotation
     horizq = Angle(math.atan2(nextq[0],nextq[1]))
     if horizq.GetAngle() < 0:
         horizq = Angle(PI2 + horizq.GetAngle())
     zenithq = Angle(math.atan2(math.sqrt(nextq[0]**2 + nextq[1]**2), nextq[2]))
     
-	ts.Move(horizq, zenithq) # Rotating to the Q point
+    ts.Move(horizq, zenithq) # Rotating to the Q point
