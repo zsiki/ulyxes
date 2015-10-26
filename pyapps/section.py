@@ -12,18 +12,19 @@
     :param argv[2] (sensor): 1100/1800/1200, default 1200
     :param argv[3] (port): serial port, default COM7
     :param argv[4] (number of points): number of measured points to determine a arbitrary plane, default 1 
+    :param argv[5]  (tolerance): acceptable tolerance (meter) from the horizontal plane, default 0.01
+    :param argv[6] (iteration): max iteration number for a point, default 10
 """
 
 import sys
 import re
 import math
 import numpy as np
-import array
 import logging
 
 sys.path.append('../pyapi/')
 
-from angle import Angle,PI2
+from angle import Angle, PI2
 from serialiface import SerialIface
 from csvwriter import CsvWriter
 from totalstation import TotalStation
@@ -61,12 +62,17 @@ if len(sys.argv) > 4:
     numberOfPoints = int(sys.argv[4])
 else:
     numberOfPoints = 2   
-
-MAXITER = 10   # Number of iterations to find point on the chosen plane
+tol = 0.01
+if len(sys.argv) > 5:
+    tol = float(sys.argv[5])
+# Number of iterations to find point on the chosen plane
+maxiter = 10
+if len(sys.argv) > 6:
+    maxiter = int(sys.argv[6])
 iface = SerialIface("rs-232", port)   ## eomRead='\n'
 wrt = CsvWriter(angle = 'DMS', dist = '.3f',
                 filt = ['id','east','north','elev'],
-                fname = '20140429_6.txt', mode = 'w', sep = ';')
+                fname = 'section.txt', mode = 'w', sep = ';')
 ts = TotalStation(stationtype, mu, iface)
 ts.SetATR(0)    # ATR mode off
 ts.SetLock(0)   # Lock mode off
@@ -137,7 +143,9 @@ while act.GetAngle() < PI2:   # Going around a whole circle
         ts.MoveRel(stepinterval, Angle(0))  # TODO
         continue
     nextp = ts.GetMeasure()   # Get observation data
-    if ts.measureIface.state != ts.measureIface.IF_OK:
+    if ts.measureIface.state != ts.measureIface.IF_OK or \
+        not 'hz' in nextp or not 'v' in nextp or \
+        not 'distance' in nextp:
         ts.measureIface.state = ts.measureIface.IF_OK
         ts.MoveRel(stepinterval, Angle(0))  # TODO
         continue
@@ -152,7 +160,7 @@ while act.GetAngle() < PI2:   # Going around a whole circle
     dist = nextp['east'] * plane[0] + nextp['north'] * plane[1] + nextp['elev'] * plane[2] + plane[3]
     logging.debug("Distance  between the point and the plane: %d - %.3f" % dist)
     #print "dist=%.3f" % dist
-    while abs(dist) > 0.01:   # Acceptable distance from the plane has to be lower than 1 centimeter
+    while abs(dist) > tol:   # Acceptable distance from the plane has to be lower than tolerance
         w = True
         # Calculation of the nadir point(intp) on the plane
         intp['east'] = nextp['east'] - plane[0] * dist
@@ -176,7 +184,7 @@ while act.GetAngle() < PI2:   # Going around a whole circle
         ts.MoveRel(Angle(horiz1- horiz), Angle(zenith1-zenith))  # Rotation of the nextp into the plane    
         ts.Measure()
         index += 1
-        if index > MAXITER or ts.measureIface.state != ts.measureIface.IF_OK:
+        if index > maxiter or ts.measureIface.state != ts.measureIface.IF_OK:
             w = False
             ts.measureIface.state = ts.measureIface.IF_OK
             logging.warning('Missing measurement') #TODO
@@ -204,9 +212,9 @@ while act.GetAngle() < PI2:   # Going around a whole circle
     
     # Definition of the next point Q on the plane from the nextp
     # Rotating the normal vector into the plane
-    rotationDelta = math.atan2(plane[0],plane[1]) # horizontal angle
+    rotationDelta = math.atan2(plane[0], plane[1]) # horizontal angle
 
-    rotationZenith = math.atan2(math.sqrt(plane[0]**2 + plane[1]**2),plane[2]) # zenith angle
+    rotationZenith = math.atan2(math.sqrt(plane[0]**2 + plane[1]**2), plane[2]) # zenith angle
 
     MZ = np.array([[math.cos(rotationDelta), -math.sin(rotationDelta), 0.0],
                    [math.sin(rotationDelta), math.cos(rotationDelta), 0.0],
@@ -223,16 +231,16 @@ while act.GetAngle() < PI2:   # Going around a whole circle
     #print np.array([nextp['east'], nextp['north'], nextp['elev']])
     
     # Rotation of the normal vector into the plane
-    nextpvar = np.dot(np.array([nextp['east'], nextp['north'], nextp['elev']]), np.dot(MZ,MEast))
+    nextpvar = np.dot(np.array([nextp['east'], nextp['north'], nextp['elev']]), np.dot(MZ, MEast))
     
     # Rotation with the stepinterval angle to the next point Q
     nextqvar = np.dot(nextpvar, Mstepinterval)
     
     # Defining the normal vector of the next point Q with rotation 
-    nextq = np.dot(nextqvar,np.dot(np.linalg.inv(MEast),np.linalg.inv(MZ)))
+    nextq = np.dot(nextqvar, np.dot(np.linalg.inv(MEast), np.linalg.inv(MZ)))
     
     # Calculation of the horizontal and vertical angle of the next point Q for the actual rotation
-    horizq = Angle(math.atan2(nextq[0],nextq[1]))
+    horizq = Angle(math.atan2(nextq[0], nextq[1]))
     if horizq.GetAngle() < 0:
         horizq = Angle(PI2 + horizq.GetAngle())
     zenithq = Angle(math.atan2(math.sqrt(nextq[0]**2 + nextq[1]**2), nextq[2]))
