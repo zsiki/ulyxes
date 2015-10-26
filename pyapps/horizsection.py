@@ -12,6 +12,8 @@ coordinates and observations are written to csv file
     :param argv[2] (sensor): 1100/1800/1200, default 1200
     :param argv[3] (port): serial port, default COM7
     :param argv[4] (max angle): stop at this direction, default 360 degree
+    :param argv[5] (tolerance): acceptable tolerance (meter) from the horizontal plane, default 0.01
+    :param argv[6] (iteration): max iteration number for a point, default 10
 """
 import sys
 import re
@@ -57,7 +59,12 @@ if __name__ == "__main__":
         maxa = float(sys.argv[4]) / 180.0 * math.pi
     else:
         maxa = PI2
-    MAXITER = 10    # number of iterations to find point on horizontal plan
+    tol = 0.01
+    if len(sys.argv) > 5:
+        tol = float(sys.argv[5])
+    maxiter = 10    # number of iterations to find point on horizontal plan
+    if len(sys.argv) > 6:
+        maxiter = int(sys.argv[6])
     iface = SerialIface("rs-232", port)
     wrt = CsvWriter(angle = 'DMS', dist = '.3f', filt = ['id', 'hz', 'v', 'distance', 'east', 'north', 'elev'], fname = 'stdout', mode = 'a', sep = ';')
     ts = TotalStation(stationtype, mu, iface)
@@ -94,14 +101,14 @@ if __name__ == "__main__":
 
         height = math.cos(nextp['v'].GetAngle()) * nextp['distance']
         index = 0
-        while abs(height-height0) > 0.01:   # looking for right elevation
+        while abs(height-height0) > tol:   # looking for right elevation
             w = True
             zenith = nextp['v'].GetAngle()
             zenith1 = math.acos(height0 / nextp['distance'])
             ts.MoveRel(Angle(0), Angle(zenith1-zenith))   
             ts.Measure()
             index += 1
-            if index > MAXITER or ts.measureIface.state != ts.measureIface.IF_OK:
+            if index > maxiter or ts.measureIface.state != ts.measureIface.IF_OK:
                 w = False
                 ts.measureIface.state = ts.measureIface.IF_OK
                 logging.warning('Missing measurement')
