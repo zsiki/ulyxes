@@ -59,7 +59,7 @@ if __name__ == "__main__":
         maxa = PI2
     MAXITER = 10    # number of iterations to find point on horizontal plan
     iface = SerialIface("rs-232", port)
-    wrt = CsvWriter(angle = 'DMS', dist = '.3f', filt = ['id','hz','v','distance','east','north','elev'], fname = 'stdout', mode = 'a', sep = ';')
+    wrt = CsvWriter(angle = 'DMS', dist = '.3f', filt = ['id', 'hz', 'v', 'distance', 'east', 'north', 'elev'], fname = 'stdout', mode = 'a', sep = ';')
     ts = TotalStation(stationtype, mu, iface)
     ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
     ts.Measure()    # initial measurement for startpoint
@@ -85,6 +85,10 @@ if __name__ == "__main__":
         nextp = ts.GetMeasure()  # get observation data
         if ts.measureIface.state != ts.measureIface.IF_OK:
             ts.measureIface.state = ts.measureIface.IF_OK
+            ts.MoveRel(stepinterval, Angle(0))
+            continue
+
+        if not 'v' in nextp or not 'distance' in nextp or not 'hz' in nextp:
             ts.MoveRel(stepinterval, Angle(0))
             continue
 
