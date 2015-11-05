@@ -31,6 +31,14 @@ class LeicaDnaUnit(MeasureUnit):
         # call super class init
         super(LeicaDnaUnit, self).__init__(name, typ)
 
+    @staticmethod
+    def GetCapabilities():
+        """ Get instrument specialities
+
+            :returns: List of specialities
+        """
+        return ['LEVEL', 'DISTANCE', 'TEMPERATURE']
+
     def Result(self, msg, ans):
         """ process result of a measurement
 
