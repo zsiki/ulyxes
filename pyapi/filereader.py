@@ -29,7 +29,7 @@ class FileReader(Reader):
             self.fp = open(fname, 'r')
         except:
             self.state = self.RD_OPEN
-            logging.error(" cannot open file %s", self.fname)
+            logging.error(" cannot open file %s", fname)
 
     def __del__(self):
         """ Destructor
