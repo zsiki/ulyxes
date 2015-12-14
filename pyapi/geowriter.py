@@ -28,7 +28,7 @@ class GeoWriter(FileWriter):
     # ulyxes to GeoEasy code translator
     codes = { 'station': 2, 'ih': 3, 'id': 5, 'th': 6,
         'hz': 7, 'v': 8, 'distance': 9, 'hd': 11, 'faces': 112,
-        'datetime': 4}
+        'datetime': 4, 'east': 38, 'north': 37, 'elev': 39 }
     def __init__(self, name = 'None', angle = 'DMS', dist = '.3f',
                 dt = '%Y-%m-%d %H:%M:%S', filt = None,
                 fname = None, mode = 'a'):
@@ -59,7 +59,7 @@ class GeoWriter(FileWriter):
             del data['id']
         line = ''
         for key, val in data.items():
-            if self.filt is None or key in self.filt:
+            if key in self.codes and (self.filt is None or key in self.filt):
                 line = line + '{' + str(self.codes[key]) + ' ' + \
                     self.StrVal(val) + '} '
         try:
