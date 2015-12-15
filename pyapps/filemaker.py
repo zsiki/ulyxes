@@ -86,7 +86,7 @@ if __name__ == "__main__":
     coo_wrt.WriteData(coo)
     geo = {}
     if otype == 'geo':
-        geo['id'] = coo['id']
+        geo['station'] = coo['id']
         geo['ih'] = 0.0
         geo_wrt.WriteData(geo)
 
