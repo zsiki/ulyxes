@@ -68,8 +68,8 @@ if __name__ == "__main__":
 
     iface = SerialIface("rs-232", port)
     if otype == 'geo':
-        geo_wrt = GeoWriter(dist = '.4f', angle = 'RAD', fname = ofname + '.geo')
-        coo_wrt = GeoWriter(dist = '.4f', angle = 'RAD', fname = ofname + '.coo')
+        geo_wrt = GeoWriter(dist = '.4f', angle = 'RAD', fname = ofname + '.geo', mode = 'w)
+        coo_wrt = GeoWriter(dist = '.4f', angle = 'RAD', fname = ofname + '.coo', mode = 'w)
     else:
         geo_wrt = CsvWriter(dist = '.4f', fname = ofname + '.dmp', \
             header = True, filt = ['station', 'id', 'hz', 'v', 'faces'])
