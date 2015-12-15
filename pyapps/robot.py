@@ -24,13 +24,13 @@ Sample geo::
 
 Sample dmp::
 
-	station; id; hz; v; code;faces
-	S2;2;6.283145;1.120836;PR0;2
-	S2;T1;2.022707;1.542995;RL;2
-	S2;3;3.001701;1.611722;OR;2
-	S2;T2;3.006678;1.550763;ATR1;2
-	S2;4;3.145645;1.610680;PR2;2
-	S2;1;6.002123;1.172376;PR;2
+    station; id; hz; v; code;faces
+    S2;2;6.283145;1.120836;PR0;2
+    S2;T1;2.022707;1.542995;RL;2
+    S2;3;3.001701;1.611722;OR;2
+    S2;T2;3.006678;1.550763;ATR1;2
+    S2;4;3.145645;1.610680;PR2;2
+    S2;1;6.002123;1.172376;PR;2
 
 Codes describe target type::
 
@@ -52,26 +52,59 @@ from angle import Angle, PI2
 from serialiface import SerialIface
 from csvwriter import CsvWriter
 from georeader import GeoReader
+from httpwriter import HttpWriter
 from totalstation import TotalStation
 
 logging.getLogger().setLevel(logging.WARNING)
 
 if __name__ == "__main__":
+    # defaults
+    conf = False
+    ofname = 'stdout'
+    stationtype = '1100'
+    port = '/dev/ttyUSB0'
     # process commandline parameters
-    if len(sys.argv) > 2:
+    if len(sys.argv) > 1:
         ifname = sys.argv[1]
-        if ifname[-4:] != '.geo':
+        if ifname[-3:] == '.py':  # configuration file given
+            conf = True
+            exec 'from ' + ifname[:-3] + ' import *'
+        elif ifname[-4:] != '.geo' and ifname[-4:] != '.dmp':
             ifname = ifname + '.geo'
-        ofname = sys.argv[2]
-        if ofname[-4:] == '.dmp' or ofname[-4:] == 'csv':
-            ofname = ofname[:-4]
     else:
         print ("Usage: robot.py input_file [output_file] [sensor] [serial_port]")
+        print ("  or   robot.py config_file.py")
         exit(-1)
+    # output file
+    if len(sys.argv) > 2:
+        ofname = sys.argv[2]
+    if ofname[-4:] == '.dmp' or ofname[-4:] == '.csv' or ofname == 'stdout':
+        # filewriter output
+        if ofname[-4:] == '.dmp' or ofname[-4:] == '.csv':
+            ofname1 = ofname[:-4] + '.dmp'
+            ofname2 = ofname[:-4] + '.csv'
+        else:
+            ofname1 = ofname2 = ofname
+        dmp_wrt = CsvWriter(angle = 'DMS', dist = '.4f', \
+            filt = ['station', 'id','hz','v','distance', 'datetime'], \
+            fname = ofname1, mode = 'a', sep = ';')
+        coo_wrt = CsvWriter(dist = '.4f', \
+            filt = ['id', 'east', 'north', 'elev', 'datetime'], \
+            fname = ofname2, mode = 'a', sep = ';')
+    elif ofname[:5] == 'http:' or ofname[:6] == 'https:':
+        # http output
+        ofname1 = ofname2 = ofname
+        dmp_wrt = HttpWriter(angle = 'DMS', dist = '.4f', \
+            filt = ['station', 'id','hz','v','distance', 'datetime'], \
+            url = ofname1, mode = 'POST')
+        coo_wrt = HttpWriter(angle = 'DMS', dist = '.4f', \
+            filt = ['station', 'id','hz','v','distance', 'datetime'], \
+            url = ofname2, mode = 'POST')
+    else:
+        print ('unsupported output type\n')
+        exit(1)
     if len(sys.argv) > 3:
         stationtype = sys.argv[3]
-    else:
-        stationtype = '1200'
     if re.search('120[0-9]$', stationtype):
         from leicatps1200 import LeicaTPS1200
         mu = LeicaTPS1200()
@@ -85,20 +118,12 @@ if __name__ == "__main__":
         from trimble5500 import Trimble5500
         mu = Trimble5500()
     else:
-        print "unsupported instrument type"
+        print ("unsupported instrument type")
         exit(1)
     if len(sys.argv) > 4:
         port = sys.argv[4]
-    else:
-        port = 'COM7'
 
     iface = SerialIface("rs-232", port)
-    dmp_wrt = CsvWriter(angle = 'DMS', dist = '.4f', \
-        filt = ['station', 'id','hz','v','distance', 'datetime'], \
-        fname = ofname + '.dmp', mode = 'a', sep = ';')
-    coo_wrt = CsvWriter(dist = '.4f', \
-        filt = ['id', 'east', 'north', 'elev', 'datetime'], \
-        fname = ofname + '.csv', mode = 'a', sep = ';')
     ts = TotalStation(stationtype, mu, iface)
 
     # load input data set
