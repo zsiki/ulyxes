@@ -54,7 +54,11 @@ class GeoReader(FileReader):
                 if key in self.codes and \
                     (self.filt is None or key in self.filt):
                     if key in (7, 8, 21):   # angles
-                        res[self.codes[key]] =  Angle(float(www[1]))
+                        # angles in DMS?
+                        if re.search('-', www[1]):
+                            res[self.codes[key]] =  Angle(www[1], 'DMS')
+                        else:
+                            res[self.codes[key]] =  Angle(float(www[1]))
                     elif key in (3, 6, 9, 11, 37, 38, 39):
                         res[self.codes[key]] =  float(www[1]) # numeric
                     elif key == 112:
