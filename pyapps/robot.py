@@ -130,6 +130,8 @@ if __name__ == "__main__":
     g = GeoReader(fname = ifname)
     directions = []
     max_faces = 0
+    # wake up instrument
+    ts.GetATR()
     while 1:
         w = g.GetNext()
         if w is None or len(w) == 0:
@@ -160,6 +162,7 @@ if __name__ == "__main__":
                     hz = hz - math.pi if hz > math.pi else hz + math.pi 
                     v = PI2 - v
                 j = 0   # try count
+                ans = ''
                 while j < maxtry:
                     if directions[i]['code'][0:3] == 'ATR':
                         ts.SetATR(1)
