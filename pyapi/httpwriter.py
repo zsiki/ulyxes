@@ -30,7 +30,7 @@ class HttpWriter(Writer):
 
     def __init__(self, name = None, angle = 'GON', dist = '.3f', 
                 dt = '%Y-%m-%d %H:%M:%S', filt = None,
-                url = 'http://localhost/get.php', mode = 'GET'):
+                url = 'http://localhost/monitoring/get.php', mode = 'GET'):
         """ Constructor
         """
         super(HttpWriter, self).__init__(name, angle, dist, dt, filt)
@@ -42,7 +42,6 @@ class HttpWriter(Writer):
 
             :param data: dictionary with observation data
         """
-        line = ""
         par = {}
         if data is None or self.DropData(data):
             logging.warning(" empty or inappropiate data not written")
@@ -51,12 +50,9 @@ class HttpWriter(Writer):
         data = self.ExtendData(data)
         for key, val in data.items():
             if self.filt is None or key in self.filt:
-                if self.mode == 'GET':
-                    line += key + "=" + self.StrVal(val) + "&"
-                else:
-                    par[key] = self.StrVal(val)
+                par[key] = self.StrVal(val)
         if self.mode == 'GET':
-            res = urllib.urlopen(self.url + '?' + line).read()
+            res = urllib.urlopen(self.url + '?' + urllib.urlencode(par)).read()
         else:
             d = urllib.urlencode(par)
             req = urllib2.Request(self.url, d)
@@ -65,5 +61,5 @@ class HttpWriter(Writer):
 
 if __name__ == "__main__":
     myfile = HttpWriter(mode='POST')
-    data = {'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'dist': 123.6581}
+    data = {'id': '1', 'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'distance': 123.6581}
     print (myfile.WriteData(data))
