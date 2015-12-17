@@ -95,7 +95,7 @@ if __name__ == "__main__":
         t_id = raw_input("Target id: ")
         if len(t_id) == 0:
             break
-        t_mode = raw_input("Target mode(ATR/PR/RL/OR): ")
+        t_mode = raw_input("Target mode(ATR/PR/RL/OR): ").upper()
         raw_input("Target on point and press enter")
         angles = ts.GetAngles()
         if otype == 'csv':
