@@ -158,8 +158,7 @@ while act.GetAngle() < PI2:   # Going around a whole circle
     intp = {}
     # Distance between the nextp and the plane
     dist = nextp['east'] * plane[0] + nextp['north'] * plane[1] + nextp['elev'] * plane[2] + plane[3]
-    logging.debug("Distance  between the point and the plane: %d - %.3f" % dist)
-    #print "dist=%.3f" % dist
+    logging.debug("Distance  between the point and the plane: %.3f" % dist)
     while abs(dist) > tol:   # Acceptable distance from the plane has to be lower than tolerance
         w = True
         # Calculation of the nadir point(intp) on the plane
