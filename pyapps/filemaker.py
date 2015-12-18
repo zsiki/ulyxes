@@ -9,9 +9,16 @@ Output file uses GeoEasy geo format or simple csv
 
     :param argv[1] output file with observations
     :param argv[2] (sensor): 1100/1800/1200, default 1200
-    :param argv[3] (port): serial port, default COM7
+    :param argv[3] (port): serial port, default COM1
 
 For each target point the point id and a type is 
+A mode have to be defined for each point
+ATRn - use automatic targeting, n is prism type id (1/2/3/...)
+PR - prism with manual targeting
+RL - reflectorless distance with manual targeting
+ARL - automatic reflectorless ditance measurement
+OR - orientation direction, manual targeting, no distance
+
 """
 import sys
 import re
@@ -25,6 +32,9 @@ from csvwriter import CsvWriter
 from totalstation import TotalStation
 
 logging.getLogger().setLevel(logging.WARNING)
+modes = ['ATR', 'PR', 'RL', 'RLA', 'OR']
+modes1 = ['ATR', 'ATR0', 'ATR1', 'ATR2', 'ATR3', 'ATR4', 'ATR5', 'ATR6', 'ATR7', 'PR', 'PR0', 'PR1', 'PR2', 'PR3', 'PR4', 'PR5', 'PR6', 'PR7', 'RL', 'RLA', 'OR']
+modes_str = '/'.join(modes)
 
 if __name__ == "__main__":
     # process commandline parameters
@@ -64,7 +74,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 3:
         port = sys.argv[3]
     else:
-        port = 'COM7'
+        port = 'COM1'
 
     iface = SerialIface("rs-232", port)
     if otype == 'geo':
@@ -95,7 +105,9 @@ if __name__ == "__main__":
         t_id = raw_input("Target id: ")
         if len(t_id) == 0:
             break
-        t_mode = raw_input("Target mode(ATR/PR/RL/OR): ").upper()
+        t_mode = ""
+        while not t_mode in modes1:
+            t_mode = raw_input("Target mode(" + modes_str + "): ").upper()
         raw_input("Target on point and press enter")
         angles = ts.GetAngles()
         if otype == 'csv':
