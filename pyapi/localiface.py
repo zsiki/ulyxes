@@ -23,7 +23,7 @@ class LocalIface(Iface):
 
             :param name: name of the interface (str), default 'Local'
             :param fname: name of the file the data read from
-            :param mode: seq/rand, seq=read the input sequentiali (NMEA GNSS), leica=get line with given key
+            :param mode: seq/rand, seq=read the input sequentially (e.g. NMEA GNSS), rand=get line with given key (e.g. leica totalstation)
     """
     def __init__(self, name = 'Local', fname = 'None', mode='seq'):
         """ Constructor
