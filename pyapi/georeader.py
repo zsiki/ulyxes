@@ -21,9 +21,9 @@ class GeoReader(FileReader):
         :param fname: name of input file
         :param filt: list of GeoEasy field codes to use, default None (use all)
     """
-    codes = {2: 'station', 3: 'ih', 4: 'code', 5: 'pid', 6: 'th',
+    codes = {2: 'station', 3: 'ih', 4: 'code', 5: 'id', 6: 'th',
              7: 'hz', 8: 'v', 9: 'distance', 11: 'hd', 21: 'hz',
-             37: 'north', 38: 'east', 39: 'elev', 62: 'pid', 112: 'faces'}
+             37: 'north', 38: 'east', 39: 'elev', 62: 'id', 112: 'faces'}
 
     def __init__(self, name = None, fname = None, filt = None):
         """ Constructor
