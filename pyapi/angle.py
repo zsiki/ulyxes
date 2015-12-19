@@ -193,6 +193,7 @@ Operators supported:
         """
         if self.value < 0:
             self.value += PI2
+        return self
 
     def __str__(self):
         """ GON string representation of angle
