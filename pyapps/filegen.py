@@ -6,10 +6,10 @@
 
 Sample application of Ulyxes PyAPI to create input file for robot
 Output file uses GeoEasy geo format. The first point in the coordinate list is
-the station.
+the station if no station id given.
 
-    :param argv[1] output file with observations, geo or dmp file
-    :param argv[2] input GeoEasy coo or csv coordinate file
+    :param argv[1] input GeoEasy coo or csv coordinate file
+    :param argv[2] output file with observations, geo or dmp file (default stdout)
     :param argv[3] station id (default first point in input)
     :param argv[4] instrument height (default 0)
 """
@@ -27,14 +27,15 @@ from filemaker import modes1
 
 if __name__ == "__main__":
     # process commandline parameters
-    if len(sys.argv) > 2:
-        ofname = sys.argv[1]
-        ifname = sys.argv[2]
+    if len(sys.argv) > 1:
+        ifname = sys.argv[1]
     else:
-        print ("Usage: filegen.py output_geo_file input_coo_file [station_id] [instrument_height]")
-        #exit(-1)
-        ofname = 'xxx.geo'
-        ifname = 'test.coo'
+        print ("Usage: filegen.py input_coo_file output_geo_file [station_id] [instrument_height]")
+        exit(-1)
+    if len(sys.argv) > 2:
+        ofname = sys.argv[2]
+    else:
+        ofname = 'stdout'
     station_id = None
     if len(sys.argv) > 3:
         station_id = sys.argv[3]
@@ -48,8 +49,8 @@ if __name__ == "__main__":
             mode = 'w')
     else:
         geo_wrt = CsvWriter(dist = '.4f', angle = 'RAD', fname = ofname, \
-            header = True, filt = ['station', 'id', 'hz', 'v', 'faces', 'code'], \
-            mode = 'w')
+            header = True, mode = 'w', \
+            filt = ['station', 'id', 'hz', 'v', 'faces', 'ih', 'code'])
     if ifname[-4:] == '.coo':
         geo_rdr = GeoReader(fname = ifname)
     else:
@@ -63,7 +64,6 @@ if __name__ == "__main__":
         if 'id' in w and 'east' in w and 'north' in w and 'elev' in w:
             # use only 3D points
             coords.append(w)
-            print w
     # get station coordinates
     station_east = station_north = station_elev = None
     if station_id is None:
@@ -82,10 +82,12 @@ if __name__ == "__main__":
     if station_east is None:
         print "station coordinates not found: ", station_id
         exit(-1)
-    obs = {}
-    obs['station'] = station_id
-    obs['ih'] = 0
-    geo_wrt.WriteData(obs)
+    if ofname[-4:] == '.geo':
+        # write station record for geo
+        obs = {}
+        obs['station'] = station_id
+        obs['ih'] = 0
+        geo_wrt.WriteData(obs)
     for coo in coords:
         if station_id == coo['id']:
             #skip station
@@ -99,16 +101,14 @@ if __name__ == "__main__":
         zenith = math.atan(dist / math.fabs(d_elev))
         if d_elev < 0:
             zenith += math.pi / 2.0
-        obs['station'] = station_id
+        if ofname[-4:] != '.geo':
+            obs['station'] = station_id
+        obs['id'] = coo['id']
+        obs['ih'] = station_ih
         obs['hz'] = Angle(bearing).Positive()
-        #obs['hz'].Positive()
-        print "hz=" +obs['hz'].GetAngle('DMS')
         obs['v'] = Angle(zenith).Positive()
-        #obs['v'].Positive()
-        print "v=" + obs['v'].GetAngle('DMS')
         obs['code'] = 'ATR'
         obs['faces'] = 1
         if 'code' in coo and coo['code'] in modes1:
             obs['code'] = coo['code']
-        print obs
         geo_wrt.WriteData(obs)
