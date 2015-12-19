@@ -57,8 +57,8 @@ class LeicaTCRA1100(LeicaMeasureUnit):
         'POWERSEARCH': 9052,
         'SEARCHNEXT': 9051,
         'SETREDLASER': 1004,
-		'GETPT': 17009,
-		'SETPT': 17008
+        'GETPT': 17009,
+        'SETPT': 17008
     }
 
     # Constants for EMD modes
@@ -75,6 +75,20 @@ class LeicaTCRA1100(LeicaMeasureUnit):
         """
         return ['ROBOT', 'ANGLE', 'EDM', 'ATR', 'LOCK', 'RL', \
             'LASER', 'POSITION']
+
+    def SetPrismTypeMsg(self, typ):
+        """ Set prism type
+
+            :param typ: prism type (0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini)
+        """
+        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETPT'], typ)
+
+    def GetPrismTypeMsg(self):
+        """ Get prism type
+
+            :returns: prism type (0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini)
+        """
+        return '%R1Q,{0:d}:'.format(self.codes['GETPT'])
 
     def SetRedLaserMsg(self, on):
         """ Set red laser on/off
