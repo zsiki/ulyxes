@@ -62,6 +62,9 @@ logging.getLogger().setLevel(logging.WARNING)
 
 class Robot(object):
     """ manage robotic observations
+
+        :param ifname: input file name .py/.geo/.dmp file
+        :param ofname: output file name .csv or an URL
     """
 
     def __init__(self, ifname, ofname = 'stdout', stationtype = '1100',
@@ -111,13 +114,10 @@ class Robot(object):
         self.ts = TotalStation(stationtype, mu, iface)
         self.maxtry = maxtry # number of retry if failed
         self.directions, self.max_faces = self.load(ifname)
-        print self.max_faces
         if ifname[-4:] == '.geo':
             self.coordinates, _ = self.load(ifname[:-4] + '.coo')
         else:
             self.coordinates, _ = self.load(ifname[:-4] + '.csv')
-        print self.directions
-        print self.coordinates
         self.station = '???'
         if 'station' in self.directions[0]:
             self.station = self.directions[0]['station']
@@ -127,9 +127,10 @@ class Robot(object):
         self.station_east = self.station_north = self.station_elev = 0
         for coo in self.coordinates:
             if coo['id'] == self.station:
-                   self.station_east = coo['east']
-                   self.station_north = coo['north']
-                   self.station_elev = coo['elev']
+                self.station_east = coo['east']
+                self.station_north = coo['north']
+                self.station_elev = coo['elev']
+                break
 
     def load(self, ifn):
         """ load observation or coordinate data from file
@@ -138,7 +139,6 @@ class Robot(object):
             :returns: observation list and max faces to measure
         """
         # load input data set
-        print ifn
         if ifn[-4:] in ('.geo', '.coo'):
             g = GeoReader(fname = ifn)
         else:
@@ -149,9 +149,14 @@ class Robot(object):
             w = g.GetNext()
             if w is None or len(w) == 0:
                 break
-            directions.append(w)
-            if 'faces' in w and max_faces < w['faces']:
+            if not 'code' in w:
+                w['code'] = 'ATR'
+            if not 'faces' in w:
+                # default to 1 face
+                w['faces'] = 1
+            if max_faces < w['faces']:
                 max_faces = w['faces']
+            directions.append(w)
         return (directions, max_faces)
 
     def run(self):
@@ -252,8 +257,14 @@ class Robot(object):
         self.ts.Move(self.directions[1]['hz'], self.directions[1]['v'], 0)
 
 if __name__ == "__main__":
+
+    import os.path
+
     if len(sys.argv) > 1:
         ifn = sys.argv[1]
+        if not os.path.isfile(ifn) and not os.path.isfile(ifn + '.geo'):
+            print ("Input file doesn't exists:" + ifn)
+            exit(-1)
     else:
         print ("Usage: robot.py input_file [output_file] [sensor] [serial_port]")
         print ("  or   robot.py config_file.py")
