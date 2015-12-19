@@ -1,5 +1,5 @@
-ulyxes
-======
+ulyxes (Ultimate Y X Estimation System)
+=======================================
 
 Surveyor's sensor data processing system
 http://www.geod.bme.hu/ulyxes
