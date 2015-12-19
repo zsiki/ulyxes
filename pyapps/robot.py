@@ -257,15 +257,14 @@ if __name__ == "__main__":
     else:
         print ("Usage: robot.py input_file [output_file] [sensor] [serial_port]")
         print ("  or   robot.py config_file.py")
-        ifn = 'test.geo'
-        #exit(-1)
+        exit(-1)
     # output file
     if len(sys.argv) > 2:
         ofn = sys.argv[2]
     else:
-        #ofn = 'stdout'
+        ofn = 'stdout'
         #ofn = 'http://192.168.1.108/monitoring/get.php'
-        ofn = 'http://192.168.7.145/monitoring/get.php'
+        #ofn = 'http://192.168.7.145/monitoring/get.php'
     if ofn[-4:] != '.dmp' and ofn[-4:] != '.csv' and ofn != 'stdout' and ofn[:4] != 'http':
         print "Unknown output type"
         exit(1)
