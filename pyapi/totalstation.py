@@ -128,7 +128,7 @@ class TotalStation(Instrument):
         msg = self.measureUnit.LockInMsg()
         return self._process(msg)
 
-    def SetAtmCorr(self, valueOfLambda, pres, dryTemp, wetTemp):
+    def SetAtmCorr(self, valueOfLambda, pres, dryTemp, wetTemp = None):
         """ Set atmospheric correction
 
             :param valueOfLambda: TODO
@@ -136,6 +136,8 @@ class TotalStation(Instrument):
             :param dryTemp: dry temperature
             :param wetTemp: wet temperature
         """
+        if wetTemp is None:
+            wetTemp = dryTemp - 5.0
         msg = self.measureUnit.SetAtmCorrMsg(valueOfLambda, pres, dryTemp,
             wetTemp)
         return self._process(msg)
