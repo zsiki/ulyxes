@@ -221,7 +221,7 @@ class LeicaMeasureUnit(MeasureUnit):
             :param wet: wet temperature
             :returns: set atmospheric correction message
         """
-        return '%R1Q,{0:d}:{1:f},{2:f},{3:f},{4:f}'.format( \
+        return '%R1Q,{0:d}:{1:.8f},{2:f},{3:f},{4:f}'.format( \
             self.codes['SETATMCORR'], valueOfLambda, pres, dry, wet)
 
     def GetAtmCorrMsg(self):
