@@ -89,20 +89,6 @@ class LeicaTPS1200(LeicaMeasureUnit):
             self.codes['SETSEARCHAREA'], hzCenter.GetAngle(),
             vCenter.GetAngle(), hzRange.GetAngle(), vRange.GetAngle(), on)
 
-    def SetPrismTypeMsg(self, typ):
-        """ Set prism type
-
-            :param typ: prism type (0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini)
-        """
-        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETPT'], typ)        
-
-    def GetPrismTypeMsg(self):
-        """ Get prism type
-
-            :returns: prism type (0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini)
-        """
-        return '%R1Q,{0:d}:'.format(self.codes['GETPT'])
-
     def PowerSearchMsg(self):
         """ Power search
         

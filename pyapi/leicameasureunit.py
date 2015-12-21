@@ -96,7 +96,7 @@ class LeicaMeasureUnit(MeasureUnit):
             ansBufflist = re.split(':|,', ans)
             try:
                 errCode = int(ansBufflist[3])
-            except:
+            except ValueError:
                 errCode = -1   # invalid answer
             if errCode != 0:
                 logging.error(" error from instrument: %d", errCode)
@@ -175,7 +175,23 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         return '%R1Q,{0:d}:'.format(self.codes['GETPC'])
 
-    def SetATRMsg(self, atr):
+
+
+    def SetPrismTypeMsg(self, typ):
+        """ Set prism type
+
+            :param typ: prism type (0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini)
+        """
+        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETPT'], typ)
+
+    def GetPrismTypeMsg(self):
+        """ Get prism type
+
+            :returns: prism type (0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini)
+        """
+        return '%R1Q,{0:d}:'.format(self.codes['GETPT'])
+
+    def SetAtrMsg(self, atr):
         """ Set ATR status on/off
         
             :param atr: 0/1 = off/on
