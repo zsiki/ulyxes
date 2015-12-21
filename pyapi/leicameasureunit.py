@@ -175,8 +175,6 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         return '%R1Q,{0:d}:'.format(self.codes['GETPC'])
 
-
-
     def SetPrismTypeMsg(self, typ):
         """ Set prism type
 
@@ -191,7 +189,7 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         return '%R1Q,{0:d}:'.format(self.codes['GETPT'])
 
-    def SetAtrMsg(self, atr):
+    def SetATRMsg(self, atr):
         """ Set ATR status on/off
         
             :param atr: 0/1 = off/on
