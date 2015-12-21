@@ -96,11 +96,11 @@ if __name__ == "__main__":
         d_north = coo['north'] - station_north
         d_east = coo['east'] - station_east
         d_elev = coo['elev'] - station_elev - station_ih
-        bearing = math.atan2(d_north, d_east)
-        dist = math.hypot(d_north, d_east)
+        bearing = math.atan2(d_east, d_north)
+        dist = math.hypot(d_east, d_north)
         zenith = math.atan(dist / math.fabs(d_elev))
         if d_elev < 0:
-            zenith += math.pi / 2.0
+            zenith = math.pi - zenith
         if ofname[-4:] != '.geo':
             obs['station'] = station_id
         obs['id'] = coo['id']
