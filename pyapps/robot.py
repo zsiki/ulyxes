@@ -292,12 +292,15 @@ if __name__ == "__main__":
         p = sys.argv[4]
     else:
         p = '/dev/ttyUSB0'
+    met = None
+    if len(sys.argv) > 5:
+        met = sys.argv[5]
 
     r = Robot(ifn, ofn, st, p)
     # met sensor
-    if len(sys.argv) > 5:
+    if not met is None:
         atm = r.ts.GetAtmCorr()     # get current settings
-        if sys.argv[5] == 'BMP180':
+        if met == 'BMP180':
             # bmp180 sensor
             bmp_mu = BMP180MeasureUnit()
             i2c = I2CIface(None, 0x77)
