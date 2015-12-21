@@ -47,6 +47,8 @@ import sys
 import re
 import math
 import logging
+import urllib2
+import json
 
 sys.path.append('../pyapi/')
 
@@ -57,6 +59,9 @@ from georeader import GeoReader
 from csvreader import CsvReader
 from httpwriter import HttpWriter
 from totalstation import TotalStation
+from bmp180measureunit import BMP180MeasureUnit
+from i2ciface import I2CIface
+from bmp180 import BMP180
 
 logging.getLogger().setLevel(logging.WARNING)
 
@@ -266,7 +271,7 @@ if __name__ == "__main__":
             print ("Input file doesn't exists:" + ifn)
             exit(-1)
     else:
-        print ("Usage: robot.py input_file [output_file] [sensor] [serial_port]")
+        print ("Usage: robot.py input_file [output_file] [sensor] [serial_port] [BMP180]")
         print ("  or   robot.py config_file.py")
         exit(-1)
     # output file
@@ -289,4 +294,21 @@ if __name__ == "__main__":
         p = '/dev/ttyUSB0'
 
     r = Robot(ifn, ofn, st, p)
+    # met sensor
+    if len(sys.argv) > 5:
+        atm = r.ts.GetAtmCorr()     # get current settings
+        if sys.argv[5] == 'BMP180':
+            # bmp180 sensor
+            bmp_mu = BMP180MeasureUnit()
+            i2c = I2CIface(None, 0x77)
+            bmp = BMP180('BMP180', bmp_mu, i2c)
+            pres = float(bmp.GetPressure()['pressure']) / 100.0
+            temp = float(bmp.GetTemp()['temp'])
+        else:
+            # met data from the net
+            response = urllib2.urlopen('http://api.openweathermap.org/data/2.5/weather?q=budapest&appid=13152b0308b85a39cc9a161e241ec2cf')
+            data = json.load(response)['main']
+            pres = data['pressure']
+            temp = data['temp'] - 273.1
+        r.ts.SetAtmCorr(float(atm['lambda']), pres, temp)
     r.run()
