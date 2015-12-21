@@ -139,6 +139,7 @@ class LeicaMeasureUnit(MeasureUnit):
                 res['east'] = float(ansBufflist[4])
                 res['north'] = float(ansBufflist[5])
                 res['elev'] = float(ansBufflist[6])
+                res['ih'] = float(ansBufflist[7])
             elif commandID == self.codes['GETEDMMODE']:
                 res['edmMode'] = int(ansBufflist[4])
             #Coords()
@@ -270,7 +271,7 @@ class LeicaMeasureUnit(MeasureUnit):
             :param e: easting
             :param n: northing
             :param z: elevation
-            :returns: 0 or error code
+            :returns: set station coordinates message
         """
         return '%R1Q,{0:d}:{1:f},{2:f},{3:f}'.format(self.codes['SETSTN'], \
             e, n, z)
@@ -278,7 +279,7 @@ class LeicaMeasureUnit(MeasureUnit):
     def GetStationMsg(self):
         """ Get station coordinates
         
-        :returns: TODO
+        :returns: get station coordinates message
           
         """
         return '%R1Q,{0:d}:'.format(self.codes['GETSTN'])
