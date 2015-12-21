@@ -131,7 +131,7 @@ class TotalStation(Instrument):
     def SetAtmCorr(self, valueOfLambda, pres, dryTemp, wetTemp = None):
         """ Set atmospheric correction
 
-            :param valueOfLambda: TODO
+            :param valueOfLambda: instrument specific constant
             :param pres: air presure
             :param dryTemp: dry temperature
             :param wetTemp: wet temperature
@@ -183,7 +183,7 @@ class TotalStation(Instrument):
     def    GetStation(self):
         """ Get station coordinates
 
-            :returns: station coordinates (dictionary)
+            :returns: station coordinates and instrument height (dictionary)
         """
         msg = self.measureUnit.GetStationMsg()
         return self._process(msg)
