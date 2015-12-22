@@ -37,8 +37,8 @@ class BMP180(Instrument):
         msg = self.measureUnit.LoadCalibrationMsg()
         return self._process(msg)
 
-    def GetPressure(self, withTemp = 1):
-        """ Get pressure from sensor
+    def _GetPressure(self, withTemp = 1):
+        """ Get pressure in Pascals from sensor
 
             :param withTemp: measure temperature also for fresh correction value (B5 stored in measure unit)
             :returns: pressure in Pascals
@@ -48,6 +48,16 @@ class BMP180(Instrument):
         msg = self.measureUnit.GetPressureMsg()
         return self._process(msg)
 
+    def GetPressure(self, withTemp = 1):
+        """ Get pressure in HPa from sensor
+
+            :param withTemp: measure temperature also for fresh correction value (B5 stored in measure unit)
+            :returns: air pressure in HPa
+        """
+        w = self._GetPressure(withTemp)
+        w['pressure'] /= 100.0
+        return w
+        
     def GetTemp(self):
         """ Get temperature from sensor
 
@@ -63,7 +73,7 @@ class BMP180(Instrument):
             :param pressure: know pressure at elevation, default None means get the pressure from sensor
         """
         if pressure is None:
-            pressure = self.GetPressure()['pressure']
+            pressure = self._GetPressure(1)['pressure']
         self.p0 = pressure / pow(1.0 - altitude / 44330.0, 5.255)
 
     def GetAltitude(self):
