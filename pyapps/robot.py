@@ -47,8 +47,6 @@ import sys
 import re
 import math
 import logging
-import urllib2
-import json
 
 sys.path.append('../pyapi/')
 
@@ -59,9 +57,6 @@ from georeader import GeoReader
 from csvreader import CsvReader
 from httpwriter import HttpWriter
 from totalstation import TotalStation
-from bmp180measureunit import BMP180MeasureUnit
-from i2ciface import I2CIface
-from bmp180 import BMP180
 
 logging.getLogger().setLevel(logging.WARNING)
 
@@ -264,6 +259,12 @@ class Robot(object):
 if __name__ == "__main__":
 
     import os.path
+    from bmp180measureunit import BMP180MeasureUnit
+    from i2ciface import I2CIface
+    from bmp180 import BMP180
+    from webmetmeasureunit import WebMetMeasureUnit
+    from webiface import WebIface
+    from webmet import WebMet
 
     if len(sys.argv) > 1:
         ifn = sys.argv[1]
@@ -299,21 +300,27 @@ if __name__ == "__main__":
     r = Robot(ifn, ofn, st, p)
     if r.ts.measureIface.state != r.ts.measureIface.IF_OK:
         exit(-1)   # no serial communication available
+    r.ts.GetATR()               # wake up instrument
     # met sensor
     if not met is None:
-        atm = r.ts.GetAtmCorr()     # get current settings
+        atm = r.ts.GetAtmCorr()     # get current settings from ts
         if met == 'BMP180':
             # bmp180 sensor
             bmp_mu = BMP180MeasureUnit()
-            i2c = I2CIface(None, 0x77)
+            i2c = I2CIface(None, 0x77)   # TODO error handling if no sensor
             bmp = BMP180('BMP180', bmp_mu, i2c)
-            pres = float(bmp.GetPressure()['pressure']) / 100.0
+            pres = float(bmp.GetPressure()['pressure'])
             temp = float(bmp.GetTemp()['temp'])
+            wet = None	# wet temperature unknown
         else:
             # met data from the net
-            response = urllib2.urlopen('http://api.openweathermap.org/data/2.5/weather?q=budapest&appid=13152b0308b85a39cc9a161e241ec2cf')
-            data = json.load(response)['main']
+            wi = WebIface("demo", "http://api.openweathermap.org/data/2.5/weather", "json")
+            web_mu = WebMetMeasureUnit(msg="q=budapest&appid=13152b0308b85a39cc9a161e241ec2cf")
+            web = WebMet('WebMet', mu, wi)
+            data = web.GetPressure()
             pres = data['pressure']
-            temp = data['temp'] - 273.1
-        r.ts.SetAtmCorr(float(atm['lambda']), pres, temp)
+            temp = data['temp']
+            humi = data['huminidity']
+            wet = web.GetWetTemp(temp, humi)
+        r.ts.SetAtmCorr(float(atm['lambda']), pres, temp, wet)
     r.run()
