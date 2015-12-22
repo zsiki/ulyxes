@@ -139,7 +139,6 @@ class BMP180MeasureUnit(MeasureUnit):
             X2 = (-7357 * p) >> 16
             res['pressure'] = p + ((X1 + X2 + 3791) >> 4)
         elif len(msg) == 11:
-            print ans
             self.cal_AC1 = ans['data'][0]
             self.cal_AC2 = ans['data'][1]
             self.cal_AC3 = ans['data'][2]
