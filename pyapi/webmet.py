@@ -73,6 +73,7 @@ class WebMet(Instrument):
         pressure = self.GetPressure()['pressure'] * 100
         return 44330.0 * (1.0 - pow(pressure / self.p0, (1.0 / 5.255)))
 
+    @staticmethod
     def GetWetTemp(self, temp, humi):
         """ Calculate wet temperature from humidity and temperature
             formula from http://journals.ametsoc.org/doi/pdf/10.1175/JAMC-D-11-0143.1
@@ -115,7 +116,7 @@ if __name__ == "__main__":
     else:
         elevation = 100                # default elevation for start point
     mu = WebMetMeasureUnit(msg="q=budapest&appid=13152b0308b85a39cc9a161e241ec2cf")
-    wi = w = WebIface("demo", "http://api.openweathermap.org/data/2.5/weather", "json")
+    wi = WebIface("demo", "http://api.openweathermap.org/data/2.5/weather", "json")
     fw = FileWriter(fname=log, filt=['pressure', 'temp', 'huminidity', 'datetime'])
     web = WebMet('WebMet', mu, wi)
     for i in range(n):
