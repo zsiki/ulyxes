@@ -297,6 +297,8 @@ if __name__ == "__main__":
         met = sys.argv[5]
 
     r = Robot(ifn, ofn, st, p)
+    if r.ts.measureIface.state != r.ts.measureIface.IF_OK:
+        exit(-1)   # no serial communication available
     # met sensor
     if not met is None:
         atm = r.ts.GetAtmCorr()     # get current settings
