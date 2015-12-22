@@ -53,6 +53,7 @@ class BMP180MeasureUnit(MeasureUnit):
         """
         super(BMP180MeasureUnit, self).__init__(name, type)
         self.mode = mode
+        # calibration data from catalog
         self.cal_AC1 = 7186
         self.cal_AC2 = -1064
         self.cal_AC3 = -14482
@@ -67,10 +68,27 @@ class BMP180MeasureUnit(MeasureUnit):
         # temperature coefficient
         self.B5 = None
 
+    def LoadCalibrationMsg(self):
+        """ Load calibration data from sensor message
+
+            :returns: load calibration data message
+        """
+        return (('readS16BE', BMP180_CAL_AC1),
+                ('readS16BE', BMP180_CAL_AC2),
+                ('readS16BE', BMP180_CAL_AC3),
+                ('readU16BE', BMP180_CAL_AC4),  # unsigned!
+                ('readS16BE', BMP180_CAL_AC5),
+                ('readS16BE', BMP180_CAL_AC6),
+                ('readS16BE', BMP180_CAL_B1),
+                ('readS16BE', BMP180_CAL_B2),
+                ('readS16BE', BMP180_CAL_MB),
+                ('readS16BE', BMP180_CAL_MC),
+                ('readS16BE', BMP180_CAL_MD))
+
     def GetTempMsg(self):
         """ Read temperature message
 
-            :returns read temperature message
+            :returns: read temperature message
         """
         return (('write8', BMP180_CONTROL, BMP180_READTEMPCMD),
                 ('sleep', BMP180_DELAY[0]),
@@ -120,6 +138,20 @@ class BMP180MeasureUnit(MeasureUnit):
             X1 = (X1 * 3038) >> 16
             X2 = (-7357 * p) >> 16
             res['pressure'] = p + ((X1 + X2 + 3791) >> 4)
+        elif len(msg) == 11:
+            print ans
+            self.cal_AC1 = ans['data'][0]
+            self.cal_AC2 = ans['data'][1]
+            self.cal_AC3 = ans['data'][2]
+            self.cal_AC4 = ans['data'][3]
+            self.cal_AC5 = ans['data'][4]
+            self.cal_AC6 = ans['data'][5]
+            self.cal_B1 = ans['data'][6]
+            self.cal_B2 = ans['data'][7]
+            self.cal_MB = ans['data'][8]
+            self.cal_MC = ans['data'][9]
+            self.cal_MD = ans['data'][10]
+            res = True
         return res
         
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ Based on BMP085.py created by Tony DiCola
 """
 
 from instrument import Instrument
-from bmp180measureunit import *
+from bmp180measureunit import BMP180MeasureUnit
 
 class BMP180(Instrument):
     """ BMP180/BMP085 air pressure sensor
@@ -31,14 +31,16 @@ class BMP180(Instrument):
         self.LoadCalibration()
 
     def LoadCalibration(self):
-        # TODO read calibration data from sensor
-        #self.measureUnit.cal_AC1 = self.measureIface.Send(('readS16BE', BMP180_CAL_AC1))['data']
-        pass
+        """ read calibration data from sensor
+
+        """
+        msg = self.measureUnit.LoadCalibrationMsg()
+        return self._process(msg)
 
     def GetPressure(self, withTemp = 1):
         """ Get pressure from sensor
 
-            :param withTemp: measure temperature also for fresh correction value (B5 sotred in measure unit)
+            :param withTemp: measure temperature also for fresh correction value (B5 stored in measure unit)
             :returns: pressure in Pascals
         """
         if withTemp:
@@ -107,6 +109,7 @@ if __name__ == "__main__":
     i2c = I2CIface(None, 0x77)
     fw = FileWriter(fname = 'bmp180.log', filt=['elev', 'pressure', 'temp', 'datetime'])
     bmp = BMP180('BMP180', mu, i2c)
+    bmp.LoadCalibration()
     bmp.SetSealevel(elevation)
     #bmp.GetTemp()
     for i in range(n):
