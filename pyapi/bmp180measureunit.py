@@ -137,7 +137,7 @@ class BMP180MeasureUnit(MeasureUnit):
             X1 = (p >> 8) * (p >> 8)
             X1 = (X1 * 3038) >> 16
             X2 = (-7357 * p) >> 16
-            res['pressure'] = p + ((X1 + X2 + 3791) >> 4)
+            res['pressure'] = (p + ((X1 + X2 + 3791) >> 4)) / 100.0
         elif len(msg) == 11:
             self.cal_AC1 = ans['data'][0]
             self.cal_AC2 = ans['data'][1]
