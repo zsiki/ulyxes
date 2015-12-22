@@ -12,10 +12,9 @@
 Based on BMP085.py created by Tony DiCola
 """
 
-from instrument import Instrument
-from bmp180measureunit import BMP180MeasureUnit
+from webmet import WebMet
 
-class BMP180(Instrument):
+class BMP180(WebMet):
     """ BMP180/BMP085 air pressure sensor
 
             :param name: name of sensor (str)
@@ -27,7 +26,6 @@ class BMP180(Instrument):
         """ constructor
         """
         super(BMP180, self).__init__(name, measureUnit, measureIface, writerUnit)
-        self.p0 = None    # sealevel pressure not set
         self.LoadCalibration()
 
     def LoadCalibration(self):
@@ -37,8 +35,8 @@ class BMP180(Instrument):
         msg = self.measureUnit.LoadCalibrationMsg()
         return self._process(msg)
 
-    def _GetPressure(self, withTemp = 1):
-        """ Get pressure in Pascals from sensor
+    def GetPressure(self, withTemp = 1):
+        """ Get pressure in hecto Pascals (hPa) from sensor
 
             :param withTemp: measure temperature also for fresh correction value (B5 stored in measure unit)
             :returns: pressure in Pascals
@@ -48,16 +46,6 @@ class BMP180(Instrument):
         msg = self.measureUnit.GetPressureMsg()
         return self._process(msg)
 
-    def GetPressure(self, withTemp = 1):
-        """ Get pressure in HPa from sensor
-
-            :param withTemp: measure temperature also for fresh correction value (B5 stored in measure unit)
-            :returns: air pressure in HPa
-        """
-        w = self._GetPressure(withTemp)
-        w['pressure'] /= 100.0
-        return w
-        
     def GetTemp(self):
         """ Get temperature from sensor
 
@@ -66,25 +54,12 @@ class BMP180(Instrument):
         msg = self.measureUnit.GetTempMsg()
         return self._process(msg)
 
-    def SetSealevel(self, altitude, pressure = None):
-        """ calculate sealevel pressure from known elevation and pressure
+    def GetHumi(self):
+        """ Get huminidity from sensor
 
-            :param altitude: known elevation (float) meters
-            :param pressure: know pressure at elevation, default None means get the pressure from sensor
+            :returns: None (no huminidity available)
         """
-        if pressure is None:
-            pressure = self._GetPressure(1)['pressure']
-        self.p0 = pressure / pow(1.0 - altitude / 44330.0, 5.255)
-
-    def GetAltitude(self):
-        """ calculate altitude from sealevel pressure
-
-            :returns: altitude
-        """
-        if self.p0 is None:
-            return None    # no reference pressure
-        pressure = self.GetPressure()['pressure']
-        return 44330.0 * (1.0 - pow(pressure / self.p0, (1.0 / 5.255)))
+        return None
 
 if __name__ == "__main__":
     """ bmp180 demo logger
