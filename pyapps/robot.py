@@ -188,59 +188,73 @@ class Robot(object):
                     j = 0   # try count
                     ans = ''
                     while j < self.maxtry:
+                        res = {}
                         if self.directions[i]['code'][0:3] == 'ATR':
-                            self.ts.SetATR(1)
-                            self.ts.SetEDMMode('STANDARD')
-                            if len(self.directions[i]['code']) > 3:
-                                self.ts.SetPrismType(int(self.directions[i]['code'][3:]))
-                            self.ts.Move(Angle(hz), Angle(v), 1)
-                            self.ts.Measure()
+                            if j == 0: # first try set target
+                                self.ts.SetATR(1)
+                                self.ts.SetEDMMode('STANDARD')
+                                if len(self.directions[i]['code']) > 3:
+                                    self.ts.SetPrismType(int(self.directions[i]['code'][3:]))
+                            res = self.ts.Move(Angle(hz), Angle(v), 1)
+                            if not 'errorCode' in res:
+                                res = self.ts.Measure()
                         elif self.directions[i]['code'][0:2] == 'PR':
-                            # prism type: 0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini
-                            self.ts.SetATR(0)
-                            self.ts.SetEDMMode('STANDARD')
-                            if len(self.directions[i]['code']) > 2:
-                                self.ts.SetPrismType(int(self.directions[i]['code'][2:]))
-                            self.ts.Move(Angle(hz), Angle(v), 0)
+                            if j == 0:
+                                # prism type: 0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini
+                                self.ts.SetATR(0)
+                                self.ts.SetEDMMode('STANDARD')
+                                if len(self.directions[i]['code']) > 2:
+                                    self.ts.SetPrismType(int(self.directions[i]['code'][2:]))
+                            res = self.ts.Move(Angle(hz), Angle(v), 0)
                             # wait for user to target on point
                             ans = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
-                            if ans != 's':
-                                self.ts.Measure()
+                            if ans == 's':
+                                j = self.maxtry
+                                break
+                            res = self.ts.Measure()
                         elif self.directions[i]['code'] == 'RL':
                             self.ts.SetATR(0)
                             self.ts.SetEDMMode('RLSTANDARD')
                             self.ts.Move(Angle(hz), Angle(v), 0)
                             # wait for user to target on point
                             ans = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
-                            if ans != 's':
-                                self.ts.Measure()
+                            if ans == 's':
+                                j = self.maxtry
+                                break
+                            res = self.ts.Measure()
                         elif self.directions[i]['code'] == 'RLA':
-                            self.ts.SetATR(0)
-                            self.ts.SetEDMMode('RLSTANDARD')
-                            self.ts.Move(Angle(hz), Angle(v), 0)
-                            self.ts.Measure()
+                            if j == 0:
+                                self.ts.SetATR(0)
+                                self.ts.SetEDMMode('RLSTANDARD')
+                            res = self.ts.Move(Angle(hz), Angle(v), 0)
+                            if not 'errorCode' in res:
+                                res = self.ts.Measure()
                         elif self.directions[i]['code'] == 'OR':
-                            self.ts.Move(Angle(hz), Angle(v), 0)
+                            res = self.ts.Move(Angle(hz), Angle(v), 0)
                             # wait for user to target on point
                             ans = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
+                            if ans == 's':
+                                j = self.maxtry
+                                break
                         else:
+                            # unknown code skip
                             j = self.maxtry
                             break
-                        if ans != 's':
-                            if self.directions[i]['code'] == 'OR':
-                                obs = self.ts.GetAngles()
-                            else:
-                                obs = self.ts.GetMeasure()
-                            if self.ts.measureIface.state != self.ts.measureIface.IF_OK or 'errorCode' in obs:
-                                self.ts.measureIface.state = self.ts.measureIface.IF_OK
-                                j = j + 1
-                                continue
-                            else:
-                                break   # observation OK
+                        if 'errorCode' in res:
+                            j += 1
+                            continue
+                        if self.directions[i]['code'] == 'OR':
+                            obs = self.ts.GetAngles()
                         else:
-                            j = self.maxtry
+                            obs = self.ts.GetMeasure()
+                        if self.ts.measureIface.state != self.ts.measureIface.IF_OK or 'errorCode' in obs:
+                            self.ts.measureIface.state = self.ts.measureIface.IF_OK
+                            j += 1
+                            continue
+                        else:
+                            break   # observation OK
                     if j >= self.maxtry:
-                        print "Cannot measure point %s" % pn
+                        logging.error("Cannot measure point %s" % pn)
                         continue
                     obs['id'] = pn
                     obs['station'] = self.directions[0]['station']
@@ -311,16 +325,16 @@ if __name__ == "__main__":
             bmp = BMP180('BMP180', bmp_mu, i2c)
             pres = float(bmp.GetPressure()['pressure'])
             temp = float(bmp.GetTemp()['temp'])
-            wet = None	# wet temperature unknown
+            wet = None    # wet temperature unknown
         else:
             # met data from the net
             wi = WebIface("demo", "http://api.openweathermap.org/data/2.5/weather", "json")
             web_mu = WebMetMeasureUnit(msg="q=budapest&appid=13152b0308b85a39cc9a161e241ec2cf")
-            web = WebMet('WebMet', mu, wi)
+            web = WebMet('WebMet', web_mu, wi)
             data = web.GetPressure()
             pres = data['pressure']
             temp = data['temp']
-            humi = data['huminidity']
+            humi = data['humidity']
             wet = web.GetWetTemp(temp, humi)
         r.ts.SetAtmCorr(float(atm['lambda']), pres, temp, wet)
     r.run()
