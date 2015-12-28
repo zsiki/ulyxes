@@ -6,10 +6,15 @@
 
 Sample application of Ulyxes PyAPI to measure a serie of points
 
-    :param argv[1] input file with directions
-    :param argv[2] output file with observations
-    :param argv[3] (sensor): 1100/1800/1200, default 1200
-    :param argv[4] (port): serial port, default COM7
+    :param argv[1]: input file with directions
+    :param argv[2]: output file with observations default stdout
+    :param argv[3]: sensor tcra1103/1100/tca1800/1800/tps1201/1200, default 1200
+    :param argv[4]: serial port, default COM1
+    :param argv[5]: number of retry if target not found, default 3
+    :param argv[6]: delay between retries default 0
+    :param argv[7]: name of met sensor BMP180/webmet, default None
+    :param argv[8]: address of met sensor, i2c addres for BMP180 or internet address of webmet service
+    :param argv[9]: parameters for webmet sensor
 
 Input file is a GeoEasy geo file or a dmp (can be created by filemaker.py).
 Sample geo::
@@ -44,6 +49,7 @@ Codes describe target type::
     In case of PR/RL/OR the program stops and the user have to aim at the target
 """
 import sys
+import time
 import re
 import math
 import logging
@@ -68,7 +74,7 @@ class Robot(object):
     """
 
     def __init__(self, ifname, ofname = 'stdout', stationtype = '1100',
-        port = '/dev/ttyUSB0', maxtry = 3):
+        port = '/dev/ttyUSB0', maxtry = 3, delaytry = 0):
         """ initialize
         """
         if ifname[-3:] == '.py':  # configuration file given
@@ -76,7 +82,7 @@ class Robot(object):
         elif ifname[-4:] != '.geo' and ifname[-4:] != '.dmp':
             ifname = ifname + '.geo'
         if ofname[-4:] == '.dmp' or ofname[-4:] == '.csv' or ofname == 'stdout':
-            # file or console output
+            # dmp/csv file or console output
             if ofname[-4:] == '.dmp' or ofname[-4:] == '.csv':
                 ofname1 = ofname[:-4] + '.dmp'
                 ofname2 = ofname[:-4] + '.csv'
@@ -88,6 +94,17 @@ class Robot(object):
             self.coo_wrt = CsvWriter(dist = '.4f', \
                 filt = ['id', 'east', 'north', 'elev', 'datetime'], \
                 fname = ofname2, mode = 'a', sep = ';')
+        elif ofname[-4:] == '.geo' or ofname[-4:] == '.coo':
+            # geo/coo file output
+            if ofname[-4:] == '.geo' or ofname[-4:] == '.coo':
+                ofname1 = ofname[:-4] + '.geo'
+                ofname2 = ofname[:-4] + '.coo'
+            self.dmp_wrt = GeoWriter(angle = 'RAD', dist = '.4f', \
+                filt = ['station', 'id','hz','v','distance', 'datetime'], \
+                fname = ofname1, mode = 'a')
+            self.coo_wrt = CooWriter(dist = '.4f', \
+                filt = ['id', 'east', 'north', 'elev', 'datetime'], \
+                fname = ofname2, mode = 'a')
         elif ofname[:5] == 'http:' or ofname[:6] == 'https:':
             # http output
             ofname1 = ofname2 = ofname
@@ -112,13 +129,20 @@ class Robot(object):
 
         iface = SerialIface("rs-232", port)
         self.ts = TotalStation(stationtype, mu, iface)
+        if maxtry < 1:
+            maxtry = 1
+            logging.warning("maxtry changed to 1")
         self.maxtry = maxtry # number of retry if failed
+        if delaytry < 0:
+            delaytry = 0
+            logging.warning("delaytry changed to 0")
+        self.delaytry = delaytry # delay between retries
         self.directions, self.max_faces = self.load(ifname)
         if ifname[-4:] == '.geo':
             self.coordinates, _ = self.load(ifname[:-4] + '.coo')
         else:
             self.coordinates, _ = self.load(ifname[:-4] + '.csv')
-        self.station = '???'
+        self.station = '???'  # TODO
         if 'station' in self.directions[0]:
             self.station = self.directions[0]['station']
         self.ih = 0
@@ -158,6 +182,17 @@ class Robot(object):
                 max_faces = w['faces']
             directions.append(w)
         return (directions, max_faces)
+
+    def polar(self, obs):
+        """ calculate coordinates for target
+
+            :param obs: observed angles and distance
+            :returns: (east, north, elev)
+        """
+        east = self.station_east + obs['distance'] * math.sin(obs['v'].GetAngle()) * math.sin(obs['hz'].GetAngle())
+        north = self.station_north + obs['distance'] * math.sin(obs['v'].GetAngle()) * math.cos(obs['hz'].GetAngle())
+        elev = self.station_elev + self.ih + obs['distance'] * math.cos(obs['v'].GetAngle())
+        return (east, north, elev)
 
     def run(self):
         """ run an observation serie
@@ -242,6 +277,7 @@ class Robot(object):
                             break
                         if 'errorCode' in res:
                             j += 1
+                            time.sleep(self.delaytry)
                             continue
                         if self.directions[i]['code'] == 'OR':
                             obs = self.ts.GetAngles()
@@ -262,9 +298,7 @@ class Robot(object):
                     coo = {}
                     if self.directions[i]['code'] != 'OR':
                         coo['id'] = pn
-                        coo['east'] = self.station_east + obs['distance'] * math.sin(obs['v'].GetAngle()) * math.sin(obs['hz'].GetAngle())
-                        coo['north'] = self.station_north + obs['distance'] * math.sin(obs['v'].GetAngle()) * math.cos(obs['hz'].GetAngle())
-                        coo['elev'] = self.station_elev + self.ih + obs['distance'] * math.cos(obs['v'].GetAngle())
+                        coo['east'], coo['north'], coo['elev'] = self.polar(obs)
                         self.coo_wrt.WriteData(coo)
             n = n + 1
         # rotate back to first point
@@ -282,11 +316,11 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         ifn = sys.argv[1]
-        if not os.path.isfile(ifn) and not os.path.isfile(ifn + '.geo'):
+        if not os.path.isfile(ifn):
             print ("Input file doesn't exists:" + ifn)
             exit(-1)
     else:
-        print ("Usage: robot.py input_file [output_file] [sensor] [serial_port] [BMP180]")
+        print ("Usage: robot.py input_file [output_file] [sensor] [serial_port] [max_try] [delay_try] [BMP180|webmet] [met_addr] [met_par]")
         print ("  or   robot.py config_file.py")
         exit(-1)
     # output file
@@ -307,11 +341,23 @@ if __name__ == "__main__":
         p = sys.argv[4]
     else:
         p = '/dev/ttyUSB0'
-    met = None
+    max_try = 3
     if len(sys.argv) > 5:
-        met = sys.argv[5]
+        max_try = int(sys.argv[5])
+    delay_try = 0
+    if len(sys.argv) > 6:
+        delay_try = int(sys.argv[6])
+    met = None
+    if len(sys.argv) > 7 and sys.argv[7].upper() in ["BMP180", "WEBMET"]:
+        met = sys.argv[7].upper()
+    met_addr = None
+    if len(sys.argv) > 8:
+        met_addr = sys.argv[8]
+    met_par = None
+    if len(sys.argv) > 9:
+        met_par = sys.argv[9]
 
-    r = Robot(ifn, ofn, st, p)
+    r = Robot(ifn, ofn, st, p, delay_try)
     if r.ts.measureIface.state != r.ts.measureIface.IF_OK:
         exit(-1)   # no serial communication available
     r.ts.GetATR()               # wake up instrument
