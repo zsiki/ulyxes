@@ -60,6 +60,8 @@ from angle import Angle, PI2
 from serialiface import SerialIface
 from csvwriter import CsvWriter
 from georeader import GeoReader
+from geowriter import GeoWriter
+from georeader import GeoReader
 from csvreader import CsvReader
 from httpwriter import HttpWriter
 from totalstation import TotalStation
@@ -79,8 +81,6 @@ class Robot(object):
         """
         if ifname[-3:] == '.py':  # configuration file given
             exec 'from ' + ifname[:-3] + ' import *'
-        elif ifname[-4:] != '.geo' and ifname[-4:] != '.dmp':
-            ifname = ifname + '.geo'
         if ofname[-4:] == '.dmp' or ofname[-4:] == '.csv' or ofname == 'stdout':
             # dmp/csv file or console output
             if ofname[-4:] == '.dmp' or ofname[-4:] == '.csv':
@@ -102,7 +102,7 @@ class Robot(object):
             self.dmp_wrt = GeoWriter(angle = 'RAD', dist = '.4f', \
                 filt = ['station', 'id','hz','v','distance', 'datetime'], \
                 fname = ofname1, mode = 'a')
-            self.coo_wrt = CooWriter(dist = '.4f', \
+            self.coo_wrt = GeoWriter(dist = '.4f', \
                 filt = ['id', 'east', 'north', 'elev', 'datetime'], \
                 fname = ofname2, mode = 'a')
         elif ofname[:5] == 'http:' or ofname[:6] == 'https:':
@@ -330,7 +330,7 @@ if __name__ == "__main__":
         ofn = 'stdout'
         #ofn = 'http://192.168.1.108/monitoring/get.php'
         #ofn = 'http://192.168.7.145/monitoring/get.php'
-    if ofn[-4:] != '.dmp' and ofn[-4:] != '.csv' and ofn != 'stdout' and ofn[:4] != 'http':
+    if not ofn[-4:] in ['.dmp', '.csv', '.geo', '.coo'] and ofn != 'stdout' and ofn[:4] != 'http':
         print "Unknown output type"
         exit(1)
     if len(sys.argv) > 3:
