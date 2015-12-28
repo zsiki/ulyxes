@@ -47,7 +47,7 @@ class WebMet(Instrument):
         
 
     def GetHumi(self):
-        """ Get huminidity from sensor
+        """ Get humidity from sensor
 
             :returns: temperature data as dict
         """
@@ -79,7 +79,7 @@ class WebMet(Instrument):
             formula from http://journals.ametsoc.org/doi/pdf/10.1175/JAMC-D-11-0143.1
 
             :param temp: dry temperature
-            :param humi: huminidity as percent
+            :param humi: humidity as percent
         """
         wet = temp * math.atan(0.151977 * math.sqrt(humi + 8.313659)) + \
             math.atan(temp + humi) - math.atan(humi - 1.676331) + \
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         elevation = 100                # default elevation for start point
     mu = WebMetMeasureUnit(msg="q=budapest&appid=13152b0308b85a39cc9a161e241ec2cf")
     wi = WebIface("demo", "http://api.openweathermap.org/data/2.5/weather", "json")
-    fw = FileWriter(fname=log, filt=['pressure', 'temp', 'huminidity', 'datetime'])
+    fw = FileWriter(fname=log, filt=['pressure', 'temp', 'humidity', 'datetime'])
     web = WebMet('WebMet', mu, wi)
     for i in range(n):
         data = web.GetPressure()
