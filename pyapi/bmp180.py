@@ -55,9 +55,9 @@ class BMP180(WebMet):
         return self._process(msg)
 
     def GetHumi(self):
-        """ Get huminidity from sensor
+        """ Get humidity from sensor
 
-            :returns: None (no huminidity available)
+            :returns: None (no humidity available)
         """
         return None
 
