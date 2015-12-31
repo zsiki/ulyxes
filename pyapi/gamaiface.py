@@ -7,6 +7,7 @@
 
 .. moduleauthor::Zoltan Siki <siki@agt.bme.hu>
 """
+
 import os
 import math
 import tempfile
@@ -17,17 +18,27 @@ from PyQt4.QtXml import QDomDocument, QXmlSimpleReader, QXmlInputSource
 class GamaIface(object):
     """ Interface class to GNU Gama
     """
-    def __init__(self, gama_path, dimension=3, probability=0.95, stdev_angle=1, stdev_dist=1, stdev_dist1=1.5):
+    def __init__(self, gama_path, dimension=3, probability=0.95, stdev_angle=1,
+        stdev_dist=1, stdev_dist1=1.5):
         """ Initialize a new GamaIface instance.
 
             :param dimension: dimension of network (int), 1/2/3
-            :param probability: porbability for statistical tests (float)
+            :param probability: porbability for statistical tests (0.9/0.95/0.997) (float)
             :param stdev_angle: standard deviation for directions in cc (float)
             :param stdev_dist: base standard deviation for distances mm (float)
             :param stdev_dist1: standard deviation for distances mm/km (float)
         """
         self.dimension = dimension
-        self.probability = probability
+        # limit probability to 90/95/99.7%
+        if probability < 0.925:
+            self.probability = 0.9
+            self.krit = 1.64
+        elif probability < 0.975:
+            self.probability = 0.95
+            self.krit = 1.96
+        else:
+            self.probability = 0.997
+            self.krit = 2.97
         self.stdev_angle = stdev_angle
         self.stdev_dist = stdev_dist
         self.stdev_dist1 = stdev_dist1
@@ -70,6 +81,19 @@ class GamaIface(object):
             else:
                 self.observations.pop()
 
+    def remove_observation(self, fr, to):
+        """ Remove a polar observation
+            TODO it erases hz, v and distance 
+            TODO it removes first occurance
+        """
+        for o in self.observations:
+            if 'station' in o:
+                st = o['station']
+            elif st == fr and to == o['id']:
+                oo = o
+                break
+        self.observations.remove(oo)
+
     def adjust(self):
         """ Export data to GNU Gama xml, adjust the network and read result
 
@@ -103,7 +127,8 @@ class GamaIface(object):
         parameters.setAttribute('sigma-apr', '1')
         parameters.setAttribute('conf-pr', str(self.probability))
         parameters.setAttribute('tol-abs', '1000')
-        parameters.setAttribute('sigma-act', 'aposteriori')
+#        parameters.setAttribute('sigma-act', 'aposteriori')
+        parameters.setAttribute('sigma-act', 'apriori')
         parameters.setAttribute('update-constrained-coordinates', 'yes')
         network.appendChild(parameters)
         points_observations = doc.createElement('points-observations')
@@ -199,22 +224,20 @@ class GamaIface(object):
                     if 'distance' in o:
                         tmp = doc.createElement('s-distance')
                         tmp.setAttribute('to', o['id'])
-                        print o['distance']
                         tmp.setAttribute('val', str(o['distance']))
                         tmp.setAttribute('from_dh', str(ih))
                         tmp.setAttribute('to_dh', str(th))
                         sta.appendChild(tmp)
                     if 'v' in o:
-                        tmp = doc.createElement('direction')
+                        tmp = doc.createElement('z-angle')
                         tmp.setAttribute('to', o['id'])
-                        tmp.setAttribute('val', str(o['hz'].GetAngle('GON')))
+                        tmp.setAttribute('val', str(o['v'].GetAngle('GON')))
                         tmp.setAttribute('from_dh', str(ih))
                         tmp.setAttribute('to_dh', str(th))
                         sta.appendChild(tmp)                      
                 else:
                     # unknown dimension
                     return None
-        #print doc.toprettyxml(indent="  ")
         # generate temp file name
         f = tempfile.NamedTemporaryFile()
         tmp_name = f.name
@@ -226,9 +249,6 @@ class GamaIface(object):
         # run gama-local
         if self.gama_path is None:
             return None
-#        status = call([str(self.gama_path), str(tmp_name) + '.xml', '--text',
-#            str(tmp_name) + '.txt', '--xml', str(tmp_name) + 'out.xml'])
-        print self.gama_path + ' ' + tmp_name + '.xml --text ' + tmp_name + '.txt --xml' + tmp_name + 'out.xml'
         status = os.system(self.gama_path + ' ' + tmp_name + '.xml --text ' +
             tmp_name + '.txt --xml ' + tmp_name + 'out.xml')
         if status != 0:
@@ -259,22 +279,44 @@ class GamaIface(object):
                         p['north'] = float(ppp.firstChild().nodeValue())
                     elif ppp.nodeName() == 'Z' or ppp.nodeName() == 'z':
                         p['elev'] = float(ppp.firstChild().nodeValue())
-                # TODO return ajusted coordinates
+					# TODO standard deviation of coords to p
                 res.append(p)
+        adj_nodes = doc.elementsByTagName('observations')
+        if adj_nodes.count() < 1:
+            return None
+        blunder = {'std-residual': 0}
+        adj_node = adj_nodes.at(0)
+        for i in range(len(adj_node.childNodes())):
+            pp = adj_node.childNodes().at(i)
+            if pp.nodeName() in ['direction', 'slope-distance', 'zenith-angle']:
+                o = {'std-residual': 0}
+                for ii in range(len(pp.childNodes())):
+                    ppp = pp.childNodes().at(ii)
+                    if ppp.nodeName() == 'from':
+                        o['from'] = str(ppp.firstChild().nodeValue())
+                    elif ppp.nodeName() == 'to':
+                        o['to'] = str(ppp.firstChild().nodeValue())
+                    elif ppp.nodeName() == 'f':
+                        o['f'] = float(ppp.firstChild().nodeValue())
+                    elif ppp.nodeName() == 'std-residual':
+                        o['std-residual'] = float(ppp.firstChild().nodeValue())
+                if o['std-residual'] > self.krit and \
+                   o['std-residual'] > blunder['std-residual'] and \
+                   o['f'] > 10:
+                    blunder = dict(o)
         xmlFile.close()
         # remove input xml and output xml
         os.remove(tmp_name + '.xml')
         os.remove(tmp_name + '.txt')
         os.remove(tmp_name + 'out.xml')
         
-        return res
+        return (res, blunder)
 
 if __name__ == "__main__":
     """
         unit test
     """
     import sys
-    import os
     from georeader import GeoReader
 
     fname = "/home/siki/GeoEasy/data/freestation.geo"
@@ -288,6 +330,7 @@ if __name__ == "__main__":
         exit(-1)
     fn = fname[:-4] # remove extension
     g = GamaIface(gama_path, 3, 0.95, 1, 1, 1.5)
+    # load coordinates
     coo = GeoReader(fname = fn + '.coo')
     while True:
         w = coo.GetNext()
@@ -299,12 +342,26 @@ if __name__ == "__main__":
             else:
                 g.add_point(w, 'FIX')
     obs = GeoReader(fname = fn + '.geo')
+    # load observations
     while True:
         w = obs.GetNext()
         if w is None or len(w) == 0:
             break
-        print w
-        if 'station' in w or ('id' in w and 'hz' in w and 'v' in w and 'distance' in w):
+        if 'station' in w or \
+            ('id' in w and 'hz' in w and 'v' in w and 'distance' in w):
             g.add_observation(w)
-    res = g.adjust()
-    print res
+    res = {}
+    while True:
+        last_res = res
+        res, blunder = g.adjust()
+        print res[0]
+        print blunder
+        if not 'east' in res[0] or not 'north' in res[0] or not 'elev' in res[0]:
+            print "adjustment failed"
+            break
+        elif blunder['std-residual'] < 1.0:
+            print "blunders removed"
+            break
+        else:
+            print "%s - %s observation removed" % (blunder['from'], blunder['to'])
+            g.remove_observation(blunder['from'], blunder['to'])
