@@ -371,10 +371,31 @@ class TotalStation(Instrument):
         msg = self.measureUnit.SearchTargetMsg()
         return self._process(msg)
 
-    def SwitchOn(self):
+    def SwitchOn(self, mode):
+        """ Switch on or wake up instrument and change to remote control
+
+            :param mode: 0/1 local/remote mode
+        """
+        # TODO local mode 
+        msg = self.measureUnit.SwitchOnMsg(mode)
+        return self._process(msg)
+
+    def SwitchOff(self, mode):
         """ Switch on or wake up instrument and change to remote control
         """
-        msg = self.measureUnit.SwitchOnMsg()
+        msg = self.measureUnit.SwitchOffMsg(mode)
+        return self._process(msg)
+
+    def GetInstrumentNo(self):
+        """ Get instrument factory number
+        """
+        msg = self.measureUnit.GetInstrumentNo()
+        return self._process(msg)
+
+    def GetInstrumentName(self):
+        """ Get instrument name
+        """
+        msg = self.measureUnit.GetInstrumentName()
         return self._process(msg)
 
     def GetFace(self):

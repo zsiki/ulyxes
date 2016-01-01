@@ -26,8 +26,11 @@ class LeicaMeasureUnit(MeasureUnit):
     # Constants for message codes
     codes = {
         'SWITCHON': 111,
+        'SWITCHOFF': 112,
         'SETPC': 2024,
         'GETPC': 2023,
+        'INSTRNO': 5003,
+        'INSTRNAME': 5004,
         'SETATR': 9018,
         'GETATR': 9019,
         'SETLOCK': 9020,
@@ -161,12 +164,10 @@ class LeicaMeasureUnit(MeasureUnit):
             elif commandID == self.codes['GETSPIRAL']:
                 res['hzRange'] = Angle(float(ansBufflist[4]))
                 res['vRange'] = Angle(float(ansBufflist[5]))
-            # Set search area
-            elif commandID == self.codes['SETSEARCHAREA']:
-                pass
-            # PowerSearch
-            elif commandID == self.codes['POWERSEARCH']:
-                pass
+            elif commandID == self.codes['INSTRNO']:
+                res['instrNo'] = ansBufflist[4]
+            elif commandID == self.codes['INSTRNAME']:
+                res['instrName'] = ansBufflist[4]
         return res
 
     def SetPcMsg(self, pc):
@@ -423,9 +424,31 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         return '%R1Q,{0:d}:'.format(self.codes['SEARCHTARGET'])
 
-    def SwitchOnMsg(self):
+    def SwitchOnMsg(self, mode=1):
         """ Switch on instrument or wake up and change to remote mode
 
+            :param mode: startup mode 0/1 local/remote
             :returns: switch on message
         """
-        return '%R1Q,{0:d}:'.format(self.codes['SWITCHON'])
+        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SWITCHON'], mode)
+
+    def SwitchOffMsg(self, offMode=0):
+        """ Switch off instrument or sleep
+
+            :param offMode: 0/1 power down/sleep state
+        """
+        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SWITCHOFF'], offMode)
+
+    def GetInstrumentNo(self):
+        """ Get instrument factory number
+
+            :returns: get instrument factory number message
+        """
+        return '%R1Q,{0:d}:'.format(self.codes['INSTRNO'])
+
+    def GetInstrumentName(self):
+        """ Get instrument name
+
+            :returns: get instrument name
+        """
+        return '%R1Q,{0:d}:'.format(self.codes['INSTRNAME'])

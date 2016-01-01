@@ -30,8 +30,11 @@ class LeicaTPS1200(LeicaMeasureUnit):
     # Constants for message codes
     codes = {
         'SWITCHON': 111,
+        'SWITCHOFF': 112,
         'SETPC': 2024,
         'GETPC': 2023,
+        'INSTRNO': 5003,
+        'INSTRNAME': 5004,
         'SETATR': 18005,
         'GETATR': 18006,
         'SETLOCK': 18007,
