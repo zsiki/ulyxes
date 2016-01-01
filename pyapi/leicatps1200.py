@@ -59,6 +59,9 @@ class LeicaTPS1200(LeicaMeasureUnit):
         'SETREDLASER': 1004,
         'GETPT': 17009,
         'SETPT': 17008
+        'GETSPIRAL': 9040,
+        'SETSPIRAL': 9041,
+		'SEARCHTARGET': 17020
     }
 
     # Constants for EMD modes

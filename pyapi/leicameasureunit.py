@@ -54,7 +54,10 @@ class LeicaMeasureUnit(MeasureUnit):
         'SEARCHNEXT': 9051,
         'SETREDLASER': 1004,
         'GETPT': 17009,
-        'SETPT': 17008
+        'SETPT': 17008,
+        'GETSPIRAL': 9040,
+        'SETSPIRAL': 9041,
+        'SEARCHTARGET': 17020
     }
 
     # Constants for EMD modes
@@ -153,6 +156,10 @@ class LeicaMeasureUnit(MeasureUnit):
                 res['v'] = Angle(float(ansBufflist[5]))
                 res['crossincline'] = Angle(float(ansBufflist[8]))
                 res['lengthincline'] = Angle(float(ansBufflist[9]))
+			# GetSpiral()
+            elif commandID == self.codes['GETSPIRAL']:
+                res['hzRange'] = Angle(float(ansBufflist[4]))
+                res['vRange'] = Angle(float(ansBufflist[5]))
             # Set search area
             elif commandID == self.codes['SETSEARCHAREA']:
                 pass
@@ -390,3 +397,28 @@ class LeicaMeasureUnit(MeasureUnit):
             :returns: change face message
         """
         return '%R1Q,{0:d}:'.format(self.codes['CHANGEFACE'])
+
+    def GetSpiralMsg(self):
+        """ Get search spiral parameters
+
+            :returns: get spiral message
+        """
+        return '%R1Q,{0:d}:'.format(self.codes['GETSPIRAL'])
+
+    def SetSpiralMsg(self, dRangeHz, dRangeV):
+        """ Set search priral parameters
+
+            :param dRangeHz: horizontal range of search (Angle)
+            :param dRangeV: vertical range of search (Angle)
+            :returns: set search spiral message
+        """
+        return '%R1Q,{0:d}:{1:f},{2:f}'.format(self.codes['SETSPIRAL'], \
+            dRangeHz.GetAngle('RAD'), dRangeV.GetAngle('RAD'))
+
+    def SearchTargetMsg(self):
+        """ Search target using user spiral
+
+            :returns: Search target message
+        """
+        return '%R1Q,{0:d}:'.format(self.codes['SEARCHTARGET'])
+

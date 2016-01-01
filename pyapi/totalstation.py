@@ -96,11 +96,15 @@ class TotalStation(Instrument):
         return self._process(msg)
 
     def SetPrismType(self, typ):
+        """ Set prism type 
+        """
         msg = self.measureUnit.SetPrismTypeMsg(typ)
         return self._process(msg)
         
-    def GetPrismType(self, typ):
-        msg = self.measureUnit.GetPrismTypeMsg(lock)
+    def GetPrismType(self):
+        """ Get prism type
+        """
+        msg = self.measureUnit.GetPrismTypeMsg()
         return self._process(msg)
 
     def SetLock(self, lock):
@@ -340,6 +344,31 @@ class TotalStation(Instrument):
             :returns: TODO
         """
         msg = self.measureUnit.PowerSearchMsg()
+        return self._process(msg)
+
+    def GetSpiral(self):
+        """ Get search spiral parameters
+
+            :returns: horizontal and vertical range
+        """
+        msg = self.measureUnit.GetSpiralMsg()
+        return self._process(msg)
+
+    def SetSpiral(self, dRangeHz, dRangeV):
+        """ Set search spiral parameters
+
+            :param dRangeHz: horizontal range (Angle)
+            :param dRangeV: vertical range (Angle)
+        """
+        msg = self.measureUnit.SetSpiralMsg(dRangeHz, dRangeV)
+        return self._process(msg)
+
+    def SearchTarget(self):
+        """ Search target
+
+            :returns: TODO
+        """
+        msg = self.measureUnit.SearchTargetMsg()
         return self._process(msg)
 
     def GetFace(self):
