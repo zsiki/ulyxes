@@ -35,6 +35,7 @@ class LeicaTPS1200(LeicaMeasureUnit):
         'GETPC': 2023,
         'INSTRNO': 5003,
         'INSTRNAME': 5004,
+        'INTTEMP': 5011,
         'SETATR': 18005,
         'GETATR': 18006,
         'SETLOCK': 18007,

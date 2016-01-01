@@ -389,13 +389,19 @@ class TotalStation(Instrument):
     def GetInstrumentNo(self):
         """ Get instrument factory number
         """
-        msg = self.measureUnit.GetInstrumentNo()
+        msg = self.measureUnit.GetInstrumentNoMsg()
         return self._process(msg)
 
     def GetInstrumentName(self):
         """ Get instrument name
         """
-        msg = self.measureUnit.GetInstrumentName()
+        msg = self.measureUnit.GetInstrumentNameMsg()
+        return self._process(msg)
+
+    def GetInternalTemperature(self):
+        """ Get instrument internal temperature
+        """
+        msg = self.measureUnit.GetInternalTemperatureMsg()
         return self._process(msg)
 
     def GetFace(self):

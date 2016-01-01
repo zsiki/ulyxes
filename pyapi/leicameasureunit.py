@@ -31,6 +31,7 @@ class LeicaMeasureUnit(MeasureUnit):
         'GETPC': 2023,
         'INSTRNO': 5003,
         'INSTRNAME': 5004,
+        'INTTEMP': 5011,
         'SETATR': 9018,
         'GETATR': 9019,
         'SETLOCK': 9020,
@@ -168,6 +169,8 @@ class LeicaMeasureUnit(MeasureUnit):
                 res['instrNo'] = ansBufflist[4]
             elif commandID == self.codes['INSTRNAME']:
                 res['instrName'] = ansBufflist[4]
+            elif commandID == self.codes['INTTEMP']:
+                res['intTemp'] = float(ansBufflist[4])
         return res
 
     def SetPcMsg(self, pc):
@@ -439,16 +442,23 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         return '%R1Q,{0:d}:{1:d}'.format(self.codes['SWITCHOFF'], offMode)
 
-    def GetInstrumentNo(self):
+    def GetInstrumentNoMsg(self):
         """ Get instrument factory number
 
             :returns: get instrument factory number message
         """
         return '%R1Q,{0:d}:'.format(self.codes['INSTRNO'])
 
-    def GetInstrumentName(self):
+    def GetInstrumentNameMsg(self):
         """ Get instrument name
 
             :returns: get instrument name
         """
         return '%R1Q,{0:d}:'.format(self.codes['INSTRNAME'])
+
+    def GetInternalTemperatureMsg(self):
+        """ Get instrument internal temperature
+
+            :returns: instrument internal temperature
+        """
+        return '%R1Q,{0:d}:'.format(self.codes['INTTEMP'])
