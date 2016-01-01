@@ -371,6 +371,12 @@ class TotalStation(Instrument):
         msg = self.measureUnit.SearchTargetMsg()
         return self._process(msg)
 
+    def SwitchOn(self):
+        """ Switch on or wake up instrument and change to remote control
+        """
+        msg = self.measureUnit.SwitchOnMsg()
+        return self._process(msg)
+
     def GetFace(self):
         """ Get face left or face right
 

@@ -198,7 +198,7 @@ class Robot(object):
         """ run an observation serie
         """
         # wake up instrument
-        self.ts.GetATR()
+        r.ts.SwitchOn()               # wake up instrument
         target_msg = "Target on %s point(%s) in face %d and press enter or press 's' to skip the point"
         n = 0  # number of faces measured fo far
         while n < self.max_faces:
@@ -360,7 +360,7 @@ if __name__ == "__main__":
     r = Robot(ifn, ofn, st, p, delay_try)
     if r.ts.measureIface.state != r.ts.measureIface.IF_OK:
         exit(-1)   # no serial communication available
-    r.ts.GetATR()               # wake up instrument
+    r.ts.SwitchOn()               # wake up instrument
     # met sensor
     if not met is None:
         atm = r.ts.GetAtmCorr()     # get current settings from ts

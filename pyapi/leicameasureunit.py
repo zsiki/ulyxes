@@ -25,6 +25,7 @@ class LeicaMeasureUnit(MeasureUnit):
     """
     # Constants for message codes
     codes = {
+        'SWITCHON': 111,
         'SETPC': 2024,
         'GETPC': 2023,
         'SETATR': 9018,
@@ -422,3 +423,9 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         return '%R1Q,{0:d}:'.format(self.codes['SEARCHTARGET'])
 
+    def SwitchOnMsg(self):
+        """ Switch on instrument or wake up and change to remote mode
+
+            :returns: switch on message
+        """
+        return '%R1Q,{0:d}:'.format(self.codes['SWITCHON'])

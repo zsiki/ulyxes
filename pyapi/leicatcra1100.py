@@ -29,6 +29,7 @@ class LeicaTCRA1100(LeicaMeasureUnit):
 
     # Constants for message codes
     codes = {
+        'SWITCHON': 111,
         'SETPC': 2024,
         'GETPC': 2023,
         'SETATR': 18005,
@@ -59,9 +60,9 @@ class LeicaTCRA1100(LeicaMeasureUnit):
         'SETREDLASER': 1004,
         'GETPT': 17009,
         'SETPT': 17008,
-		'GETSPIRAL': 9040,
-		'SETSPIRAL': 9041,
-		'SEARCHTARGET': 17020
+        'GETSPIRAL': 9040,
+        'SETSPIRAL': 9041,
+        'SEARCHTARGET': 17020
     }
 
     # Constants for EMD modes

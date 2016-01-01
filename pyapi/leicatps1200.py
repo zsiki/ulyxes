@@ -29,6 +29,7 @@ class LeicaTPS1200(LeicaMeasureUnit):
 
     # Constants for message codes
     codes = {
+        'SWITCHON': 111,
         'SETPC': 2024,
         'GETPC': 2023,
         'SETATR': 18005,
@@ -61,7 +62,7 @@ class LeicaTPS1200(LeicaMeasureUnit):
         'SETPT': 17008
         'GETSPIRAL': 9040,
         'SETSPIRAL': 9041,
-		'SEARCHTARGET': 17020
+        'SEARCHTARGET': 17020
     }
 
     # Constants for EMD modes
