@@ -54,9 +54,12 @@ class GeoWriter(FileWriter):
             return
         # add datetime and/or id
         data = self.ExtendData(data)
-        # remove point id if station given
+        # remove point id or station if both are given
         if 'station' in data and 'id' in data:
-            del data['id']
+            if 'hz' in data or 'v' in data or 'distance' in data:
+                del data['station']
+            else:
+                del data['id']
         line = ''
         for key, val in data.items():
             if key in self.codes and (self.filt is None or key in self.filt):
