@@ -100,8 +100,8 @@ class Robot(object):
                 ofname1 = ofname[:-4] + '.geo'
                 ofname2 = ofname[:-4] + '.coo'
             self.dmp_wrt = GeoWriter(angle = 'RAD', dist = '.4f', \
-                filt = ['station', 'id','hz','v','distance', 'datetime'], \
-                fname = ofname1, mode = 'a')
+                filt = ['station', 'ih', 'id', 'th', 'hz', 'v', 'distance', \
+                'datetime'], fname = ofname1, mode = 'a')
             self.coo_wrt = GeoWriter(dist = '.4f', \
                 filt = ['id', 'east', 'north', 'elev', 'datetime'], \
                 fname = ofname2, mode = 'a')
@@ -198,9 +198,12 @@ class Robot(object):
         """ run an observation serie
         """
         # wake up instrument
-        r.ts.SwitchOn()               # wake up instrument
+        #r.ts.SwitchOn(1)               # wake up instrument
+        r.ts.GetATR()            # wake up instrument
         target_msg = "Target on %s point(%s) in face %d and press enter or press 's' to skip the point"
         n = 0  # number of faces measured fo far
+        # write station record to output
+        self.dmp_wrt.WriteData({'station': self.station, 'ih': self.ih})
         while n < self.max_faces:
             if n % 2 == 0:   # face left
                 i1 = 1
@@ -360,7 +363,8 @@ if __name__ == "__main__":
     r = Robot(ifn, ofn, st, p, delay_try)
     if r.ts.measureIface.state != r.ts.measureIface.IF_OK:
         exit(-1)   # no serial communication available
-    r.ts.SwitchOn()               # wake up instrument
+    #r.ts.SwitchOn(1) TODO              # wake up instrument
+    r.ts.GetATR()            # wake up instrument
     # met sensor
     if not met is None:
         atm = r.ts.GetAtmCorr()     # get current settings from ts
