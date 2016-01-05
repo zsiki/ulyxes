@@ -7,7 +7,9 @@
 
 .. moduleauthor::Zoltan Siki <siki@agt.bme.hu>
 
-    calculate 3D coordinates of a station from polar observations
+    calculate 3D coordinates of a station from polar observations as a
+    free starion, blunders are eliminated 
+
     :param argv[1]: input geo/coo or dmp/csv file
     :param argv[2]: gama-local path
 """
@@ -24,7 +26,8 @@ from gamaiface import GamaIface
 
 logging.getLogger().setLevel(logging.WARNING)
 
-fname = "/home/siki/GeoEasy/data/freestation.geo"
+#fname = "/home/siki/GeoEasy/data/freestation.geo"
+fname = "test.geo"
 gama_path = '/home/siki/GeoEasy/gama-local'
 
 if len(sys.argv) > 1:
@@ -57,21 +60,34 @@ while True:
     elif 'id' in w and 'hz' in w and 'v' in w and 'distance' in w:
         no += 1 # number of observations
         g.add_observation(w)
-# load coordinates
+# load coordinates and add to adjustment
 if ext in ['.geo', '.coo']:
     coo = GeoReader(fname = fn + '.coo')
 else:
     coo = CsvReader(fname = fn + '.csv')
 n = 0
+st = False
 while True:
     w = coo.GetNext()
     if w is None or len(w) == 0:
         break
+    n += 1
     if 'id' in w:
         if w['id'] == station:
             g.add_point(w, 'ADJ')
-        else:
+            st = True
+        elif 'east' in w and 'north' in w and 'elev' in w:
             g.add_point(w, 'FIX')
+        else:
+            logging.warning("point skiped (no 3D coords):" + w['id'])
+    else:
+        logging.warning("line skiped (no id):" + str(n))
+if n < 3:
+    logging.error("not enough points found in coordinate list")
+    exit(-1)
+if not st:
+    logging.error("not station found in coordinate list:" + station)
+    exit(-1)
 # adjustment loop
 res = {}
 while True:

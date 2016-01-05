@@ -260,10 +260,10 @@ class GamaIface(object):
         doc.setContent(xmlInputSource, xmlParser)
         
         # get adjusted coordinates
-        res = []
         adj_nodes = doc.elementsByTagName('adjusted')
         if adj_nodes.count() < 1:
-            return res
+            return None
+        res = []
         adj_node = adj_nodes.at(0)
         for i in range(len(adj_node.childNodes())):
             pp = adj_node.childNodes().at(i)
@@ -279,7 +279,7 @@ class GamaIface(object):
                         p['north'] = float(ppp.firstChild().nodeValue())
                     elif ppp.nodeName() == 'Z' or ppp.nodeName() == 'z':
                         p['elev'] = float(ppp.firstChild().nodeValue())
-					# TODO standard deviation of coords to p
+                    # TODO standard deviation of coords to p
                 res.append(p)
         adj_nodes = doc.elementsByTagName('observations')
         if adj_nodes.count() < 1:
