@@ -98,6 +98,7 @@ class ObsGen(object):
             obs['ih'] = self.station_ih
             obs['hz'] = Angle(bearing).Positive()
             obs['v'] = Angle(zenith).Positive()
+            obs['distance'] = math.hypot(dist, d_elev)
             obs['code'] = 'ATR'
             obs['faces'] = 1
             if 'code' in coo and coo['code'] in modes1:
@@ -147,3 +148,4 @@ if __name__ == "__main__":
             else:
                 obs['station'] = station
         geo_wrt.WriteData(obs)
+
