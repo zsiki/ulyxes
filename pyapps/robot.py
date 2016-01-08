@@ -66,7 +66,8 @@ from csvreader import CsvReader
 from httpwriter import HttpWriter
 from totalstation import TotalStation
 
-logging.getLogger().setLevel(logging.WARNING)
+#logging.getLogger().setLevel(logging.WARNING)
+logging.getLogger().setLevel(logging.INFO)
 
 class Robot(object):
     """ manage robotic observations
@@ -79,8 +80,6 @@ class Robot(object):
         port = '/dev/ttyUSB0', maxtry = 3, delaytry = 0):
         """ initialize
         """
-        if ifname[-3:] == '.py':  # configuration file given
-            exec 'from ' + ifname[:-3] + ' import *'
         if ofname[-4:] == '.dmp' or ofname[-4:] == '.csv' or ofname == 'stdout':
             # dmp/csv file or console output
             if ofname[-4:] == '.dmp' or ofname[-4:] == '.csv':
@@ -156,7 +155,8 @@ class Robot(object):
                 self.station_elev = coo['elev']
                 break
 
-    def load(self, ifn):
+    @staticmethod
+    def load(ifn):
         """ load observation or coordinate data from file
 
             :param ifn: name of input file
@@ -311,50 +311,60 @@ if __name__ == "__main__":
 
     import os.path
 
+    config = False
     if len(sys.argv) > 1:
-        ifn = sys.argv[1]
-        if not os.path.isfile(ifn):
-            print ("Input file doesn't exists:" + ifn)
+        ifname = sys.argv[1]
+        if not os.path.isfile(ifname):
+            print ("Input file doesn't exists:" + ifname)
             exit(-1)
+        if ifname[-3:] == '.py':  # configuration file given
+            exec 'from ' + ifname[:-3] + ' import *'
+            config = True
     else:
         print ("Usage: robot.py input_file [output_file] [sensor] [serial_port] [max_try] [delay_try] [BMP180|webmet] [met_addr] [met_par]")
         print ("  or   robot.py config_file.py")
         exit(-1)
     # output file
     if len(sys.argv) > 2:
-        ofn = sys.argv[2]
-    else:
-        ofn = 'stdout'
-        #ofn = 'http://192.168.1.108/monitoring/get.php'
-        #ofn = 'http://192.168.7.145/monitoring/get.php'
-    if not ofn[-4:] in ['.dmp', '.csv', '.geo', '.coo'] and ofn != 'stdout' and ofn[:4] != 'http':
+        ofname = sys.argv[2]
+    elif not config:
+        ofname = 'stdout'
+        #ofname = 'http://192.168.1.108/monitoring/get.php'
+        #ofname = 'http://192.168.7.145/monitoring/get.php'
+    if not ofname[-4:] in ['.dmp', '.csv', '.geo', '.coo'] and \
+        ofname != 'stdout' and ofname[:4] != 'http':
         print "Unknown output type"
         exit(1)
     if len(sys.argv) > 3:
-        st = sys.argv[3]
-    else:
-        st = '1100'
+        stationtype = sys.argv[3]
+    elif not config:
+        stationtype = '1100'
     if len(sys.argv) > 4:
-        p = sys.argv[4]
-    else:
-        p = '/dev/ttyUSB0'
-    max_try = 3
+        port = sys.argv[4]
+    elif not config:
+        port = '/dev/ttyUSB0'
     if len(sys.argv) > 5:
-        max_try = int(sys.argv[5])
-    delay_try = 0
+        maxtry = int(sys.argv[5])
+    elif not config:
+        maxtry = 3
     if len(sys.argv) > 6:
-        delay_try = int(sys.argv[6])
-    met = None
+        delaytry = int(sys.argv[6])
+    elif not config:
+        delaytry = 0
     if len(sys.argv) > 7 and sys.argv[7].upper() in ["BMP180", "WEBMET"]:
         met = sys.argv[7].upper()
-    met_addr = None
+    elif not config:
+        met = None
     if len(sys.argv) > 8:
         met_addr = sys.argv[8]
-    met_par = None
+    elif not config:
+        met_addr = None
     if len(sys.argv) > 9:
         met_par = sys.argv[9]
+    elif not config:
+        met_par = None
 
-    r = Robot(ifn, ofn, st, p, delay_try)
+    r = Robot(ifname, ofname, stationtype, port, maxtry, delaytry)
     if r.ts.measureIface.state != r.ts.measureIface.IF_OK:
         exit(-1)   # no serial communication available
     #r.ts.SwitchOn(1) TODO              # wake up instrument
@@ -387,4 +397,6 @@ if __name__ == "__main__":
             humi = data['humidity']
             wet = web.GetWetTemp(temp, humi)
         r.ts.SetAtmCorr(float(atm['lambda']), pres, temp, wet)
+    logging.info(" temperature: %f air pressure: %f wet termperature: %f" % 
+        (temp, pres, wet))
     r.run()
