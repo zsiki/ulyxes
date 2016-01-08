@@ -310,12 +310,6 @@ class Robot(object):
 if __name__ == "__main__":
 
     import os.path
-    from bmp180measureunit import BMP180MeasureUnit
-    from i2ciface import I2CIface
-    from bmp180 import BMP180
-    from webmetmeasureunit import WebMetMeasureUnit
-    from webiface import WebIface
-    from webmet import WebMet
 
     if len(sys.argv) > 1:
         ifn = sys.argv[1]
@@ -369,6 +363,9 @@ if __name__ == "__main__":
     if not met is None:
         atm = r.ts.GetAtmCorr()     # get current settings from ts
         if met == 'BMP180':
+            from bmp180measureunit import BMP180MeasureUnit
+            from i2ciface import I2CIface
+            from bmp180 import BMP180
             # bmp180 sensor
             bmp_mu = BMP180MeasureUnit()
             i2c = I2CIface(None, 0x77)   # TODO error handling if no sensor
@@ -378,6 +375,9 @@ if __name__ == "__main__":
             wet = None    # wet temperature unknown
         else:
             # met data from the net
+            from webmetmeasureunit import WebMetMeasureUnit
+            from webmet import WebMet
+            from webiface import WebIface
             wi = WebIface("demo", "http://api.openweathermap.org/data/2.5/weather", "json")
             web_mu = WebMetMeasureUnit(msg="q=budapest&appid=13152b0308b85a39cc9a161e241ec2cf")
             web = WebMet('WebMet', web_mu, wi)
