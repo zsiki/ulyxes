@@ -91,9 +91,7 @@ class ObsGen(object):
             d_elev = coo['elev'] - self.station_elev - self.station_ih
             bearing = math.atan2(d_east, d_north)
             dist = math.hypot(d_east, d_north)
-            zenith = math.atan(dist / math.fabs(d_elev))
-            if d_elev < 0:
-                zenith = math.pi - zenith
+            zenith = math.atan2(dist, d_elev)
             obs['id'] = coo['id']
             obs['ih'] = self.station_ih
             obs['hz'] = Angle(bearing).Positive()
