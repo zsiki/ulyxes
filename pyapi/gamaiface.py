@@ -11,9 +11,10 @@
 import os
 import math
 import tempfile
+import logging
+# for XML
 from PyQt4.QtCore import QFile
 from PyQt4.QtXml import QDomDocument, QXmlSimpleReader, QXmlInputSource
-#from angle import Angle
 
 class GamaIface(object):
     """ Interface class to GNU Gama
@@ -45,9 +46,7 @@ class GamaIface(object):
         self.points = []
         self.observations = []
         if not os.path.isfile(gama_path):
-            # TODO log error
-            print "gama not found"
-            pass
+            logging.error("GNU gama not found")
         self.gama_path = gama_path
 
     def add_point(self, point, state='ADJ'):
@@ -97,14 +96,15 @@ class GamaIface(object):
     def adjust(self):
         """ Export data to GNU Gama xml, adjust the network and read result
 
-            :returns: result list of adjusment from GNU Gama
+            :returns: result list of adjusment and blunder from GNU Gama
         """
         # fix = 0 free network
         fix = sum([1 for p, s in self.points if s == 'FIX'])
         adj = sum([1 for p, s in self.points if s == 'ADJ'])
         if adj == 0 or len(self.observations) == 0:
             # no unknowns or observations
-            return None
+            logging.error("GNU gama no unknowns or observations")
+            return (None, None)
         
         doc = QDomDocument()
         doc.appendChild(doc.createComment('Gama XML created by Ulyxes'))
@@ -237,7 +237,8 @@ class GamaIface(object):
                         sta.appendChild(tmp)                      
                 else:
                     # unknown dimension
-                    return None
+                    logging.error("GNU gama unknown dimension")
+                    return (None, None)
         # generate temp file name
         f = tempfile.NamedTemporaryFile()
         tmp_name = f.name
@@ -248,11 +249,13 @@ class GamaIface(object):
        
         # run gama-local
         if self.gama_path is None:
-            return None
+            logging.error("GNU gama path is None")
+            return (None, None)
         status = os.system(self.gama_path + ' ' + tmp_name + '.xml --text ' +
             tmp_name + '.txt --xml ' + tmp_name + 'out.xml')
         if status != 0:
-            return None
+            logging.error("GNU gama failed")
+            return (None, None)
         
         xmlParser = QXmlSimpleReader()
         xmlFile = QFile(tmp_name + 'out.xml')
@@ -262,7 +265,8 @@ class GamaIface(object):
         # get adjusted coordinates
         adj_nodes = doc.elementsByTagName('adjusted')
         if adj_nodes.count() < 1:
-            return None
+            logging.error("GNU gama no adjusted coordinates")
+            return (None, None)
         res = []
         adj_node = adj_nodes.at(0)
         for i in range(len(adj_node.childNodes())):
@@ -283,7 +287,8 @@ class GamaIface(object):
                 res.append(p)
         adj_nodes = doc.elementsByTagName('observations')
         if adj_nodes.count() < 1:
-            return None
+            logging.error("GNU gama no adjusted observations")
+            return (None, None)
         blunder = {'std-residual': 0}
         adj_node = adj_nodes.at(0)
         for i in range(len(adj_node.childNodes())):
@@ -321,6 +326,7 @@ if __name__ == "__main__":
 
     fname = "/home/siki/GeoEasy/data/freestation.geo"
     gama_path = '/home/siki/GeoEasy/gama-local'
+    #gama_path = 'gama-local'
     if len(sys.argv) > 1:
         fname = sys.argv[1]
     if fname[-4:] != '.geo' and fname[-4:] != '.coo':
@@ -354,12 +360,19 @@ if __name__ == "__main__":
     while True:
         last_res = res
         res, blunder = g.adjust()
-        print res[0]
-        print blunder
-        if not 'east' in res[0] or not 'north' in res[0] or not 'elev' in res[0]:
+        if not res is None:
+            print res[0]
+        else:
+            print "None"
+        if not blunder is None:
+            print blunder
+        else:
+            print "None"
+        if res is None  or not 'east' in res[0] or \
+           not 'north' in res[0] or not 'elev' in res[0]:
             print "adjustment failed"
             break
-        elif blunder['std-residual'] < 1.0:
+        elif not blunder is None and blunder['std-residual'] < 1.0:
             print "blunders removed"
             break
         else:
