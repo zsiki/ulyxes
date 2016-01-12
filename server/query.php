@@ -53,13 +53,15 @@
 				"in (SELECT id, max(datetime) FROM monitoring_coo " .
 				"GROUP BY id)";
 	} else {
-		$sql .= " WHERE and (monitoring_coo.id, monitoring_coo.datetime) in (SELECT id, max(datetime) FROM monitoring_coo)";
+		$sql .= " WHERE (monitoring_coo.id, monitoring_coo.datetime) in (SELECT id, max(datetime) FROM monitoring_coo GROUP BY id)";
 	}
-// echo $sql;
+//echo $sql;
 	$rs = $dbh->query($sql);
-	echo "[ ";
+	echo "[";
+	$sep = " ";
 	foreach ($dbh->query($sql, PDO::FETCH_ASSOC) as $row) {
-		echo json_encode($row);
+		echo $sep . json_encode($row);
+		$sep = ", ";
 	}
 	echo " ]";
 ?>
