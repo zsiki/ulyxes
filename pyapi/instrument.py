@@ -11,6 +11,36 @@
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>,
     Daniel Moka <mokadaniel@citromail.hu>
 
+
+codes handles by descendent classes:
+
+- atrStatus: 0/1 ATR on/off, totalstation
+- crossincline: angle from vertical, totalstation
+- distance: measured distance, totalstation
+- dryTemp: dry temperature, met sensor
+- earthRadius: radius of Earth, totalstation
+- east: coordinate, totalstation, GPS
+- edmMode: distance measurement mode, totalstation
+- elev: elevation, totalstation, GPS
+- errorCode: error code from sensor, any instrument
+- hz: horizontal angle, totalstation
+- hzRange: horizontal search range, totalstation
+- ih: instrument height, totalstation
+- instrName: name of instrument, any
+- instrNo: product number, any
+- intTemp: internal temperature of instrument, totalstation, level
+- lambda: ..., totalstation
+- lengthincline: angle from vertical, totalstation
+- lockStat: lock status, totalstation
+- north: coordinate, totalstation, GPS
+- pc: prism constant, totalstation
+- pressure: air pressure, met sensor
+- pt: prism type, totalstation
+- refractiveScale: ..., totalstation
+- status: ...,...
+- v: zenith angle, totalstation
+- vRange: vertical search range, totalstation
+- wetTemp: wet temperature, met sensor
 """
 
 class Instrument(object):
