@@ -30,10 +30,11 @@ class HttpReader(Reader):
         :param ptys: point types to query FIX/STA/MON list
     """
 
-    def __init__(self, name = None, url = None, pids = None, ptys = None):
+    def __init__(self, name = None, url = None, pids = None, ptys = None, \
+                filt = None):
         """ Constructor
         """
-        super(HttpReader, self).__init__(name)
+        super(HttpReader, self).__init__(name, filt)
         self.state = self.RD_OK
         if url[-1] != '?':
             url += '?'
@@ -78,11 +79,7 @@ class HttpReader(Reader):
             return self._process(self.res[0])
 
 if __name__ == "__main__":
-    # read most recent coordinates of all monitoring points from server
-    rd = HttpReader(url='http://localhost/monitoring/query.php', ptys='MON')
-    while True:
-        r = rd.GetNext()
-        if r:
-            print r
-        else:
-            break
+    # read most recent coordinates of all 3D monitoring points from server
+    rd = HttpReader(url='http://localhost/monitoring/query.php', ptys='MON', \
+                    filt = ['id', 'east', 'north', 'elev'])
+    print rd.Load()
