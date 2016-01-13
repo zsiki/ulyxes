@@ -40,3 +40,22 @@ class Reader(object):
         """ Clear the state of the reader being used.
         """
         self.state = self.RD_OK
+
+    def GetNext(self):
+        """ Dummy function implemented in descendant objects
+        """
+        pass
+
+    def Load(self):
+        """ Load all records into a list
+
+            :returns: list of data units/lines
+        """
+        res = []
+        while True:
+            w = self.GetNext()
+            if w:
+                res.append(w)
+            else:
+                break
+        return res
