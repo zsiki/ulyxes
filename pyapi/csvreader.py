@@ -25,11 +25,12 @@ class CsvReader(FileReader):
     def __init__(self, name = None, fname = None, separator = ';', filt = None):
         """ Constructor
         """
-        super(CsvReader, self).__init__(name, fname)        
+        super(CsvReader, self).__init__(name, fname, filt)        
         self.separator = separator
         self.filt = filt
         # get field name from header line
         self.fields = [x.strip() for x in self.GetLine().split(self.separator)]
+        print self.fields
 
     def __del__(self):
         """ Destructor
@@ -40,15 +41,19 @@ class CsvReader(FileReader):
             pass
 
     def GetNext(self):
-        """ Get fields in dictionary from next line considering filter
+        """ Get fields in dictionary from next line
         """
         w = [x.strip() for x in self.GetLine().split(self.separator)]
+        print w
+        print len(w)
         res = {}
-        for i in range(len(self.fields)):
-            if self.filt is None or self.fields[i] in self.filt:
-                res[self.fields[i]] = w[i]
+        if len(w) == 0 or w[0] == '':
+            return None
+        for i in range(len(w)):
+            #if self.filt is None or self.fields[i] in self.filt:
+            res[self.fields[i]] = w[i]
         return res
 
 if __name__ == '__main__':
     cr = CsvReader('test', 'test.csv')
-    print (cr.GetNext())
+    print (cr.Load())

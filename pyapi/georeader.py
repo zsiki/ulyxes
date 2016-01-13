@@ -28,8 +28,7 @@ class GeoReader(FileReader):
     def __init__(self, name = None, fname = None, filt = None):
         """ Constructor
         """
-        super(GeoReader, self).__init__(name, fname)
-        self.filt = filt
+        super(GeoReader, self).__init__(name, fname, filt)
 
     def __del__(self):
         """ Destructor
@@ -51,8 +50,7 @@ class GeoReader(FileReader):
             if len(ww) > 2:
                 www = ww.split(' ')
                 key = int(www[0])
-                if key in self.codes and \
-                    (self.filt is None or key in self.filt):
+                if key in self.codes:
                     if key in (7, 8, 21):   # angles
                         # angles in DMS?
                         if re.search('-', www[1]):
@@ -69,8 +67,10 @@ class GeoReader(FileReader):
 
 if __name__ == "__main__":
     g = GeoReader(fname='/home/siki/GeoEasy/data/test1.geo')
-    while 1:
-        w = g.GetNext()
-        if w is None or len(w) == 0:
-            break
-        print w
+    m = g.Load()
+    print m
+    #while 1:
+    #    w = g.GetNext()
+    #    if w is None or len(w) == 0:
+    #        break
+    #    print w

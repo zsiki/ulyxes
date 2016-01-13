@@ -15,15 +15,17 @@ class Reader(object):
     """ Base class for different readers (virtual)
 
             :param name: name of reader (str), default None
+            :param filt: list of mandatory field names in input record to keep
     """
     RD_OK = 0
     RD_OPEN = -1
     RD_READ = -2
 
-    def __init__(self, name = None):
+    def __init__(self, name = None, filt = None):
         """ Constructor
         """
         self.name = name
+        self.filt = filt
         self.state = self.RD_OK
 
     def GetName(self):
@@ -46,6 +48,20 @@ class Reader(object):
         """
         pass
 
+    def Filt(self, rec):
+        """ Filter a record
+
+            :param rec: record to check to self.filt
+            :returns: Tue/False keep/drop record
+        """
+        if self.filt is None:
+            return True
+        for f in self.filt:
+            if not f in rec:
+                return False
+        return True
+        #return sum([1 for f in self.filt if f in w]) == len(self.filt)
+
     def Load(self):
         """ Load all records into a list
 
@@ -55,7 +71,8 @@ class Reader(object):
         while True:
             w = self.GetNext()
             if w:
-                res.append(w)
+                if self.Filt(w):
+                    res.append(w)   # keep record passed filter
             else:
                 break
         return res

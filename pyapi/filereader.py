@@ -20,10 +20,10 @@ class FileReader(Reader):
             :param fname: name of input file
     """
 
-    def __init__(self, name = None, fname = None):
+    def __init__(self, name = None, fname = None, filt = None):
         """ Constructor
         """
-        super(FileReader, self).__init__(name)        
+        super(FileReader, self).__init__(name, filt)        
         self.state = self.RD_OK
         try:
             self.fp = open(fname, 'r')

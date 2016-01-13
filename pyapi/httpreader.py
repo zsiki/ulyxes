@@ -22,6 +22,7 @@ FLOATS = ['east', 'north', 'elev']
 
 class HttpReader(Reader):
     """ Class to read data from web in JSON format
+        No filter implemented filter by point name and point type TODO
 
         :param name: name of reader (str), default None
         :param url: url to read from
