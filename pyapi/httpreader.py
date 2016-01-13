@@ -58,7 +58,7 @@ class HttpReader(Reader):
                 row[key] = float(row[key])
         return row
 
-    def GetLine(self):
+    def GetNext(self):
         """ Get next line from url
         """
         if self.start:
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     # read most recent coordinates of all monitoring points from server
     rd = HttpReader(url='http://localhost/monitoring/query.php', ptys='MON')
     while True:
-        r = rd.GetLine()
+        r = rd.GetNext()
         if r:
             print r
         else:
