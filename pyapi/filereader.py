@@ -24,7 +24,6 @@ class FileReader(Reader):
         """ Constructor
         """
         super(FileReader, self).__init__(name, filt)        
-        self.state = self.RD_OK
         try:
             self.fp = open(fname, 'r')
         except:
@@ -44,6 +43,9 @@ class FileReader(Reader):
         """
         return self.fp.readline().lstrip('\r\n')
 
+    def GetNext(self):
+        return self.GetLine()
+
 if __name__ == '__main__':
-    fr = FileReader('test', 'test.txt')
-    print (fr.GetLine())
+    fr = FileReader('test', 'reader.py')
+    print fr.Load()
