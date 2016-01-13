@@ -29,7 +29,7 @@ from filemaker import modes1
 class ObsGen(object):
     """ Generate observations from coordinates (bearings and zenith angles
 
-        :param ifname: input coordinate file
+        :param ifname: input coordinate file or list of coordinates
         :param station_id: id of the station point, default first point from input
         :param instrument_height: height of instrument, default: 0
     """
@@ -42,7 +42,18 @@ class ObsGen(object):
         self.station_east = None
         self.station_north = None
         self.station_elev = None
-        self.coords = self.Load(ifname)
+        if type(ifname) == str:
+            self.coords = self.Load(ifname)
+        else:
+            self.coords = ifname
+        for w in self.coords:
+            if self.station_id is None:
+                # first point is the station if not defined
+                self.station_id = w['id']
+            if w['id'] == self.station_id:
+                self.station_east = w['east']
+                self.station_north = w['north']
+                self.station_elev = w['elev']
 
     def Load(self, ifn):
         """ load coordinate data from file
@@ -62,13 +73,6 @@ class ObsGen(object):
                 break
             if 'id' in w and 'east' in w and 'north' in w and 'elev' in w:
                 data.append(w)
-                if self.station_id is None:
-                    # first point is the station if not defined
-                    self.station_id = w['id']
-                if w['id'] == self.station_id:
-                    self.station_east = w['east']
-                    self.station_north = w['north']
-                    self.station_elev = w['elev']
         return data
 
     def run(self):
@@ -111,7 +115,7 @@ if __name__ == "__main__":
     else:
         print ("Usage: filegen.py input_coo_file output_geo_file [station_id] [instrument_height]")
         #exit(-1)
-        ifname = "otthon.coo"
+        ifname = "test.coo"
     if len(sys.argv) > 2:
         ofname = sys.argv[2]
     else:
@@ -125,12 +129,13 @@ if __name__ == "__main__":
 
     if ofname[-4:] == '.geo':
         geo_wrt = GeoWriter(dist = '.4f', angle = 'RAD', fname = ofname, \
-            filt = ['station', 'id', 'hz', 'v', 'faces', 'ih', 'code'], \
-            mode = 'w')
+            filt = ['station', 'id', 'hz', 'v', 'distance', 'faces', 'ih', \
+                    'code'], mode = 'w')
     else:
         geo_wrt = CsvWriter(dist = '.4f', angle = 'RAD', fname = ofname, \
             header = True, mode = 'w', \
-            filt = ['station', 'id', 'hz', 'v', 'faces', 'ih', 'code'])
+            filt = ['station', 'id', 'hz', 'v', 'distance', 'faces', 'ih', \
+                    'code'])
     og = ObsGen(ifname, station_id, station_ih)
     if og.station_east is None or og.station_north is None or og.station_elev is None:
         print "station coordinates not found: ", station_id
