@@ -154,7 +154,8 @@ class Robot(object):
                 step = -1
 
             for i in range(i1, i2, step):
-                if self.directions[i]['faces'] > n:
+                if 'id' in self.directions[i] and \
+                    self.directions[i]['faces'] > n:
                     pn = self.directions[i]['id']
                     hz = self.directions[i]['hz'].GetAngle()
                     v = self.directions[i]['v'].GetAngle()

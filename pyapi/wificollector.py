@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-.. module:: wificollector
+.. module:: wificollector.py
 
 :platform: Unix, Windows
 :synopsis: Ulyxes - an open source project to drive total stations and

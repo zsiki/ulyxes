@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-.. module:: ibmp180measureunit.py
+.. module:: bmp180measureunit.py
    :platform: Unix, Windows
    :synopsis: Ulyxes - an open source project to drive total stations and
        publish observation results.  GPL v2.0 license Copyright (C)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-.. module:: videowriter.py
+.. module:: imagewriter.py
    :platform: Unix, Windows
    :synopsis: Ulyxes - an open source project to drive total stations and
            publish observation results.

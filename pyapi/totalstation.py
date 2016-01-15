@@ -371,7 +371,7 @@ class TotalStation(Instrument):
         msg = self.measureUnit.SearchTargetMsg()
         return self._process(msg)
 
-    def SwitchOn(self, mode):
+    def SwitchOn(self, mode=1):
         """ Switch on or wake up instrument and change to remote control
 
             :param mode: 0/1 local/remote mode
@@ -381,7 +381,9 @@ class TotalStation(Instrument):
         return self._process(msg)
 
     def SwitchOff(self, mode):
-        """ Switch on or wake up instrument and change to remote control
+        """ Switch off instrument
+
+			:param mode: 0/1 power down/sleep state
         """
         msg = self.measureUnit.SwitchOffMsg(mode)
         return self._process(msg)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-.. module:: gamaiface
+.. module:: gamaiface.py
     :platform: Linux, Windows
     :synopsis: interface modul to GNU Gama
 

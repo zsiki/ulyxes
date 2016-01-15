@@ -21,22 +21,34 @@ Reader
 .. automodule:: reader
    :members:
 
-FileReader
-::::::::::
+File Reader
+:::::::::::
 
 .. automodule:: filereader
    :members:
 
-CsvReader
+Csv Reader
 ::::::::::
 
 .. automodule:: csvreader
    :members:
 
+Geo Reader
+:::::::::::
+
+.. automodule:: georeader
+   :members:
+
+HTTP Reader
+:::::::::::
+
+.. automodule:: httpreader
+   :members:
+
 INTERFACES
 ==========
 
-Interfaces handle the connection to the physical sensor.
+Interfaces handle the connection to the physical sensors.
 
 Generic Iface
 :::::::::::::
@@ -66,6 +78,18 @@ I2C Iface
 :::::::::
 
 .. automodule:: i2ciface
+   :members:
+
+WEB Iface
+:::::::::
+
+.. automodule:: webiface
+   :members:
+
+Gama Iface
+::::::::::
+
+.. automodule:: gamaiface
    :members:
 
 MEASURE UNITS
@@ -139,10 +163,16 @@ Wifi Unit
 .. automodule:: wifiunit
    :members:
 
+Web Met Unit
+::::::::::::
+
+.. automodule:: webmetmeasureunit
+   :members:
+
 SENSORS/INSTRUMENTS
 ===================
 
-Sensors or instruments integrate the interface, the measure unit and an 
+Sensors or instruments integrate the interface, the measure unit and an
 optional writer. Interface is responsible for the communication with the
 physical device, measure unit gives the specific features of intruments,
 the writer adds the storing logic to observed data.
@@ -189,12 +219,18 @@ WiFi Collector
 .. automodule:: wificollector
    :members:
 
+Web Met Sensor
+::::::::::::::
+
+.. automodule:: webmet
+   :members:
+
 WRITERS
 =======
 
 Writers are responsible to store observed data on different media.
 
-Generic Writer
+Writer
 ::::::::::::::
 
 .. automodule:: writer
@@ -230,6 +266,12 @@ HTTP Writer
 .. automodule:: httpwriter
    :members:
 
+Geo Writer
+::::::::::
+
+.. automodule:: geowriter
+   :members:
+
 SAMPLE APPLICATIONS
 ===================
 
@@ -251,6 +293,12 @@ Horizontal section
 .. automodule:: horizsection
    :members:
 
+Section
+:::::::
+
+.. automodule:: section
+   :members:
+
 Robot
 :::::
 
@@ -261,6 +309,18 @@ Filemaker
 :::::::::
 
 .. automodule:: filemaker
+   :members:
+
+Filegen
+:::::::
+
+.. automodule:: filegen
+   :members:
+
+Freestation
+:::::::::::
+
+.. automodule:: freestation
    :members:
 
 Measure matrix

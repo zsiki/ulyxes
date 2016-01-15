@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-.. module:: csvreader.py
+.. module:: httpreader.py
    :platform: Unix, Windows
    :synopsis: Ulyxes - an open source project to drive total stations and
            publish observation results.
