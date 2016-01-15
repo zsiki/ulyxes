@@ -37,6 +37,7 @@ class Writer(object):
         self.distFormat = dist
         self.filt = filt
         self.id = 0  # serial number for records written
+        self.dtFormat = dt
         self.state = self.WR_OK
 
     def GetName(self):
@@ -71,7 +72,7 @@ class Writer(object):
         elif type(val) is int or type(val) is long:
             sval = str(val)
         elif type(val) is type(datetime.datetime.now()):
-            sval = val.strftime("%Y-%m-%d %H:%M:%S")
+            sval = val.strftime(self.dtFormat)
         else:
             sval = str(val)
         return sval
