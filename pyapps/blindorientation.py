@@ -32,10 +32,10 @@ class Orientation(object):
         :param observations: list of observation
         :param ts: totalstation
         :param dist_tol: distance tolerance, default 0.1 m
-        :param ang_tol: zenith angle tolerance, default 0.000145 (1 arc min)
+        :param ang_tol: zenith angle tolerance, default 0.000145 (10 arc min)
     """
 
-    def __init__(self, observations, ts, dist_tol = 0.1, ang_tol = 0.000145):
+    def __init__(self, observations, ts, dist_tol = 0.1, ang_tol = 0.00145):
         """ initialize
         """
         self.dist_tol = dist_tol
@@ -75,6 +75,7 @@ class Orientation(object):
                     max_v = obs['v'].GetAngle()
 
         self.ts.SetATR(1)
+        self.ts.SetEDMMode('STANDARD')
         # instrument targeting on prism?
         ans = self.ts.MoveRel(Angle(0), Angle(0), 1)
         if not 'errorCode' in ans:
@@ -84,6 +85,17 @@ class Orientation(object):
             if not w is None:
                 self.ts.SetOri(w)
                 return True
+        # try to rotate to the second point
+        ans = self.ts.Move(self.observations[1]['hz'], \
+            self.observations[1]['v'], 1)
+        if not 'errorCode' in ans:
+            self.ts.Measure()
+            obs = self.ts.GetMeasure()
+            w = self.FindPoint(obs)
+            if not w is None:
+                self.ts.SetOri(w)
+                return True
+        # try blind find
         angles = self.ts.GetAngles()
         act_hz = angles['hz'].GetAngle()
         while dhz < PI2:
@@ -119,12 +131,7 @@ if __name__ == '__main__':
         g = GeoReader(fname = ifname)
     else:
         g = CsvReader(fname = ifname)
-    data = []
-    while True:
-        w = g.GetNext()
-        if w is None or len(w) == 0:
-            break
-        data.append(w)
+    data = g.Load()
     stationtype = '1100'
     port = '/dev/ttyUSB0'
     if re.search('120[0-9]$', stationtype):
