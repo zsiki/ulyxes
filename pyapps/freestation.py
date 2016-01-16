@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-.. module:: freestation.py
+.. module:: freestation
     :platform: Linux, Windows
     :synopsis: interface modul to GNU Gama
 
@@ -66,12 +66,17 @@ class Freestation(object):
             :returns: adjusted coordinates or None
         """
         # adjustment loop
-        res = {}
+        last_res = None
         while True:
             res, blunder = self.g.adjust()
             if res is None or not 'east' in res[0] or not 'north' in res[0] or \
-               not 'elev' in res[0]:
-                logging.error("adjustment failed")
+                              not 'elev' in res[0]:
+                # adjustment faild or too many blunders
+                if not last_res is None:
+                    logging.warning("blunders are not fully removed")
+                    res = last_res
+                else:
+                    logging.error("adjustment failed")
                 break
             elif blunder['std-residual'] < 1.0:
                 logging.info("blunders removed")
@@ -79,6 +84,7 @@ class Freestation(object):
             else:
                 logging.info("%s - %s observation removed" % (blunder['from'], blunder['to']))
                 self.g.remove_observation(blunder['from'], blunder['to'])
+                last_res = res
         return res
 
 if __name__ == "__main__":
