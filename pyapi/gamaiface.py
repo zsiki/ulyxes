@@ -47,6 +47,7 @@ class GamaIface(object):
         self.observations = []
         if not os.path.isfile(gama_path):
             logging.error("GNU gama not found")
+            gama_path = None
         self.gama_path = gama_path
 
     def add_point(self, point, state='ADJ'):
@@ -98,6 +99,10 @@ class GamaIface(object):
 
             :returns: result list of adjusment and blunder from GNU Gama
         """
+        # gama-local OK?
+        if self.gama_path is None:
+            logging.error("GNU gama path is None")
+            return (None, None)
         # fix = 0 free network
         fix = sum([1 for p, s in self.points if s == 'FIX'])
         adj = sum([1 for p, s in self.points if s == 'ADJ'])
@@ -248,9 +253,6 @@ class GamaIface(object):
         f.close()
        
         # run gama-local
-        if self.gama_path is None:
-            logging.error("GNU gama path is None")
-            return (None, None)
         status = os.system(self.gama_path + ' ' + tmp_name + '.xml --text ' +
             tmp_name + '.txt --xml ' + tmp_name + 'out.xml')
         if status != 0:
