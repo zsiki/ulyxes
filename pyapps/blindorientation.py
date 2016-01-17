@@ -124,7 +124,9 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         ifname = sys.argv[1]
     else:
-        ifname = 'test.geo'
+        #ifname = 'test.geo'
+        print "Usage: blindorientation.py input_file totalstation port"
+        sys.exit(-1)
     if ifname[-4:] != '.dmp' and ifname[-4:] != '.geo':
         ifname += '.geo'
     if ifname[-4:] == '.geo':
@@ -133,7 +135,11 @@ if __name__ == '__main__':
         g = CsvReader(fname = ifname)
     data = g.Load()
     stationtype = '1100'
+    if len(sys.argv) > 2:
+        stationtype = sys.argv[2]
     port = '/dev/ttyUSB0'
+    if len(sys.argv) > 3:
+        port = sys.argv[3]
     if re.search('120[0-9]$', stationtype):
         from leicatps1200 import LeicaTPS1200
         mu = LeicaTPS1200()
