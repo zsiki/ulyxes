@@ -48,6 +48,11 @@ class Reader(object):
         """
         pass
 
+    def Rewind(self):
+        """ Dummy function implemented in descendant objects
+        """
+        pass
+
     def Filt(self, rec):
         """ Filter a record
 
@@ -60,7 +65,6 @@ class Reader(object):
             if not f in rec:
                 return False
         return True
-        #return sum([1 for f in self.filt if f in w]) == len(self.filt)
 
     def Load(self):
         """ Load all records into a list
@@ -68,6 +72,7 @@ class Reader(object):
             :returns: list of data units/lines
         """
         res = []
+        self.Rewind()
         while True:
             w = self.GetNext()
             if w:

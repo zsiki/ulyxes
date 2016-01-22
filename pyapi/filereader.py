@@ -46,6 +46,12 @@ class FileReader(Reader):
     def GetNext(self):
         return self.GetLine()
 
+    def Rewind(self):
+        """ Rewind file to start
+        """
+        if self.fp.tell():
+            self.fp.seek(0)
+
 if __name__ == '__main__':
     fr = FileReader('test', 'reader.py')
     print fr.Load()
