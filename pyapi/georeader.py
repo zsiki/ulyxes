@@ -19,7 +19,7 @@ class GeoReader(FileReader):
 
         :param name: name of reader (str), default None
         :param fname: name of input file
-        :param filt: list of GeoEasy field codes to use, default None (use all)
+        :param filt: obligatory list of GeoEasy field code for Load
     """
     codes = {2: 'station', 3: 'ih', 4: 'code', 5: 'id', 6: 'th',
              7: 'hz', 8: 'v', 9: 'distance', 11: 'hd', 21: 'hz',
