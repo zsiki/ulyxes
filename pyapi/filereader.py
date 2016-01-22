@@ -18,6 +18,7 @@ class FileReader(Reader):
 
             :param name: name of reader (str), default None
             :param fname: name of input file
+            :param filt: obligatory fields for Load
     """
 
     def __init__(self, name = None, fname = None, filt = None):
