@@ -45,7 +45,7 @@
 	}
 	// build query
 	$sql = "SELECT monitoring_coo.id, monitoring_coo.east, " .
-			"monitoring_coo.north, monitoring_coo.elev " .
+			"monitoring_coo.north, monitoring_coo.elev, monitoring_poi.code " .
 			"FROM monitoring_coo INNER JOIN monitoring_poi " .
 			"on (monitoring_coo.id = monitoring_poi.id)";
 	if (strlen($where)) {
