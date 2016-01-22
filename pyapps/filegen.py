@@ -34,7 +34,7 @@ class ObsGen(object):
         :param instrument_height: height of instrument, default: 0
     """
 
-    def __init__(self, ifname, station_id = None, instrument_height = 0):
+    def __init__(self, coords, station_id = None, instrument_height = 0):
         """ Initialize
         """
         self.station_id = station_id
@@ -42,10 +42,7 @@ class ObsGen(object):
         self.station_east = None
         self.station_north = None
         self.station_elev = None
-        if type(ifname) == str:
-            self.coords = self.Load(ifname)
-        else:
-            self.coords = ifname
+        self.coords = coords
         for w in self.coords:
             if self.station_id is None:
                 # first point is the station if not defined
@@ -54,26 +51,6 @@ class ObsGen(object):
                 self.station_east = w['east']
                 self.station_north = w['north']
                 self.station_elev = w['elev']
-
-    def Load(self, ifn):
-        """ load coordinate data from file
-
-            :param ifn: name of input file
-            :returns: coordinate list
-        """
-        # load input data set
-        if ifn[-4:] == '.coo':
-            g = GeoReader(fname = ifn)
-        else:
-            g = CsvReader(fname = ifn)
-        data = []
-        while 1:
-            w = g.GetNext()
-            if w is None or len(w) == 0:
-                break
-            if 'id' in w and 'east' in w and 'north' in w and 'elev' in w:
-                data.append(w)
-        return data
 
     def run(self):
         """ generate observetion list
@@ -127,6 +104,12 @@ if __name__ == "__main__":
     if len(sys.argv) > 4:
         station_ih = float(sys.argv[4])
 
+    # load input data set
+    if ifname[-4:] == '.coo':
+        g = GeoReader(fname = ifname, filt = ['id', 'east', 'north', 'elev'])
+    else:
+        g = CsvReader(fname = ifname, filt = ['id', 'east', 'north', 'elev'])
+    data = g.Load()
     if ofname[-4:] == '.geo':
         geo_wrt = GeoWriter(dist = '.4f', angle = 'RAD', fname = ofname, \
             filt = ['station', 'id', 'hz', 'v', 'distance', 'faces', 'ih', \
@@ -136,7 +119,7 @@ if __name__ == "__main__":
             header = True, mode = 'w', \
             filt = ['station', 'id', 'hz', 'v', 'distance', 'faces', 'ih', \
                     'code'])
-    og = ObsGen(ifname, station_id, station_ih)
+    og = ObsGen(data, station_id, station_ih)
     if og.station_east is None or og.station_north is None or og.station_elev is None:
         print "station coordinates not found: ", station_id
         exit(-1)
