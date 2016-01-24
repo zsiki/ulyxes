@@ -32,29 +32,32 @@ class Orientation(object):
         :param observations: list of observation
         :param ts: totalstation
         :param dist_tol: distance tolerance, default 0.1 m
-        :param ang_tol: zenith angle tolerance, default 0.000145 (10 arc min)
     """
 
-    def __init__(self, observations, ts, dist_tol = 0.1, ang_tol = 0.00145):
+    def __init__(self, observations, ts, dist_tol = 0.1):
         """ initialize
         """
         self.dist_tol = dist_tol
-        self.ang_tol = ang_tol
         self.step = 3.0 / 180.0 * math.pi   # 3 arc deg
         self.observations = observations
         self.ts = ts
 
     def FindPoint(self, obs):
         """ Find point from observation (distance and zenith)
+            compering slope distances and heifgt differences
 
             :param obs: observation data
             :returns: orientation angle
         """
+        if not 'distance' in obs or not 'v' in obs:
+            return None
+        d_elev = obs['distance'] * math.cos(obs['v'].GetAngle())
         for o in self.observations:
-            if 'distance' in o and \
-               abs(o['distance'] - obs['distance']) < self.dist_tol and \
-               abs((o['v'] - obs['v']).GetAngle()) < self.ang_tol:
-                return o['hz']
+            if 'distance' in o and 'v' in o:
+                d_elev1 = o['distance'] * math.cos(o['v'].GetAngle())
+                if abs(o['distance'] - obs['distance']) < self.dist_tol and \
+                   abs(d_elev1 - d_elev) < self.dist_tol:
+                    return o['hz']
         return None
 
     def Search(self):
