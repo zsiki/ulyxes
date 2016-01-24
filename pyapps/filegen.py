@@ -32,13 +32,16 @@ class ObsGen(object):
         :param ifname: input coordinate file or list of coordinates
         :param station_id: id of the station point, default first point from input
         :param instrument_height: height of instrument, default: 0
+        :param faces: default number of faces to measure
     """
 
-    def __init__(self, coords, station_id = None, instrument_height = 0):
+    def __init__(self, coords, station_id = None, instrument_height = 0, \
+                faces =1):
         """ Initialize
         """
         self.station_id = station_id
         self.station_ih = instrument_height
+        self.faces = faces
         self.station_east = None
         self.station_north = None
         self.station_elev = None
@@ -79,7 +82,7 @@ class ObsGen(object):
             obs['v'] = Angle(zenith).Positive()
             obs['distance'] = math.hypot(dist, d_elev)
             obs['code'] = 'ATR'
-            obs['faces'] = 1
+            obs['faces'] = self.faces
             if 'code' in coo and coo['code'] in modes1:
                 obs['code'] = coo['code']
             observations.append(obs)
@@ -134,4 +137,3 @@ if __name__ == "__main__":
             else:
                 obs['station'] = station
         geo_wrt.WriteData(obs)
-
