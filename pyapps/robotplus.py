@@ -70,6 +70,8 @@ def conf_check(conf):
     if not 'station_height' in conf:
         logging.warning("station_height not defined in config, set to 0")
         conf['station_height'] = 0
+    if not 'faces' in conf:
+        conf['faces'] = 1
     # are thhere fix points?
     if 'fix_list' in conf:
         if not type(conf['fix_list']) == list:
@@ -136,6 +138,69 @@ def get_mu(t):
         return LeicaTCA1800()
     return False
 
+def avg_coo(coords):
+    """ Calculate average coordinates
+
+        :param coords: input coordinate list (duplicates)
+        :returns: average coordinates no duplicates
+    """
+    res = []    # output list
+    ids = [coo['id'] for coo in coords]
+    for i in ids:
+        e = [coo['east'] for coo in coords if coo['id'] == i]
+        n = [coo['north'] for coo in coords if coo['id'] == i]
+        h = [coo['elev'] for coo in coords if coo['id'] == i]
+        res.append({'east': sum(e) / len(e), 'north': sum(n) / len(n), 
+            'elev': sum(h) / len(h)})
+    return res
+
+def avg_obs(obs):
+    """ Calculate average observations in faces
+
+        :param obs: list of observations
+        :returns: average observations
+    """
+    res = []    # output list
+    # copy station record to output
+    if 'station' in obs[0]:
+        res.append(obs[0])
+    ids = list(set([o['id'] for o in obs if 'id' in o]))
+    for k in ids:
+        # get first datetime for k
+        dt = [o['datetime'] for o in obs if 'id' in o and o['id'] == k][0]
+        # separate face left/right
+        hz1 = [o['hz'].GetAngle() for o in obs if o['id'] == k and \
+            o['v'].GetAngle() < math.pi]
+        hz2 = [o['hz'].GetAngle() for o in obs if o['id'] == k and \
+            o['v'].GetAngle() > math.pi]
+        # check angles around 0
+        for i in range(len(hz1)):
+            if hz1[i] - hz1[0] > math.pi:
+                hz1[i] -= math.pi * 2.0
+            if hz1[i] - hz1[0] < math.pi:
+                hz1[i] += math.pi * 2.0
+        for i in range(len(hz2)):
+            if hz2[i] - hz2[0] > math.pi:
+                hz2[i] -= math.pi * 2.0
+            if hz2[i] - hz2[0] < math.pi:
+                hz2[i] += math.pi * 2.0
+        if hz1[0] > hz2[0]:
+            hz2 = [h + math.pi for h in hz2]
+        else:
+            hz2 = [h - math.pi for h in hz2]
+        hz = sum(hz1 + hz2) / (len(hz1) + len(hz2))
+
+        v1 = [o['v'].GetAngle() for o in obs if o['id'] == k and \
+            o['v'].GetAngle() < math.pi]
+        v2 = [math.pi * 2.0 - o['v'].GetAngle() \
+            for o in obs if o['id'] == k and o['v'].GetAngle() > math.pi]
+        v = sum(v1 + v2) / (len(v1) + len(v2))
+        sd12 = [o['distance'] for o in obs]
+        sd = sum(sd12) / len(sd12)
+        res.append({'id': k, 'hz': Angle(hz), 'v': Angle(v), 'distance': sd, \
+            'datetime': dt})
+    return res
+
 if __name__ == "__main__":
     # command line param
     if len(sys.argv) > 1:
@@ -149,7 +214,8 @@ if __name__ == "__main__":
             logging.error("Config file not found")
     else:
         print "Usage: robotplus.py config_file"
-        sys.exit(-1)
+        #sys.exit(-1)
+        conf = conf_load('robotplus.json')
     if not conf_check(conf):
         sys.exit(-1)
 
@@ -157,7 +223,13 @@ if __name__ == "__main__":
     mu = get_mu(conf['station_type'])
     iface = SerialIface("rs-232", conf['port'])
     ts = TotalStation(conf['station_type'], mu, iface)
-    ts.GetATR() # wake up instrument
+    w = ts.GetATR() # wake up instrument
+    if 'errorCode' in w:
+        time.sleep(15)
+    w = ts.GetATR() # wake up instrument
+    if 'errorCode' in w or ts.measureIface.GetState():
+        logging.error("Instrument wake up failed")
+        sys.exit(-1)
     # get meteorology data
     print "Getting met data..."
     if not conf['met'] is None:
@@ -198,7 +270,7 @@ if __name__ == "__main__":
         # generate observations for fix points, first point is the station
         print "Generating observations for fix..."
         og = ObsGen(st_coord + fix_coords, conf['station_id'], \
-            conf['station_height'])
+            conf['station_height'], conf['faces'])
         observations = og.run()
         # check/find orientation
         print "Orientation..."
@@ -213,10 +285,16 @@ if __name__ == "__main__":
         # TODO observations to FIX points to the database????
         # calculate station coordinates as freestation
         print "Freestation..."
+        obs_out = avg_obs(obs_out)
         fs = Freestation(obs_out, st_coord + fix_coords, conf['gama_path'])
         w = fs.Adjustment()
         if w is None:
             logging.error("No adjusted coordinates for station %s" % conf['station_id'])
+            sys.exit(-1)
+        if math.abs(st_coord[0]['east'] - w[0]['east']) > 0.03 or \
+           math.abs(st_coord[0]['north'] - w[0]['north']) > 0.03 or \
+           math.abs(st_coord[0]['elev'] - w[0]['elev']) > 0.03:
+            logging.error("Station moved!!!")
             sys.exit(-1)
         # update station coordinates
         st_coord = w
@@ -243,19 +321,22 @@ if __name__ == "__main__":
         ts.Move(obs_out[back_indx]['hz'], obs_out[back_indx]['v'], 1)
         ts.SetOri(bearing)
     # get monitoring coordinates from database
-    print "Loadind mon coords..."
+    print "Loading mon coords..."
     rd_mon = HttpReader(url=conf['coo_rd'], ptys='MON', \
         filt = ['id', 'east', 'north', 'elev'])
     mon_coords = [p for p in rd_mon.Load() if p['id'] in conf['mon_list']]
     # generate observations for monitoring points, first point is the station
     print "Generating observations for mon..."
     og = ObsGen(st_coord + mon_coords, conf['station_id'], \
-        conf['station_height'])
+        conf['station_height'], conf['faces'])
     observations = og.run()
     # observation to monitoring points
     print "Measuring mon..."
     r = Robot(observations, st_coord, ts)
     obs_out, coo_out = r.run()
+    if 'avg_wr' in conf:
+        coo_out = avg_coo(coo_out)
+        obs_out = avg_obs(obs_out)
     for o in obs_out:
         if 'distance' in o:
             wrt1.WriteData(o)
