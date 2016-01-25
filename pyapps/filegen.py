@@ -58,13 +58,9 @@ class ObsGen(object):
     def run(self):
         """ generate observetion list
 
-            :returns: list of observation dicts
+            :returns: list of observation dicts ordered by hz
         """
         observations = []
-        obs = {}
-        obs['station'] = self.station_id
-        obs['ih'] = self.station_ih
-        observations.append(obs)
         for coo in self.coords:
             if self.station_id == coo['id']:
                 #skip station
@@ -86,6 +82,11 @@ class ObsGen(object):
             if 'code' in coo and coo['code'] in modes1:
                 obs['code'] = coo['code']
             observations.append(obs)
+        observations = sorted(observations, key = lambda a: a['hz'].GetAngle())
+        obs = {}
+        obs['station'] = self.station_id
+        obs['ih'] = self.station_ih
+        observations.insert(0, obs)
         return observations
 
 if __name__ == "__main__":
