@@ -16,7 +16,7 @@ A mode have to be defined for each point
 ATRn - use automatic targeting, n is prism type id (1/2/3/...)
 PR - prism with manual targeting
 RL - reflectorless distance with manual targeting
-ARL - automatic reflectorless ditance measurement
+RLA - automatic reflectorless distance measurement
 OR - orientation direction, manual targeting, no distance
 
 """
