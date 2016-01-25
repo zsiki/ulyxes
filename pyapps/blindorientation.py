@@ -19,7 +19,6 @@ import re
 import math
 import logging
 
-logging.getLogger().setLevel(logging.WARNING)
 
 sys.path.append('../pyapi/')
 
@@ -124,6 +123,7 @@ if __name__ == '__main__':
     from georeader import GeoReader
     from csvreader import CsvReader
 
+    logging.getLogger().setLevel(logging.WARNING)
     if len(sys.argv) > 1:
         ifname = sys.argv[1]
     else:
