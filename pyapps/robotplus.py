@@ -28,6 +28,7 @@ import re
 import logging
 import math
 import os
+import time
 import json
 
 sys.path.append('../pyapi/')
@@ -48,7 +49,8 @@ from leicatps1200 import LeicaTPS1200
 from leicatcra1100 import LeicaTCRA1100
 from leicatca1800 import LeicaTCA1800
 
-logging.getLogger().setLevel(logging.WARNING)
+levels = { 'debug': logging.DEBUG, 'info': logging.INFO, \
+    'warning': logging.WARNING, 'error': logging.ERROR }
 
 def conf_check(conf):
     """ Check configuration
@@ -56,12 +58,15 @@ def conf_check(conf):
         :param conf: dict of config parameters
         :returns: True/False
     """
-    obligatory = ['station_type', 'station_id', 'mon_list', \
+    obligatory = ['log_file', 'log_level', 'log_format', \
+                  'station_type', 'station_id', 'mon_list', \
                   'port', 'coo_rd', 'coo_wr']
     for par in obligatory:
         if not par in conf:
             logging.error(par + " not defined in config")
             return False
+    if not conf['log_level'] in levels:
+        logging.error("Unknown log level: " + conf['log_level'])
     if not re.search('120[0-9]$', conf['station_type']) and \
        not re.search('1800$', conf['station_type']) and \
        not re.search('110[0-9]$', conf['station_type']):
@@ -70,9 +75,13 @@ def conf_check(conf):
     if not 'station_height' in conf:
         logging.warning("station_height not defined in config, set to 0")
         conf['station_height'] = 0
+    if not 'station_coo_limit' in conf:
+        conf['station_coo_limit'] = 0.05
+    if not 'orientation_limit' in conf:
+        conf['orientation_limit'] = 0.1
     if not 'faces' in conf:
         conf['faces'] = 1
-    # are thhere fix points?
+    # are there fix points?
     if 'fix_list' in conf:
         if not type(conf['fix_list']) == list:
             logging.error("fix_list not a list")
@@ -145,12 +154,12 @@ def avg_coo(coords):
         :returns: average coordinates no duplicates
     """
     res = []    # output list
-    ids = [coo['id'] for coo in coords]
+    ids = list(set([coo['id'] for coo in coords]))
     for i in ids:
         e = [coo['east'] for coo in coords if coo['id'] == i]
         n = [coo['north'] for coo in coords if coo['id'] == i]
         h = [coo['elev'] for coo in coords if coo['id'] == i]
-        res.append({'east': sum(e) / len(e), 'north': sum(n) / len(n), 
+        res.append({'id': i, 'east': sum(e) / len(e), 'north': sum(n) / len(n), 
             'elev': sum(h) / len(h)})
     return res
 
@@ -166,13 +175,11 @@ def avg_obs(obs):
         res.append(obs[0])
     ids = list(set([o['id'] for o in obs if 'id' in o]))
     for k in ids:
-        # get first datetime for k
-        dt = [o['datetime'] for o in obs if 'id' in o and o['id'] == k][0]
         # separate face left/right
-        hz1 = [o['hz'].GetAngle() for o in obs if o['id'] == k and \
-            o['v'].GetAngle() < math.pi]
-        hz2 = [o['hz'].GetAngle() for o in obs if o['id'] == k and \
-            o['v'].GetAngle() > math.pi]
+        hz1 = [o['hz'].GetAngle() for o in obs \
+            if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi]
+        hz2 = [o['hz'].GetAngle() for o in obs \
+            if 'id' in o and o['id'] == k and o['v'].GetAngle() > math.pi]
         # check angles around 0
         for i in range(len(hz1)):
             if hz1[i] - hz1[0] > math.pi:
@@ -190,15 +197,15 @@ def avg_obs(obs):
             hz2 = [h - math.pi for h in hz2]
         hz = sum(hz1 + hz2) / (len(hz1) + len(hz2))
 
-        v1 = [o['v'].GetAngle() for o in obs if o['id'] == k and \
-            o['v'].GetAngle() < math.pi]
-        v2 = [math.pi * 2.0 - o['v'].GetAngle() \
-            for o in obs if o['id'] == k and o['v'].GetAngle() > math.pi]
+        v1 = [o['v'].GetAngle() for o in obs \
+            if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi]
+        v2 = [math.pi * 2.0 - o['v'].GetAngle() for o in obs \
+            if 'id' in o and o['id'] == k and o['v'].GetAngle() > math.pi]
         v = sum(v1 + v2) / (len(v1) + len(v2))
-        sd12 = [o['distance'] for o in obs]
+        sd12 = [o['distance'] for o in obs \
+            if 'id' in o and o['id'] == k]
         sd = sum(sd12) / len(sd12)
-        res.append({'id': k, 'hz': Angle(hz), 'v': Angle(v), 'distance': sd, \
-            'datetime': dt})
+        res.append({'id': k, 'hz': Angle(hz), 'v': Angle(v), 'distance': sd})
     return res
 
 if __name__ == "__main__":
@@ -208,7 +215,7 @@ if __name__ == "__main__":
             try:
                 conf = conf_load(sys.argv[1])
             except:
-                logging.error("Error in config file: ", sys.argv[1])
+                logging.error("Error in config file: " + sys.argv[1])
                 sys.exit(-1)
         else:
             logging.error("Config file not found")
@@ -218,10 +225,14 @@ if __name__ == "__main__":
         conf = conf_load('robotplus.json')
     if not conf_check(conf):
         sys.exit(-1)
-
+    # logging
+    logging.basicConfig(format=conf['log_format'], filename=conf['log_file'], \
+         filemode='a', level=levels[conf['log_level']])
     # create totalstation
     mu = get_mu(conf['station_type'])
     iface = SerialIface("rs-232", conf['port'])
+    if iface.GetState():
+        sys.exit(-1)
     ts = TotalStation(conf['station_type'], mu, iface)
     w = ts.GetATR() # wake up instrument
     if 'errorCode' in w:
@@ -274,7 +285,7 @@ if __name__ == "__main__":
         observations = og.run()
         # check/find orientation
         print "Orientation..."
-        o = Orientation(observations, ts)
+        o = Orientation(observations, ts, conf['orientation_limit'])
         if not o.Search():
             logging.error("Orientation failed %s" % conf['station_id'])
             sys.exit(-1)
@@ -291,10 +302,10 @@ if __name__ == "__main__":
         if w is None:
             logging.error("No adjusted coordinates for station %s" % conf['station_id'])
             sys.exit(-1)
-        if math.abs(st_coord[0]['east'] - w[0]['east']) > 0.03 or \
-           math.abs(st_coord[0]['north'] - w[0]['north']) > 0.03 or \
-           math.abs(st_coord[0]['elev'] - w[0]['elev']) > 0.03:
-            logging.error("Station moved!!!")
+        if abs(st_coord[0]['east'] - w[0]['east']) > conf['station_coo_limit'] or \
+           abs(st_coord[0]['north'] - w[0]['north']) > conf['station_coo_limit'] or \
+           abs(st_coord[0]['elev'] - w[0]['elev']) > conf['station_coo_limit']:
+            logging.error("Station moved!!!" + str(w))
             sys.exit(-1)
         # update station coordinates
         st_coord = w
@@ -340,5 +351,8 @@ if __name__ == "__main__":
     for o in obs_out:
         if 'distance' in o:
             wrt1.WriteData(o)
+            print o['id'] + ' ' + o['hz'].GetAngle('DMS') + ' ' + \
+                o['v'].GetAngle('DMS') + ' ' + str(o['distance'])
     for c in coo_out:
         wrt.WriteData(c)
+        print c['id'] + ' ' + str(c['east']) + ' ' + str(c['north']) + ' ' + str(c['elev'])
