@@ -14,7 +14,7 @@ Output file uses GeoEasy geo format or simple csv
 For each target point the point id and a type is 
 A mode have to be defined for each point
 ATRn - use automatic targeting, n is prism type id (1/2/3/...)
-PR - prism with manual targeting
+PRn - prism with manual targeting, n is prism type id (1/2/3/...)
 RL - reflectorless distance with manual targeting
 RLA - automatic reflectorless distance measurement
 OR - orientation direction, manual targeting, no distance
