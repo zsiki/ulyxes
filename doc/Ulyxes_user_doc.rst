@@ -1,8 +1,5 @@
 .. ulyxes_user_documentation
 
-
-
-
 ######
 ULYXES
 ######
@@ -368,12 +365,71 @@ Use the SerialInterface
 Sensor Creation
 ***************
 
-PyAPI Applications Tutorials
-############################
+PyAPPS Applications Tutorials
+#############################
 
 MeasureToPrism
 **************
 
-FileMaker
+Observations to a single pism, point.
+
+Measurematrix
+*************
+
+NMEA_demo
 *********
 
+Horizsection
+************
+
+Section
+*******
+
+Monitoring
+**********
+
+This block consist of several apps to solve simple tasks for monitoring.
+
+- *FileMaker* creates an input file for monitoring using manual targeting
+- *FileGen* creates an input file for monitoring from coordinates automaticly
+- *Blindorientation* search for a prism from a known station az calculate orientation
+- *Robot* makes automatic observation using a file from FileMaker or FileGen
+- *Robotplus* complex monitoring application using FileGen, Blindorientation and Robot
+
+FileMaker
+=========
+
+It is a simple interactive app to create input file for monitoring observations.
+First set up the total station on a known point and set the orientation.
+
+Usage: filemaker.py output_file [sensor] [serial_port]
+
+Start the application. Two types of output files can be generated, CSV dump 
+(.dmp) or GeoEasy (.geo) file.
+First it will prompt for the id of the station and the station coordinates.
+
+For each target points the id and mode must be entered.
+
+Target modes:
+
+- ATR*n* use automatic targeting, n is prism type id (1/2/3/...)
+- PR*n* prism with manual targeting
+- RL reflectorless distance with manual targeting
+- RLA automatic reflectorless ditance measurement to given direction
+- OR orientation direction, manual targeting, no distance
+
+.. NOTE::
+   Generated output file cannot be used for Blindorientation because
+   distance missing!
+
+FileGen
+=======
+
+Blindorientation
+================
+
+Robot
+=====
+
+Robotplus
+=========
