@@ -281,34 +281,36 @@ Supported angle units:
         print (a1.GetAngle(u))
 
 
-reader.py
-=========
+Readers
+=======
 
-Base class for different readers (virtual).
+reader.py is the base class for all readers (virtual).
+
+filereader.py
+^^^^^^^^^^^^^
+
+Class to read file. It is mostly used as a base class for other readers
+loading information from file.
+
+.. code:: python
+    
+    # create a filereader object
+    fr = FileReader('test', 'test.txt')
+    # print the lines
+    print (fr.GetLine())
 
 csvreader.py
 ^^^^^^^^^^^^
 
 Class to read csv file, first line must contain field names.
+Default separator is semicolon (;).
 
 .. code:: python
 
-    #Init and declare a csvreader object
+    # create a csvreader object
     cr = CsvReader('test', 'test.csv')
-    #Print the next line from csv file
-    print (cr.GetNext())
-
-filereader.py
-^^^^^^^^^^^^^
-
-Class to read file.
-
-.. code:: python
-    
-    #Init and declare a filereader object
-    fr = FileReader('test', 'test.txt')
-    #Print the lines
-    print (fr.GetLine())
+    # load the whole file into a list
+    lines = cr.Load()
 
 georeader.py
 ^^^^^^^^^^^^
