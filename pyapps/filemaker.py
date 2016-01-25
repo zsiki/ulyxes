@@ -94,10 +94,11 @@ if __name__ == "__main__":
     coo['north'] = float(raw_input("Station north: "))
     coo['elev'] = float(raw_input("Station  elev: "))
     coo_wrt.WriteData(coo)
+    ih = float(raw_input("Instrument height: "))
     geo = {}
     if otype == 'geo':
         geo['station'] = coo['id']
-        geo['ih'] = 0.0
+        geo['ih'] = ih
         geo_wrt.WriteData(geo)
 
     faces = int(raw_input("Number of faces: "))
