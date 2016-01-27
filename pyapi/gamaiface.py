@@ -106,9 +106,9 @@ class GamaIface(object):
         # fix = 0 free network
         fix = sum([1 for p, s in self.points if s == 'FIX'])
         adj = sum([1 for p, s in self.points if s == 'ADJ'])
-        if adj == 0 or len(self.observations) == 0:
+        if adj == 0 or len(self.observations) < 2:
             # no unknowns or observations
-            logging.error("GNU gama no unknowns or observations")
+            logging.error("GNU gama no unknowns or not enough observations")
             return (None, None)
         
         doc = QDomDocument()
