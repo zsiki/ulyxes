@@ -209,6 +209,33 @@ How to install Python 3.x
 
 .. warning:: TODO: How to install python 2 or 3...
 
+Required Python modules
+^^^^^^^^^^^^^^^^^^^^^^^
+
+*Standard modules*:
+
+    * datetime
+    * json
+    * logging
+    * math
+    * os
+    * re
+    * sys
+    * tempfile
+    * time
+    * urllib
+    * urllib2
+    
+*Extra modules*:
+
+    * serial
+    * smbus
+    * wifi 
+    * numpy
+    * PyQt4.QtCore
+    * PyQt4.QtXml
+
+
 How to install PyAPI
 ^^^^^^^^^^^^^^^^^^^^
 
