@@ -296,7 +296,8 @@ if __name__ == "__main__":
         # TODO observations to FIX points to the database????
         # calculate station coordinates as freestation
         print "Freestation..."
-        obs_out = avg_obs(obs_out)
+        if conf['faces'] > 1:
+            obs_out = avg_obs(obs_out)
         fs = Freestation(obs_out, st_coord + fix_coords, conf['gama_path'])
         w = fs.Adjustment()
         if w is None:
@@ -345,7 +346,7 @@ if __name__ == "__main__":
     print "Measuring mon..."
     r = Robot(observations, st_coord, ts)
     obs_out, coo_out = r.run()
-    if 'avg_wr' in conf:
+    if conf['faces'] > 1 and 'avg_wr' in conf:
         coo_out = avg_coo(coo_out)
         obs_out = avg_obs(obs_out)
     for o in obs_out:
