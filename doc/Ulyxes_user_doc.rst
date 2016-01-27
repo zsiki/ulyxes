@@ -234,7 +234,9 @@ Required Python modules
     * numpy
     * PyQt4.QtCore
     * PyQt4.QtXml
-
+    
+*External dependencies*:
+    * GNU Gama
 
 How to install PyAPI
 ^^^^^^^^^^^^^^^^^^^^
