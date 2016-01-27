@@ -3,8 +3,8 @@
 ######
 ULYXES
 ######
-English User Documentation 2015
--------------------------------
+User's Guide
+------------
 
 
 .. topic:: Overview
