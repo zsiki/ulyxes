@@ -74,7 +74,7 @@ class WebMet(Instrument):
         return 44330.0 * (1.0 - pow(pressure / self.p0, (1.0 / 5.255)))
 
     @staticmethod
-    def GetWetTemp(self, temp, humi):
+    def GetWetTemp(temp, humi):
         """ Calculate wet temperature from humidity and temperature
             formula from http://journals.ametsoc.org/doi/pdf/10.1175/JAMC-D-11-0143.1
 
