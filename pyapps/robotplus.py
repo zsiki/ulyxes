@@ -221,8 +221,7 @@ if __name__ == "__main__":
             logging.error("Config file not found")
     else:
         print "Usage: robotplus.py config_file"
-        #sys.exit(-1)
-        conf = conf_load('robotplus.json')
+        sys.exit(-1)
     if not conf_check(conf):
         sys.exit(-1)
     # logging
