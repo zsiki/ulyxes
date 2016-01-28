@@ -242,7 +242,7 @@ class Robot(object):
                         coo_out.append(coo)
             n = n + 1
         # rotate back to first point
-        self.ts.Move(self.directions[1]['hz'], self.directions[1]['v'], 0)
+        self.ts.Move(self.directions[0]['hz'], self.directions[0]['v'], 0)
         return (obs_out, coo_out)
 
 if __name__ == "__main__":
