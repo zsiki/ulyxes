@@ -338,12 +338,13 @@ class TotalStation(Instrument):
             vRange, on)
         return self._process(msg)
 
-    def PowerSearch(self):
+    def PowerSearch(self, dir = 1):
         """ Start power search
 
+            :param dir: 1/-1 clockwise/counter clockwise
             :returns: TODO
         """
-        msg = self.measureUnit.PowerSearchMsg()
+        msg = self.measureUnit.PowerSearchMsg(dir)
         return self._process(msg)
 
     def GetSpiral(self):

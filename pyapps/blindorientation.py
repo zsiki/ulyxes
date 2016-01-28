@@ -80,17 +80,15 @@ class Orientation(object):
         self.ts.SetEDMMode('STANDARD')
         # instrument targeting on prism?
         ans = self.ts.MoveRel(Angle(0), Angle(0), 1)
-        if not 'errorCode' in ans:
-            self.ts.Measure()
-            obs = self.ts.GetMeasure()
-            w = self.FindPoint(obs)
-            if not w is None:
-                self.ts.SetOri(w)
-                return True
-        # try to rotate to the second point
-        ans = self.ts.Move(self.observations[1]['hz'], \
-            self.observations[1]['v'], 1)
-        if not 'errorCode' in ans:
+        if 'errorCode' in ans:
+            # try to rotate to the second point
+            ans = self.ts.Move(self.observations[1]['hz'], \
+                self.observations[1]['v'], 1)
+            if 'errorCode' in ans:
+                # try powersearch clockwise
+                if 'POWERSEARCH' in self.ts.measureUnit.GetCapabilities():
+                    w = self.ts.PowerSearch(1)
+        if not 'erroCode' in ans:
             self.ts.Measure()
             obs = self.ts.GetMeasure()
             w = self.FindPoint(obs)
