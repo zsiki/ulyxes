@@ -140,6 +140,8 @@ class Robot(object):
         obs_out = []
         coo_out = []
         # write station record to output
+        obs = {'station': self.directions[0]['station'], 'ih': self.ih}
+        obs_out.append(obs)
         while n < self.max_faces:
             if n % 2 == 0:   # face left
                 i1 = 1
@@ -233,7 +235,6 @@ class Robot(object):
                         logging.error("Cannot measure point %s" % pn)
                         continue
                     obs['id'] = pn
-                    obs['station'] = self.directions[0]['station']
                     obs_out.append(obs)
                     coo = {}
                     if self.directions[i]['code'] != 'OR':
@@ -242,7 +243,7 @@ class Robot(object):
                         coo_out.append(coo)
             n = n + 1
         # rotate back to first point
-        self.ts.Move(self.directions[0]['hz'], self.directions[0]['v'], 0)
+        self.ts.Move(self.directions[1]['hz'], self.directions[1]['v'], 0)
         return (obs_out, coo_out)
 
 if __name__ == "__main__":
@@ -370,7 +371,6 @@ if __name__ == "__main__":
         exit(-1)   # no serial communication available
     ts.GetATR()            # wake up instrument
     #ts.SwitchOn(1) TODO              # wake up instrument
-    self.ts.GetATR()            # wake up instrument
     # met sensor
     if not met is None:
         atm = ts.GetAtmCorr()     # get current settings from ts
@@ -403,9 +403,6 @@ if __name__ == "__main__":
         (temp, pres, wet))
     r = Robot(directions, coordinates, ts, maxtry, delaytry)
     obs_out, coo_out = r.run()
-    # station record
-    if ofname[-4:] == '.geo' or ofname[-4:] == '.coo':
-        dmp_wrt.WriteData({'station': r.station, 'ih': r.ih})
     for obs in obs_out: 
         dmp_wrt.WriteData(obs)
     for coo in coo_out:
