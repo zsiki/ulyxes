@@ -135,9 +135,6 @@ class Robot(object):
 
             :returns: (obs_out, coo_out)
         """
-        # wake up instrument
-        #r.ts.SwitchOn(1)               # wake up instrument
-        self.ts.GetATR()            # wake up instrument
         target_msg = "Target on %s point(%s) in face %d and press enter or press 's' to skip the point"
         n = 0  # number of faces measured fo far
         obs_out = []
@@ -373,6 +370,7 @@ if __name__ == "__main__":
         exit(-1)   # no serial communication available
     ts.GetATR()            # wake up instrument
     #ts.SwitchOn(1) TODO              # wake up instrument
+    self.ts.GetATR()            # wake up instrument
     # met sensor
     if not met is None:
         atm = ts.GetAtmCorr()     # get current settings from ts
