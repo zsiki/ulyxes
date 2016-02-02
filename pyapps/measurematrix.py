@@ -68,7 +68,8 @@ if __name__ == "__main__":
         fn = sys.argv[5]
     # write out measurements
     wrt = FileWriter(angle='DEG', dist = '.3f', fname=fn)
-    # TODO error handling wrt
+    if wrt.GetState() != self.WR_OK:
+        sys.exit(-1)    # open error
     ts = TotalStation(stationtype, mu, iface, wrt)
     ts.SetATR(0) # turn ATR off
     ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement

@@ -338,13 +338,13 @@ class TotalStation(Instrument):
             vRange, on)
         return self._process(msg)
 
-    def PowerSearch(self, dir = 1):
+    def PowerSearch(self, direction = 1):
         """ Start power search
 
-            :param dir: 1/-1 clockwise/counter clockwise
-            :returns: TODO
+            :param direction: 1/-1 clockwise/counter clockwise
+            :returns: empty list if succesfull
         """
-        msg = self.measureUnit.PowerSearchMsg(dir)
+        msg = self.measureUnit.PowerSearchMsg(direction)
         return self._process(msg)
 
     def GetSpiral(self):
@@ -376,8 +376,8 @@ class TotalStation(Instrument):
         """ Switch on or wake up instrument and change to remote control
 
             :param mode: 0/1 local/remote mode
+            :returns: empty list if successful, timeout may occure
         """
-        # TODO local mode 
         msg = self.measureUnit.SwitchOnMsg(mode)
         return self._process(msg)
 

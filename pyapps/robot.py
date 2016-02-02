@@ -102,7 +102,7 @@ class Robot(object):
                 w['faces'] = 1
             if self.max_faces < w['faces']:
                 self.max_faces = w['faces']
-        self.station = '???'  # TODO
+        self.station = '???'
         if 'station' in self.directions[0]:
             self.station = self.directions[0]['station']
         self.ih = 0
@@ -380,8 +380,12 @@ if __name__ == "__main__":
             from bmp180 import BMP180
             # bmp180 sensor
             bmp_mu = BMP180MeasureUnit()
-            i2c = I2CIface(None, 0x77)   # TODO error handling if no sensor
-            bmp = BMP180('BMP180', bmp_mu, i2c)
+            i2c = I2CIface(None, 0x77)
+            try:
+                bmp = BMP180('BMP180', bmp_mu, i2c)
+            except IOError:
+                logging.error("BMP180 sensor not found")
+                sys.exit(-1)
             pres = float(bmp.GetPressure()['pressure'])
             temp = float(bmp.GetTemp()['temp'])
             wet = None    # wet temperature unknown

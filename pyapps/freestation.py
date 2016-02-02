@@ -58,7 +58,6 @@ class Freestation(object):
                 self.g.add_point(w, 'ADJ')
             elif 'east' in w and 'north' in w and 'elev' in w:
                 self.g.add_point(w, 'FIX')
-        # TODO if no < 3
 
     def Adjustment(self):
         """ adjustment & and blunder removing

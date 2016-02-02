@@ -45,6 +45,9 @@ from freestation import Freestation
 from webmetmeasureunit import WebMetMeasureUnit
 from webmet import WebMet
 from webiface import WebIface
+from bmp180measureunit import BMP180MeasureUnit
+from i2ciface import I2CIface
+from bmp180 import BMP180
 from leicatps1200 import LeicaTPS1200
 from leicatcra1100 import LeicaTCRA1100
 from leicatca1800 import LeicaTCA1800
@@ -253,7 +256,17 @@ if __name__ == "__main__":
             temp = data['temp']
             humi = data['humidity']
             wet = web_met.GetWetTemp(temp, humi)
-        # TODO other met sensors
+        elif conf['met'].upper() == 'BMP180':
+            bmp_mu = BMP180MeasureUnit()
+            i2c = I2CIface(None, 0x77)
+            try:
+                bmp = BMP180('BMP180', bmp_mu, i2c)
+            except IOError:
+                logging.error("BMP180 sensor not found")
+                sys.exit(1)
+            pres = float(bmp.GetPressure()['pressure'])
+            temp = float(bmp.GetTemp()['temp'])
+            wet = None    # wet temperature unknown
         ts.SetAtmCorr(float(atm['lambda']), pres, temp, wet)
     # get station coordinates
     print "Loading station coords..."

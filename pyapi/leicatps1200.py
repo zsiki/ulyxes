@@ -96,13 +96,13 @@ class LeicaTPS1200(LeicaMeasureUnit):
             self.codes['SETSEARCHAREA'], hzCenter.GetAngle(),
             vCenter.GetAngle(), hzRange.GetAngle(), vRange.GetAngle(), on)
 
-    def PowerSearchMsg(self, dir):
+    def PowerSearchMsg(self, direction):
         """ Power search
         
-            :param dir: 1/-1 clockwise/counter clockwise
+            :param direction: 1/-1 clockwise/counter clockwise
             :returns: Power search message
         """
-        return '%R1Q,{0:d}:{1:d},0'.format(self.codes['POWERSEARCH'], dir)
+        return '%R1Q,{0:d}:{1:d},0'.format(self.codes['POWERSEARCH'], direction)
 
     def SetRedLaserMsg(self, on):
         """ Set red laser on/off
