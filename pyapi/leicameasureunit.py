@@ -122,7 +122,7 @@ class LeicaMeasureUnit(MeasureUnit):
                 res['distance'] = float(ansBufflist[6])
             # Prism constant
             elif commandID == self.codes['GETPC']:
-                res['pc'] = int(ansBufflist[4])
+                res['pc'] = float(ansBufflist[4])
             # Prism type
             elif commandID == self.codes['GETPT']:
                 res['pt'] = int(ansBufflist[4])           
