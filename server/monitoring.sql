@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS monitoring_poi;
 -- it is used to display points on web map (EPSG:3857)
 -- ptype can be FIX/STA/MON for fix points, stations, monitoring points
 CREATE TABLE monitoring_poi (
-	id varchar(50) PRIMARY KEY
+	id varchar(50) PRIMARY KEY,
 	ptype char(3) NOT NULL DEFAULT 'MON' CHECK (ptype in ('FIX','STA','MON')),
 );
 SELECT AddGeometryColumn('monitoring_poi', 'geom', 3857, 'POINT', 3);
