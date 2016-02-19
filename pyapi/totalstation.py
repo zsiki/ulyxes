@@ -184,7 +184,7 @@ class TotalStation(Instrument):
         msg = self.measureUnit.SetStationMsg(easting, northing, elevation)
         return self._process(msg)
 
-    def    GetStation(self):
+    def GetStation(self):
         """ Get station coordinates
 
             :returns: station coordinates and instrument height (dictionary)
