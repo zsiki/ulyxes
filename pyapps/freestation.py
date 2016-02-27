@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-.. module:: freestation
+.. module:: freestation.py
     :platform: Linux, Windows
     :synopsis: interface modul to GNU Gama
 

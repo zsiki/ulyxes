@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-.. module:: arbitsection.py
+.. module:: section.py
 
 .. moduleauthor:: Viktoria Zubaly, Zoltan Siki
 

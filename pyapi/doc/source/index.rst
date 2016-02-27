@@ -287,6 +287,12 @@ NMEA Demo
 .. automodule:: nmea_demo
    :members:
 
+Measure matrix
+::::::::::::::
+
+.. automodule:: measurematrix
+   :members:
+
 Horizontal section
 ::::::::::::::::::
 
@@ -297,12 +303,6 @@ Section
 :::::::
 
 .. automodule:: section
-   :members:
-
-Robot
-:::::
-
-.. automodule:: robot
    :members:
 
 Filemaker
@@ -323,9 +323,15 @@ Freestation
 .. automodule:: freestation
    :members:
 
-Measure matrix
-::::::::::::::
+Robot
+:::::
 
-.. automodule:: measurematrix
+.. automodule:: robot
+   :members:
+
+Robot+
+::::::
+
+.. automodule:: robotplus
    :members:
 

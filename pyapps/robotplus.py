@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-.. module:: robot.py
+.. module:: robotplus.py
 
 .. moduleauthor:: Zoltan Siki
 
