@@ -4,15 +4,10 @@
 
 .. moduleauthor:: Zoltan Siki
 
-Get orientation for totalstation
+Get orientation for totalstation. Command line parameters::
 
-    :param argv[1]: input coordinate file
+    argv[1]: input coordinate file
 
-    9042 get search area
-    9043 set search area
-    9040 get spiral
-    9041 set spiral
-    9047, 9048, 9052, 9051 power search
 """
 import sys
 import re

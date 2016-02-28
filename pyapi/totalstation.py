@@ -9,28 +9,10 @@
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>,
     Daniel Moka <mokadaniel@citromail.hu>
 """
-#from __future__ import print_function
 import logging
 from instrument import Instrument
 from angle import Angle
 
-#Import weakref module due to memory leak problem
-#import weakref
-
-#class IterableTotalStation(type):
-#    """ Iterable TotalStation Class
-#
-#    """
-#    # Make WeakSet to avoid memory leak
-#    _totalStations = weakref.WeakSet()
-
-#    def __iter__(cls):
-#        return iter(cls._totalStations)
-
-#    def add_totalStation(cls, ts):
-#        cls._totalStations.add(ts)
-
-#class TotalStation(Instrument, metaclass=IterableTotalStation):
 class TotalStation(Instrument):
     """ Generic total station instrument
 

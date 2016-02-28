@@ -6,21 +6,21 @@
 
 Sample application for complex monitoring for a station
 
-Parameters are stored in config file using JSON format
+Parameters are stored in config file using JSON format::
 
-    :param station_type: TCRA1103/TPS1200/TCA1800
-    :param station_id: pont id for the station
-    :param station_height: height above point, optional default 0
-    :param fix_list: list of fix points to calculate station coordinates
-    :param mon_list: list of monitoring points to measure
-    :param port: serial port to use (e.g. COM1 or /dev/ttyS0 or /dev/ttyUSB0)
-    :param gama_path: path to GNU Gama executable
-    :param coo_rd: URL to get coordinates from (server side script)
-    :param coo_wr: URL to send coordinates to
-    :param obs_wr: URL to send observations to
-    :param met: met sensor name WEBMET/BMP180, optional default None
-    :param met_addr: URL to webmet data, optional default None
-    :param met_par: parameters to web met service, optional default None
+    station_type: TCRA1103/TPS1200/TCA1800
+    station_id: pont id for the station
+    station_height: height above point, optional default 0
+    fix_list: list of fix points to calculate station coordinates
+    mon_list: list of monitoring points to measure
+    port: serial port to use (e.g. COM1 or /dev/ttyS0 or /dev/ttyUSB0)
+    gama_path: path to GNU Gama executable
+    coo_rd: URL to get coordinates from (server side script)
+    coo_wr: URL to send coordinates to
+    obs_wr: URL to send observations to
+    met: met sensor name WEBMET/BMP180, optional default None
+    met_addr: URL to webmet data, optional default None
+    met_par: parameters to web met service, optional default None
 """
 
 import sys
@@ -128,6 +128,7 @@ def conf_load(fname):
     """ Load json config from file
 
         :param fname: name of the config file
+		:returns: configuration as object
     """
     conf_file = open(fname)    
     c = ""

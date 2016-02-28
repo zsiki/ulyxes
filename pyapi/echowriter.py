@@ -19,6 +19,9 @@ class EchoWriter(FileWriter):
     """ Class to write observations to consol
 
             :param name: name of writer (str)
+            :param angle: angle unit to use (str), default GON
+            :param dist: distance and coordinate format (str), default 3 decimals
+            :param dt: date/time format (str), default ansi
             :param filt: list of allowed keys (list)
     """
 
