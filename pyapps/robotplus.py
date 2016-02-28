@@ -239,7 +239,7 @@ if __name__ == "__main__":
     ts = TotalStation(conf['station_type'], mu, iface)
     w = ts.GetATR() # wake up instrument
     if 'errorCode' in w:
-        time.sleep(15)
+        time.sleep(60)
     w = ts.GetATR() # wake up instrument
     if 'errorCode' in w or ts.measureIface.GetState():
         logging.error("Instrument wake up failed")
