@@ -84,6 +84,10 @@ def conf_check(conf):
         conf['orientation_limit'] = 0.1
     if not 'faces' in conf:
         conf['faces'] = 1
+    if not 'max_try' in conf:
+        conf['max_try'] = 3
+    if not 'delay_try' in conf:
+        conf['delay_try'] = 5
     # are there fix points?
     if 'fix_list' in conf:
         if not type(conf['fix_list']) == list:
@@ -225,7 +229,8 @@ if __name__ == "__main__":
             logging.error("Config file not found")
     else:
         print "Usage: robotplus.py config_file"
-        sys.exit(-1)
+        #sys.exit(-1)
+        conf = conf_load('robotplus.json')
     if not conf_check(conf):
         sys.exit(-1)
     # logging
@@ -235,6 +240,7 @@ if __name__ == "__main__":
     mu = get_mu(conf['station_type'])
     iface = SerialIface("rs-232", conf['port'])
     if iface.GetState():
+        logging.error("Serial interface error")
         sys.exit(-1)
     ts = TotalStation(conf['station_type'], mu, iface)
     w = ts.GetATR() # wake up instrument
@@ -317,7 +323,7 @@ if __name__ == "__main__":
         observations = og.run()
         # observation to fix points
         print "Measuring to fix..."
-        r = Robot(observations, st_coord, ts)
+        r = Robot(observations, st_coord, ts, conf['max_try'], conf['delay_try'])
         obs_out, coo_out = r.run()
         # TODO observations to FIX points to the database????
         # calculate station coordinates as freestation
