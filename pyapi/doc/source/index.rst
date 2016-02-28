@@ -317,6 +317,12 @@ Filegen
 .. automodule:: filegen
    :members:
 
+Blind orientation
+:::::::::::::::::
+
+.. automodule:: blindorientation
+   :members:
+
 Freestation
 :::::::::::
 

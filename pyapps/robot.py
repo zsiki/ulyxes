@@ -4,31 +4,33 @@
 
 .. moduleauthor:: Zoltan Siki
 
-Sample application of Ulyxes PyAPI to measure a serie of points
+Sample application of Ulyxes PyAPI to measure a serie of points.
+Command line parameters::
 
-    :param argv[1]: input file with directions
-    :param argv[2]: output file with observations default stdout
-    :param argv[3]: sensor tcra1103/1100/tca1800/1800/tps1201/1200, default 1200
-    :param argv[4]: serial port, default COM1
-    :param argv[5]: number of retry if target not found, default 3
-    :param argv[6]: delay between retries default 0
-    :param argv[7]: name of met sensor BMP180/webmet, default None
-    :param argv[8]: address of met sensor, i2c addres for BMP180 or internet address of webmet service
-    :param argv[9]: parameters for webmet sensor
+    argv[1]: input file with directions
+    argv[2]: output file with observations default stdout
+    argv[3]: sensor tcra1103/1100/tca1800/1800/tps1201/1200, default 1200
+    argv[4]: serial port, default COM1
+    argv[5]: number of retry if target not found, default 3
+    argv[6]: delay between retries default 0
+    argv[7]: name of met sensor BMP180/webmet, default None
+    argv[8]: address of met sensor, i2c addres for BMP180 or internet address of webmet service
+    argv[9]: parameters for webmet sensor
 
-Input file is a GeoEasy geo file or a dmp (can be created by filemaker.py).
-Sample geo::
+Input file is a GeoEasy geo file or a dmp (can be created by filemaker.py
+or filegen.py).
+Sample geo file::
 
-    {2 S2} {3 0.0}                                    # station id & istrumnt h.
+    {2 S2} {3 0.0}                                   # station id & istrumnt h.
     {5 2} {7 6.283145} {8 1.120836} {4 PR0} {112 2}  # target id, hz, v, code,
-    {5 T1} {7 2.022707} {8 1.542995} {4 RL} {112 2} # number of faces
+    {5 T1} {7 2.022707} {8 1.542995} {4 RL} {112 2}  # number of faces
     {5 3} {7 3.001701} {8 1.611722} {4 OR} {112 2}
     {5 T2} {7 3.006678} {8 1.550763} {4 ATR1} {112 2}
     {5 4} {7 3.145645} {8 1.610680} {4 PR2} {112 2}
     {5 1} {7 6.002123} {8 1.172376} {4 PR} {112 2}
     {5 9} {7 6.235123} {8 1.178538} {4 RLA} {112 2}
 
-Sample dmp::
+Sample dmp file::
 
     station; id; hz; v; code;faces
     S2;2;6.283145;1.120836;PR0;2
