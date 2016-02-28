@@ -128,7 +128,7 @@ def conf_load(fname):
     """ Load json config from file
 
         :param fname: name of the config file
-		:returns: configuration as object
+        :returns: configuration as object
     """
     conf_file = open(fname)    
     c = ""
@@ -284,6 +284,25 @@ if __name__ == "__main__":
         wrt1 = HttpWriter(url = conf['obs_wr'], mode = 'POST')
     else:
         wrt1 = wrt
+
+    # check orientation including FIX and MON points
+    rd_target = HttpReader(url=conf['coo_rd'], ptys='FIX,MON', \
+            filt = ['id', 'east', 'north', 'elev'])
+    # remove other points
+    target_coords = [p for p in rd_target.Load() if p['id'] \
+        in conf['fix_list'] + conf['mon_list']]
+    # generate observations for all target points, first point is the station
+    print "Generating observations for targets..."
+    og = ObsGen(st_coord + target_coords, conf['station_id'], \
+        conf['station_height'], conf['faces'])
+    observations = og.run()
+    # check/find orientation
+    print "Orientation..."
+    o = Orientation(observations, ts, conf['orientation_limit'])
+    if not o.Search():
+        logging.error("Orientation failed %s" % conf['station_id'])
+        sys.exit(-1)
+
     if not conf['fix_list'] is None:
     # get fix coordinates from database
         print "Loading fix coords..."
@@ -296,12 +315,6 @@ if __name__ == "__main__":
         og = ObsGen(st_coord + fix_coords, conf['station_id'], \
             conf['station_height'], conf['faces'])
         observations = og.run()
-        # check/find orientation
-        print "Orientation..."
-        o = Orientation(observations, ts, conf['orientation_limit'])
-        if not o.Search():
-            logging.error("Orientation failed %s" % conf['station_id'])
-            sys.exit(-1)
         # observation to fix points
         print "Measuring to fix..."
         r = Robot(observations, st_coord, ts)
