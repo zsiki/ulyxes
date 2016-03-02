@@ -1,12 +1,15 @@
 <?php
 /*
- * Sample script to query  latest coordinates from ulyxes monitoring
+ * Sample script to query coordinates from ulyxes monitoring
  * (httpreader)
  *
  * query parameters:
  *    plist: coma separated list on point ids
  *    ptyte: coma separated list of point types
+ *    from:  starting datetime (optional)
+ *    to:    end datetime (optional)
  *
+ * With no parameters it returns the latest coordinates of all points
  */
 
 	//error_log(http_build_query($_REQUEST));
@@ -18,10 +21,10 @@
 		$pids = explode(",", $_REQUEST['plist']);
 		// add single quote to point id list
 		foreach ($pids as $key => $val) {
-			$pids[$key] = "'" . $val . "'";
+			$pids[$key] = "'$val'";
 		}
 		$pids = implode(",", $pids);
-		$where = " WHERE monitoring_coo.id in (" .  $pids . ")";
+		$where = " WHERE monitoring_coo.id in ($pids)";
 	}
 	if (isset($_REQUEST['ptype']) && strlen($_REQUEST['ptype'])) {
 		$ptys = explode(",", $_REQUEST['ptype']);
@@ -30,13 +33,33 @@
 			$ptys[$key] = "'" . $val . "'";
 		}
 		$ptys = implode(",", $ptys);
-		if (strlen($where)) {
-			$where .= " and monitoring_poi.ptype in (" . $ptys . ")";
+		$where .= (strlen($where) ? " and" : " WHERE");
+		$where .= " monitoring_poi.ptype in ($ptys)";
+	}
+	$date_regexp = '/^[12][0-9]{3}([-\.][0-9]{1,2}){2}\.?( [0-9]{1,2}(:[0-9]{1,2}){2})?$/';
+
+	if (isset($_REQUEST['from'])) {
+		if (preg_match($date_regexp, $_REQUEST['from'])) {
+			$from_d = $_REQUEST['from'];
+			$where .= (strlen($where) ? " and" : " WHERE");
+			$where .= " monitoring_coo.datetime >= '$from_d'";
 		} else {
-			$where = " WHERE monitoring_poi.ptype in (" . $ptys . ")";
+			echo -3;	// date format error
+			error_log("Date time format error");
+			exit();
 		}
 	}
-	// $dbh = new PDO('pgsql:host=localhost;port=5432;dbname=ulyxes;user=postgres;password=qwerty');
+	if (isset($_REQUEST['to'])) {
+		if (preg_match($date_regexp, $_REQUEST['to'])) {
+			$to_d = $_REQUEST['to'];
+			$where .= (strlen($where) ? " and" : " WHERE");
+			$where .= " monitoring_coo.datetime <= '$to_d'";
+		} else {
+			echo -3;	// date format error
+			error_log("Date time format error");
+			exit();
+		}
+	}
 	$dbh = new PDO($conn_str);
 	if (! $dbh) {
 		echo -2;	// connection error
@@ -45,15 +68,18 @@
 	}
 	// build query
 	$sql = "SELECT monitoring_coo.id, monitoring_coo.east, " .
-			"monitoring_coo.north, monitoring_coo.elev, monitoring_poi.code " .
+			"monitoring_coo.north, monitoring_coo.elev, monitoring_poi.code, " .
+			"monitoring_coo.datetime " .
 			"FROM monitoring_coo INNER JOIN monitoring_poi " .
 			"on (monitoring_coo.id = monitoring_poi.id)";
-	if (strlen($where)) {
-		$sql .= $where . " and (monitoring_coo.id, monitoring_coo.datetime) " .
+	$sql .= $where;
+	if (! isset($from_d) && ! isset($to_d)) {
+		$sql .= (strlen($where) ? " and" : " WHERE");
+		$sql .= " (monitoring_coo.id, monitoring_coo.datetime) " .
 				"in (SELECT id, max(datetime) FROM monitoring_coo " .
-				"GROUP BY id)";
+				"GROUP BY id) ORDER BY monitoring_coo.id";
 	} else {
-		$sql .= " WHERE (monitoring_coo.id, monitoring_coo.datetime) in (SELECT id, max(datetime) FROM monitoring_coo GROUP BY id)";
+		$sql .= " ORDER BY monitoring_coo.id, monitoring_coo.datetime";
 	}
 //echo $sql;
 	$rs = $dbh->query($sql);
