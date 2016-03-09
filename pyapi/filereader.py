@@ -25,6 +25,7 @@ class FileReader(Reader):
         """ Constructor
         """
         super(FileReader, self).__init__(name, filt)        
+        self.fp = None
         try:
             self.fp = open(fname, 'r')
         except:
