@@ -82,10 +82,19 @@ class Orientation(object):
             if 'errorCode' in ans:
                 # set telescope horizontal
                 angles = self.ts.GetAngles()
-                self.ts.Move(angles['hz'], Angle(90, 'DEG'))
+                self.ts.Move(angles['hz'], Angle((min_v + max_v) / 2.0))
                 # try powersearch clockwise
                 if 'POWERSEARCH' in self.ts.measureUnit.GetCapabilities():
-                    ans = self.ts.PowerSearch(1)
+                    # repeat power search to skip false prisms
+                    for i in range(10):
+                        ans = self.ts.PowerSearch(1)
+                        if not 'errorCode' in ans:
+                            self.ts.Measure()
+                            obs = self.ts.GetMeasure()
+                            w = self.FindPoint(obs)
+                            if w is not None:
+                                self.ts.SetOri(w)
+                                return True
         if not 'errorCode' in ans:
             self.ts.Measure()
             obs = self.ts.GetMeasure()
