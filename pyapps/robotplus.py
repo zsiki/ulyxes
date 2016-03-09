@@ -45,9 +45,6 @@ from freestation import Freestation
 from webmetmeasureunit import WebMetMeasureUnit
 from webmet import WebMet
 from webiface import WebIface
-from bmp180measureunit import BMP180MeasureUnit
-from i2ciface import I2CIface
-from bmp180 import BMP180
 from leicatps1200 import LeicaTPS1200
 from leicatcra1100 import LeicaTCRA1100
 from leicatca1800 import LeicaTCA1800
@@ -238,6 +235,9 @@ if __name__ == "__main__":
          filemode='a', level=levels[conf['log_level']])
     # create totalstation
     mu = get_mu(conf['station_type'])
+    if not mu:
+        logging.error('Invalid instrument type')
+        sys.exit(-1)
     iface = SerialIface("rs-232", conf['port'])
     if iface.GetState():
         logging.error("Serial interface error")
@@ -264,6 +264,9 @@ if __name__ == "__main__":
             humi = data['humidity']
             wet = web_met.GetWetTemp(temp, humi)
         elif conf['met'].upper() == 'BMP180':
+            from bmp180measureunit import BMP180MeasureUnit
+            from i2ciface import I2CIface
+            from bmp180 import BMP180
             bmp_mu = BMP180MeasureUnit()
             i2c = I2CIface(None, 0x77)
             try:
@@ -291,15 +294,28 @@ if __name__ == "__main__":
     else:
         wrt1 = wrt
 
-    # check orientation including FIX and MON points
-    rd_target = HttpReader(url=conf['coo_rd'], ptys='FIX,MON', \
+    if 'fix_list' in conf and conf['fix_list'] is not None:
+        # get fix coordinates from database
+        print "Loading fix coords..."
+        rd_fix = HttpReader(url=conf['coo_rd'], ptys='FIX', \
             filt = ['id', 'east', 'north', 'elev'])
-    # remove other points
-    target_coords = [p for p in rd_target.Load() if p['id'] \
-        in conf['fix_list'] + conf['mon_list']]
+        # remove other points
+        fix_coords = [p for p in rd_fix.Load() if p['id'] in conf['fix_list']]
+    else:
+        fix_coords = []
+
+    if 'mon_list' in conf and conf['mon_list'] is not None:
+        # get monitoring coordinates from database
+        print "Loading mon coords..."
+        rd_mon = HttpReader(url=conf['coo_rd'], ptys='MON', \
+            filt = ['id', 'east', 'north', 'elev'])
+        mon_coords = [p for p in rd_mon.Load() if p['id'] in conf['mon_list']]
+    else:
+        mon_coords = []
+    # check orientation including FIX and MON points
     # generate observations for all target points, first point is the station
     print "Generating observations for targets..."
-    og = ObsGen(st_coord + target_coords, conf['station_id'], \
+    og = ObsGen(st_coord + fix_coords + mon_coords, conf['station_id'], \
         conf['station_height'], conf['faces'])
     observations = og.run()
     # check/find orientation
@@ -309,13 +325,7 @@ if __name__ == "__main__":
         logging.error("Orientation failed %s" % conf['station_id'])
         sys.exit(-1)
 
-    if not conf['fix_list'] is None:
-    # get fix coordinates from database
-        print "Loading fix coords..."
-        rd_fix = HttpReader(url=conf['coo_rd'], ptys='FIX', \
-            filt = ['id', 'east', 'north', 'elev'])
-        # remove other points
-        fix_coords = [p for p in rd_fix.Load() if p['id'] in conf['fix_list']]
+    if 'fix_list' in conf and conf['fix_list'] is not None:
         # generate observations for fix points, first point is the station
         print "Generating observations for fix..."
         og = ObsGen(st_coord + fix_coords, conf['station_id'], \
@@ -384,8 +394,8 @@ if __name__ == "__main__":
     for o in obs_out:
         if 'distance' in o:
             wrt1.WriteData(o)
-            print o['id'] + ' ' + o['hz'].GetAngle('DMS') + ' ' + \
-                o['v'].GetAngle('DMS') + ' ' + str(o['distance'])
+            #print o['id'] + ' ' + o['hz'].GetAngle('DMS') + ' ' + \
+            #    o['v'].GetAngle('DMS') + ' ' + str(o['distance'])
     for c in coo_out:
         wrt.WriteData(c)
-        print c['id'] + ' ' + str(c['east']) + ' ' + str(c['north']) + ' ' + str(c['elev'])
+        #print c['id'] + ' ' + str(c['east']) + ' ' + str(c['north']) + ' ' + str(c['elev'])
