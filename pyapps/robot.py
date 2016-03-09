@@ -365,11 +365,14 @@ if __name__ == "__main__":
     elif re.search('550[0-9]$', stationtype):
         from trimble5500 import Trimble5500
         mu = Trimble5500()
+    else:
+        print "Invalid instrument type: " + stationtype
+        sys.exit()
     # interface to the totalstation
     iface = SerialIface("rs-232", port)
     ts = TotalStation(stationtype, mu, iface)
     if ts.measureIface.state != ts.measureIface.IF_OK:
-        print "no searial communication"
+        print "no serial communication"
         exit(-1)   # no serial communication available
     ts.GetATR()            # wake up instrument
     #ts.SwitchOn(1) TODO              # wake up instrument
