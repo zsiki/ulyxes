@@ -11,10 +11,10 @@ Parameters are stored in config file using JSON format::
     station_type: TCRA1103/TPS1200/TCA1800
     station_id: pont id for the station
     station_height: height above point, optional default 0
-    fix_list: list of fix points to calculate station coordinates
-    mon_list: list of monitoring points to measure
+    fix_list: list of fix points to calculate station coordinates, optional
+    mon_list: list of monitoring points to measure, optional
     port: serial port to use (e.g. COM1 or /dev/ttyS0 or /dev/ttyUSB0)
-    gama_path: path to GNU Gama executable
+    gama_path: path to GNU Gama executable, optional
     coo_rd: URL to get coordinates from (server side script)
     coo_wr: URL to send coordinates to
     obs_wr: URL to send observations to
@@ -59,7 +59,7 @@ def conf_check(conf):
         :returns: True/False
     """
     obligatory = ['log_file', 'log_level', 'log_format', \
-                  'station_type', 'station_id', 'mon_list', \
+                  'station_type', 'station_id', \
                   'port', 'coo_rd', 'coo_wr']
     for par in obligatory:
         if not par in conf:
@@ -87,7 +87,9 @@ def conf_check(conf):
         conf['delay_try'] = 5
     # are there fix points?
     if 'fix_list' in conf:
-        if not type(conf['fix_list']) == list:
+        if conf['fix_list'] is None:
+            pass
+        elif not type(conf['fix_list']) == list:
             logging.error("fix_list not a list")
             return False
         elif len(conf['fix_list']) == 0:
@@ -99,12 +101,16 @@ def conf_check(conf):
     else:
         conf['fix_list'] = None
         conf['gama_path'] = None
-    if not type(conf['mon_list']) == list:
-        logging.error("mon_list not a list")
-        return False
-    if len(conf['mon_list']) < 1:
-        logging.error("mon_list is empty")
-        return False
+    if 'mon_list' in conf:
+        if conf['mon_list'] is None:
+            pass
+        elif not type(conf['mon_list']) == list:
+            logging.error("mon_list not a list")
+            return False
+        elif len(conf['mon_list']) == 0:
+            conf['mon_list'] = None
+    if conf['fix_list'] is None and conf['mon_list'] is None:
+        logging.error('Neither fix nor mon points are given')
     if conf['gama_path'] is not None and \
             not (os.path.isfile(conf['gama_path']) and \
             os.access(conf['gama_path'], os.X_OK)):
@@ -336,66 +342,64 @@ if __name__ == "__main__":
         r = Robot(observations, st_coord, ts, conf['max_try'], conf['delay_try'])
         obs_out, coo_out = r.run()
         # TODO observations to FIX points to the database????
-        # calculate station coordinates as freestation
-        print "Freestation..."
-        if conf['faces'] > 1:
+        # calculate station coordinates as freestation if gama_path set
+        if 'gama_path' in conf and conf['gama_path'] is not None:
+            print "Freestation..."
+            if conf['faces'] > 1:
+                obs_out = avg_obs(obs_out)
+            fs = Freestation(obs_out, st_coord + fix_coords, conf['gama_path'])
+            w = fs.Adjustment()
+            if w is None:
+                logging.error("No adjusted coordinates for station %s" % conf['station_id'])
+                sys.exit(-1)
+            if abs(st_coord[0]['east'] - w[0]['east']) > conf['station_coo_limit'] or \
+               abs(st_coord[0]['north'] - w[0]['north']) > conf['station_coo_limit'] or \
+               abs(st_coord[0]['elev'] - w[0]['elev']) > conf['station_coo_limit']:
+                logging.error("Station moved!!!" + str(w))
+                sys.exit(-1)
+            # update station coordinates
+            st_coord = w
+            # upload station coords to server
+            print "Uploading station coords..."
+            wrt.WriteData(st_coord[0])
+            # update orientation using farest FIX
+            max_dist = 0
+            back_site = None
+            i = 0
+            for o in obs_out:
+                if 'distance' in o and o['distance'] > max_dist:
+                    max_dist = o['distance']
+                    back_site = o['id']
+                    back_indx = i
+                i += 1
+            if back_site is None:
+                logging.error("Backsite trouble")
+                sys.exit(1)
+            ori_p = [ p for p in fix_coords if p['id'] == back_site ][0]
+            bearing = Angle(math.atan2(ori_p['east'] - st_coord[0]['east'], \
+                                 ori_p['north'] - st_coord[0]['north']))
+            # rotate to farest FIX and set orientation
+            ts.Move(obs_out[back_indx]['hz'], obs_out[back_indx]['v'], 1)
+            ts.SetOri(bearing)
+
+    if 'mon_list' in conf and conf['mon_list'] is not None:
+        # generate observations for monitoring points, first point is the station
+        print "Generating observations for mon..."
+        og = ObsGen(st_coord + mon_coords, conf['station_id'], \
+            conf['station_height'], conf['faces'])
+        observations = og.run()
+        # observation to monitoring points
+        print "Measuring mon..."
+        r = Robot(observations, st_coord, ts)
+        obs_out, coo_out = r.run()
+        if conf['faces'] > 1 and 'avg_wr' in conf:
+            coo_out = avg_coo(coo_out)
             obs_out = avg_obs(obs_out)
-        fs = Freestation(obs_out, st_coord + fix_coords, conf['gama_path'])
-        w = fs.Adjustment()
-        if w is None:
-            logging.error("No adjusted coordinates for station %s" % conf['station_id'])
-            sys.exit(-1)
-        if abs(st_coord[0]['east'] - w[0]['east']) > conf['station_coo_limit'] or \
-           abs(st_coord[0]['north'] - w[0]['north']) > conf['station_coo_limit'] or \
-           abs(st_coord[0]['elev'] - w[0]['elev']) > conf['station_coo_limit']:
-            logging.error("Station moved!!!" + str(w))
-            sys.exit(-1)
-        # update station coordinates
-        st_coord = w
-        # upload station coords to server
-        print "Uploading station coords..."
-        wrt.WriteData(st_coord[0])
-        # update orientation using farest FIX
-        max_dist = 0
-        back_site = None
-        i = 0
         for o in obs_out:
-            if 'distance' in o and o['distance'] > max_dist:
-                max_dist = o['distance']
-                back_site = o['id']
-                back_indx = i
-            i += 1
-        if back_site is None:
-            logging.error("Backsite trouble")
-            sys.exit(1)
-        ori_p = [ p for p in fix_coords if p['id'] == back_site ][0]
-        bearing = Angle(math.atan2(ori_p['east'] - st_coord[0]['east'], \
-                             ori_p['north'] - st_coord[0]['north']))
-        # rotate to farest FIX and set orientation
-        ts.Move(obs_out[back_indx]['hz'], obs_out[back_indx]['v'], 1)
-        ts.SetOri(bearing)
-    # get monitoring coordinates from database
-    print "Loading mon coords..."
-    rd_mon = HttpReader(url=conf['coo_rd'], ptys='MON', \
-        filt = ['id', 'east', 'north', 'elev'])
-    mon_coords = [p for p in rd_mon.Load() if p['id'] in conf['mon_list']]
-    # generate observations for monitoring points, first point is the station
-    print "Generating observations for mon..."
-    og = ObsGen(st_coord + mon_coords, conf['station_id'], \
-        conf['station_height'], conf['faces'])
-    observations = og.run()
-    # observation to monitoring points
-    print "Measuring mon..."
-    r = Robot(observations, st_coord, ts)
-    obs_out, coo_out = r.run()
-    if conf['faces'] > 1 and 'avg_wr' in conf:
-        coo_out = avg_coo(coo_out)
-        obs_out = avg_obs(obs_out)
-    for o in obs_out:
-        if 'distance' in o:
-            wrt1.WriteData(o)
-            #print o['id'] + ' ' + o['hz'].GetAngle('DMS') + ' ' + \
-            #    o['v'].GetAngle('DMS') + ' ' + str(o['distance'])
-    for c in coo_out:
-        wrt.WriteData(c)
-        #print c['id'] + ' ' + str(c['east']) + ' ' + str(c['north']) + ' ' + str(c['elev'])
+            if 'distance' in o:
+                wrt1.WriteData(o)
+                #print o['id'] + ' ' + o['hz'].GetAngle('DMS') + ' ' + \
+                #    o['v'].GetAngle('DMS') + ' ' + str(o['distance'])
+        for c in coo_out:
+            wrt.WriteData(c)
+            #print c['id'] + ' ' + str(c['east']) + ' ' + str(c['north']) + ' ' + str(c['elev'])
