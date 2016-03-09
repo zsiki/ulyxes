@@ -80,10 +80,13 @@ class Orientation(object):
             ans = self.ts.Move(self.observations[1]['hz'], \
                 self.observations[1]['v'], 1)
             if 'errorCode' in ans:
+                # set telescope horizontal
+                angles = self.ts.GetAngles()
+                self.ts.Move(angles['hz'], Angle(90, 'DEG'))
                 # try powersearch clockwise
                 if 'POWERSEARCH' in self.ts.measureUnit.GetCapabilities():
-                    w = self.ts.PowerSearch(1)
-        if not 'erroCode' in ans:
+                    ans = self.ts.PowerSearch(1)
+        if not 'errorCode' in ans:
             self.ts.Measure()
             obs = self.ts.GetMeasure()
             w = self.FindPoint(obs)
@@ -92,6 +95,9 @@ class Orientation(object):
                 return True
         # try blind find
         angles = self.ts.GetAngles()
+        if 'errorCode' in angles:
+            logging.error("Cannot measure angles")
+            return False
         act_hz = angles['hz'].GetAngle()
         while dhz < PI2:
             act_v = min_v
