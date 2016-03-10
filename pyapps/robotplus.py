@@ -251,7 +251,8 @@ if __name__ == "__main__":
     ts = TotalStation(conf['station_type'], mu, iface)
     for i in range(10):
         w = ts.GetATR() # wake up instrument
-        if 'errorCode' in w:
+        if 'errorCode' in w or ts.measureIface.GetState():
+            ts.measureIface.ClearState()
             time.sleep(10)
         else:
             break
