@@ -249,10 +249,12 @@ if __name__ == "__main__":
         logging.error("Serial interface error")
         sys.exit(-1)
     ts = TotalStation(conf['station_type'], mu, iface)
-    w = ts.GetATR() # wake up instrument
-    if 'errorCode' in w:
-        time.sleep(60)
-    w = ts.GetATR() # wake up instrument
+    for i in range(10):
+        w = ts.GetATR() # wake up instrument
+        if 'errorCode' in w:
+            time.sleep(10)
+        else:
+            break
     if 'errorCode' in w or ts.measureIface.GetState():
         logging.error("Instrument wake up failed")
         sys.exit(-1)
