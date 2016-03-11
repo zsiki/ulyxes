@@ -42,9 +42,6 @@ from totalstation import TotalStation
 from blindorientation import Orientation
 from robot import Robot
 from freestation import Freestation
-from webmetmeasureunit import WebMetMeasureUnit
-from webmet import WebMet
-from webiface import WebIface
 from leicatps1200 import LeicaTPS1200
 from leicatcra1100 import LeicaTCRA1100
 from leicatca1800 import LeicaTCA1800
@@ -264,6 +261,9 @@ if __name__ == "__main__":
     if not conf['met'] is None:
         atm = ts.GetAtmCorr()     # get current settings from ts
         if conf['met'].upper() == 'WEBMET':
+            from webmetmeasureunit import WebMetMeasureUnit
+            from webmet import WebMet
+            from webiface import WebIface
             wi = WebIface("demo", conf['met_addr'], "json")
             web_mu = WebMetMeasureUnit(msg = conf['met_par'])
             web_met = WebMet('WebMet', web_mu, wi)
@@ -286,6 +286,14 @@ if __name__ == "__main__":
             pres = float(bmp.GetPressure()['pressure'])
             temp = float(bmp.GetTemp()['temp'])
             wet = None    # wet temperature unknown
+        elif conf['met'].upper() == 'SENSEHAT':
+            from sense_hat import SenseHat
+            from webmet import WebMet
+            sense = SenseHat()
+            pres = sense.get_pressure()
+            temp = sense.get_temperature()
+            humi = sense.get_humidity()
+            wet = WebMet.GetWetTemp(temp, humi)
         ts.SetAtmCorr(float(atm['lambda']), pres, temp, wet)
     # get station coordinates
     print "Loading station coords..."
