@@ -36,6 +36,8 @@ sys.path.append('../pyapi/')
 from angle import Angle
 from httpreader import HttpReader
 from httpwriter import HttpWriter
+from georeader import GeoReader
+from geowriter import GeoWriter
 from filegen import ObsGen
 from serialiface import SerialIface
 from totalstation import TotalStation
@@ -297,25 +299,37 @@ if __name__ == "__main__":
         ts.SetAtmCorr(float(atm['lambda']), pres, temp, wet)
     # get station coordinates
     print "Loading station coords..."
-    rd_st = HttpReader(url=conf['coo_rd'], ptys='STA', \
-        filt = ['id', 'east', 'north', 'elev'])
+    if re.search('^http[s]?://', conf['coo_rd']):
+        rd_st = HttpReader(url=conf['coo_rd'], ptys='STA', \
+            filt = ['id', 'east', 'north', 'elev'])
+    else:
+        rd_st = GeoReader(fname=conf['coo_rd'], \
+            filt = ['id', 'east', 'north', 'elev'])
     st_coord = [x for x in rd_st.Load() if x['id'] == conf['station_id']]
     if len(st_coord) == 0:
         logging.error("Station not found: " + conf['station_id'])
         sys.exit(-1)
-    # coordinate writer
-    wrt = HttpWriter(url = conf['coo_wr'], mode = 'POST')
-    # observation writer
-    if 'obs_wr' in conf:
-        wrt1 = HttpWriter(url = conf['obs_wr'], mode = 'POST')
+    # coordinate writer & observation writer
+    if re.search('^http[s]?://', conf['coo_wr']):
+        wrt = HttpWriter(url = conf['coo_wr'], mode = 'POST')
+        # observation writer
+        if 'obs_wr' in conf:
+            wrt1 = HttpWriter(url = conf['obs_wr'], mode = 'POST')
+        else:
+            wrt1 = wrt
     else:
-        wrt1 = wrt
-
+        wrt = GeoWriter(fname = conf['coo_wr'], mode = 'a')
+        if 'obs_wr' in conf:
+            wrt1 = GeoWriter(fname = conf['obs_wr'], mode = 'a')
     if 'fix_list' in conf and conf['fix_list'] is not None:
         # get fix coordinates from database
         print "Loading fix coords..."
-        rd_fix = HttpReader(url=conf['coo_rd'], ptys='FIX', \
-            filt = ['id', 'east', 'north', 'elev'])
+        if re.search('^http[s]?://', conf['coo_rd']):
+            rd_fix = HttpReader(url=conf['coo_rd'], ptys='FIX', \
+                filt = ['id', 'east', 'north', 'elev'])
+        else:
+            rd_fix = GeoReader(fname=conf['coo_rd'], \
+                filt = ['id', 'east', 'north', 'elev'])
         # remove other points
         fix_coords = [p for p in rd_fix.Load() if p['id'] in conf['fix_list']]
     else:
@@ -324,8 +338,12 @@ if __name__ == "__main__":
     if 'mon_list' in conf and conf['mon_list'] is not None:
         # get monitoring coordinates from database
         print "Loading mon coords..."
-        rd_mon = HttpReader(url=conf['coo_rd'], ptys='MON', \
-            filt = ['id', 'east', 'north', 'elev'])
+        if re.search('^http[s]?://', conf['coo_rd']):
+            rd_mon = HttpReader(url=conf['coo_rd'], ptys='MON', \
+                filt = ['id', 'east', 'north', 'elev'])
+        else:
+            rd_mon = GeoReader(fname=conf['coo_rd'], \
+                filt = ['id', 'east', 'north', 'elev'])
         mon_coords = [p for p in rd_mon.Load() if p['id'] in conf['mon_list']]
     else:
         mon_coords = []
