@@ -111,7 +111,7 @@ if __name__ == "__main__":
             t_mode = raw_input("Target mode(" + modes_str + "): ").upper()
         raw_input("Target on point and press enter")
         angles = ts.GetAngles()
-        if erroCode in angles or ts.measureIface.state != ts.measureIface.IF.OK:
+        if 'errorCode' in angles or ts.measureIface.state != ts.measureIface.IF.OK:
             print "Cannot get angles from instrument"
             ts.measureIface.state = ts.measureIface.IF.OK
             continue
