@@ -10,7 +10,7 @@
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 """
 try:
-    import cv2
+    import cv2 as cv
 except ImportError:
     import cv
 import logging

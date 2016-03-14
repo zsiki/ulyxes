@@ -11,7 +11,7 @@
 """
 
 try:
-    import cv2
+    import cv2 as cv
 except:
     import cv
 import logging
