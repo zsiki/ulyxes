@@ -232,9 +232,15 @@ Required Python modules
     * smbus
     * wifi 
     * numpy
+    * cv/cv2
     * PyQt4.QtCore
     * PyQt4.QtXml
-    
+
+cv install
+
+sudo apt-get install libopencv-dev python-opencv
+
+
 *External dependencies*:
     * GNU Gama
 
