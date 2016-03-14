@@ -36,10 +36,12 @@ class WebCam(Instrument):
 
 if __name__ == "__main__":
     from videoiface import VideoIface
+    #from picamiface import PiCamIface
     from videomeasureunit import VideoMeasureUnit
     from imagewriter import ImageWriter
     mu = VideoMeasureUnit()
-    iface = VideoIface(source=1)
+    iface = VideoIface(source=0)
+    #iface = PiCamIface()
     wrt = ImageWriter("test", "tmp")
     wc = WebCam('test', mu, iface, wrt)
     for i in range(2):
