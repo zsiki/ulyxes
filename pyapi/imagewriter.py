@@ -10,10 +10,7 @@
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 """
 import os
-try:
-    import cv2 as cv
-except ImportError:
-    import cv
+import cv2
 import logging
 from writer import Writer
 
@@ -52,7 +49,7 @@ class ImageWriter(Writer):
             return
         name = os.path.join(self.dirName, str(self.counter) + '.png')
         try:
-            cv.SaveImage(name, data)
+            cv2.imwrite(name, data)
             self.counter += 1
         except:
             logging.warning(" cannot write image to file")

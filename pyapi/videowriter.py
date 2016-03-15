@@ -9,10 +9,7 @@
 
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 """
-try:
-    import cv2 as cv
-except ImportError:
-    import cv
+import cv2
 import logging
 from writer import Writer
 
@@ -25,10 +22,10 @@ class VideoWriter(Writer):
             :param fps: frame per sec (int), default 10
             :param size: image size (int, int), default (640, 480)
     """
-    codecs = { 'JPEG': cv.CV_FOURCC('J', 'P', 'E', 'G'),
-               'MJPG': cv.CV_FOURCC('M', 'J', 'P', 'G'),
-               'FLV1': cv.CV_FOURCC('F', 'L', 'V', '1'),
-               'PIM1': cv.CV_FOURCC('P', 'I', 'M', '1') }
+    codecs = { 'JPEG': cv2.cv.CV_FOURCC('J', 'P', 'E', 'G'),
+               'MJPG': cv2.cv.CV_FOURCC('M', 'J', 'P', 'G'),
+               'FLV1': cv2.cv.CV_FOURCC('F', 'L', 'V', '1'),
+               'PIM1': cv2.cv.CV_FOURCC('P', 'I', 'M', '1') }
 
     def __init__(self, name, fname, codec, fps = 10, size = (640, 480)):
         """ Constructor
@@ -37,7 +34,7 @@ class VideoWriter(Writer):
         self.state = self.WR_OK
         if codec is None:
             codec = self.codecs['JPEG']
-        self.wp = cv.CreateVideoWriter(fname, codec, fps, size)
+        self.wp = cv2.cv.CreateVideoWriter(fname, codec, fps, size)
         if self.wp is None:
             self.state = self.WR_OPEN
             logging.error("cannot open video file %s", fname)
@@ -46,9 +43,7 @@ class VideoWriter(Writer):
         """ Destructor
         """
         try:
-            # TODO no Release in cv, cv2 should be used
-            #cv.cvReleaseVideoWriter(self.wp)
-            pass
+            self.wp.release()
         except:
             pass
 
@@ -61,7 +56,7 @@ class VideoWriter(Writer):
             logging.warning(" empty image not writen")
             return
         try:
-            cv.WriteFrame(self.wp, data)
+            cv2.cv.WriteFrame(self.wp, data)
         except:
             logging.warning(" cannot write image to video file")
 
