@@ -179,7 +179,7 @@ class LeicaMeasureUnit(MeasureUnit):
             :param pc: prism constant [mm]
             :returns: set prism constant message
         """
-        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETPC'], pc)
+        return '%R1Q,{0:d}:{1:f}'.format(self.codes['SETPC'], pc)
 
     def GetPcMsg(self):
         """ Get prism constant
