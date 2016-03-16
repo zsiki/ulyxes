@@ -23,6 +23,7 @@ class GamaIface(object):
         stdev_dist=1, stdev_dist1=1.5):
         """ Initialize a new GamaIface instance.
 
+            :param gama_path: path to gama-local program
             :param dimension: dimension of network (int), 1/2/3
             :param probability: porbability for statistical tests (0.9/0.95/0.997) (float)
             :param stdev_angle: standard deviation for directions in cc (float)
