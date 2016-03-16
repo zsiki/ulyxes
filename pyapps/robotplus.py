@@ -18,7 +18,7 @@ Parameters are stored in config file using JSON format::
     coo_rd: URL to get coordinates from (server side script)
     coo_wr: URL to send coordinates to
     obs_wr: URL to send observations to
-    met: met sensor name WEBMET/BMP180, optional default None
+    met: met sensor name WEBMET/BMP180/SENSEHAT, optional default None
     met_addr: URL to webmet data, optional default None
     met_par: parameters to web met service, optional default None
 """
