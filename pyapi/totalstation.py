@@ -41,12 +41,13 @@ class TotalStation(Instrument):
     def __repr__(self):
         muString = self.measureUnit.GetName()
         muString = muString.replace(' ', '') + '()'
-        return "{}('{}',{},'{}')".format(type(self).__name__,self.name,muString,self.measureIface.GetName())
+        return "{}('{}',{},'{}')".format(type(self).__name__, self.name,
+            muString, self.measureIface.GetName())
 
     def SetPc(self, pc):
         """ Set prism constant
 
-            :param pc: prism constant [mm]
+            :param pc: prism constant [m]
             :returns: processed answer from instrument
         """
         msg = self.measureUnit.SetPcMsg(pc)
@@ -79,6 +80,8 @@ class TotalStation(Instrument):
 
     def SetPrismType(self, typ):
         """ Set prism type 
+
+
         """
         msg = self.measureUnit.SetPrismTypeMsg(typ)
         return self._process(msg)
@@ -366,25 +369,32 @@ class TotalStation(Instrument):
     def SwitchOff(self, mode):
         """ Switch off instrument
 
-			:param mode: 0/1 power down/sleep state
+            :param mode: 0/1 power down/sleep state
+            :returns: processed answer from instrument
         """
         msg = self.measureUnit.SwitchOffMsg(mode)
         return self._process(msg)
 
     def GetInstrumentNo(self):
         """ Get instrument factory number
+
+            :returns: processed answer from instrument
         """
         msg = self.measureUnit.GetInstrumentNoMsg()
         return self._process(msg)
 
     def GetInstrumentName(self):
         """ Get instrument name
+
+            :returns: processed answer from instrument
         """
         msg = self.measureUnit.GetInstrumentNameMsg()
         return self._process(msg)
 
     def GetInternalTemperature(self):
         """ Get instrument internal temperature
+
+            :returns: processed answer from instrument
         """
         msg = self.measureUnit.GetInternalTemperatureMsg()
         return self._process(msg)
