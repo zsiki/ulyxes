@@ -110,13 +110,13 @@ def conf_check(conf):
             conf['mon_list'] = None
     if conf['fix_list'] is None and conf['mon_list'] is None:
         logging.error('Neither fix nor mon points are given')
-    if conf['gama_path'] is not None and \
+    if 'gama_path' in conf and conf['gama_path'] and \
             not (os.path.isfile(conf['gama_path']) and \
             os.access(conf['gama_path'], os.X_OK)):
         logging.error("GNU Gama not found or not executable:" + conf['gama_path'])
         return False
-    if 'met' in conf:
-        if not conf['met'].upper() in ['WEBMET', 'BMP180']:
+    if 'met' in conf and conf['met']:
+        if not conf['met'].upper() in ['WEBMET', 'BMP180', 'SENSEHAT']:
             logging.error("Invalid met sensor:" + conf['met'])
             return False
         if conf['met'].upper() == 'WEBMET':
