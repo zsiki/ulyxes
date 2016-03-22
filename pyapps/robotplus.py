@@ -66,6 +66,8 @@ def conf_check(conf):
             return False
     if not conf['log_level'] in levels:
         logging.error("Unknown log level: " + conf['log_level'])
+        conf['log_level'] = 'error'
+        logging.warning("Log level set to: " + conf['log_level'])
     if not re.search('120[0-9]$', conf['station_type']) and \
        not re.search('1800$', conf['station_type']) and \
        not re.search('110[0-9]$', conf['station_type']):
@@ -85,10 +87,8 @@ def conf_check(conf):
     if not 'delay_try' in conf:
         conf['delay_try'] = 5
     # are there fix points?
-    if 'fix_list' in conf:
-        if conf['fix_list'] is None:
-            pass
-        elif not type(conf['fix_list']) == list:
+    if 'fix_list' in conf and conf['fix_list']:
+        if not type(conf['fix_list']) == list:
             logging.error("fix_list not a list")
             return False
         elif len(conf['fix_list']) == 0:
@@ -100,16 +100,15 @@ def conf_check(conf):
     else:
         conf['fix_list'] = None
         conf['gama_path'] = None
-    if 'mon_list' in conf:
-        if conf['mon_list'] is None:
-            pass
-        elif not type(conf['mon_list']) == list:
+    if 'mon_list' in conf and conf['mon_list']:
+        if not type(conf['mon_list']) == list:
             logging.error("mon_list not a list")
             return False
         elif len(conf['mon_list']) == 0:
             conf['mon_list'] = None
     if conf['fix_list'] is None and conf['mon_list'] is None:
         logging.error('Neither fix nor mon points are given')
+        return False
     if 'gama_path' in conf and conf['gama_path'] and \
             not (os.path.isfile(conf['gama_path']) and \
             os.access(conf['gama_path'], os.X_OK)):
