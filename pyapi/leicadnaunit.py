@@ -49,7 +49,7 @@ class LeicaDnaUnit(MeasureUnit):
         m = re.search("^@[EW]([0-9]+)$", ans)
         res = {}
         if m is not None:
-            res["error"] = int(m.group(0))
+            res["error"] = int(m.group(1))
             return res    # error
         ansBuflist = re.split(' ', ans.strip('*'))
         if msg == self.MEASURE:

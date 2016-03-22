@@ -66,6 +66,6 @@ if __name__ == "__main__":
     iface = SerialIface('x', '/dev/ttyS0')
     dna = DigitalLevel('DNA03', mu, iface)
     dna.SetAutoOff(0)
-    print (dna.GetAutoOff())
+    #print (dna.GetAutoOff())
     print (dna.Temperature())
     print (dna.Measure())
