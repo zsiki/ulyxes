@@ -351,6 +351,12 @@ if __name__ == "__main__":
     og = ObsGen(st_coord + fix_coords + mon_coords, conf['station_id'], \
         conf['station_height'], conf['faces'])
     observations = og.run()
+    # change to face left
+    if ts.GetFace():
+        a = ts.GetAngles()
+        a['hz'] += Angle(180, 'DEG')
+        a['v'] = Angle(360, 'DEG') - a['v']
+        ts.Move(a['hz'], a['v'], 0) # no ATR
     # check/find orientation
     print "Orientation..."
     o = Orientation(observations, ts, conf['orientation_limit'])
