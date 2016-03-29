@@ -352,7 +352,7 @@ if __name__ == "__main__":
         conf['station_height'], conf['faces'])
     observations = og.run()
     # change to face left
-    if ts.GetFace():
+    if ts.GetFace()['face'] == ts.FACE_RIGHT:
         a = ts.GetAngles()
         a['hz'] += Angle(180, 'DEG')
         a['v'] = Angle(360, 'DEG') - a['v']
