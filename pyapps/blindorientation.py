@@ -93,15 +93,15 @@ class Orientation(object):
                             obs = self.ts.GetMeasure()
                             w = self.FindPoint(obs)
                             if w is not None:
-                                self.ts.SetOri(w)
-                                return True
+                                ans = self.ts.SetOri(w)
+                                return ans
         if not 'errorCode' in ans:
             self.ts.Measure()
             obs = self.ts.GetMeasure()
             w = self.FindPoint(obs)
             if not w is None:
-                self.ts.SetOri(w)
-                return True
+                ans = self.ts.SetOri(w)
+                return ans
         # try blind find
         angles = self.ts.GetAngles()
         if 'errorCode' in angles:
@@ -117,8 +117,8 @@ class Orientation(object):
                     obs = self.ts.GetMeasure()
                     w = self.FindPoint(obs)
                     if not w is None:
-                        self.ts.SetOri(w)
-                        return True
+                        ans = self.ts.SetOri(w)
+                        return ans
                 act_v += self.step
             act_hz += self.step
             if act_hz > 2 * math.pi:

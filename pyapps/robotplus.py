@@ -360,7 +360,11 @@ if __name__ == "__main__":
     # check/find orientation
     print "Orientation..."
     o = Orientation(observations, ts, conf['orientation_limit'])
-    if not o.Search():
+    ans = o.Search()
+    if not ans:
+        logging.error("Orientation failed %s" % conf['station_id'])
+        sys.exit(-1)
+    if 'errCode' in ans:
         logging.error("Orientation failed %s" % conf['station_id'])
         sys.exit(-1)
 
@@ -413,7 +417,8 @@ if __name__ == "__main__":
                                  ori_p['north'] - st_coord[0]['north']))
             # rotate to farest FIX and set orientation
             ts.Move(obs_out[back_indx]['hz'], obs_out[back_indx]['v'], 1)
-            ts.SetOri(bearing)
+            ans = ts.SetOri(bearing)
+            print ans
 
     if 'mon_list' in conf and conf['mon_list'] is not None:
         # generate observations for monitoring points, first point is the station
