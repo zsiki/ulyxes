@@ -106,7 +106,7 @@ class Orientation(object):
         angles = self.ts.GetAngles()
         if 'errorCode' in angles:
             logging.error("Cannot measure angles")
-            return False
+            return angles
         act_hz = angles['hz'].GetAngle()
         while dhz < PI2:
             act_v = min_v
@@ -124,7 +124,7 @@ class Orientation(object):
             if act_hz > 2 * math.pi:
                 act_hz -= 2* math.pi
             dhz += self.step
-        return False
+        return {errCode: -999}
 
 if __name__ == '__main__':
     from serialiface import SerialIface
