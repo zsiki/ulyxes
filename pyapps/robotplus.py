@@ -354,9 +354,12 @@ if __name__ == "__main__":
     # change to face left
     if ts.GetFace()['face'] == ts.FACE_RIGHT:
         a = ts.GetAngles()
-        a['hz'] += Angle(180, 'DEG')
-        a['v'] = Angle(360, 'DEG') - a['v']
-        ts.Move(a['hz'], a['v'], 0) # no ATR
+        a['hz'] = (a + Angle(180, 'DEG')).Normalize()
+        a['v'] = (Angle(360, 'DEG') - a['v']).Normalize()
+        ans = ts.Move(a['hz'], a['v'], 0) # no ATR
+        if 'errCode' in ans:
+            logging.error("Rotation to face left failed %d" % ans['errCode'])
+            sys.exit(-1)
     # check/find orientation
     print "Orientation..."
     o = Orientation(observations, ts, conf['orientation_limit'])
@@ -365,7 +368,7 @@ if __name__ == "__main__":
         logging.error("Orientation failed %s" % conf['station_id'])
         sys.exit(-1)
     if 'errCode' in ans:
-        logging.error("Orientation failed %s" % conf['station_id'])
+        logging.error("Orientation failed %d" % ans['errCode'])
         sys.exit(-1)
 
     if 'fix_list' in conf and conf['fix_list'] is not None:
