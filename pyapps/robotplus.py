@@ -364,9 +364,6 @@ if __name__ == "__main__":
     print "Orientation..."
     o = Orientation(observations, ts, conf['orientation_limit'])
     ans = o.Search()
-    if not ans:
-        logging.error("Orientation failed %s" % conf['station_id'])
-        sys.exit(-1)
     if 'errCode' in ans:
         logging.error("Orientation failed %d" % ans['errCode'])
         sys.exit(-1)
