@@ -195,6 +195,15 @@ Operators supported:
             self.value += PI2
         return self
 
+    def Normalize(self):
+        """ Normalize angle between 0-360 DEG
+        """
+        while self.value < 0:
+            self.value += PI2
+        while self.value >= PI2:
+            self.value -= PI2
+        return self
+
     def __str__(self):
         """ GON string representation of angle
 
@@ -211,7 +220,7 @@ Operators supported:
         return Angle(self.value + a.GetAngle('RAD'), 'RAD')
 
     def __iadd__(self, a):
-        """ add an agle to current
+        """ add an angle to current
 
             :param a: Angle to add
         """
@@ -235,7 +244,16 @@ Operators supported:
         return self
 
 if __name__ == "__main__":
-    a1 = Angle("152-23-45", "DMS")
+    a1 = Angle("204-55-28", "DMS")
+    print a1.GetAngle('DMS')
+    a1 += Angle(180, 'DEG')
+    print a1.Normalize().GetAngle('DMS')
+    a2 = Angle('280-03-24', 'DMS')
+    print a2.GetAngle('DMS')
+    a3 = Angle(360, 'DEG')
+    print a3.GetAngle('DMS')
+    a2 = a3 - a2
+    print a2.Normalize().GetAngle('DMS')
     for u in ['RAD', 'DMS', 'GON', 'NMEA', 'DEG', 'PDEG', 'MIL']:
         print (a1.GetAngle(u))
     b1 = Angle(1.1111, 'PDEG')
