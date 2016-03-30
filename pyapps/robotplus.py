@@ -354,7 +354,7 @@ if __name__ == "__main__":
     # change to face left
     if ts.GetFace()['face'] == ts.FACE_RIGHT:
         a = ts.GetAngles()
-        a['hz'] = (a + Angle(180, 'DEG')).Normalize()
+        a['hz'] = (a['hz'] + Angle(180, 'DEG')).Normalize()
         a['v'] = (Angle(360, 'DEG') - a['v']).Normalize()
         ans = ts.Move(a['hz'], a['v'], 0) # no ATR
         if 'errCode' in ans:
