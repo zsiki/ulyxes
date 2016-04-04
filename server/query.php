@@ -8,6 +8,8 @@
  *    ptyte: coma separated list of point types
  *    from:  starting datetime (optional)
  *    to:    end datetime (optional)
+ *    ids:   query the list of unique point ids, do not use it with plist
+ *    dates: query min/max dates
  *
  * With no parameters it returns the latest coordinates of all points
  */
@@ -67,21 +69,28 @@
 		exit();
 	}
 	// build query
-	$sql = "SELECT monitoring_coo.id, monitoring_coo.east, " .
+	if (isset($_REQUEST['ids'])) {
+		$sql = "SELECT distinct  monitoring_coo.id ";
+	} elseif (isset($_REQUEST['dates'])) {
+		$sql = "SELECT min(monitoring_coo.datetime) AS sd, " .
+		"max(monitoring_coo.datetime) AS ed ";
+	} else {
+		$sql = "SELECT monitoring_coo.id, monitoring_coo.east, " .
 			"monitoring_coo.north, monitoring_coo.elev, monitoring_poi.code, " .
-			"monitoring_coo.datetime " .
-			"FROM monitoring_coo INNER JOIN monitoring_poi " .
+			"monitoring_coo.datetime ";
+	}
+	$sql .= "FROM monitoring_coo INNER JOIN monitoring_poi " .
 			"on (monitoring_coo.id = monitoring_poi.id)";
 	$sql .= $where;
-	if (! isset($from_d) && ! isset($to_d)) {
+	if (! isset($from_d) && ! isset($to_d) && ! isset($_REQUEST['dates'])) {
 		$sql .= (strlen($where) ? " and" : " WHERE");
 		$sql .= " (monitoring_coo.id, monitoring_coo.datetime) " .
 				"in (SELECT id, max(datetime) FROM monitoring_coo " .
 				"GROUP BY id) ORDER BY monitoring_coo.id";
-	} else {
+	} elseif(! isset($_REQUEST['dates'])) {
 		$sql .= " ORDER BY monitoring_coo.id, monitoring_coo.datetime";
 	}
-//echo $sql;
+//echo $sql . "<br>";
 	$rs = $dbh->query($sql);
 	echo "[";
 	$sep = " ";
