@@ -7,17 +7,18 @@
 Sample application of Ulyxes PyAPI to create input file for robot
 Output file uses GeoEasy geo format or simple csv
 
-    :param argv[1] output file with observations
+    :param argv[1]: output file with observations
     :param argv[2] (sensor): 1100/1800/1200, default 1200
     :param argv[3] (port): serial port, default COM1
 
-For each target point the point id and a type is 
-A mode have to be defined for each point
-ATRn - use automatic targeting, n is prism type id (1/2/3/...)
-PRn - prism with manual targeting, n is prism type id (1/2/3/...)
-RL - reflectorless distance with manual targeting
-RLA - automatic reflectorless distance measurement
-OR - orientation direction, manual targeting, no distance
+For each target point the point id and a mode must be given
+Modes::
+
+    ATRn - use automatic targeting, n is prism type id (1/2/3/...)
+    PRn - prism with manual targeting, n is prism type id (1/2/3/...)
+    RL - reflectorless distance with manual targeting
+    RLA - automatic reflectorless distance measurement
+    OR - orientation direction, manual targeting, no distance
 
 """
 import sys
