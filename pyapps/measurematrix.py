@@ -68,7 +68,7 @@ if __name__ == "__main__":
         fn = sys.argv[5]
     # write out measurements
     wrt = FileWriter(angle='DEG', dist = '.3f', fname=fn)
-    if wrt.GetState() != self.WR_OK:
+    if wrt.GetState() != wrt.WR_OK:
         sys.exit(-1)    # open error
     ts = TotalStation(stationtype, mu, iface, wrt)
     ts.SetATR(0) # turn ATR off
