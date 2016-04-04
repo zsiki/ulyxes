@@ -2,13 +2,39 @@
 /*
  * Sample script to collect data from ulyxes monitoring (httpwriter)
  *
+ *  parameters to store measured (local) coordinates
+ *    id: point id
+ *    east: east coordinate
+ *    north: north coordinate
+ *    elev: elevation
+ *    datetime: time stamp
+ *
+ *  parameters to store observations:
+ *    id: point id
+ *    hz: horizontal angle (WCB)
+ *    v: zenith angle
+ *    distance: slope distance
+ *    datetime: time stamp
+ *
+ *  params to store initial, mapable (global) positions:
+ *    id: point id
+ *    east: east coordinate (or latitude)
+ *    north: north cooridnate (or latitude)
+ *    elev: elevation
+ *    ptype: point type STA/FIX/MON
+ *    code: target code ATRn/RLA
  */
 
 	//error_log(http_build_query($_REQUEST));
 
-	$STR_TYPE = array('varchar', 'char', 'timestamp');
+	$STR_TYPE = array('varchar', 'char', 'bpchar', 'timestamp');
 	include_once("config.php");
 
+	if (! isset($_REQUEST['id'])) {
+		echo -1;
+		error_log("Parameter error: id missing" . http_build_query($_REQUEST));
+		exit();
+	}
 	if (isset($_REQUEST['east']) && isset($_REQUEST['north']) &&
 		isset($_REQUEST['elev']) && isset($_REQUEST['datetime'])) {
 		// coordinate record sent
@@ -17,6 +43,13 @@
 		isset($_REQUEST['distance']) && isset($_REQUEST['datetime'])) {
 		// totalstation observation record sent
 		$table = $obs_table;
+	} elseif (isset($_REQUEST['east']) && isset($_REQUEST['north']) &&
+		isset($_REQUEST['elev']) && isset($_REQUEST['ptype'])) {
+		// poi record sent
+		$table = $poi_table;
+		$_REQUEST['geom'] = "ST_SetSRID(" .
+			"ST_MakePoint(" . $_REQUEST['east'] . "," .
+			$_REQUEST['north'] . "," . $_REQUEST['elev'] . "), 3857)";
 	} else {
 		echo -1;
 		error_log("Parameter error:" . http_build_query($_REQUEST));
@@ -51,7 +84,8 @@
 	}
 	$cols = trim($cols, ',');
 	$vals = trim($vals, ',');
+	// echo "insert into $table ($cols) values ($vals)";
 	$i = $dbh->exec("insert into $table ($cols) values ($vals)");
-	//error_log("insert into $table ($cols) values ($vals)");
+	// error_log("insert into $table ($cols) values ($vals)");
 	echo $i;	// number of lines affected (1)
 ?>
