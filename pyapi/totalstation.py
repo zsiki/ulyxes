@@ -200,6 +200,10 @@ class TotalStation(Instrument):
             :param ori: bearing to direction (Angle)
             :returns: empty dictionary
         """
+        # clear previous distance measured
+        ans = self.Measure('CLEAR')
+        if 'errCode' in ans:
+            return ans
         msg = self.measureUnit.SetOriMsg(ori)
         return self._process(msg)
 
