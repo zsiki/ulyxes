@@ -80,7 +80,7 @@ class Orientation(object):
             ans = self.ts.Move(self.observations[1]['hz'], \
                 self.observations[1]['v'], 1)
             if 'errorCode' in ans:
-                # set telescope horizontal
+                # set telescope into the middle in vertical direction
                 angles = self.ts.GetAngles()
                 self.ts.Move(angles['hz'], Angle((min_v + max_v) / 2.0))
                 # try powersearch clockwise
@@ -124,7 +124,7 @@ class Orientation(object):
             if act_hz > 2 * math.pi:
                 act_hz -= 2* math.pi
             dhz += self.step
-        return {errCode: -999}
+        return {'errCode': -999}
 
 if __name__ == '__main__':
     from serialiface import SerialIface
