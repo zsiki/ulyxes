@@ -310,16 +310,16 @@ if __name__ == "__main__":
         sys.exit(-1)
     # coordinate writer & observation writer
     if re.search('^http[s]?://', conf['coo_wr']):
-        wrt = HttpWriter(url = conf['coo_wr'], mode = 'POST')
+        wrt = HttpWriter(url = conf['coo_wr'], mode = 'POST', dist = '.4f')
         # observation writer
         if 'obs_wr' in conf:
-            wrt1 = HttpWriter(url = conf['obs_wr'], mode = 'POST')
+            wrt1 = HttpWriter(url = conf['obs_wr'], mode = 'POST', dist = '.4f')
         else:
             wrt1 = wrt
     else:
-        wrt = GeoWriter(fname = conf['coo_wr'], mode = 'a')
+        wrt = GeoWriter(fname = conf['coo_wr'], mode = 'a', dist = '.4f')
         if 'obs_wr' in conf:
-            wrt1 = GeoWriter(fname = conf['obs_wr'], mode = 'a')
+            wrt1 = GeoWriter(fname = conf['obs_wr'], mode = 'a', dist = '.4f')
     if 'fix_list' in conf and conf['fix_list'] is not None:
         # get fix coordinates from database
         print "Loading fix coords..."
@@ -331,6 +331,8 @@ if __name__ == "__main__":
                 filt = ['id', 'east', 'north', 'elev'])
         # remove other points
         fix_coords = [p for p in rd_fix.Load() if p['id'] in conf['fix_list']]
+        if len(conf['fix_list']) != len(fix_coords):
+            logging.error("Not all fix points found in database");
     else:
         fix_coords = []
 
@@ -344,6 +346,8 @@ if __name__ == "__main__":
             rd_mon = GeoReader(fname=conf['coo_rd'], \
                 filt = ['id', 'east', 'north', 'elev'])
         mon_coords = [p for p in rd_mon.Load() if p['id'] in conf['mon_list']]
+        if len(conf['mon_list']) != len(mon_coords):
+            logging.error("Not all mon points found in database");
     else:
         mon_coords = []
     # check orientation including FIX and MON points
