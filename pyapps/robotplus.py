@@ -227,7 +227,8 @@ if __name__ == "__main__":
                 logging.error("Error in config file: " + sys.argv[1])
                 sys.exit(-1)
         else:
-            logging.error("Config file not found")
+            print "Config file not found" + sys.argv[1]
+            logging.error("Config file not found" + sys.argv[1])
     else:
         print "Usage: robotplus.py config_file"
         sys.exit(-1)
