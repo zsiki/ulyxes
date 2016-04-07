@@ -73,6 +73,8 @@ class FileWriter(Writer):
             self.fp.flush()
         except:
             logging.error(" file write failed")
+            return -1
+        return 1
 
 if __name__ == "__main__":
     myfile = FileWriter()   # write to stdout
