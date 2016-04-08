@@ -396,7 +396,7 @@ if __name__ == "__main__":
             conf['station_height'], conf['faces'])
         observations = og.run()
         # observation to fix points
-        print "Measuring to fix..."
+        print "Measuring fix..."
         r = Robot(observations, st_coord, ts, conf['max_try'], conf['delay_try'])
         obs_out, coo_out = r.run()
         # TODO observations to FIX points to the database????
@@ -441,8 +441,9 @@ if __name__ == "__main__":
             # rotate to farest FIX and set orientation
             ts.Move(obs_out[back_indx]['hz'], obs_out[back_indx]['v'], 1)
             ans = ts.SetOri(bearing)
-            print ans
-
+            if 'errCode' in ans:
+                logging.error("Cannot upload orientation to instrument")
+                sys-exit(-1)
     if 'mon_list' in conf and conf['mon_list'] is not None:
         # generate observations for monitoring points, first point is the station
         print "Generating observations for mon..."
