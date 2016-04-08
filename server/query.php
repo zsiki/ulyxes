@@ -26,7 +26,7 @@
 			$pids[$key] = "'$val'";
 		}
 		$pids = implode(",", $pids);
-		$where = " WHERE monitoring_coo.id in ($pids)";
+		$where = " WHERE $coo_table.id in ($pids)";
 	}
 	if (isset($_REQUEST['ptype']) && strlen($_REQUEST['ptype'])) {
 		$ptys = explode(",", $_REQUEST['ptype']);
@@ -36,29 +36,34 @@
 		}
 		$ptys = implode(",", $ptys);
 		$where .= (strlen($where) ? " and" : " WHERE");
-		$where .= " monitoring_poi.ptype in ($ptys)";
+		$where .= " $poi_table.ptype in ($ptys)";
 	}
+	// ANSI DATE
 	$date_regexp = '/^[12][0-9]{3}([-\.][0-9]{1,2}){2}\.?( [0-9]{1,2}(:[0-9]{1,2}){2})?$/';
+	// US DATE
+	$date_regexp1 = '/^([0-9][0-9]?\/){2}[12][0-9]{3}$/';
 
-	if (isset($_REQUEST['from'])) {
-		if (preg_match($date_regexp, $_REQUEST['from'])) {
+	if (isset($_REQUEST['from']) && strlen(trim($_REQUEST['from']))) {
+		if (preg_match($date_regexp, $_REQUEST['from']) ||
+			preg_match($date_regexp1, $_REQUEST['from'])) {
 			$from_d = $_REQUEST['from'];
 			$where .= (strlen($where) ? " and" : " WHERE");
-			$where .= " monitoring_coo.datetime >= '$from_d'";
+			$where .= " $coo_table.datetime >= '$from_d'";
 		} else {
 			echo -3;	// date format error
-			error_log("Date time format error");
+			error_log("Date time format error from");
 			exit();
 		}
 	}
-	if (isset($_REQUEST['to'])) {
-		if (preg_match($date_regexp, $_REQUEST['to'])) {
+	if (isset($_REQUEST['to']) && strlen(trim($_REQUEST['to']))) {
+		if (preg_match($date_regexp, $_REQUEST['to']) ||
+			preg_match($date_regexp1, $_REQUEST['to'])) {
 			$to_d = $_REQUEST['to'];
 			$where .= (strlen($where) ? " and" : " WHERE");
-			$where .= " monitoring_coo.datetime <= '$to_d'";
+			$where .= " $coo_table.datetime <= '$to_d'";
 		} else {
-			echo -3;	// date format error
-			error_log("Date time format error");
+			echo -4;	// date format error
+			error_log("Date time format error to");
 			exit();
 		}
 	}
@@ -70,25 +75,25 @@
 	}
 	// build query
 	if (isset($_REQUEST['ids'])) {
-		$sql = "SELECT distinct  monitoring_coo.id ";
+		$sql = "SELECT distinct  $coo_table.id FROM $coo_table " .
+			"ORDER BY $coo_table.id";
 	} elseif (isset($_REQUEST['dates'])) {
-		$sql = "SELECT min(monitoring_coo.datetime) AS sd, " .
-		"max(monitoring_coo.datetime) AS ed ";
+		$sql = "SELECT min($coo_table.datetime) AS sd, " .
+		"max($coo_table.datetime) AS ed FROM $coo_table";
 	} else {
-		$sql = "SELECT monitoring_coo.id, monitoring_coo.east, " .
-			"monitoring_coo.north, monitoring_coo.elev, monitoring_poi.code, " .
-			"monitoring_coo.datetime ";
-	}
-	$sql .= "FROM monitoring_coo INNER JOIN monitoring_poi " .
-			"on (monitoring_coo.id = monitoring_poi.id)";
-	$sql .= $where;
-	if (! isset($from_d) && ! isset($to_d) && ! isset($_REQUEST['dates'])) {
-		$sql .= (strlen($where) ? " and" : " WHERE");
-		$sql .= " (monitoring_coo.id, monitoring_coo.datetime) " .
-				"in (SELECT id, max(datetime) FROM monitoring_coo " .
-				"GROUP BY id) ORDER BY monitoring_coo.id";
-	} elseif(! isset($_REQUEST['dates'])) {
-		$sql .= " ORDER BY monitoring_coo.id, monitoring_coo.datetime";
+		$sql = "SELECT $coo_table.id, $coo_table.east, " .
+			"$coo_table.north, $coo_table.elev, $poi_table.code, " .
+			"$coo_table.datetime " .
+			"FROM $coo_table INNER JOIN $poi_table " .
+			"on ($coo_table.id = $poi_table.id)";
+		$sql .= $where;
+		if (! isset($from_d) && ! isset($to_d)) {
+			$sql .= (strlen($where) ? " and" : " WHERE");
+			$sql .= " ($coo_table.id, $coo_table.datetime) " .
+				"in (SELECT id, max(datetime) FROM $coo_table " .
+				"GROUP BY id)";
+		}
+		$sql .= " ORDER BY $coo_table.id, $coo_table.datetime";
 	}
 //echo $sql . "<br>";
 	$rs = $dbh->query($sql);

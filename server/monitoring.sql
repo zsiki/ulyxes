@@ -13,6 +13,7 @@ DROP TABLE IF EXISTS monitoring_poi;
 CREATE TABLE monitoring_poi (
 	id varchar(50) PRIMARY KEY,
 	ptype char(3) NOT NULL DEFAULT 'MON' CHECK (ptype in ('FIX','STA','MON')),
+	code char(4) NOT NULL DEFAULT 'ATR'
 );
 SELECT AddGeometryColumn('monitoring_poi', 'geom', 3857, 'POINT', 3);
 
