@@ -107,6 +107,11 @@ def conf_check(conf):
         conf['stdev_dist'] = 1
     if not 'stdev_dist1' in conf:
         conf['stdev_dist1'] = 1.5
+    # gama params
+    if not 'dimension' in conf:
+        conf['dimension'] = 3
+    if not 'probability' in conf:
+        conf['dimension'] = 0.95
     # decimals in distance, coordinates
     if not 'decimals' in conf:
         conf['decimals'] = 4
@@ -401,6 +406,7 @@ if __name__ == "__main__":
             if conf['faces'] > 1:
                 obs_out = avg_obs(obs_out)
             fs = Freestation(obs_out, st_coord + fix_coords, conf['gama_path'],
+                conf['dimension'], conf['probability'],
                 conf['stdev_angle'], conf['stdev_dist'], conf['stdev_dist1'])
             w = fs.Adjustment()
             if w is None:
