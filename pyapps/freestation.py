@@ -33,13 +33,17 @@ class Freestation(object):
         :param obs: list of observations
         :param coords: coordinates of points
         :param gama_path: path to gama-local
+        :param dimiension: dimension of adjustment 1/2/3
+        :param
     """
 
-    def __init__(self, obs, coords, gama_path):
+    def __init__(self, obs, coords, gama_path, dimension=3, probability=0.95,
+                stdev_angle=1, stdev_dist=1, stdev_dist1=1.5):
         """ initialize
         """
         # create gama interface
-        self.g = GamaIface(gama_path, 3, 0.95, 1, 1, 1.5)
+        self.g = GamaIface(gama_path, dimension, probability, stdev_angle,
+                        stdev_dist, stdev_dist1)
         ns = 0    # number of stations
         no = 0    # number of observations
         self.station = None

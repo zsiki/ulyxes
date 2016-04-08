@@ -100,6 +100,16 @@ def conf_check(conf):
     else:
         conf['fix_list'] = None
         conf['gama_path'] = None
+    # standard deviations
+    if not 'stdev_angle' in conf:
+        conf['stdev_angle'] = 1
+    if not 'stdev_dist' in conf:
+        conf['stdev_dist'] = 1
+    if not 'stdev_dist1' in conf:
+        conf['stdev_dist1'] = 1.5
+    # decimals in distance, coordinates
+    if not 'decimals' in conf:
+        conf['decimals'] = 4
     if 'mon_list' in conf and conf['mon_list']:
         if not type(conf['mon_list']) == list:
             logging.error("mon_list not a list")
@@ -309,17 +319,18 @@ if __name__ == "__main__":
         logging.error("Station not found: " + conf['station_id'])
         sys.exit(-1)
     # coordinate writer & observation writer
+    fmt = '.%df' % conf['decimals']
     if re.search('^http[s]?://', conf['coo_wr']):
-        wrt = HttpWriter(url = conf['coo_wr'], mode = 'POST', dist = '.4f')
+        wrt = HttpWriter(url = conf['coo_wr'], mode = 'POST', dist = fmt)
         # observation writer
         if 'obs_wr' in conf:
-            wrt1 = HttpWriter(url = conf['obs_wr'], mode = 'POST', dist = '.4f')
+            wrt1 = HttpWriter(url = conf['obs_wr'], mode = 'POST', dist = fmt)
         else:
             wrt1 = wrt
     else:
-        wrt = GeoWriter(fname = conf['coo_wr'], mode = 'a', dist = '.4f')
+        wrt = GeoWriter(fname = conf['coo_wr'], mode = 'a', dist = fmt)
         if 'obs_wr' in conf:
-            wrt1 = GeoWriter(fname = conf['obs_wr'], mode = 'a', dist = '.4f')
+            wrt1 = GeoWriter(fname = conf['obs_wr'], mode = 'a', dist = fmt)
     if 'fix_list' in conf and conf['fix_list'] is not None:
         # get fix coordinates from database
         print "Loading fix coords..."
@@ -389,7 +400,8 @@ if __name__ == "__main__":
             print "Freestation..."
             if conf['faces'] > 1:
                 obs_out = avg_obs(obs_out)
-            fs = Freestation(obs_out, st_coord + fix_coords, conf['gama_path'])
+            fs = Freestation(obs_out, st_coord + fix_coords, conf['gama_path'],
+                conf['stdev_angle'], conf['stdev_dist'], conf['stdev_dist1'])
             w = fs.Adjustment()
             if w is None:
                 logging.error("No adjusted coordinates for station %s" % conf['station_id'])
