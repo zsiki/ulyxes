@@ -33,17 +33,22 @@ class Freestation(object):
         :param obs: list of observations
         :param coords: coordinates of points
         :param gama_path: path to gama-local
-        :param dimiension: dimension of adjustment 1/2/3
-        :param
+        :param dimiension: dimension of adjustment 1/2/3, optional default 3
+        :param probability: probability level, optional, default 0.95
+        :param stdev_angle: angle measurement standard deviation (seconds), optional, default 1"
+        :param stdev_dist: distance measurement additive standard deviation (mm), optional, default 1 mm
+        :param stdev_dist1: distance measurement multiplicative standdard deviation (mm/km), optional, default 1.5 mm/km
+        :param blunders: remove blunders, optional, default True
     """
 
     def __init__(self, obs, coords, gama_path, dimension=3, probability=0.95,
-                stdev_angle=1, stdev_dist=1, stdev_dist1=1.5):
+                stdev_angle=1, stdev_dist=1, stdev_dist1=1.5, blunders=True):
         """ initialize
         """
         # create gama interface
         self.g = GamaIface(gama_path, dimension, probability, stdev_angle,
                         stdev_dist, stdev_dist1)
+        self.blunders = blunders
         ns = 0    # number of stations
         no = 0    # number of observations
         self.station = None
@@ -80,6 +85,9 @@ class Freestation(object):
                     res = last_res
                 else:
                     logging.error("adjustment failed")
+                break
+            elif not self.blunders:
+                logging.warning("no blunders checked")
                 break
             elif blunder['std-residual'] < 1.0:
                 logging.info("blunders removed")

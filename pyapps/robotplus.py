@@ -94,8 +94,8 @@ def conf_check(conf):
         elif len(conf['fix_list']) == 0:
             conf['fix_list'] = None
             conf['gama_path'] = None
-        elif len(conf['fix_list']) < 3:
-            logging.error("fix_list shorter than 3")
+        elif len(conf['fix_list']) < 2:
+            logging.error("fix_list shorter than 2")
             return False
     else:
         conf['fix_list'] = None
@@ -112,6 +112,8 @@ def conf_check(conf):
         conf['dimension'] = 3
     if not 'probability' in conf:
         conf['dimension'] = 0.95
+    if not 'blunders' in conf:
+        conf['bluders'] = True
     # decimals in distance, coordinates
     if not 'decimals' in conf:
         conf['decimals'] = 4
