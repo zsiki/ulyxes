@@ -408,8 +408,8 @@ if __name__ == "__main__":
             if conf['faces'] > 1:
                 obs_out = avg_obs(obs_out)
             fs = Freestation(obs_out, st_coord + fix_coords, conf['gama_path'],
-                conf['dimension'], conf['probability'],
-                conf['stdev_angle'], conf['stdev_dist'], conf['stdev_dist1'])
+                conf['dimension'], conf['probability'], conf['stdev_angle'],
+                conf['stdev_dist'], conf['stdev_dist1'], conf['blunders'])
             w = fs.Adjustment()
             if w is None:
                 logging.error("No adjusted coordinates for station %s" % conf['station_id'])
