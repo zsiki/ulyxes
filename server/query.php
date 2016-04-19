@@ -18,6 +18,13 @@
 
 	include_once("config.php");
 	
+	if (isset($_REQUEST['table']) && $_REQUEST['table'] == "obs") {
+		$table = $obs_table;
+		$cols = "$table.hz, $table.v, $table.distance";
+	} else {
+		$table = $coo_table;
+		$cols = "$table.east, $table.north, $table.elev";
+	}
 	$where = "";
 	if (isset($_REQUEST['plist']) && strlen($_REQUEST['plist'])) {
 		$pids = explode(",", $_REQUEST['plist']);
@@ -26,7 +33,7 @@
 			$pids[$key] = "'$val'";
 		}
 		$pids = implode(",", $pids);
-		$where = " WHERE $coo_table.id in ($pids)";
+		$where = " WHERE $table.id in ($pids)";
 	}
 	if (isset($_REQUEST['ptype']) && strlen($_REQUEST['ptype'])) {
 		$ptys = explode(",", $_REQUEST['ptype']);
@@ -48,10 +55,9 @@
 			preg_match($date_regexp1, $_REQUEST['from'])) {
 			$from_d = $_REQUEST['from'];
 			$where .= (strlen($where) ? " and" : " WHERE");
-			$where .= " $coo_table.datetime >= '$from_d'";
+			$where .= " $table.datetime >= '$from_d'";
 		} else {
 			echo -3;	// date format error
-			error_log("Date time format error from");
 			exit();
 		}
 	}
@@ -60,43 +66,40 @@
 			preg_match($date_regexp1, $_REQUEST['to'])) {
 			$to_d = $_REQUEST['to'];
 			$where .= (strlen($where) ? " and" : " WHERE");
-			$where .= " $coo_table.datetime <= '$to_d'";
+			$where .= " $table.datetime <= '$to_d'";
 		} else {
 			echo -4;	// date format error
-			error_log("Date time format error to");
 			exit();
 		}
 	}
 	$dbh = new PDO($conn_str);
 	if (! $dbh) {
 		echo -2;	// connection error
-		error_log("Connection error: check connection string");
 		exit();
 	}
 	// build query
 	if (isset($_REQUEST['ids'])) {
-		$sql = "SELECT distinct  $coo_table.id FROM $coo_table " .
-			"ORDER BY $coo_table.id";
+		// get unique measure point ids
+		$sql = "SELECT distinct  $table.id FROM $table " .
+			"ORDER BY $table.id";
 	} elseif (isset($_REQUEST['dates'])) {
-		$sql = "SELECT min($coo_table.datetime) AS sd, " .
-		"max($coo_table.datetime) AS ed FROM $coo_table";
+		// get min/max date/time
+		$sql = "SELECT min($table.datetime) AS sd, " .
+		"max($table.datetime) AS ed FROM $table";
 	} else {
-		$sql = "SELECT $coo_table.id, $coo_table.east, " .
-			"$coo_table.north, $coo_table.elev, $poi_table.code, " .
-			"$coo_table.datetime " .
-			"FROM $coo_table INNER JOIN $poi_table " .
-			"on ($coo_table.id = $poi_table.id)";
+		// get coordinates or observations
+		$sql = "SELECT $table.id, $cols , $poi_table.code, $table.datetime " .
+			"FROM $table INNER JOIN $poi_table " .
+			"on ($table.id = $poi_table.id)";
 		$sql .= $where;
 		if (! isset($from_d) && ! isset($to_d)) {
 			$sql .= (strlen($where) ? " and" : " WHERE");
-			$sql .= " ($coo_table.id, $coo_table.datetime) " .
-				"in (SELECT id, max(datetime) FROM $coo_table " .
-				"GROUP BY id)";
+			$sql .= " ($table.id, $table.datetime) " .
+				"in (SELECT id, max(datetime) FROM $table GROUP BY id)";
 		}
-		$sql .= " ORDER BY $coo_table.id, $coo_table.datetime";
+		$sql .= " ORDER BY $table.id, $table.datetime";
 	}
 //echo $sql . "<br>";
-	$rs = $dbh->query($sql);
 	echo "[";
 	$sep = " ";
 	foreach ($dbh->query($sql, PDO::FETCH_ASSOC) as $row) {
