@@ -4,8 +4,9 @@
  * (httpreader)
  *
  * query parameters:
- *    plist: coma separated list on point ids
- *    ptyte: coma separated list of point types
+ *    table: obs/coo observations/coordinates (optional), default coo
+ *    plist: coma separated list of point ids (optional)
+ *    ptyte: coma separated list of point types (optional)
  *    from:  starting datetime (optional)
  *    to:    end datetime (optional)
  *    ids:   query the list of unique point ids, do not use it with plist
