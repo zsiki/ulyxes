@@ -30,7 +30,7 @@ from csvwriter import CsvWriter
 from totalstation import TotalStation
 
 if __name__ == "__main__":
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.ERROR)
     # Process command line parameters
     if len(sys.argv) > 1:
         stepinterval = Angle(float(sys.argv[1]), 'DEG')
