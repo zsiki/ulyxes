@@ -14,6 +14,7 @@ coordinates and observations are written to csv file
     :param argv[4] (number of points): number of measured points to determine a arbitrary plane, default 1 
     :param argv[5]  (tolerance): acceptable tolerance (meter) from the horizontal plane, default 0.01
     :param argv[6] (iteration): max iteration number for a point, default 10
+    :param argv[7] (range): max angle (deg), default 360
 """
 
 import sys
@@ -70,6 +71,9 @@ if __name__ == "__main__":
     maxiter = 10
     if len(sys.argv) > 6:
         maxiter = int(sys.argv[6])
+    arange = PI2
+    if len(sys.argv) > 7:
+        arange = float(sys.argv[7]) / 360.0 * PI2
     iface = SerialIface("rs-232", port)   ## eomRead='\n'
     wrt = CsvWriter(angle = 'DMS', dist = '.3f',
                     filt = ['id','east','north','elev'],
@@ -137,7 +141,7 @@ if __name__ == "__main__":
         ts.Move(points[0]['hz'], points[0]['v'])
     act = Angle(0)   # Actual angle from start point set to zero
     w = True
-    while act.GetAngle() < PI2:   # Going around a whole circle
+    while act.GetAngle() < arange:   # Going around a whole circle
         ts.Measure()   # Measuring distance
         if ts.measureIface.state != ts.measureIface.IF_OK:
             ts.measureIface.state = ts.measureIface.IF_OK
