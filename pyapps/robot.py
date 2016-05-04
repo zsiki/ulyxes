@@ -227,6 +227,11 @@ class Robot(object):
                             obs = self.ts.GetAngles()
                         else:
                             obs = self.ts.GetMeasure()
+                            # add inclination data to obs
+                            w = self.ts.GetAngles()
+                            if 'crossincline' in w and 'lengthincline' in w:
+                                obs['crossincline'] = w['crossincline']
+                                obs['lengthincline'] = w['lengthincline']
                         if self.ts.measureIface.state != self.ts.measureIface.IF_OK or 'errorCode' in obs:
                             self.ts.measureIface.state = self.ts.measureIface.IF_OK
                             j += 1
