@@ -75,8 +75,8 @@ class Orientation(object):
         self.ts.SetEDMMode('STANDARD')
         ans = self.ts.GetAngles()
         if ans['v'].GetAngle('DEG') > 160 and ans['v'].GetAngle('DEG') < 200:
-            ans = self.ts.Move(self.observations[0]['hz'], \
-                self.observations[0]['v'], 0)
+            ans = self.ts.Move(self.observations[1]['hz'], \
+                self.observations[1]['v'], 0)
         # instrument targeting on prism?
         ans = self.ts.MoveRel(Angle(0), Angle(0), 1)
         if 'errorCode' in ans:
