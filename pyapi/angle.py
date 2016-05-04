@@ -86,11 +86,12 @@ def _rad2deg(value):
 def _dms(value):
     """ Convert radian to DMS
     """
-    secs = round(_rad2sec(value))
+    signum = "-" if value < 0 else ""
+    secs = round(_rad2sec(abs(value)))
     mi, sec = divmod(secs, 60)
     deg, mi = divmod(mi, 60)
     deg = int(deg)
-    return "%d-%02d-%02d" % (deg, mi, sec)
+    return "%s%d-%02d-%02d" % (signum, deg, mi, sec)
 
 def _rad2dm(value):
     """ Convert radian to NMEA DDDMM.nnnnn
@@ -244,6 +245,8 @@ Operators supported:
         return self
 
 if __name__ == "__main__":
+    a = Angle(-0.01112, "DEG")
+    print a.GetAngle("DMS")
     a1 = Angle("204-55-28", "DMS")
     print a1.GetAngle('DMS')
     a1 += Angle(180, 'DEG')
