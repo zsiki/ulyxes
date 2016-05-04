@@ -468,4 +468,4 @@ if __name__ == "__main__":
             wrt.WriteData(c)
             #print c['id'] + ' ' + str(c['east']) + ' ' + str(c['north']) + ' ' + str(c['elev'])
     # move telescope to safe position
-    ans = ts.Move(Angle(0), Angle(180, "DEG", 0)) # no ATR
+    ans = ts.Move(Angle(0), Angle(180, "DEG")) # no ATR
