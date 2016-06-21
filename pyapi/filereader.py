@@ -28,7 +28,7 @@ class FileReader(Reader):
         self.fp = None
         try:
             self.fp = open(fname, 'r')
-        except:
+        except IOError:
             self.state = self.RD_OPEN
             logging.error(" cannot open file %s", fname)
 
