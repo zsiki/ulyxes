@@ -29,7 +29,7 @@ class ConfReader(JSONReader):
         super(ConfReader, self).__init__(name, fname, filt)
         self.pars = pars
 
-    def check(self):
+    def Check(self):
         """ Validate config values and send warning/error to log
 
             :returns: True/False
@@ -109,4 +109,4 @@ if __name__ == '__main__':
     }
     jr = ConfReader('test', '../pyapps/robotplus.json', None, config_pars)
     print jr.Load()
-    print jr.check()
+    print jr.Check()
