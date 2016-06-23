@@ -45,6 +45,18 @@ HTTP Reader
 .. automodule:: httpreader
    :members:
 
+JSON Reader
+:::::::::::
+
+.. automodule:: jsonreader
+   :members:
+
+Configurtion Reader
+:::::::::::::::::::
+
+.. automodule:: confreader
+   :members:
+
 INTERFACES
 ==========
 
