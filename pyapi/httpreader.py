@@ -71,12 +71,20 @@ class HttpReader(Reader):
         else:
             par = {}
             if not self.pids is None:
-                par['pids'] = ','.join(self.pids)
+                if len(self.pids) > 1:
+                    par['pids'] = ','.join(self.pids)
+                else:
+                    par['pids'] = self.pids[0]
             if not self.ptys is None:
-                par['ptys'] = ','.join(self.ptys)
+                if len(self.ptys) > 1:
+                    par['ptys'] = ','.join(self.ptys)
+                else:
+                    par['ptys'] = self.ptys[0]
             self.res = json.loads(urllib.urlopen(self.url + urllib.urlencode(par)).read())
-            self.start += 1
-            return self._process(self.res[0])
+            if len(self.res):
+                self.start += 1
+                return self._process(self.res[0])
+            return None
 
 if __name__ == "__main__":
     # read most recent coordinates of all 3D monitoring points from server
