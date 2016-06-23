@@ -29,7 +29,6 @@ import logging
 import math
 import os
 import time
-import json
 
 sys.path.append('../pyapi/')
 
@@ -38,6 +37,7 @@ from httpreader import HttpReader
 from httpwriter import HttpWriter
 from georeader import GeoReader
 from geowriter import GeoWriter
+from confreader import ConfReader
 from filegen import ObsGen
 from serialiface import SerialIface
 from totalstation import TotalStation
@@ -47,122 +47,12 @@ from freestation import Freestation
 from leicatps1200 import LeicaTPS1200
 from leicatcra1100 import LeicaTCRA1100
 from leicatca1800 import LeicaTCA1800
-
-levels = { 'debug': logging.DEBUG, 'info': logging.INFO, \
-    'warning': logging.WARNING, 'error': logging.ERROR }
-
-def conf_check(conf):
-    """ Check configuration
-
-        :param conf: dict of config parameters
-        :returns: True/False
-    """
-    obligatory = ['log_file', 'log_level', 'log_format', \
-                  'station_type', 'station_id', \
-                  'port', 'coo_rd', 'coo_wr']
-    for par in obligatory:
-        if not par in conf:
-            logging.error(par + " not defined in config")
-            return False
-    if not conf['log_level'] in levels:
-        logging.error("Unknown log level: " + conf['log_level'])
-        conf['log_level'] = 'error'
-        logging.warning("Log level set to: " + conf['log_level'])
-    if not re.search('120[0-9]$', conf['station_type']) and \
-       not re.search('1800$', conf['station_type']) and \
-       not re.search('110[0-9]$', conf['station_type']):
-        logging.error("Unknown station type:" + conf['station_type'])
-        return False
-    if not 'station_height' in conf:
-        logging.warning("station_height not defined in config, set to 0")
-        conf['station_height'] = 0
-    if not 'station_coo_limit' in conf:
-        conf['station_coo_limit'] = 0.05
-    if not 'orientation_limit' in conf:
-        conf['orientation_limit'] = 0.1
-    if not 'faces' in conf:
-        conf['faces'] = 1
-    if not 'max_try' in conf:
-        conf['max_try'] = 3
-    if not 'delay_try' in conf:
-        conf['delay_try'] = 5
-    # are there fix points?
-    if 'fix_list' in conf and conf['fix_list']:
-        if not type(conf['fix_list']) == list:
-            logging.error("fix_list not a list")
-            return False
-        elif len(conf['fix_list']) == 0:
-            conf['fix_list'] = None
-            conf['gama_path'] = None
-        elif len(conf['fix_list']) < 2:
-            logging.error("fix_list shorter than 2")
-            return False
-    else:
-        conf['fix_list'] = None
-        conf['gama_path'] = None
-    # standard deviations
-    if not 'stdev_angle' in conf:
-        conf['stdev_angle'] = 1
-    if not 'stdev_dist' in conf:
-        conf['stdev_dist'] = 1
-    if not 'stdev_dist1' in conf:
-        conf['stdev_dist1'] = 1.5
-    # gama params
-    if not 'dimension' in conf:
-        conf['dimension'] = 3
-    if not 'probability' in conf:
-        conf['dimension'] = 0.95
-    if not 'blunders' in conf:
-        conf['bluders'] = True
-    # decimals in distance, coordinates
-    if not 'decimals' in conf:
-        conf['decimals'] = 4
-    if 'mon_list' in conf and conf['mon_list']:
-        if not type(conf['mon_list']) == list:
-            logging.error("mon_list not a list")
-            return False
-        elif len(conf['mon_list']) == 0:
-            conf['mon_list'] = None
-    if conf['fix_list'] is None and conf['mon_list'] is None:
-        logging.error('Neither fix nor mon points are given')
-        return False
-    if 'gama_path' in conf and conf['gama_path'] and \
-            not (os.path.isfile(conf['gama_path']) and \
-            os.access(conf['gama_path'], os.X_OK)):
-        logging.error("GNU Gama not found or not executable:" + conf['gama_path'])
-        return False
-    if 'met' in conf and conf['met']:
-        if not conf['met'].upper() in ['WEBMET', 'BMP180', 'SENSEHAT']:
-            logging.error("Invalid met sensor:" + conf['met'])
-            return False
-        if conf['met'].upper() == 'WEBMET':
-            if not 'met_addr' in conf:
-                logging.error("met_addres not defined")
-                return False
-            if not 'met_par' in conf:
-                logging.error("met_par not defined")
-                return False
-    else:
-        conf['met'] = None
-    return True
-
-def conf_load(fname):
-    """ Load json config from file
-
-        :param fname: name of the config file
-        :returns: configuration as object
-    """
-    conf_file = open(fname)    
-    c = ""
-    for line in conf_file:
-        c += line
-    conf = json.loads(c)
-    return conf
+from localiface import LocalIface
 
 def get_mu(t):
     """ Select measure unit
 
-        :param t: instrument type 1200/1800/1100
+        :param t: instrument type 1200/1800/1100/local
         :returns: measure unit or False
     """
     if re.search('120[0-9]$', t):
@@ -171,6 +61,8 @@ def get_mu(t):
         return LeicaTCRA1100()
     elif re.search('180[0-9]$', t):
         return LeicaTCA1800()
+    elif re.search('^local', t):
+        return LeicaTPS1200()
     return False
 
 def avg_coo(coords):
@@ -235,35 +127,72 @@ def avg_obs(obs):
     return res
 
 if __name__ == "__main__":
-    # command line param
+    config_pars = {'log_file': {'required' : True, 'type': 'file'},
+        'log_level': {'required' : True, 'type': 'list', 'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR ]},
+        'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
+        'station_type': {'required' : True, 'type': 'reglist', 'set': ['120[0-9]$', '1800$', '110[0-9]$']},
+        'station_id': {'required' : True, 'type': 'str'},
+        'station_height': {'required': False, 'default': 0, 'type': 'float'},
+        'station_coo_limit': {'required': False, 'default': 0.01, 'type': 'float'},
+        'orientation_limit': {'required': False, 'default': 0.1, 'type': 'float'},
+        'faces': {'required': False, 'default': 1, 'type': 'int'},
+        'fix_list': {'required': False, 'type': 'list'},
+        'mon_list': {'required': False, 'type': 'list'},
+        'max_try': {'required': False, 'type': 'int', 'default': 3},
+        'delay_try': {'required': False, 'type': 'float', 'default': 0},
+        'port': {'required' : True, 'type': 'str'},
+        'coo_rd': {'required' : True},
+        'coo_wr': {'required' : True},
+        'obs_wr': {'required': False},
+        'avg_wr': {'required': False, 'type': 'int', 'default': 1},
+        'decimals': {'required': False, 'type': 'int', 'default': 4},
+        'gama_path': {'required': False, 'type': 'file'},
+        'stdev_angle': {'required': False, 'type': 'float', 'default': 1},
+        'stdev_dist': {'required': False, 'type': 'float', 'default': 1},
+        'stdev_dist1': {'required': False, 'type': 'float', 'default': 1.5},
+        'dimension': {'required': False, 'type': 'int', 'default': 1.5},
+        'probability': {'required': False, 'type': 'float', 'default': 0.95},
+        'blunders': {'required': False, 'type': 'int', 'default': 1},
+        'met': {'required': False, 'set': ['WEBMET', 'BMP180', 'SENSEHAT']},
+        'met_addr': {'required': False},
+        'met_par': {'required': False},
+        '__comment__': {'required': False, 'type': 'str'}
+    }
+    # check command line param
     if len(sys.argv) > 1:
         if os.path.isfile(sys.argv[1]):
             try:
-                conf = conf_load(sys.argv[1])
+                cr = ConfReader('robotplus', sys.argv[1], None, config_pars)
+                cr.Load()
             except:
                 logging.error("Error in config file: " + sys.argv[1])
+                sys.exit(-1)
+            if not cr.Check():
                 sys.exit(-1)
         else:
             print "Config file not found" + sys.argv[1]
             logging.error("Config file not found" + sys.argv[1])
     else:
         print "Usage: robotplus.py config_file"
-        sys.exit(-1)
-    if not conf_check(conf):
-        sys.exit(-1)
+        cr = ConfReader('robotplus', 'robotplus.json', None, config_pars)
+        cr.Load()
+        #sys.exit(-1)
     # logging
-    logging.basicConfig(format=conf['log_format'], filename=conf['log_file'], \
-         filemode='a', level=levels[conf['log_level']])
+    logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
+         filemode='a', level=cr.json['log_level'])
     # create totalstation
-    mu = get_mu(conf['station_type'])
+    mu = get_mu(cr.json['station_type'])
     if not mu:
         logging.error('Invalid instrument type')
         sys.exit(-1)
-    iface = SerialIface("rs-232", conf['port'])
+    if cr.json['station_type'] == 'local':
+        iface = LocalIface('test', 'test_iface.txt', 'rand')
+    else:
+        iface = SerialIface("rs-232", cr.json['port'])
     if iface.GetState():
         logging.error("Serial interface error")
         sys.exit(-1)
-    ts = TotalStation(conf['station_type'], mu, iface)
+    ts = TotalStation(cr.json['station_type'], mu, iface)
     for i in range(10):
         w = ts.GetATR() # wake up instrument
         if 'errorCode' in w or ts.measureIface.GetState():
@@ -276,21 +205,21 @@ if __name__ == "__main__":
         sys.exit(-1)
     # get meteorology data
     print "Getting met data..."
-    if not conf['met'] is None:
+    if not cr.json['met'] is None:
         atm = ts.GetAtmCorr()     # get current settings from ts
-        if conf['met'].upper() == 'WEBMET':
+        if cr.json['met'].upper() == 'WEBMET':
             from webmetmeasureunit import WebMetMeasureUnit
             from webmet import WebMet
             from webiface import WebIface
-            wi = WebIface("demo", conf['met_addr'], "json")
-            web_mu = WebMetMeasureUnit(msg = conf['met_par'])
+            wi = WebIface("demo", cr.json['met_addr'], "json")
+            web_mu = WebMetMeasureUnit(msg = cr.json['met_par'])
             web_met = WebMet('WebMet', web_mu, wi)
             data = web_met.GetPressure()
             pres = data['pressure']
             temp = data['temp']
             humi = data['humidity']
             wet = web_met.GetWetTemp(temp, humi)
-        elif conf['met'].upper() == 'BMP180':
+        elif cr.json['met'].upper() == 'BMP180':
             from bmp180measureunit import BMP180MeasureUnit
             from i2ciface import I2CIface
             from bmp180 import BMP180
@@ -304,7 +233,7 @@ if __name__ == "__main__":
             pres = float(bmp.GetPressure()['pressure'])
             temp = float(bmp.GetTemp()['temp'])
             wet = None    # wet temperature unknown
-        elif conf['met'].upper() == 'SENSEHAT':
+        elif cr.json['met'].upper() == 'SENSEHAT':
             from sense_hat import SenseHat
             from webmet import WebMet
             sense = SenseHat()
@@ -313,66 +242,74 @@ if __name__ == "__main__":
             humi = sense.get_humidity()
             wet = WebMet.GetWetTemp(temp, humi)
         ts.SetAtmCorr(float(atm['lambda']), pres, temp, wet)
+        # TODO send met data to server/file
     # get station coordinates
     print "Loading station coords..."
-    if re.search('^http[s]?://', conf['coo_rd']):
-        rd_st = HttpReader(url=conf['coo_rd'], ptys='STA', \
+    if re.search('^http[s]?://', cr.json['coo_rd']):
+        rd_st = HttpReader(url=cr.json['coo_rd'], ptys='STA', \
             filt = ['id', 'east', 'north', 'elev'])
+        # TODO read from local file if HttpReader failed
+        # other file reader from config coo_rd_loc (optional)
     else:
-        rd_st = GeoReader(fname=conf['coo_rd'], \
+        rd_st = GeoReader(fname=cr.json['coo_rd'], \
             filt = ['id', 'east', 'north', 'elev'])
-    st_coord = [x for x in rd_st.Load() if x['id'] == conf['station_id']]
+    w = rd_st.Load()
+    print w
+    st_coord = [x for x in w if x['id'] == cr.json['station_id']]
     if len(st_coord) == 0:
-        logging.error("Station not found: " + conf['station_id'])
+        logging.error("Station not found: " + cr.json['station_id'])
         sys.exit(-1)
     # coordinate writer & observation writer
-    fmt = '.%df' % conf['decimals']
-    if re.search('^http[s]?://', conf['coo_wr']):
-        wrt = HttpWriter(url = conf['coo_wr'], mode = 'POST', dist = fmt)
+    fmt = '.%df' % cr.json['decimals']
+    if re.search('^http[s]?://', cr.json['coo_wr']):
+        wrt = HttpWriter(url = cr.json['coo_wr'], mode = 'POST', dist = fmt)
         # observation writer
-        if 'obs_wr' in conf:
-            wrt1 = HttpWriter(url = conf['obs_wr'], mode = 'POST', dist = fmt)
+        if 'obs_wr' in cr.json:
+            wrt1 = HttpWriter(url = cr.json['obs_wr'], mode = 'POST', dist = fmt)
         else:
             wrt1 = wrt
+        # TODO write to local file if HttpWriter failed
     else:
-        wrt = GeoWriter(fname = conf['coo_wr'], mode = 'a', dist = fmt)
-        if 'obs_wr' in conf:
-            wrt1 = GeoWriter(fname = conf['obs_wr'], mode = 'a', dist = fmt)
-    if 'fix_list' in conf and conf['fix_list'] is not None:
+        wrt = GeoWriter(fname = cr.json['coo_wr'], mode = 'a', dist = fmt)
+        if 'obs_wr' in cr.json:
+            wrt1 = GeoWriter(fname = cr.json['obs_wr'], mode = 'a', dist = fmt)
+    if 'fix_list' in cr.json and cr.json['fix_list'] is not None:
         # get fix coordinates from database
         print "Loading fix coords..."
-        if re.search('^http[s]?://', conf['coo_rd']):
-            rd_fix = HttpReader(url=conf['coo_rd'], ptys='FIX', \
+        if re.search('^http[s]?://', cr.json['coo_rd']):
+            rd_fix = HttpReader(url=cr.json['coo_rd'], ptys='FIX', \
                 filt = ['id', 'east', 'north', 'elev'])
+            # TODO read from local file if HttpReader failed
         else:
-            rd_fix = GeoReader(fname=conf['coo_rd'], \
+            rd_fix = GeoReader(fname=cr.json['coo_rd'], \
                 filt = ['id', 'east', 'north', 'elev'])
         # remove other points
-        fix_coords = [p for p in rd_fix.Load() if p['id'] in conf['fix_list']]
-        if len(conf['fix_list']) != len(fix_coords):
-            logging.error("Not all fix points found in database");
+        fix_coords = [p for p in rd_fix.Load() if p['id'] in cr.json['fix_list']]
+        if len(cr.json['fix_list']) != len(fix_coords):
+            logging.error("Not all fix points found in database")
     else:
         fix_coords = []
 
-    if 'mon_list' in conf and conf['mon_list'] is not None:
+    if 'mon_list' in cr.json and cr.json['mon_list'] is not None:
         # get monitoring coordinates from database
         print "Loading mon coords..."
-        if re.search('^http[s]?://', conf['coo_rd']):
-            rd_mon = HttpReader(url=conf['coo_rd'], ptys='MON', \
+        if re.search('^http[s]?://', cr.json['coo_rd']):
+            rd_mon = HttpReader(url=cr.json['coo_rd'], ptys='MON', \
                 filt = ['id', 'east', 'north', 'elev'])
+            # TODO read from local file if HttpReader failed
         else:
-            rd_mon = GeoReader(fname=conf['coo_rd'], \
+            rd_mon = GeoReader(fname=cr.json['coo_rd'], \
                 filt = ['id', 'east', 'north', 'elev'])
-        mon_coords = [p for p in rd_mon.Load() if p['id'] in conf['mon_list']]
-        if len(conf['mon_list']) != len(mon_coords):
-            logging.error("Not all mon points found in database");
+        mon_coords = [p for p in rd_mon.Load() if p['id'] in cr.json['mon_list']]
+        if len(cr.json['mon_list']) != len(mon_coords):
+            logging.error("Not all mon points found in database")
     else:
         mon_coords = []
     # check orientation including FIX and MON points
     # generate observations for all target points, first point is the station
     print "Generating observations for targets..."
-    og = ObsGen(st_coord + fix_coords + mon_coords, conf['station_id'], \
-        conf['station_height'], conf['faces'])
+    og = ObsGen(st_coord + fix_coords + mon_coords, cr.json['station_id'], \
+        cr.json['station_height'], cr.json['faces'])
     observations = og.run()
     # change to face left
     if ts.GetFace()['face'] == ts.FACE_RIGHT:
@@ -385,38 +322,41 @@ if __name__ == "__main__":
             sys.exit(-1)
     # check/find orientation
     print "Orientation..."
-    o = Orientation(observations, ts, conf['orientation_limit'])
+    o = Orientation(observations, ts, cr.json['orientation_limit'])
     ans = o.Search()
     if 'errCode' in ans:
         logging.error("Orientation failed %d" % ans['errCode'])
         sys.exit(-1)
 
-    if 'fix_list' in conf and conf['fix_list'] is not None:
+    if 'fix_list' in cr.json and cr.json['fix_list'] is not None:
         # generate observations for fix points, first point is the station
         print "Generating observations for fix..."
-        og = ObsGen(st_coord + fix_coords, conf['station_id'], \
-            conf['station_height'], conf['faces'])
+        og = ObsGen(st_coord + fix_coords, cr.json['station_id'], \
+            cr.json['station_height'], cr.json['faces'])
         observations = og.run()
         # observation to fix points
         print "Measuring fix..."
-        r = Robot(observations, st_coord, ts, conf['max_try'], conf['delay_try'])
+        r = Robot(observations, st_coord, ts, cr.json['max_try'], cr.json['delay_try'])
         obs_out, coo_out = r.run()
-        # TODO observations to FIX points to the database????
         # calculate station coordinates as freestation if gama_path set
-        if 'gama_path' in conf and conf['gama_path'] is not None:
+        if 'gama_path' in cr.json and cr.json['gama_path'] is not None:
             print "Freestation..."
-            if conf['faces'] > 1:
+            if cr.json['faces'] > 1:
                 obs_out = avg_obs(obs_out)
-            fs = Freestation(obs_out, st_coord + fix_coords, conf['gama_path'],
-                conf['dimension'], conf['probability'], conf['stdev_angle'],
-                conf['stdev_dist'], conf['stdev_dist1'], conf['blunders'])
+            # store observations to FIX points into the database
+            for o in obs_out:
+                if 'distance' in o:
+                    wrt1.WriteData(o)
+            fs = Freestation(obs_out, st_coord + fix_coords, cr.json['gama_path'],
+                cr.json['dimension'], cr.json['probability'], cr.json['stdev_angle'],
+                cr.json['stdev_dist'], cr.json['stdev_dist1'], cr.json['blunders'])
             w = fs.Adjustment()
             if w is None:
-                logging.error("No adjusted coordinates for station %s" % conf['station_id'])
+                logging.error("No adjusted coordinates for station %s" % cr.json['station_id'])
                 sys.exit(-1)
-            if abs(st_coord[0]['east'] - w[0]['east']) > conf['station_coo_limit'] or \
-               abs(st_coord[0]['north'] - w[0]['north']) > conf['station_coo_limit'] or \
-               abs(st_coord[0]['elev'] - w[0]['elev']) > conf['station_coo_limit']:
+            if abs(st_coord[0]['east'] - w[0]['east']) > cr.json['station_coo_limit'] or \
+               abs(st_coord[0]['north'] - w[0]['north']) > cr.json['station_coo_limit'] or \
+               abs(st_coord[0]['elev'] - w[0]['elev']) > cr.json['station_coo_limit']:
                 logging.error("Station moved!!!" + str(w))
                 sys.exit(-1)
             # update station coordinates
@@ -446,17 +386,17 @@ if __name__ == "__main__":
             if 'errCode' in ans:
                 logging.error("Cannot upload orientation to instrument")
                 sys-exit(-1)
-    if 'mon_list' in conf and conf['mon_list'] is not None:
+    if 'mon_list' in cr.json and cr.json['mon_list'] is not None:
         # generate observations for monitoring points, first point is the station
         print "Generating observations for mon..."
-        og = ObsGen(st_coord + mon_coords, conf['station_id'], \
-            conf['station_height'], conf['faces'])
+        og = ObsGen(st_coord + mon_coords, cr.json['station_id'], \
+            cr.json['station_height'], cr.json['faces'])
         observations = og.run()
         # observation to monitoring points
         print "Measuring mon..."
         r = Robot(observations, st_coord, ts)
         obs_out, coo_out = r.run()
-        if conf['faces'] > 1 and 'avg_wr' in conf:
+        if cr.json['faces'] > 1 and 'avg_wr' in cr.json:
             coo_out = avg_coo(coo_out)
             obs_out = avg_obs(obs_out)
         for o in obs_out:
