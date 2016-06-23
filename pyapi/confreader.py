@@ -15,12 +15,12 @@ import os
 from jsonreader import JSONReader
 
 class ConfReader(JSONReader):
-    """ Class to read file
+    """ Class to read json configuration file
 
             :param name: name of reader (str), default None
             :param fname: name of input file
             :param filt: obligatory fields for Load
-            :param pars: a dictionary for parameter validation e.g. {key : {}}
+            :param pars: a dictionary for parameter validation e.g. {key : {}}, valid keys for individual config parameters are: required (True/False), type (int/float/str/list)
     """
 
     def __init__(self, name = None, fname = None, filt = None, pars = None):
@@ -30,9 +30,10 @@ class ConfReader(JSONReader):
         self.pars = pars
 
     def check(self):
-        """ Validate config values
+        """ Validate config values and send warning/error to log
+
+            :returns: True/False
         """
-        # TODO
         # check for required pars and
         # set default values for missing parameters
         for par in self.pars:
@@ -65,18 +66,20 @@ class ConfReader(JSONReader):
                     not os.path.isfile(self.json[par]):
                     logging.error("type mismatch parameter or file does not exist: " + par)
                     return False
-                elif pardef['type'] == 'set' and \
+                elif pardef['type'] == 'list' and \
+                    type(self.json[par]) is not list and \
                     not self.json[par] in pardef['set']:
-                    logging.error("typ mismatch parameter or file does not exist: " + par)
-                    # TODO regset
-
+                    logging.error("invalid value: " + par)
+                    return False
+                    # TODO reglist
+        # TODO complex rules e.g. no fix but gama_path given
         return True
 
 if __name__ == '__main__':
     config_pars = {'log_file': {'required' : True, 'type': 'file'},
-        'log_level': {'required' : True, 'type': 'set', 'set': { 'debug': logging.DEBUG, 'info': logging.INFO, 'warning': logging.WARNING, 'error': logging.ERROR }},
+        'log_level': {'required' : True, 'type': 'list', 'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR ]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
-        'station_type': {'required' : True, 'type': 'regset', 'set': ['120[0-9]$', '1800$', '110[0-9]$']},
+        'station_type': {'required' : True, 'type': 'reglist', 'set': ['120[0-9]$', '1800$', '110[0-9]$']},
         'station_id': {'required' : True, 'type': 'str'},
         'station_height': {'required': False, 'default': 0, 'type': 'float'},
         'station_coo_limit': {'required': False, 'default': 0.01, 'type': 'float'},
