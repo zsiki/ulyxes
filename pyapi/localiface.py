@@ -17,7 +17,7 @@ import logging
 from iface import Iface
 
 class LocalIface(Iface):
-    """ This local interface stands for using PyAPI wihtout any instrument. 
+    """ This local interface stands for using PyAPI without any instrument. 
         A file is used to read data instread of instrument.
         It is mainly for developing or testing
 
@@ -38,7 +38,7 @@ class LocalIface(Iface):
             self.state = self.IF_FILE
             logging.error(" error opening file")
             return
-        if mode == 'leica':
+        if mode == 'rand':
             # load whole file
             for line in self.fp:
                 code, ans = line.split('|')
@@ -58,7 +58,7 @@ class LocalIface(Iface):
             :param msg: message to send
             :returns: message specific answer
         """
-        if self.mode == 'leica':
+        if self.mode == 'rand':
             code = re.split(':|,', msg)[1]
             if code in self.data:
                 return self.data[code]
@@ -70,10 +70,14 @@ class LocalIface(Iface):
             return None
 
     def GetLine(self):
+        """ Return next line from sequental file
+
+            :returns: next line from the file
+        """
         w = self.fp.readline().strip()
         if len(w) == 0:
             self.state = self.IF_EOF
-            logging
+            logging.warning('End of file')
         return w
         
 if __name__ == "__main__":
