@@ -22,7 +22,16 @@
  *    north: north cooridnate (or latitude)
  *    elev: elevation
  *    ptype: point type STA/FIX/MON
- *    code: target code ATRn/RLA
+ *    code: target code ATR/RLA
+ *
+ *	parameters to store met data
+ *    id: point id
+ *	  temp: temperature
+ *	  pressure: air pressure
+ *	  huminidity: air huminidity
+ *	  wettemp: wet temperature
+ *    datetime: time stamp
+ *	  
  */
 
 	//error_log(http_build_query($_REQUEST));
@@ -50,6 +59,10 @@
 		$_REQUEST['geom'] = "ST_SetSRID(" .
 			"ST_MakePoint(" . $_REQUEST['east'] . "," .
 			$_REQUEST['north'] . "," . $_REQUEST['elev'] . "), 3857)";
+	} elseif (isset($_REQUEST['datetime']) &&
+		isset($_REQUEST['temp']) && isset($_REQUEST['pressure'])) {
+		// met record sent
+		$table = $met_table;
 	} else {
 		echo -1;
 		error_log("Parameter error:" . http_build_query($_REQUEST));
@@ -84,7 +97,7 @@
 	}
 	$cols = trim($cols, ',');
 	$vals = trim($vals, ',');
-	// echo "insert into $table ($cols) values ($vals)";
+//echo "insert into $table ($cols) values ($vals)";
 	$i = $dbh->exec("insert into $table ($cols) values ($vals)");
 	// error_log("insert into $table ($cols) values ($vals)");
 	echo $i;	// number of lines affected (1)

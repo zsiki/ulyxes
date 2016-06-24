@@ -4,7 +4,7 @@
  * (httpreader)
  *
  * query parameters:
- *    table: obs/coo observations/coordinates (optional), default coo
+ *    table: obs/coo/met observations/coordinates/met (optional), default coo
  *    plist: coma separated list of point ids (optional)
  *    ptyte: coma separated list of point types (optional)
  *    from:  starting datetime (optional)
@@ -22,6 +22,9 @@
 	if (isset($_REQUEST['table']) && $_REQUEST['table'] == "obs") {
 		$table = $obs_table;
 		$cols = "$table.hz, $table.v, $table.distance";
+	} elseif (isset($_REQUEST['table']) && $_REQUEST['table'] == "met") {
+		$table = $met_table;
+		$cols = "$table.temp, $table.pressure, $table.huminidity, $table.wettemp";
 	} else {
 		$table = $coo_table;
 		$cols = "$table.east, $table.north, $table.elev";
