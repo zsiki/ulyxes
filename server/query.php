@@ -27,7 +27,7 @@
 		$cols = "$table.temp, $table.pressure, $table.huminidity, $table.wettemp";
 	} else {
 		$table = $coo_table;
-		$cols = "$table.east, $table.north, $table.elev";
+		$cols = "$table.east, $table.north, $table.elev, $poi_table.pc";
 	}
 	$where = "";
 	if (isset($_REQUEST['plist']) && strlen($_REQUEST['plist'])) {
