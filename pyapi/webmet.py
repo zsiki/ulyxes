@@ -35,7 +35,8 @@ class WebMet(Instrument):
         """
         msg = self.measureUnit.GetTempMsg()
         res = self._process(msg)
-        res['temp'] = res['temp'] - 273.1
+        if res is not None and 'temp' in res:
+            res['temp'] = res['temp'] - 273.1
         return res
 
     def GetPressure(self):
