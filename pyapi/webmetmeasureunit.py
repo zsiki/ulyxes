@@ -39,4 +39,7 @@ class WebMetMeasureUnit(MeasureUnit):
         return self.msg
 
     def Result(self, msg, ans):
-        return ans['main']
+        if ans is not None and 'main' in ans:
+            return ans['main']
+        else:
+            return None
