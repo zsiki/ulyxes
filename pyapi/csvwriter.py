@@ -24,7 +24,7 @@ class CsvWriter(FileWriter):
             :param fname: name of text file to write to (str)
             :param mode: mode of file open (a or w) (str)
             :param sep: separator character in file (str)
-            :param header: add header to file if itrue and mode is 'w'
+            :param header: add header to file if true and mode is 'w'
     """
 
     def __init__(self, name = 'None', angle = 'GON', dist = '.3f',
