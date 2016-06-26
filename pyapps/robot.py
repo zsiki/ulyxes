@@ -63,7 +63,6 @@ from serialiface import SerialIface
 from csvwriter import CsvWriter
 from georeader import GeoReader
 from geowriter import GeoWriter
-from georeader import GeoReader
 from csvreader import CsvReader
 from httpwriter import HttpWriter
 from totalstation import TotalStation
@@ -242,6 +241,7 @@ class Robot(object):
                         logging.error("Cannot measure point %s" % pn)
                         continue
                     obs['id'] = pn
+                    obs['face'] = ts.FACE_RIGHT if step < 0 else ts.FACE_LEFT
                     obs_out.append(obs)
                     coo = {}
                     if self.directions[i]['code'] != 'OR':
