@@ -71,15 +71,9 @@ class HttpReader(Reader):
         else:
             par = {}
             if not self.pids is None:
-                if len(self.pids) > 1:
-                    par['pids'] = ','.join(self.pids)
-                else:
-                    par['pids'] = self.pids[0]
+                par['pids'] = ','.join(self.pids)
             if not self.ptys is None:
-                if len(self.ptys) > 1:
-                    par['ptys'] = ','.join(self.ptys)
-                else:
-                    par['ptys'] = self.ptys[0]
+                par['ptys'] = ','.join(self.ptys)
             self.res = json.loads(urllib.urlopen(self.url + urllib.urlencode(par)).read())
             if len(self.res):
                 self.start += 1
