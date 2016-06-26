@@ -35,11 +35,16 @@ class WebIface(Iface):
             :param msg: parameters to url
             :returns: downloaded data
         """
-        response = urllib2.urlopen(self.url + '?' + msg)
-        if self.fmt == 'json':
-            data = json.load(response)
-        else:
-            data = response.read()
+        try:
+            response = urllib2.urlopen(self.url + '?' + msg)
+        except urllib2.URLError:
+            response = None
+            data = None
+        if response is not None:
+            if self.fmt == 'json':
+                data = json.load(response)
+            else:
+                data = response.read()
         return data
 
 if __name__ == "__main__":
