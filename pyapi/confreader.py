@@ -93,6 +93,7 @@ if __name__ == '__main__':
         'coo_rd': {'required' : True},
         'coo_wr': {'required' : True},
         'obs_wr': {'required': False},
+        'met_wr': {'required': False},
         'avg_wr': {'required': False, 'type': 'int', 'default': 1},
         'decimals': {'required': False, 'type': 'int', 'default': 4},
         'gama_path': {'required': False, 'type': 'file'},

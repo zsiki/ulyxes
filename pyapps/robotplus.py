@@ -144,6 +144,7 @@ if __name__ == "__main__":
         'coo_rd': {'required' : True},
         'coo_wr': {'required' : True},
         'obs_wr': {'required': False},
+        'met_wr': {'required': False},
         'avg_wr': {'required': False, 'type': 'int', 'default': 1},
         'decimals': {'required': False, 'type': 'int', 'default': 4},
         'gama_path': {'required': False, 'type': 'file'},
@@ -215,10 +216,16 @@ if __name__ == "__main__":
             web_mu = WebMetMeasureUnit(msg = cr.json['met_par'])
             web_met = WebMet('WebMet', web_mu, wi)
             data = web_met.GetPressure()
-            pres = data['pressure']
-            temp = data['temp']
-            humi = data['humidity']
-            wet = web_met.GetWetTemp(temp, humi)
+            pres = temp = humi = wet = None
+            if data is not None:
+                if 'pressure' in data:
+                    pres = data['pressure']
+                if 'temp' in data:
+                    temp = data['temp']
+                if 'huminidity' in data:
+                    humi = data['humidity']
+                if 'temp' in data and 'huminidity' in data:
+                    wet = web_met.GetWetTemp(temp, humi)
         elif cr.json['met'].upper() == 'BMP180':
             from bmp180measureunit import BMP180MeasureUnit
             from i2ciface import I2CIface
@@ -241,12 +248,26 @@ if __name__ == "__main__":
             temp = sense.get_temperature()
             humi = sense.get_humidity()
             wet = WebMet.GetWetTemp(temp, humi)
-        ts.SetAtmCorr(float(atm['lambda']), pres, temp, wet)
+        if pres is not None and temp is not None:
+            ts.SetAtmCorr(float(atm['lambda']), pres, temp, wet)
+        else:
+            logging.warning("meteorological data not available")
         # TODO send met data to server/file
+        if 'met_wr' in cr.json:
+            if re.search('^http[s]?://', cr.json['met_wr']):
+                wrtm = HttpWriter(name='met', url=cr.json['met_wr'], mode='POST')
+            else:
+                wrtm = CsvWRiter(name='met', fname=cr.json['met_wr'],
+                    filt=['id','temp','pressure','huminidity','wettemp',
+                        'datetime'], mode='a')
+            data = {'id': cr.json['station_id'], 'temp': temp, 
+                'pressure': pressure, 'huminidity': huminidity,
+                'wettemp': wettemp}
+            wrtm.WriteData(data)
     # get station coordinates
     print "Loading station coords..."
     if re.search('^http[s]?://', cr.json['coo_rd']):
-        rd_st = HttpReader(url=cr.json['coo_rd'], ptys='STA', \
+        rd_st = HttpReader(url=cr.json['coo_rd'], ptys=['STA'], \
             filt = ['id', 'east', 'north', 'elev'])
         # TODO read from local file if HttpReader failed
         # other file reader from config coo_rd_loc (optional)
@@ -277,7 +298,7 @@ if __name__ == "__main__":
         # get fix coordinates from database
         print "Loading fix coords..."
         if re.search('^http[s]?://', cr.json['coo_rd']):
-            rd_fix = HttpReader(url=cr.json['coo_rd'], ptys='FIX', \
+            rd_fix = HttpReader(url=cr.json['coo_rd'], ptys=['FIX'], \
                 filt = ['id', 'east', 'north', 'elev'])
             # TODO read from local file if HttpReader failed
         else:
@@ -294,7 +315,7 @@ if __name__ == "__main__":
         # get monitoring coordinates from database
         print "Loading mon coords..."
         if re.search('^http[s]?://', cr.json['coo_rd']):
-            rd_mon = HttpReader(url=cr.json['coo_rd'], ptys='MON', \
+            rd_mon = HttpReader(url=cr.json['coo_rd'], ptys=['MON'], \
                 filt = ['id', 'east', 'north', 'elev'])
             # TODO read from local file if HttpReader failed
         else:
@@ -342,12 +363,14 @@ if __name__ == "__main__":
         if 'gama_path' in cr.json and cr.json['gama_path'] is not None:
             print "Freestation..."
             if cr.json['faces'] > 1:
-                obs_out = avg_obs(obs_out)
+                obs_avg = avg_obs(obs_out)
+            else:
+                obs_avg = obs_out
             # store observations to FIX points into the database
             for o in obs_out:
                 if 'distance' in o:
                     wrt1.WriteData(o)
-            fs = Freestation(obs_out, st_coord + fix_coords, cr.json['gama_path'],
+            fs = Freestation(obs_avg, st_coord + fix_coords, cr.json['gama_path'],
                 cr.json['dimension'], cr.json['probability'], cr.json['stdev_angle'],
                 cr.json['stdev_dist'], cr.json['stdev_dist1'], cr.json['blunders'])
             w = fs.Adjustment()
