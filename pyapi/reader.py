@@ -72,9 +72,13 @@ class Reader(object):
             :returns: list of data units/lines
         """
         res = []
+        w = None
         self.Rewind()
         while True:
-            w = self.GetNext()
+            try:
+                w = self.GetNext()
+            except IOError:
+                pass
             if w:
                 if self.Filt(w):
                     res.append(w)   # keep record passed filter
