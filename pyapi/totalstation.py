@@ -23,6 +23,7 @@ class TotalStation(Instrument):
     """
     FACE_LEFT = 0
     FACE_RIGHT = 1
+    FACE_AVG = 2
 
     def __init__(self, name, measureUnit, measureIface, writerUnit = None):
         """ Constructor
@@ -433,15 +434,15 @@ class TotalStation(Instrument):
         return None
 
 if __name__ == "__main__":
-    from leicatps1200 import LeicaTPS1200
+    from leicatca1800 import LeicaTCA1800
     from serialiface import SerialIface
     from echowriter import EchoWriter
     logging.getLogger().setLevel(logging.DEBUG)
-    mu = LeicaTPS1200()
-    iface = SerialIface("rs-232", "/dev/ttyS0")
+    mu = LeicaTCA1800()
+    iface = SerialIface("rs-232", "/dev/ttyUSB0")
     wrt = EchoWriter()
     ts = TotalStation("Leica", mu, iface, wrt)
-    ts.SetEDMMode(5)
+    #ts.SetEDMMode(5)
     ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
     ts.Measure()
     print (ts.GetMeasure())
