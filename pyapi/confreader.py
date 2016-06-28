@@ -66,8 +66,8 @@ class ConfReader(JSONReader):
                     not os.path.isfile(self.json[par]):
                     logging.error("type mismatch parameter or file does not exist: " + par)
                     return False
-                elif pardef['type'] == 'list' and \
-                    type(self.json[par]) is not list and \
+                # check set for valid values
+                if 'set' in pardef and \
                     not self.json[par] in pardef['set']:
                     logging.error("invalid value: " + par)
                     return False
