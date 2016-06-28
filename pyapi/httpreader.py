@@ -18,7 +18,7 @@ import json
 from reader import Reader
 
 # TODO extend float for all possible fields
-FLOATS = ['east', 'north', 'elev']
+FLOATS = ['east', 'north', 'elev', 'pc']
 
 class HttpReader(Reader):
     """ Class to read data from web in JSON format
