@@ -255,15 +255,18 @@ if __name__ == "__main__":
         # TODO send met data to server/file
         if 'met_wr' in cr.json:
             if re.search('^http[s]?://', cr.json['met_wr']):
-                wrtm = HttpWriter(name='met', url=cr.json['met_wr'], mode='POST')
+                wrtm = HttpWriter(name='met', url=cr.json['met_wr'], mode='POST',
+                    filt=['id','temp','pressure','huminidity','wettemp',
+                        'datetime'])
             else:
-                wrtm = CsvWRiter(name='met', fname=cr.json['met_wr'],
+                wrtm = CsvWriter(name='met', fname=cr.json['met_wr'],
                     filt=['id','temp','pressure','huminidity','wettemp',
                         'datetime'], mode='a')
             data = {'id': cr.json['station_id'], 'temp': temp, 
-                'pressure': pressure, 'huminidity': huminidity,
-                'wettemp': wettemp}
+                'pressure': pres, 'huminidity': humi,
+                'wettemp': wet}
             wrtm.WriteData(data)
+            # TODO check result of write
     # get station coordinates
     print "Loading station coords..."
     if re.search('^http[s]?://', cr.json['coo_rd']):
@@ -275,7 +278,6 @@ if __name__ == "__main__":
         rd_st = GeoReader(fname=cr.json['coo_rd'], \
             filt = ['id', 'east', 'north', 'elev'])
     w = rd_st.Load()
-    print w
     st_coord = [x for x in w if x['id'] == cr.json['station_id']]
     if len(st_coord) == 0:
         logging.error("Station not found: " + cr.json['station_id'])
@@ -345,7 +347,7 @@ if __name__ == "__main__":
     print "Orientation..."
     o = Orientation(observations, ts, cr.json['orientation_limit'])
     ans = o.Search()
-    if 'errCode' in ans:
+    if 'errCode' in ans and cr.json['station_type'] != 'local':
         logging.error("Orientation failed %d" % ans['errCode'])
         sys.exit(-1)
 
@@ -370,6 +372,7 @@ if __name__ == "__main__":
             for o in obs_out:
                 if 'distance' in o:
                     wrt1.WriteData(o)
+                    # TODO chech result of write
             fs = Freestation(obs_avg, st_coord + fix_coords, cr.json['gama_path'],
                 cr.json['dimension'], cr.json['probability'], cr.json['stdev_angle'],
                 cr.json['stdev_dist'], cr.json['stdev_dist1'], cr.json['blunders'])
@@ -387,6 +390,7 @@ if __name__ == "__main__":
             # upload station coords to server
             print "Uploading station coords..."
             wrt.WriteData(st_coord[0])
+            # TODO check write result
             # update orientation using farest FIX
             max_dist = 0
             back_site = None
@@ -425,10 +429,12 @@ if __name__ == "__main__":
         for o in obs_out:
             if 'distance' in o:
                 wrt1.WriteData(o)
+                # TODO check result of write
                 #print o['id'] + ' ' + o['hz'].GetAngle('DMS') + ' ' + \
                 #    o['v'].GetAngle('DMS') + ' ' + str(o['distance'])
         for c in coo_out:
             wrt.WriteData(c)
+            # TODO check result of write
             #print c['id'] + ' ' + str(c['east']) + ' ' + str(c['north']) + ' ' + str(c['elev'])
     # move telescope to safe position
     ans = ts.Move(Angle(0), Angle(180, "DEG")) # no ATR
