@@ -241,7 +241,7 @@ class Robot(object):
                         logging.error("Cannot measure point %s" % pn)
                         continue
                     obs['id'] = pn
-                    obs['face'] = ts.FACE_RIGHT if step < 0 else ts.FACE_LEFT
+                    obs['face'] = self.ts.FACE_RIGHT if step < 0 else self.ts.FACE_LEFT
                     obs_out.append(obs)
                     coo = {}
                     if self.directions[i]['code'] != 'OR':
