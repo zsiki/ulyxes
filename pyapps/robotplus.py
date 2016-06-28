@@ -123,14 +123,16 @@ def avg_obs(obs):
         sd12 = [o['distance'] for o in obs \
             if 'id' in o and o['id'] == k]
         sd = sum(sd12) / len(sd12)
-        res.append({'id': k, 'hz': Angle(hz), 'v': Angle(v), 'distance': sd})
+        # TODO cross & lengthincline?
+        res.append({'id': k, 'hz': Angle(hz), 'v': Angle(v), 'distance': sd,
+            'face': 2})
     return res
 
 if __name__ == "__main__":
     config_pars = {'log_file': {'required' : True, 'type': 'file'},
-        'log_level': {'required' : True, 'type': 'list', 'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR ]},
+        'log_level': {'required' : True, 'type': 'int', 'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR ]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
-        'station_type': {'required' : True, 'type': 'reglist', 'set': ['120[0-9]$', '1800$', '110[0-9]$']},
+        'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1800', '1100']},
         'station_id': {'required' : True, 'type': 'str'},
         'station_height': {'required': False, 'default': 0, 'type': 'float'},
         'station_coo_limit': {'required': False, 'default': 0.01, 'type': 'float'},
@@ -177,6 +179,8 @@ if __name__ == "__main__":
         print "Usage: robotplus.py config_file"
         cr = ConfReader('robotplus', 'robotplus.json', None, config_pars)
         cr.Load()
+        if not cr.Check():
+            sys.exit(-1)
         #sys.exit(-1)
     # logging
     logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
@@ -368,11 +372,13 @@ if __name__ == "__main__":
                 obs_avg = avg_obs(obs_out)
             else:
                 obs_avg = obs_out
+            if cr.json['faces'] > 1 and 'avg_wr' in cr.json and cr.json['avg_wr']:
+                obs_out = obs_avg
             # store observations to FIX points into the database
             for o in obs_out:
                 if 'distance' in o:
                     wrt1.WriteData(o)
-                    # TODO chech result of write
+                    # TODO check result of write
             fs = Freestation(obs_avg, st_coord + fix_coords, cr.json['gama_path'],
                 cr.json['dimension'], cr.json['probability'], cr.json['stdev_angle'],
                 cr.json['stdev_dist'], cr.json['stdev_dist1'], cr.json['blunders'])
@@ -423,8 +429,8 @@ if __name__ == "__main__":
         print "Measuring mon..."
         r = Robot(observations, st_coord, ts)
         obs_out, coo_out = r.run()
-        if cr.json['faces'] > 1 and 'avg_wr' in cr.json:
-            coo_out = avg_coo(coo_out)
+        # calculate average for observations
+        if cr.json['faces'] > 1 and 'avg_wr' in cr.json and cr.json['avg_wr']:
             obs_out = avg_obs(obs_out)
         for o in obs_out:
             if 'distance' in o:
@@ -432,6 +438,8 @@ if __name__ == "__main__":
                 # TODO check result of write
                 #print o['id'] + ' ' + o['hz'].GetAngle('DMS') + ' ' + \
                 #    o['v'].GetAngle('DMS') + ' ' + str(o['distance'])
+        # always calculate coordinate average
+        coo_out = avg_coo(coo_out)
         for c in coo_out:
             wrt.WriteData(c)
             # TODO check result of write
