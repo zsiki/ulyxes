@@ -210,7 +210,7 @@ if __name__ == "__main__":
         sys.exit(-1)
     # get meteorology data
     print "Getting met data..."
-    if not cr.json['met'] is None:
+    if 'met' in cr.json and not cr.json['met'] is None:
         atm = ts.GetAtmCorr()     # get current settings from ts
         if cr.json['met'].upper() == 'WEBMET':
             from webmetmeasureunit import WebMetMeasureUnit
