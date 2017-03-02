@@ -79,7 +79,10 @@ class ObsGen(object):
             obs['distance'] = math.hypot(dist, d_elev)
             obs['code'] = 'ATR'
             obs['faces'] = self.faces
-            obs['pc'] = coo['pc']
+			if 'pc' in coo:
+				obs['pc'] = coo['pc']
+			else:
+				obs['pc'] = 0
             if 'code' in coo and coo['code'] in modes1:
                 obs['code'] = coo['code']
             observations.append(obs)
