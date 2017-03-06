@@ -48,5 +48,6 @@ Ulyxes
 .. code:: bash
 
 	cd ~
-	git clone https://github.com/zsiki/ulyxes.git
-
+	wget https://github.com/zsiki/ulyxes/zipball/master/ -O ulyxes.zip
+	unzip ulyxes.zip
+	mv zsiki-ulyxes-* ulyxes
