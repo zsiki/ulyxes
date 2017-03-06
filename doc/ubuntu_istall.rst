@@ -22,6 +22,7 @@ GNU GaMa
 ~~~~~~~~
 
 Optional used only by robotplus.py
+GNU GaMa is built from sources
 
 .. code:: bash
 
@@ -32,8 +33,17 @@ Optional used only by robotplus.py
 	make
 	sudo make install
 
-Ulyxes
+OpenCV
 ~~~~~~
+
+Optional used by WebCam class.
+
+.. code:: bash
+
+	sudo apt-get install libopencv-dev python-opencv
+
+Ulyxes
+------
 
 .. code:: bash
 
