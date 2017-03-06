@@ -79,10 +79,10 @@ class ObsGen(object):
             obs['distance'] = math.hypot(dist, d_elev)
             obs['code'] = 'ATR'
             obs['faces'] = self.faces
-			if 'pc' in coo:
-				obs['pc'] = coo['pc']
-			else:
-				obs['pc'] = 0
+            if 'pc' in coo:
+                obs['pc'] = coo['pc']
+            else:
+                obs['pc'] = 0
             if 'code' in coo and coo['code'] in modes1:
                 obs['code'] = coo['code']
             observations.append(obs)
@@ -99,8 +99,8 @@ if __name__ == "__main__":
         ifname = sys.argv[1]
     else:
         print ("Usage: filegen.py input_coo_file output_geo_file [station_id] [instrument_height]")
-        #exit(-1)
-        ifname = "test.coo"
+        exit(-1)
+        #ifname = "test.coo"
     if len(sys.argv) > 2:
         ofname = sys.argv[2]
     else:
