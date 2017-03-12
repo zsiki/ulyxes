@@ -41,6 +41,21 @@ Optional used by WebCam class.
 .. code:: bash
 
 	sudo apt-get install libopencv-dev python-opencv
+	
+Wifi
+~~~~
+
+Optional used by WifiCollector class.
+
+..code:: bash
+
+	sudo pip install wifi
+	
+I2C interface
+~~~~~~~~~~~~~
+
+Optional available only on Raspberry Pi.
+See http://www.instructables.com/id/Raspberry-Pi-I2C-Python/step2/Enable-I2C/
 
 Ulyxes
 ------
