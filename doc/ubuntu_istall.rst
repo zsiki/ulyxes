@@ -4,6 +4,15 @@ Installing pyapi and pyapps on Ubuntu Linux
 Prerequisites
 -------------
 
+Serial test
+~~~~~~~~~~~
+
+Optional for testing serial connection to the instrument.
+
+.. code:: bash
+
+	sudo apt-get install cutecom
+
 Python 2.7.x & pip
 ~~~~~~~~~~~~~~~~~~
 
