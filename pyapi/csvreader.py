@@ -30,7 +30,6 @@ class CsvReader(FileReader):
         self.filt = filt
         # get field name from header line
         self.fields = [x.strip() for x in self.GetLine().split(self.separator)]
-        print self.fields
 
     def __del__(self):
         """ Destructor
@@ -44,14 +43,12 @@ class CsvReader(FileReader):
         """ Get fields in dictionary from next line
         """
         w = [x.strip() for x in self.GetLine().split(self.separator)]
-        print w
-        print len(w)
         res = {}
         if len(w) == 0 or w[0] == '':
             return None
         for i in range(len(w)):
-            #if self.filt is None or self.fields[i] in self.filt:
-            res[self.fields[i]] = w[i]
+            if self.filt is None or self.fields[i] in self.filt:
+                res[self.fields[i]] = w[i]
         return res
 
 if __name__ == '__main__':
