@@ -73,7 +73,7 @@ class Reader(object):
         """
         res = []
         w = None
-        self.Rewind()
+        #self.Rewind()
         while True:
             try:
                 w = self.GetNext()
