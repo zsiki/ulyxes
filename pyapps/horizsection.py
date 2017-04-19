@@ -10,7 +10,7 @@ coordinates and observations are written to csv file
 
     :param argv[1] (angle step): angle step between points in DEG, default 45
     :param argv[2] (sensor): 1100/1800/1200, default 1200
-    :param argv[3] (port): serial port, default COM7
+    :param argv[3] (port): serial port, default /dev/ttyUSB0
     :param argv[4] (max angle): stop at this direction, default 360 degree
     :param argv[5] (tolerance): acceptable tolerance (meter) from the horizontal plane, default 0.01
     :param argv[6] (iteration): max iteration number for a point, default 10
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 3:
         port = sys.argv[3]
     else:
-        port = 'COM7'
+        port = '/dev/ttyUSB0'
     if len(sys.argv) > 4:
         maxa = float(sys.argv[4]) / 180.0 * math.pi
     else:
@@ -66,7 +66,10 @@ if __name__ == "__main__":
     if len(sys.argv) > 6:
         maxiter = int(sys.argv[6])
     iface = SerialIface("rs-232", port)
-    wrt = CsvWriter(angle = 'DMS', dist = '.3f', filt = ['id', 'hz', 'v', 'distance', 'east', 'north', 'elev'], fname = 'stdout', mode = 'a', sep = ';')
+    wrt = CsvWriter(angle = 'DMS', dist = '.3f', filt = ['id', 
+	'east', 'north', 'elev', 'hz', 'v', 'distance'], fname = 'stdout', mode = 'a', sep = ';')
+
+	
     ts = TotalStation(stationtype, mu, iface)
     ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
     ts.Measure()    # initial measurement for startpoint
