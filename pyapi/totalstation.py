@@ -434,15 +434,15 @@ class TotalStation(Instrument):
         return None
 
 if __name__ == "__main__":
-    from leicatca1800 import LeicaTCA1800
+    from leicatps1200 import LeicaTPS1200
     from serialiface import SerialIface
     from echowriter import EchoWriter
     logging.getLogger().setLevel(logging.DEBUG)
-    mu = LeicaTCA1800()
+    mu = LeicaTPS1200()
     iface = SerialIface("rs-232", "/dev/ttyUSB0")
     wrt = EchoWriter()
     ts = TotalStation("Leica", mu, iface, wrt)
-    #ts.SetEDMMode(5)
+    ts.SetEDMMode(ts.measureUnit.edmModes['RLSTANDARD'])
     ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
     ts.Measure()
     print (ts.GetMeasure())
