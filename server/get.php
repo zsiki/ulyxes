@@ -68,7 +68,6 @@
 		error_log("Parameter error:" . http_build_query($_REQUEST));
 		exit();
 	}
-	// $dbh = new PDO('pgsql:host=localhost;port=5432;dbname=ulyxes;user=postgres;password=qwerty');
 	$dbh = new PDO($conn_str);
 	if (! $dbh){
 		echo -2;	// connection error
@@ -97,7 +96,6 @@
 	}
 	$cols = trim($cols, ',');
 	$vals = trim($vals, ',');
-//echo "insert into $table ($cols) values ($vals)";
 	$i = $dbh->exec("insert into $table ($cols) values ($vals)");
 	// error_log("insert into $table ($cols) values ($vals)");
 	echo $i;	// number of lines affected (1)
