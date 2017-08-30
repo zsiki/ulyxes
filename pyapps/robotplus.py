@@ -124,10 +124,11 @@ def avg_obs(obs):
                 hz2[i] -= math.pi * 2.0
             if hz2[i] - hz2[0] < math.pi:
                 hz2[i] += math.pi * 2.0
-        if hz1[0] > hz2[0]:
-            hz2 = [h + math.pi for h in hz2]
-        else:
-            hz2 = [h - math.pi for h in hz2]
+        if len(hz2):
+            if hz2[0] < math.pi:
+                hz2 = [h + math.pi for h in hz2]
+            else:
+                hz2 = [h - math.pi for h in hz2]
         hz = sum(hz1 + hz2) / (len(hz1) + len(hz2))
 
         v1 = [o['v'].GetAngle() for o in obs \
@@ -273,7 +274,6 @@ if __name__ == "__main__":
             ts.SetAtmCorr(float(atm['lambda']), pres, temp, wet)
         else:
             logging.warning("meteorological data not available")
-        # TODO send met data to server/file
         if 'met_wr' in cr.json:
             if re.search('^http[s]?://', cr.json['met_wr']):
                 wrtm = HttpWriter(
@@ -284,10 +284,8 @@ if __name__ == "__main__":
                 wrtm = CsvWriter(name='met', fname=cr.json['met_wr'],
                                  filt=['id', 'temp', 'pressure', 'huminidity',
                                  'wettemp', 'datetime'], mode='a')
-            data = {
-                'id': cr.json['station_id'], 'temp': temp,
-                'pressure': pres, 'huminidity': humi,
-                'wettemp': wet}
+            data = {'id': cr.json['station_id'], 'temp': temp,
+                'pressure': pres, 'huminidity': humi, 'wettemp': wet}
             wrtm.WriteData(data)
             # TODO check result of write
     # get station coordinates
