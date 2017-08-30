@@ -10,7 +10,7 @@ Sample application of Ulyxes PyAPI to measure to a moving prism/object.
     0 - determine the horizontal movement of a bridge pylon without prism using 
     edm mode RLSTANDARD<br>
     1 - determine the movement of a sloly moving prism to determine 3D defomation<br>
-    2 - determine vetical movement of a prism, deflection of a bridge, we suppose horizontal distance is not changed<br>
+    2 - determine vertical movement of a prism, deflection of a bridge, we suppose horizontal distance is not changed<br>
     3 - determine vertical movement of a moving prism on a car/machine, we suppose horizontal distance is not changed<br>
     4 - determine 3D movement of a moving prism on a car/machine<br>
     5 - measure points if the prism stopped for 3-5 seconds<br>
