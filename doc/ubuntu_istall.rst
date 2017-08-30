@@ -56,7 +56,7 @@ Wifi
 
 Optional used by WifiCollector class.
 
-..code:: bash
+.. code:: bash
 
 	sudo pip install wifi
 	
@@ -65,6 +65,15 @@ I2C interface
 
 Optional available only on Raspberry Pi.
 See http://www.instructables.com/id/Raspberry-Pi-I2C-Python/step2/Enable-I2C/
+
+Qt4
+~~~
+
+Optional, used by robotplus.py
+
+.. code:: bash
+
+	sudo apt-get install libqt4-core python-qt4
 
 Ulyxes
 ------

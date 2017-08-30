@@ -51,8 +51,8 @@ JSON Reader
 .. automodule:: jsonreader
    :members:
 
-Configurtion Reader
-:::::::::::::::::::
+Configuration Reader
+::::::::::::::::::::
 
 .. automodule:: confreader
    :members:

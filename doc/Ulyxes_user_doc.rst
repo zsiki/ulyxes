@@ -389,18 +389,47 @@ For more information, please visit the `official OpenCV documentation <http://do
 PyAPI Tutorials
 ###############
 
+Most of the Python modules contain a unit test part at the end (after
+the if __name__ == "__main__":). These are also usage examples.
+
 Use the SerialInterface
 ***********************
+
+The SearialIface class can be used alone to drive an instrument through the
+serial chanel or as a building block of an Instrument instance.
 
 .. code:: python
 
     from serialiface import SerialIface
-    si = SerialIface('test', 'COMx')
+    si = SerialIface('test', 'COM1')
     si.Send('%R1Q,9028:0,0,0')
     %R1P,0,0:
 
 Sensor Creation
 ***************
+
+All the sensors (instruments) are inherited from the Instrument virtual base 
+class. A sensor consists of three building blocks:
+
+* measure unit
+* interface (communication)
+* writer (saving observed data), optional
+
+.. code:: python
+
+    from leicatps1200 import LeicaTPS1200
+    from leicatcra1100 import LeicaTCRA1100
+    from serialiface import SerialIface
+    from echowriter import EchoWriter
+    logging.getLogger().setLevel(logging.DEBUG)
+    mu = LeicaTPS1200()
+    iface = SerialIface("rs-232", "/dev/ttyUSB0")
+    wrt = EchoWriter()
+    ts = TotalStation("Leica", mu, iface, wrt)
+    ts.SetEDMMode(ts.measureUnit.edmModes['RLSTANDARD'])
+    ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
+    ts.Measure()
+    print (ts.GetMeasure())
 
 PyAPPS Applications Tutorials
 #############################
@@ -408,7 +437,23 @@ PyAPPS Applications Tutorials
 MeasureToPrism
 **************
 
-Observations to a single pism, point.
+Repeated robotic totalstation observations to a single (slowly moving) point. 
+It has several modes:
+
+* 0 - determine horizontal movement of a point using reflectorless (RL) EDM
+* 1 - determine movement ofa slowly moving prism
+* 2 - determine vertical movement of a prims (supposing horizontal distance not changed
+* 3 - ???
+* 4 - determine 3D movement of a moving prism
+* 5 - measure if prism stop moving for few seconds (stop and go) obsevations
+
+Command line parameters:
+
+* Sensor type 1100/1800/1200
+* Mode 0-5
+* EDM mode FAST/STANDARD
+* serial port
+* output file
 
 Measurematrix
 *************
