@@ -76,10 +76,12 @@ class ConfReader(JSONReader):
         return True
 
 if __name__ == '__main__':
-    config_pars = {'log_file': {'required' : True, 'type': 'file'},
-        'log_level': {'required' : True, 'type': 'list', 'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR ]},
+    config_pars = {
+        'log_file': {'required' : True, 'type': 'file'},
+        'log_level': {'required' : True, 'type': 'int',
+        'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR ]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
-        'station_type': {'required' : True, 'type': 'reglist', 'set': ['120[0-9]$', '1800$', '110[0-9]$']},
+        'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1800', '1100']},
         'station_id': {'required' : True, 'type': 'str'},
         'station_height': {'required': False, 'default': 0, 'type': 'float'},
         'station_coo_limit': {'required': False, 'default': 0.01, 'type': 'float'},
@@ -100,7 +102,7 @@ if __name__ == '__main__':
         'stdev_angle': {'required': False, 'type': 'float', 'default': 1},
         'stdev_dist': {'required': False, 'type': 'float', 'default': 1},
         'stdev_dist1': {'required': False, 'type': 'float', 'default': 1.5},
-        'dimension': {'required': False, 'type': 'int', 'default': 1.5},
+        'dimension': {'required': False, 'type': 'int', 'default': 3},
         'probability': {'required': False, 'type': 'float', 'default': 0.95},
         'blunders': {'required': False, 'type': 'int', 'default': 1},
         'met': {'required': False, 'set': ['WEBMET', 'BMP180', 'SENSEHAT']},
@@ -109,5 +111,8 @@ if __name__ == '__main__':
         '__comment__': {'required': False, 'type': 'str'}
     }
     jr = ConfReader('test', '../pyapps/robotplus.json', None, config_pars)
-    print jr.Load()
-    print jr.Check()
+    if jr.state == jr.RD_OK:
+        print jr.Load()
+        print jr.Check()
+    else:
+        print "config file?"
