@@ -8,19 +8,34 @@ Sample application for complex monitoring for a station
 
 Parameters are stored in config file using JSON format::
 
-    station_type: TCRA1103/TPS1200/TCA1800
+    log_file: path to log file, file must exist!
+    log_level: 10/20/30/40/50 for DEBUG/INFO/WARNING/ERROR/FATAL
+    log_format: format string for log (default: "%(asctime)s %(levelname)s:%(message)s"), optional
+    station_type: 1100/1200/1800
     station_id: pont id for the station
-    station_height: height above point, optional default 0
-    fix_list: list of fix points to calculate station coordinates, optional
-    mon_list: list of monitoring points to measure, optional
+    station_height: instrument height above point, optional (default: 0)
+    station_coo_limit: limitation for station coordinate change from free station (default 0.01), optional
+    fix_list: list of fix points to calculate station coordinates, optional (default: empty)
+    mon_list: list of monitoring points to measure, optional (default: empty)
+    max_try: maximum trying to measure a point, optional (default: 3)
+    delay_try: delay between tries, optional (default: 0)
     port: serial port to use (e.g. COM1 or /dev/ttyS0 or /dev/ttyUSB0)
-    gama_path: path to GNU Gama executable, optional
-    coo_rd: URL to get coordinates from (server side script)
-    coo_wr: URL to send coordinates to
-    obs_wr: URL to send observations to
+    coo_rd: URL or local file to get coordinates from
+    coo_wr: URL or local file to send coordinates to
+    obs_wr: URL or local file to send observations to, oprional (default: no output)
+    met_wr: URL or local file to send meteorological observations to, optional (default: no output)
+    avg_wr: calculate averages from more faces if value 1, no average calculation if value is zero, optional (default: 1)
+    decimals: number of decimals in output, optional (default: 4)
+    gama_path: path to GNU Gama executable, optional (default: empty, no adjustment)
+    stdev_angle: standard deviation of angle measurement (arc seconds), optional (default: 1)
+    stdev_dist: additive tag for standard deviation of distance measurement (mm), optional (default: 1)
+    stdev_dist1: multiplicative tag for standard deviation of distance measurement (mm), optional (default: 1.5)
+    dimension: dimension of stored points (1D/2D/3D), optional (default: 3)
+    probability: probability for data snooping, optional (default: 0.95)
+    blunders: data snooping on/off 1/0, optional (default: 1)
     met: met sensor name WEBMET/BMP180/SENSEHAT, optional default None
-    met_addr: URL to webmet data, optional default None
-    met_par: parameters to web met service, optional default None
+    met_addr: URL to webmet data, optional (default: empty)
+    met_par: parameters to web met service, optional (default: empty)
 """
 
 import sys
@@ -77,8 +92,8 @@ def avg_coo(coords):
         e = [coo['east'] for coo in coords if coo['id'] == i]
         n = [coo['north'] for coo in coords if coo['id'] == i]
         h = [coo['elev'] for coo in coords if coo['id'] == i]
-        res.append({'id': i, 'east': sum(e) / len(e), 'north': sum(n) / len(n), 
-            'elev': sum(h) / len(h)})
+        res.append({'id': i, 'east': sum(e) / len(e), 'north': sum(n) / len(n),
+                    'elev': sum(h) / len(h)})
     return res
 
 def avg_obs(obs):
@@ -125,12 +140,14 @@ def avg_obs(obs):
         sd = sum(sd12) / len(sd12)
         # TODO cross & lengthincline?
         res.append({'id': k, 'hz': Angle(hz), 'v': Angle(v), 'distance': sd,
-            'face': 2})
+                    'face': 2})
     return res
 
 if __name__ == "__main__":
-    config_pars = {'log_file': {'required' : True, 'type': 'file'},
-        'log_level': {'required' : True, 'type': 'int', 'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR ]},
+    config_pars = {
+        'log_file': {'required' : True, 'type': 'file'},
+        'log_level': {'required' : True, 'type': 'int',
+        'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
         'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1800', '1100']},
         'station_id': {'required' : True, 'type': 'str'},
@@ -153,7 +170,7 @@ if __name__ == "__main__":
         'stdev_angle': {'required': False, 'type': 'float', 'default': 1},
         'stdev_dist': {'required': False, 'type': 'float', 'default': 1},
         'stdev_dist1': {'required': False, 'type': 'float', 'default': 1.5},
-        'dimension': {'required': False, 'type': 'int', 'default': 1.5},
+        'dimension': {'required': False, 'type': 'int', 'default': 3},
         'probability': {'required': False, 'type': 'float', 'default': 0.95},
         'blunders': {'required': False, 'type': 'int', 'default': 1},
         'met': {'required': False, 'set': ['WEBMET', 'BMP180', 'SENSEHAT']},
@@ -177,11 +194,11 @@ if __name__ == "__main__":
             logging.error("Config file not found" + sys.argv[1])
     else:
         print "Usage: robotplus.py config_file"
-        cr = ConfReader('robotplus', 'robotplus.json', None, config_pars)
-        cr.Load()
-        if not cr.Check():
-            sys.exit(-1)
-        #sys.exit(-1)
+        #cr = ConfReader('robotplus', 'robotplus.json', None, config_pars)
+        #cr.Load()
+        #if not cr.Check():
+        #    sys.exit(-1)
+        sys.exit(-1)
     # logging
     logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
          filemode='a', level=cr.json['log_level'])
@@ -217,7 +234,7 @@ if __name__ == "__main__":
             from webmet import WebMet
             from webiface import WebIface
             wi = WebIface("demo", cr.json['met_addr'], "json")
-            web_mu = WebMetMeasureUnit(msg = cr.json['met_par'])
+            web_mu = WebMetMeasureUnit(msg=cr.json['met_par'])
             web_met = WebMet('WebMet', web_mu, wi)
             data = web_met.GetPressure()
             pres = temp = humi = wet = None
@@ -259,14 +276,16 @@ if __name__ == "__main__":
         # TODO send met data to server/file
         if 'met_wr' in cr.json:
             if re.search('^http[s]?://', cr.json['met_wr']):
-                wrtm = HttpWriter(name='met', url=cr.json['met_wr'], mode='POST',
-                    filt=['id','temp','pressure','huminidity','wettemp',
-                        'datetime'])
+                wrtm = HttpWriter(
+                    name='met', url=cr.json['met_wr'], mode='POST',
+                    filt=['id', 'temp', 'pressure', 'huminidity', 'wettemp',
+                          'datetime'])
             else:
                 wrtm = CsvWriter(name='met', fname=cr.json['met_wr'],
-                    filt=['id','temp','pressure','huminidity','wettemp',
-                        'datetime'], mode='a')
-            data = {'id': cr.json['station_id'], 'temp': temp, 
+                                 filt=['id', 'temp', 'pressure', 'huminidity',
+                                 'wettemp', 'datetime'], mode='a')
+            data = {
+                'id': cr.json['station_id'], 'temp': temp,
                 'pressure': pres, 'huminidity': humi,
                 'wettemp': wet}
             wrtm.WriteData(data)
@@ -275,12 +294,12 @@ if __name__ == "__main__":
     print "Loading station coords..."
     if re.search('^http[s]?://', cr.json['coo_rd']):
         rd_st = HttpReader(url=cr.json['coo_rd'], ptys=['STA'], \
-            filt = ['id', 'east', 'north', 'elev'])
+                           filt=['id', 'east', 'north', 'elev'])
         # TODO read from local file if HttpReader failed
         # other file reader from config coo_rd_loc (optional)
     else:
         rd_st = GeoReader(fname=cr.json['coo_rd'], \
-            filt = ['id', 'east', 'north', 'elev'])
+                          filt=['id', 'east', 'north', 'elev'])
     w = rd_st.Load()
     st_coord = [x for x in w if x['id'] == cr.json['station_id']]
     if len(st_coord) == 0:
@@ -289,27 +308,27 @@ if __name__ == "__main__":
     # coordinate writer & observation writer
     fmt = '.%df' % cr.json['decimals']
     if re.search('^http[s]?://', cr.json['coo_wr']):
-        wrt = HttpWriter(url = cr.json['coo_wr'], mode = 'POST', dist = fmt)
+        wrt = HttpWriter(url=cr.json['coo_wr'], mode='POST', dist=fmt)
         # observation writer
         if 'obs_wr' in cr.json:
-            wrt1 = HttpWriter(url = cr.json['obs_wr'], mode = 'POST', dist = fmt)
+            wrt1 = HttpWriter(url=cr.json['obs_wr'], mode='POST', dist=fmt)
         else:
             wrt1 = wrt
         # TODO write to local file if HttpWriter failed
     else:
-        wrt = GeoWriter(fname = cr.json['coo_wr'], mode = 'a', dist = fmt)
+        wrt = GeoWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt)
         if 'obs_wr' in cr.json:
-            wrt1 = GeoWriter(fname = cr.json['obs_wr'], mode = 'a', dist = fmt)
+            wrt1 = GeoWriter(fname=cr.json['obs_wr'], mode='a', dist=fmt)
     if 'fix_list' in cr.json and cr.json['fix_list'] is not None:
         # get fix coordinates from database
         print "Loading fix coords..."
         if re.search('^http[s]?://', cr.json['coo_rd']):
             rd_fix = HttpReader(url=cr.json['coo_rd'], ptys=['FIX'], \
-                filt = ['id', 'east', 'north', 'elev'])
+                                filt=['id', 'east', 'north', 'elev'])
             # TODO read from local file if HttpReader failed
         else:
             rd_fix = GeoReader(fname=cr.json['coo_rd'], \
-                filt = ['id', 'east', 'north', 'elev'])
+                               filt=['id', 'east', 'north', 'elev'])
         # remove other points
         fix_coords = [p for p in rd_fix.Load() if p['id'] in cr.json['fix_list']]
         if len(cr.json['fix_list']) != len(fix_coords):
@@ -322,11 +341,11 @@ if __name__ == "__main__":
         print "Loading mon coords..."
         if re.search('^http[s]?://', cr.json['coo_rd']):
             rd_mon = HttpReader(url=cr.json['coo_rd'], ptys=['MON'], \
-                filt = ['id', 'east', 'north', 'elev'])
+                                filt=['id', 'east', 'north', 'elev'])
             # TODO read from local file if HttpReader failed
         else:
             rd_mon = GeoReader(fname=cr.json['coo_rd'], \
-                filt = ['id', 'east', 'north', 'elev'])
+                               filt=['id', 'east', 'north', 'elev'])
         mon_coords = [p for p in rd_mon.Load() if p['id'] in cr.json['mon_list']]
         if len(cr.json['mon_list']) != len(mon_coords):
             logging.error("Not all mon points found in database")
@@ -379,9 +398,11 @@ if __name__ == "__main__":
                 if 'distance' in o:
                     wrt1.WriteData(o)
                     # TODO check result of write
-            fs = Freestation(obs_avg, st_coord + fix_coords, cr.json['gama_path'],
-                cr.json['dimension'], cr.json['probability'], cr.json['stdev_angle'],
-                cr.json['stdev_dist'], cr.json['stdev_dist1'], cr.json['blunders'])
+            fs = Freestation(obs_avg, st_coord + fix_coords,
+                             cr.json['gama_path'], cr.json['dimension'],
+                             cr.json['probability'], cr.json['stdev_angle'],
+                             cr.json['stdev_dist'], cr.json['stdev_dist1'],
+                             cr.json['blunders'])
             w = fs.Adjustment()
             if w is None:
                 logging.error("No adjusted coordinates for station %s" % cr.json['station_id'])
@@ -410,7 +431,7 @@ if __name__ == "__main__":
             if back_site is None:
                 logging.error("Backsite trouble")
                 sys.exit(1)
-            ori_p = [ p for p in fix_coords if p['id'] == back_site ][0]
+            ori_p = [p for p in fix_coords if p['id'] == back_site ][0]
             bearing = Angle(math.atan2(ori_p['east'] - st_coord[0]['east'], \
                                  ori_p['north'] - st_coord[0]['north']))
             # rotate to farest FIX and set orientation
@@ -418,7 +439,7 @@ if __name__ == "__main__":
             ans = ts.SetOri(bearing)
             if 'errCode' in ans:
                 logging.error("Cannot upload orientation to instrument")
-                sys-exit(-1)
+                sys.exit(-1)
     if 'mon_list' in cr.json and cr.json['mon_list'] is not None:
         # generate observations for monitoring points, first point is the station
         print "Generating observations for mon..."
