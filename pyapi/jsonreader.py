@@ -10,7 +10,6 @@
 
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 """
-import logging
 import json
 from filereader import FileReader
 
