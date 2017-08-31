@@ -78,9 +78,17 @@ Optional, used by robotplus.py
 Ulyxes
 ------
 
+Install only the latest version from GitHub:
+
 .. code:: bash
 
 	cd ~
 	wget https://github.com/zsiki/ulyxes/zipball/master/ -O ulyxes.zip
 	unzip ulyxes.zip
-	mv zsiki-ulyxes-* ulyxes
+
+Make a local copy of the git repository:
+
+.. code::
+
+	cd ~
+	git clone https://github.com/zsiki/ulyxes.git
