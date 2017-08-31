@@ -113,6 +113,9 @@ def avg_obs(obs):
             if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi]
         hz2 = [o['hz'].GetAngle() for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() > math.pi]
+        if len(hz1) != len(hz2):
+            logging.warning("differenctnumber of observations in two face at point: " + k)
+        
         # check angles around 0
         for i in range(len(hz1)):
             if hz1[i] - hz1[0] > math.pi:
@@ -148,7 +151,7 @@ if __name__ == "__main__":
     config_pars = {
         'log_file': {'required' : True, 'type': 'file'},
         'log_level': {'required' : True, 'type': 'int',
-        'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR]},
+            'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
         'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1800', '1100']},
         'station_id': {'required' : True, 'type': 'str'},
@@ -228,7 +231,7 @@ if __name__ == "__main__":
         sys.exit(-1)
     # get meteorology data
     print "Getting met data..."
-    if 'met' in cr.json and not cr.json['met'] is None:
+    if 'met' in cr.json and cr.json['met'] is not None:
         atm = ts.GetAtmCorr()     # get current settings from ts
         if cr.json['met'].upper() == 'WEBMET':
             from webmetmeasureunit import WebMetMeasureUnit
@@ -282,8 +285,8 @@ if __name__ == "__main__":
                           'datetime'])
             else:
                 wrtm = CsvWriter(name='met', fname=cr.json['met_wr'],
-                                 filt=['id', 'temp', 'pressure', 'huminidity',
-                                 'wettemp', 'datetime'], mode='a')
+                    filt=['id', 'temp', 'pressure', 'huminidity',
+                    'wettemp', 'datetime'], mode='a')
             data = {'id': cr.json['station_id'], 'temp': temp,
                 'pressure': pres, 'huminidity': humi, 'wettemp': wet}
             wrtm.WriteData(data)
@@ -429,7 +432,7 @@ if __name__ == "__main__":
             if back_site is None:
                 logging.error("Backsite trouble")
                 sys.exit(1)
-            ori_p = [p for p in fix_coords if p['id'] == back_site ][0]
+            ori_p = [p for p in fix_coords if p['id'] == back_site][0]
             bearing = Angle(math.atan2(ori_p['east'] - st_coord[0]['east'], \
                                  ori_p['north'] - st_coord[0]['north']))
             # rotate to farest FIX and set orientation
