@@ -2,12 +2,15 @@ ulyxes (Ultimate Y X Estimation System)
 =======================================
 
 Surveyor's sensor data processing system
-http://www.geod.bme.hu/ulyxes
+[Project home page](http://www.geod.bme.hu/ulyxes)
 
 * PyAPI - API written in Python using object oriented approache, beta version
 * PyApps - demo Python applications using PyAPI
 * server - server side scripts
 
+Documentation
+* [Ulyxes User's Guide](https://github.com/zsiki/ulyxes/blob/master/doc/Ulyxes_user_doc.rst)
+* [installation on Ubuntu/Debian/Rasbian](https://github.com/zsiki/ulyxes/blob/master/doc/ubuntu_istall.rst)
 ---
 Depricated module/API
 
