@@ -106,6 +106,7 @@ def avg_obs(obs):
     # copy station record to output
     if 'station' in obs[0]:
         res.append(obs[0])
+    # get unique point ids
     ids = list(set([o['id'] for o in obs if 'id' in o]))
     for k in ids:
         # separate face left/right
@@ -114,37 +115,62 @@ def avg_obs(obs):
         hz2 = [o['hz'].GetAngle() for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() > math.pi]
         if len(hz1) != len(hz2):
-            logging.warning("differenctnumber of observations in two face at point: " + k)
-        
-        # check angles around 0
-        for i in range(len(hz1)):
+            logging.warning('Different number of observations in two faces at point: ' + str(k) + ' FL: '+ str(len(hz1)) + ' FR: ' + str(len(hz2)))
+
+        # check angles around 0/360 degree
+        for i in range(1, len(hz1)):
             if hz1[i] - hz1[0] > math.pi:
                 hz1[i] -= math.pi * 2.0
-            if hz1[i] - hz1[0] < math.pi:
+            elif hz1[0] - hz1[i] > math.pi:
                 hz1[i] += math.pi * 2.0
-        for i in range(len(hz2)):
+        for i in range(1, len(hz2)):
             if hz2[i] - hz2[0] > math.pi:
                 hz2[i] -= math.pi * 2.0
-            if hz2[i] - hz2[0] < math.pi:
+            elif hz2[0] - hz2[i] > math.pi:
                 hz2[i] += math.pi * 2.0
-        if len(hz2):
-            if hz2[0] < math.pi:
+        # rotate face right by 180 degree
+        if len(hz2) and len(hz1):
+            if hz1[0] > hz2[0]:
                 hz2 = [h + math.pi for h in hz2]
             else:
                 hz2 = [h - math.pi for h in hz2]
+            kol = (sum(hz2) / len(hz2) - sum(hz1) / len(hz1)) / 2.0
+            logging.info('Average collimation error [seconds]: ' +
+                str(round(kol / math.pi * 648000)))
+        elif len(hz1) == 0:
+            if hz2[0] > math.pi:
+                hz2 = [h - math.pi for h in hz2]
+            else:
+                hz2 = [h + math.pi for h in hz2]
         hz = sum(hz1 + hz2) / (len(hz1) + len(hz2))
 
         v1 = [o['v'].GetAngle() for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi]
         v2 = [math.pi * 2.0 - o['v'].GetAngle() for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() > math.pi]
+        if len(v1) and len(v2):
+            ind = (sum(v2) / len(v2) - sum(v1) / len(v1)) / 2.0
+            logging.info('Average index error [seconds]: ' +
+                str(round(ind / math.pi * 648000)))
         v = sum(v1 + v2) / (len(v1) + len(v2))
+        res_obs = {'id': k, 'hz': Angle(hz), 'v': Angle(v)}
         sd12 = [o['distance'] for o in obs \
-            if 'id' in o and o['id'] == k]
-        sd = sum(sd12) / len(sd12)
-        # TODO cross & lengthincline?
-        res.append({'id': k, 'hz': Angle(hz), 'v': Angle(v), 'distance': sd,
-                    'face': 2})
+            if 'id' in o and o['id'] == k and 'distance' in o]
+        if len(sd12):
+            sd = sum(sd12) / len(sd12)
+            res_obs['distance'] = sd
+        # cross & lengthincline
+        cross = [o['crossincline'] for o in obs \
+            if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi and \
+            'crossincline' in o]
+        if len(cross):
+            res_obs['crossincline'] = cross[0]
+        length = [o['lengthincline'] for o in obs \
+            if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi and \
+            'lengthincline' in o]
+        if len(length):
+            res_obs['lengthincline'] = length[0]
+        res.append(res_obs)
     return res
 
 if __name__ == "__main__":
