@@ -74,6 +74,7 @@ class Orientation(object):
         self.ts.SetATR(1)
         self.ts.SetEDMMode('STANDARD')
         ans = self.ts.GetAngles()
+        # move from safe position to first direction
         if ans['v'].GetAngle('DEG') > 160 and ans['v'].GetAngle('DEG') < 200:
             ans = self.ts.Move(self.observations[1]['hz'], \
                 self.observations[1]['v'], 0)
@@ -84,11 +85,11 @@ class Orientation(object):
             ans = self.ts.Move(self.observations[1]['hz'], \
                 self.observations[1]['v'], 1)
             if 'errorCode' in ans:
-                # set telescope into the middle in vertical direction
-                angles = self.ts.GetAngles()
-                self.ts.Move(angles['hz'], Angle((min_v + max_v) / 2.0))
                 # try powersearch clockwise
                 if 'POWERSEARCH' in self.ts.measureUnit.GetCapabilities():
+                    # set telescope into the middle in vertical direction
+                    angles = self.ts.GetAngles()
+                    self.ts.Move(angles['hz'], Angle((min_v + max_v) / 2.0))
                     # repeat power search to skip false prisms
                     for i in range(10):
                         ans = self.ts.PowerSearch(1)
