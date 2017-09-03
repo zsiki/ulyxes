@@ -1,4 +1,5 @@
 -- tables for Ulyxes monitoring
+-- PostGIS version
 
 -- drop previous version of tables
 DROP TABLE IF EXISTS monitoring_pgr;
@@ -43,9 +44,8 @@ CREATE TABLE monitoring_obs (
 	distance double precision,
 	crossincline double precision,
 	lengthincline double precision,
-	face int NOT NULL check (face in (1, 2, 0)),
     datetime timestamp NOT NULL,
-	CONSTRAINT pkey_obs PRIMARY KEY (id, datetime, face)
+	CONSTRAINT pkey_obs PRIMARY KEY (id, datetime)
 );
 
 -- table for meteorological observations at stations
