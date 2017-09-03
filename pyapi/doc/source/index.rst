@@ -284,6 +284,11 @@ Geo Writer
 .. automodule:: geowriter
    :members:
 
+SqLite Writer
+:::::::::::::
+
+.. automodule:: sqlitewriter
+
 SAMPLE APPLICATIONS
 ===================
 
