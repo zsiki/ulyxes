@@ -4,6 +4,9 @@ Installing pyapi and pyapps on Ubuntu Linux
 Prerequisites
 -------------
 
+During the installation of prerequisites some extra packages will be installed,
+too.
+
 Serial test
 ~~~~~~~~~~~
 
@@ -75,6 +78,16 @@ Optional, used by robotplus.py
 
 	sudo apt-get install libqt4-core python-qt4
 
+SpatiaLite/SqLite
+~~~~~~~~~~~~~~~~~
+
+Optional used by robotplus if SqLiteWriter selected.
+
+.. code:: .bash
+
+	sudo apt-get install sqlite3
+	sudo apt-get install spatialite-bin
+
 Ulyxes
 ------
 
@@ -92,3 +105,5 @@ Make a local copy of the git repository:
 
 	cd ~
 	git clone https://github.com/zsiki/ulyxes.git
+
+You can move the whole ulyxes install directory to any other place inyour file system and you can also rename the ulyxes install directory. You had better not to change directory and file names under the install directory.
