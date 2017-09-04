@@ -52,6 +52,7 @@ from httpreader import HttpReader
 from httpwriter import HttpWriter
 from georeader import GeoReader
 from geowriter import GeoWriter
+from sqlitewriter import SqLiteWriter
 from confreader import ConfReader
 from filegen import ObsGen
 from serialiface import SerialIface
@@ -215,19 +216,22 @@ if __name__ == "__main__":
                 cr = ConfReader('robotplus', sys.argv[1], None, config_pars)
                 cr.Load()
             except:
-                logging.error("Error in config file: " + sys.argv[1])
+                logging.fatal("Error in config file: " + sys.argv[1])
                 sys.exit(-1)
             if not cr.Check():
+                logging.fatal("Config check failed")
                 sys.exit(-1)
         else:
-            print "Config file not found" + sys.argv[1]
-            logging.error("Config file not found" + sys.argv[1])
+            print "Config file not found " + sys.argv[1]
+            logging.fatal("Config file not found " + sys.argv[1])
+            sys.exit(-1)
     else:
         print "Usage: robotplus.py config_file"
-        #cr = ConfReader('robotplus', 'robotplus.json', None, config_pars)
+        #cr = ConfReader('robotplus', '/home/siki/monitoring/p103.json', None, config_pars)
         #cr.Load()
         #if not cr.Check():
-        #    sys.exit(-1)
+        #    logging.fatal("Config check failed")
+        logging.fatal("Invalid parameters")
         sys.exit(-1)
     # logging
     logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
@@ -235,14 +239,14 @@ if __name__ == "__main__":
     # create totalstation
     mu = get_mu(cr.json['station_type'])
     if not mu:
-        logging.error('Invalid instrument type')
+        logging.fatal('Invalid instrument type')
         sys.exit(-1)
     if cr.json['station_type'] == 'local':
         iface = LocalIface('test', 'test_iface.txt', 'rand')
     else:
         iface = SerialIface("rs-232", cr.json['port'])
     if iface.GetState():
-        logging.error("Serial interface error")
+        logging.fatal("Serial interface error")
         sys.exit(-1)
     ts = TotalStation(cr.json['station_type'], mu, iface)
     for i in range(10):
@@ -253,7 +257,7 @@ if __name__ == "__main__":
         else:
             break
     if 'errorCode' in w or ts.measureIface.GetState():
-        logging.error("Instrument wake up failed")
+        logging.fatal("Instrument wake up failed")
         sys.exit(-1)
     # get meteorology data
     print "Getting met data..."
@@ -286,7 +290,7 @@ if __name__ == "__main__":
             try:
                 bmp = BMP180('BMP180', bmp_mu, i2c)
             except IOError:
-                logging.error("BMP180 sensor not found")
+                logging.fatal("BMP180 sensor not found")
                 sys.exit(1)
             pres = float(bmp.GetPressure()['pressure'])
             temp = float(bmp.GetTemp()['temp'])
@@ -330,7 +334,7 @@ if __name__ == "__main__":
     w = rd_st.Load()
     st_coord = [x for x in w if x['id'] == cr.json['station_id']]
     if len(st_coord) == 0:
-        logging.error("Station not found: " + cr.json['station_id'])
+        logging.fatal("Station not found: " + cr.json['station_id'])
         sys.exit(-1)
     # coordinate writer & observation writer
     fmt = '.%df' % cr.json['decimals']
@@ -342,6 +346,14 @@ if __name__ == "__main__":
         else:
             wrt1 = wrt
         # TODO write to local file if HttpWriter failed
+    elif re.search('^sqlite:', cr.json['coo_wr']):
+        wrt = SqLiteWriter(db=cr.json['coo_wr'][7:],
+            filt=['id','east','north','elev','datetime'])
+        if 'obs_wr' in cr.json:
+            wrt1 = SqLiteWriter(db=cr.json['obs_wr'][7:],
+                filt=['id','hz','v','distance','datetime'])
+        else:
+            wrt1 = wrt
     else:
         wrt = GeoWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt)
         if 'obs_wr' in cr.json:
@@ -391,14 +403,14 @@ if __name__ == "__main__":
         a['v'] = (Angle(360, 'DEG') - a['v']).Normalize()
         ans = ts.Move(a['hz'], a['v'], 0) # no ATR
         if 'errCode' in ans:
-            logging.error("Rotation to face left failed %d" % ans['errCode'])
+            logging.fatal("Rotation to face left failed %d" % ans['errCode'])
             sys.exit(-1)
     # check/find orientation
     print "Orientation..."
     o = Orientation(observations, ts, cr.json['orientation_limit'])
     ans = o.Search()
     if 'errCode' in ans and cr.json['station_type'] != 'local':
-        logging.error("Orientation failed %d" % ans['errCode'])
+        logging.fatal("Orientation failed %d" % ans['errCode'])
         sys.exit(-1)
 
     if 'fix_list' in cr.json and cr.json['fix_list'] is not None:
@@ -432,12 +444,12 @@ if __name__ == "__main__":
                              cr.json['blunders'])
             w = fs.Adjustment()
             if w is None:
-                logging.error("No adjusted coordinates for station %s" % cr.json['station_id'])
+                logging.fatal("No adjusted coordinates for station %s" % cr.json['station_id'])
                 sys.exit(-1)
             if abs(st_coord[0]['east'] - w[0]['east']) > cr.json['station_coo_limit'] or \
                abs(st_coord[0]['north'] - w[0]['north']) > cr.json['station_coo_limit'] or \
                abs(st_coord[0]['elev'] - w[0]['elev']) > cr.json['station_coo_limit']:
-                logging.error("Station moved!!!" + str(w))
+                logging.fatal("Station moved!!!" + str(w))
                 sys.exit(-1)
             # update station coordinates
             st_coord = w
@@ -456,7 +468,7 @@ if __name__ == "__main__":
                     back_indx = i
                 i += 1
             if back_site is None:
-                logging.error("Backsite trouble")
+                logging.fatal("Backsite trouble")
                 sys.exit(1)
             ori_p = [p for p in fix_coords if p['id'] == back_site][0]
             bearing = Angle(math.atan2(ori_p['east'] - st_coord[0]['east'], \
@@ -465,7 +477,7 @@ if __name__ == "__main__":
             ts.Move(obs_out[back_indx]['hz'], obs_out[back_indx]['v'], 1)
             ans = ts.SetOri(bearing)
             if 'errCode' in ans:
-                logging.error("Cannot upload orientation to instrument")
+                logging.fatal("Cannot upload orientation to instrument")
                 sys.exit(-1)
     if 'mon_list' in cr.json and cr.json['mon_list'] is not None:
         # generate observations for monitoring points, first point is the station

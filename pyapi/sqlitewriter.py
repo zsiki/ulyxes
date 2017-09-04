@@ -43,7 +43,7 @@ class SqLiteWriter(Writer):
             # connect to local db
             self.conn = sqlite3.connect(db)
         else:
-            logging.error('SqLite database does not exists: ' + db)
+            logging.fatal('SqLite database does not exists: ' + db)
 
     def __del__(self):
         try:
