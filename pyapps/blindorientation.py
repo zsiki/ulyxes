@@ -57,7 +57,7 @@ class Orientation(object):
     def Search(self):
         """ Search for a prism
         
-            :returns: True if orientation set
+            :returns: dictionary on error with errorCode
         """
         self.ts.GetATR()    # wake up instrument
         dhz = 0 # relative direction from start position
@@ -81,9 +81,12 @@ class Orientation(object):
         # instrument targeting on prism?
         ans = self.ts.MoveRel(Angle(0), Angle(0), 1)
         if 'errorCode' in ans:
-            # try to rotate to the second point
-            ans = self.ts.Move(self.observations[1]['hz'], \
-                self.observations[1]['v'], 1)
+            # try to rotate to the second, third, ... point
+            i = 2
+            while 'errorCode' in ans and i < len(self.observations):
+                ans = self.ts.Move(self.observations[i]['hz'], \
+                    self.observations[i]['v'], 1)
+                i += 1
             if 'errorCode' in ans:
                 # try powersearch clockwise
                 if 'POWERSEARCH' in self.ts.measureUnit.GetCapabilities():
