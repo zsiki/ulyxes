@@ -91,7 +91,7 @@ class SqLiteWriter(Writer):
 
 if __name__ == "__main__":
     myfile = SqLiteWriter(db = "test.sqlite")
-    data = {'id': '1', 'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'distance': 123.6581}
+    data = {'id': '1', 'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'distance': 123.6581, 'lengthincline': Angle(0.0015, 'GON'), 'crossincline': Angle(0.0020, 'GON')}
     print (myfile.WriteData(data))
     data = {'id': '1', 'east': 0.12345, 'north': 100.2365, 'elev': 123.6581}
     print (myfile.WriteData(data))
