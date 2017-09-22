@@ -351,7 +351,8 @@ if __name__ == "__main__":
             filt=['id','east','north','elev','datetime'])
         if 'obs_wr' in cr.json:
             wrt1 = SqLiteWriter(db=cr.json['obs_wr'][7:],
-                filt=['id','hz','v','distance','datetime'])
+                filt=['id','hz','v','distance','crossincline','lengthincline',
+                    'datetime'])
         else:
             wrt1 = wrt
     else:
@@ -496,13 +497,10 @@ if __name__ == "__main__":
             if 'distance' in o:
                 wrt1.WriteData(o)
                 # TODO check result of write
-                #print o['id'] + ' ' + o['hz'].GetAngle('DMS') + ' ' + \
-                #    o['v'].GetAngle('DMS') + ' ' + str(o['distance'])
         # always calculate coordinate average
         coo_out = avg_coo(coo_out)
         for c in coo_out:
             wrt.WriteData(c)
             # TODO check result of write
-            #print c['id'] + ' ' + str(c['east']) + ' ' + str(c['north']) + ' ' + str(c['elev'])
     # move telescope to safe position
     ans = ts.Move(Angle(0), Angle(180, "DEG")) # no ATR
