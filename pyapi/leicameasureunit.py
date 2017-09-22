@@ -106,6 +106,8 @@ class LeicaMeasureUnit(MeasureUnit):
                 errCode = int(ansBufflist[3])
             except ValueError:
                 errCode = -1   # invalid answer
+            except IndexError:
+                errCode = -2   # instrument off?
             if errCode != 0:
                 logging.error(" error from instrument: %d", errCode)
                 res['errorCode'] = errCode
