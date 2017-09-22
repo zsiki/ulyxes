@@ -11,6 +11,7 @@
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 """
 import re
+import datetime
 from angle import Angle
 from filereader import FileReader
 
@@ -23,7 +24,8 @@ class GeoReader(FileReader):
     """
     codes = {2: 'station', 3: 'ih', 4: 'code', 5: 'id', 6: 'th',
              7: 'hz', 8: 'v', 9: 'distance', 11: 'hd', 21: 'hz',
-             37: 'north', 38: 'east', 39: 'elev', 62: 'id', 112: 'faces'}
+             37: 'north', 38: 'east', 39: 'elev', 51: 'datetime',
+             62: 'id', 112: 'faces'}
 
     def __init__(self, name = None, fname = None, filt = None):
         """ Constructor
@@ -61,6 +63,8 @@ class GeoReader(FileReader):
                         res[self.codes[key]] =  float(www[1]) # numeric
                     elif key == 112:
                         res[self.codes[key]] =  int(www[1]) # numeric
+                    elif key == 51:
+                        res[self.codes[key]] = datatime.strptime(' '.join(www[1:]), 'Y-m-d H:M:S')
                     else:
                         res[self.codes[key]] =  ' '.join(www[1:])
         return res
