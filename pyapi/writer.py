@@ -78,7 +78,7 @@ class Writer(object):
         return sval
 
     def DropData(self, data):
-        """ Deside if data will be output or dropped
+        """ Decide if data will be output or dropped
 
             :param data: data to output
             :returns: True if no index in filter is present
