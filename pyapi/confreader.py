@@ -91,6 +91,7 @@ if __name__ == '__main__':
         'mon_list': {'required': False, 'type': 'list'},
         'max_try': {'required': False, 'type': 'int', 'default': 3},
         'delay_try': {'required': False, 'type': 'float', 'default': 0},
+        'dir_limit': {'required': False, 'type': 'float', 'default': 0.015},
         'port': {'required' : True, 'type': 'str'},
         'coo_rd': {'required' : True},
         'coo_wr': {'required' : True},

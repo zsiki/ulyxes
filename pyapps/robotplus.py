@@ -19,6 +19,7 @@ Parameters are stored in config file using JSON format::
     mon_list: list of monitoring points to measure, optional (default: empty)
     max_try: maximum trying to measure a point, optional (default: 3)
     delay_try: delay between tries, optional (default: 0)
+    dir_limit: angle limit for false direction in radians (default 0.015. 5')
     port: serial port to use (e.g. COM1 or /dev/ttyS0 or /dev/ttyUSB0)
     coo_rd: URL or local file to get coordinates from
     coo_wr: URL or local file to send coordinates to
@@ -222,6 +223,7 @@ if __name__ == "__main__":
         'mon_list': {'required': False, 'type': 'list'},
         'max_try': {'required': False, 'type': 'int', 'default': 3},
         'delay_try': {'required': False, 'type': 'float', 'default': 0},
+        'dir_limit': {'required': False, 'type': 'float', 'default': 0.015},
         'port': {'required' : True, 'type': 'str'},
         'coo_rd': {'required' : True},
         'coo_wr': {'required' : True},
@@ -452,7 +454,8 @@ if __name__ == "__main__":
         # observation to fix points
         print "Measuring fix..."
         act_date = datetime.datetime.now()  # strt of observations
-        r = Robot(observations, st_coord, ts, cr.json['max_try'], cr.json['delay_try'])
+        r = Robot(observations, st_coord, ts, cr.json['max_try'],
+                  cr.json['delay_try'], cr.json['dir_limit'])
         obs_out, coo_out = r.run()
         # calculate station coordinates as freestation if gama_path set
         if 'gama_path' in cr.json and cr.json['gama_path'] is not None:

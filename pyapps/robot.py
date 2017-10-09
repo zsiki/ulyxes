@@ -76,11 +76,13 @@ class Robot(object):
         :param directions: observation directions, dictionary
         :param coordinates: station coordinate, dictionary
         :param ts: instrument, totalstation
-        :param maxtry: max retry for a point
-        :param delaytry: delay in seconds between retries
+        :param maxtry: max retry for a point, default 3
+        :param delaytry: delay in seconds between retries, default 0
+        :param dirLimit: max angle difference [radians], default 0.015 (5')
     """
 
-    def __init__(self, directions, coordinates, ts, maxtry = 3, delaytry = 0):
+    def __init__(self, directions, coordinates, ts, maxtry=3, delaytry=0,
+                 dirLimit=0.015):
         """ initialize
         """
         if maxtry < 1:
@@ -91,14 +93,15 @@ class Robot(object):
             delaytry = 0
             logging.warning("delaytry changed to 0")
         self.delaytry = delaytry # delay between retries
+        self.dirLimit = dirLimit
         self.directions = directions
         self.coordinates = coordinates
         self.ts = ts
         self.max_faces = 0
         for w in self.directions:
-            if not 'code' in w:
+            if 'code' not in w:
                 w['code'] = 'ATR'
-            if not 'faces' in w:
+            if 'faces' not in w:
                 # default to 1 face
                 w['faces'] = 1
             if self.max_faces < w['faces']:
@@ -161,7 +164,7 @@ class Robot(object):
                     v = self.directions[i]['v'].GetAngle()
                     if step < 0:
                         # change angles to face right
-                        hz = hz - math.pi if hz > math.pi else hz + math.pi 
+                        hz = hz - math.pi if hz > math.pi else hz + math.pi
                         v = PI2 - v
                     j = 0   # try count
                     ans = ''
@@ -178,7 +181,8 @@ class Robot(object):
                                 res = self.ts.Measure()
                         elif self.directions[i]['code'][0:2] == 'PR':
                             if j == 0:
-                                # prism type: 0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini
+                                # prism type: 0/1/2/3/4/5/6/7
+                                # round/mini/tape/360/user1/user2/user3/360 mini
                                 self.ts.SetATR(0)
                                 self.ts.SetEDMMode('STANDARD')
                                 if len(self.directions[i]['code']) > 2:
@@ -205,7 +209,7 @@ class Robot(object):
                                 self.ts.SetATR(0)
                                 self.ts.SetEDMMode('RLSTANDARD')
                             res = self.ts.Move(Angle(hz), Angle(v), 0)
-                            if not 'errorCode' in res:
+                            if 'errorCode' not in res:
                                 res = self.ts.Measure()
                         elif self.directions[i]['code'] == 'OR':
                             res = self.ts.Move(Angle(hz), Angle(v), 0)
@@ -236,6 +240,10 @@ class Robot(object):
                             j += 1
                             continue
                         else:
+                            # check false direction
+                            if abs(hz - obs['hz'].GetAngle()) > self.dirLimit \
+                               or abs(v - obs['v'].GetAngle()) > self.dirLimit:
+                                continue    # try again
                             break   # observation OK
                     if j >= self.maxtry:
                         logging.error("Cannot measure point %s" % pn)
@@ -279,7 +287,7 @@ if __name__ == "__main__":
         ofname = 'stdout'
         #ofname = 'http://192.168.1.108/monitoring/get.php'
         #ofname = 'http://192.168.7.145/monitoring/get.php'
-    if not ofname[-4:] in ['.dmp', '.csv', '.geo', '.coo'] and \
+    if ofname[-4:] not in ['.dmp', '.csv', '.geo', '.coo'] and \
         ofname != 'stdout' and ofname[:4] != 'http':
         print "Unknown output type"
         exit(1)
@@ -315,11 +323,11 @@ if __name__ == "__main__":
     # load input data set
     coo_filt = ['id', 'east', 'north', 'elev']
     if ifname[-4:] in ('.geo', '.coo'):
-        g = GeoReader(fname = ifname[:-4] + '.geo')
-        f = GeoReader(fname = ifname[:-4] + '.coo', filt = coo_filt)
+        g = GeoReader(fname=ifname[:-4] + '.geo')
+        f = GeoReader(fname=ifname[:-4] + '.coo', filt=coo_filt)
     else:
-        g = CsvReader(fname = ifname[:-4] + '.dmp')
-        f = CsvReader(fname = ifname[:-4] + '.csv', filt = coo_filt)
+        g = CsvReader(fname=ifname[:-4] + '.dmp')
+        f = CsvReader(fname=ifname[:-4] + '.csv', filt=coo_filt)
     directions = g.Load()
     coordinates = f.Load()
 
@@ -331,32 +339,32 @@ if __name__ == "__main__":
             ofname2 = ofname[:-4] + '.csv'
         else:
             ofname1 = ofname2 = ofname
-        dmp_wrt = CsvWriter(angle = 'DMS', dist = '.4f', \
-            filt = ['station', 'id','hz','v','distance', 'datetime'], \
-            fname = ofname1, mode = 'a', sep = ';')
-        coo_wrt = CsvWriter(dist = '.4f', \
-            filt = ['id', 'east', 'north', 'elev', 'datetime'], \
-            fname = ofname2, mode = 'a', sep = ';')
+        dmp_wrt = CsvWriter(angle='DMS', dist='.4f', \
+            filt=['station', 'id','hz','v','distance', 'datetime'], \
+            fname=ofname1, mode='a', sep=';')
+        coo_wrt = CsvWriter(dist='.4f', \
+            filt=['id', 'east', 'north', 'elev', 'datetime'], \
+            fname=ofname2, mode='a', sep=';')
     elif ofname[-4:] == '.geo' or ofname[-4:] == '.coo':
         # geo/coo file output
         if ofname[-4:] == '.geo' or ofname[-4:] == '.coo':
             ofname1 = ofname[:-4] + '.geo'
             ofname2 = ofname[:-4] + '.coo'
-        dmp_wrt = GeoWriter(angle = 'RAD', dist = '.4f', \
-            filt = ['station', 'ih', 'id', 'th', 'hz', 'v', 'distance', \
-            'datetime'], fname = ofname1, mode = 'a')
-        coo_wrt = GeoWriter(dist = '.4f', \
-            filt = ['id', 'east', 'north', 'elev', 'datetime'], \
-            fname = ofname2, mode = 'a')
+        dmp_wrt = GeoWriter(angle='RAD', dist='.4f', \
+            filt=['station', 'ih', 'id', 'th', 'hz', 'v', 'distance', \
+            'datetime'], fname=ofname1, mode='a')
+        coo_wrt = GeoWriter(dist='.4f', \
+            filt=['id', 'east', 'north', 'elev', 'datetime'], \
+            fname=ofname2, mode='a')
     elif ofname[:5] == 'http:' or ofname[:6] == 'https:':
         # http output
         ofname1 = ofname2 = ofname
-        dmp_wrt = HttpWriter(angle = 'RAD', dist = '.4f', \
-            filt = ['station', 'id','hz','v','distance', 'datetime'], \
-            url = ofname1, mode = 'POST')
-        coo_wrt = HttpWriter(angle = 'RAD', dist = '.4f', \
-            filt = ['id', 'east', 'north', 'elev', 'datetime'], \
-            url = ofname2, mode = 'POST')
+        dmp_wrt = HttpWriter(angle='RAD', dist='.4f', \
+            filt=['station', 'id','hz','v','distance', 'datetime'], \
+            url=ofname1, mode='POST')
+        coo_wrt = HttpWriter(angle='RAD', dist='.4f', \
+            filt=['id', 'east', 'north', 'elev', 'datetime'], \
+            url=ofname2, mode='POST')
     # totalstation
     if re.search('120[0-9]$', stationtype):
         from leicatps1200 import LeicaTPS1200
@@ -413,11 +421,11 @@ if __name__ == "__main__":
             humi = data['humidity']
             wet = web.GetWetTemp(temp, humi)
         ts.SetAtmCorr(float(atm['lambda']), pres, temp, wet)
-        logging.info(" temperature: %f air pressure: %f wet termperature: %f" % 
+        logging.info(" temperature: %f air pressure: %f wet termperature: %f" %
         (temp, pres, wet))
     r = Robot(directions, coordinates, ts, maxtry, delaytry)
     obs_out, coo_out = r.run()
-    for obs in obs_out: 
+    for obs in obs_out:
         dmp_wrt.WriteData(obs)
     for coo in coo_out:
         coo_wrt.WriteData(coo)
