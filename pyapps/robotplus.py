@@ -44,6 +44,7 @@ import logging
 import math
 import os
 import time
+import datetime
 
 sys.path.append('../pyapi/')
 
@@ -52,6 +53,7 @@ from httpreader import HttpReader
 from httpwriter import HttpWriter
 from georeader import GeoReader
 from geowriter import GeoWriter
+from csvwriter import CsvWriter
 from sqlitewriter import SqLiteWriter
 from confreader import ConfReader
 from filegen import ObsGen
@@ -93,8 +95,18 @@ def avg_coo(coords):
         e = [coo['east'] for coo in coords if coo['id'] == i]
         n = [coo['north'] for coo in coords if coo['id'] == i]
         h = [coo['elev'] for coo in coords if coo['id'] == i]
-        res.append({'id': i, 'east': sum(e) / len(e), 'north': sum(n) / len(n),
-                    'elev': sum(h) / len(h)})
+        avg_e = sum(e) / len(e)
+        avg_n = sum(n) / len(n)
+        avg_h = sum(h) / len(h)
+        # check before store average
+        # TODO limit from config
+        if len([x for x in e if abs(x - avg_e) > 0.01]) or \
+           len([y for y in n if abs(y - avg_n) > 0.01]) or \
+           len([z for z in h if abs(z - avg_h) > 0.01]):
+            logging.error("Large coordinate difference from faces: " + str(e) +\
+                "; " + str(n) + "; " + str(h))
+            continue    # skip point
+        res.append({'id': i, 'east': avg_e, 'north': avg_n, 'elev': avg_h})
     return res
 
 def avg_obs(obs):
@@ -116,8 +128,9 @@ def avg_obs(obs):
         hz2 = [o['hz'].GetAngle() for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() > math.pi]
         if len(hz1) != len(hz2):
-            logging.warning('Different number of observations in two faces at point: ' + str(k) + ' FL: '+ str(len(hz1)) + ' FR: ' + str(len(hz2)))
-
+            logging.warning('Different number of observations in two faces ' +
+                'at point: ' + k + ' FL: '+ str(len(hz1)) + ' FR: ' +
+                str(len(hz2)))
         # check angles around 0/360 degree
         for i in range(1, len(hz1)):
             if hz1[i] - hz1[0] > math.pi:
@@ -137,14 +150,20 @@ def avg_obs(obs):
                 hz2 = [h - math.pi for h in hz2]
             kol = (sum(hz2) / len(hz2) - sum(hz1) / len(hz1)) / 2.0
             logging.info('Average collimation error [seconds]: ' +
-                str(round(kol / math.pi * 648000)))
+                         str(round(kol / math.pi * 648000)) + ' at point: ' + k)
         elif len(hz1) == 0:
             if hz2[0] > math.pi:
                 hz2 = [h - math.pi for h in hz2]
             else:
                 hz2 = [h + math.pi for h in hz2]
         hz = sum(hz1 + hz2) / (len(hz1) + len(hz2))
-
+        # check before store average
+        # TODO limit from config
+        if len([x for x in hz1 + hz2 if abs(x - hz) > 60.0 / 200000.0]):
+            str_hz = [Angle(x).GetAngle('DMS') for x in hz1 + hz2]
+            logging.error("Large Hz difference from faces: " + str(str_hz) +
+                ' at point: ' + k)
+            continue    # skip point
         v1 = [o['v'].GetAngle() for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi]
         v2 = [math.pi * 2.0 - o['v'].GetAngle() for o in obs \
@@ -152,13 +171,26 @@ def avg_obs(obs):
         if len(v1) and len(v2):
             ind = (sum(v2) / len(v2) - sum(v1) / len(v1)) / 2.0
             logging.info('Average index error [seconds]: ' +
-                str(round(ind / math.pi * 648000)))
+                         str(round(ind / math.pi * 648000)) + ' at point: ' + k)
         v = sum(v1 + v2) / (len(v1) + len(v2))
+        # check before store average
+        # TODO limit from config
+        if len([x for x in v1 + v2 if abs(x - v) > 60.0 / 200000.0]):
+            str_v = [Angle(x).GetAngle('DMS') for x in v1 + v2]
+            logging.error("Large V difference from faces: " + str(str_v) +
+                ' at point: ' + k)
+            continue    # skip point
         res_obs = {'id': k, 'hz': Angle(hz), 'v': Angle(v)}
         sd12 = [o['distance'] for o in obs \
             if 'id' in o and o['id'] == k and 'distance' in o]
         if len(sd12):
             sd = sum(sd12) / len(sd12)
+            # check before store average
+            # TODO limit from config
+            if len([x for x in sd12 if abs(x - sd) > 0.01]):
+                logging.error("Large dist difference from faces: " + str(sd) +
+                    'at point: ' + k)
+                continue    # skip point
             res_obs['distance'] = sd
         # cross & lengthincline
         cross = [o['crossincline'] for o in obs \
@@ -227,12 +259,12 @@ if __name__ == "__main__":
             sys.exit(-1)
     else:
         print "Usage: robotplus.py config_file"
-        #cr = ConfReader('robotplus', '/home/siki/monitoring/p103.json', None, config_pars)
-        #cr.Load()
-        #if not cr.Check():
-        #    logging.fatal("Config check failed")
+        cr = ConfReader('robotplus', '/home/siki/monitoring/p103.json', None, config_pars)
+        cr.Load()
+        if not cr.Check():
+            logging.fatal("Config check failed")
         logging.fatal("Invalid parameters")
-        sys.exit(-1)
+        #sys.exit(-1)
     # logging
     logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
          filemode='a', level=cr.json['log_level'])
@@ -315,10 +347,10 @@ if __name__ == "__main__":
                           'datetime'])
             else:
                 wrtm = CsvWriter(name='met', fname=cr.json['met_wr'],
-                    filt=['id', 'temp', 'pressure', 'huminidity',
-                    'wettemp', 'datetime'], mode='a')
+                                 filt=['id', 'temp', 'pressure', 'huminidity',
+                                 'wettemp', 'datetime'], mode='a')
             data = {'id': cr.json['station_id'], 'temp': temp,
-                'pressure': pres, 'huminidity': humi, 'wettemp': wet}
+                    'pressure': pres, 'huminidity': humi, 'wettemp': wet}
             wrtm.WriteData(data)
             # TODO check result of write
     # get station coordinates
@@ -345,14 +377,13 @@ if __name__ == "__main__":
             wrt1 = HttpWriter(url=cr.json['obs_wr'], mode='POST', dist=fmt)
         else:
             wrt1 = wrt
-        # TODO write to local file if HttpWriter failed
     elif re.search('^sqlite:', cr.json['coo_wr']):
         wrt = SqLiteWriter(db=cr.json['coo_wr'][7:],
-            filt=['id','east','north','elev','datetime'])
+                           filt=['id', 'east', 'north', 'elev', 'datetime'])
         if 'obs_wr' in cr.json:
             wrt1 = SqLiteWriter(db=cr.json['obs_wr'][7:],
-                filt=['id','hz','v','distance','crossincline','lengthincline',
-                    'datetime'])
+                                filt=['id', 'hz', 'v', 'distance',
+                                'crossincline', 'lengthincline', 'datetime'])
         else:
             wrt1 = wrt
     else:
@@ -365,7 +396,6 @@ if __name__ == "__main__":
         if re.search('^http[s]?://', cr.json['coo_rd']):
             rd_fix = HttpReader(url=cr.json['coo_rd'], ptys=['FIX'], \
                                 filt=['id', 'east', 'north', 'elev'])
-            # TODO read from local file if HttpReader failed
         else:
             rd_fix = GeoReader(fname=cr.json['coo_rd'], \
                                filt=['id', 'east', 'north', 'elev'])
@@ -382,7 +412,6 @@ if __name__ == "__main__":
         if re.search('^http[s]?://', cr.json['coo_rd']):
             rd_mon = HttpReader(url=cr.json['coo_rd'], ptys=['MON'], \
                                 filt=['id', 'east', 'north', 'elev'])
-            # TODO read from local file if HttpReader failed
         else:
             rd_mon = GeoReader(fname=cr.json['coo_rd'], \
                                filt=['id', 'east', 'north', 'elev'])
@@ -422,6 +451,7 @@ if __name__ == "__main__":
         observations = og.run()
         # observation to fix points
         print "Measuring fix..."
+        act_date = datetime.datetime.now()  # strt of observations
         r = Robot(observations, st_coord, ts, cr.json['max_try'], cr.json['delay_try'])
         obs_out, coo_out = r.run()
         # calculate station coordinates as freestation if gama_path set
@@ -435,6 +465,7 @@ if __name__ == "__main__":
                 obs_out = obs_avg
             # store observations to FIX points into the database
             for o in obs_out:
+                o['datetime'] = act_date
                 if 'distance' in o:
                     wrt1.WriteData(o)
                     # TODO check result of write
@@ -456,6 +487,7 @@ if __name__ == "__main__":
             st_coord = w
             # upload station coords to server
             print "Uploading station coords..."
+            st_coord[0]['datetime'] = act_date
             wrt.WriteData(st_coord[0])
             # TODO check write result
             # update orientation using farest FIX
@@ -488,18 +520,22 @@ if __name__ == "__main__":
         observations = og.run()
         # observation to monitoring points
         print "Measuring mon..."
+        act_date = datetime.datetime.now()  # start of observations
         r = Robot(observations, st_coord, ts)
         obs_out, coo_out = r.run()
         # calculate average for observations
         if cr.json['faces'] > 1 and 'avg_wr' in cr.json and cr.json['avg_wr']:
             obs_out = avg_obs(obs_out)
         for o in obs_out:
+            o['datetime'] = act_date
             if 'distance' in o:
                 wrt1.WriteData(o)
                 # TODO check result of write
-        # always calculate coordinate average
+        # calculate coordinate average
         coo_out = avg_coo(coo_out)
         for c in coo_out:
+            # add datetime to coords (same as obs)
+            c['datetime'] = act_date
             wrt.WriteData(c)
             # TODO check result of write
     # move telescope to safe position
