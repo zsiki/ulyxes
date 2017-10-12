@@ -133,15 +133,15 @@ class GamaIface(object):
         parameters.setAttribute('sigma-apr', '1')
         parameters.setAttribute('conf-pr', str(self.probability))
         parameters.setAttribute('tol-abs', '1000')
-#        parameters.setAttribute('sigma-act', 'aposteriori')
-        parameters.setAttribute('sigma-act', 'apriori')
+        parameters.setAttribute('sigma-act', 'aposteriori')
+#        parameters.setAttribute('sigma-act', 'apriori')
         parameters.setAttribute('update-constrained-coordinates', 'yes')
         network.appendChild(parameters)
         points_observations = doc.createElement('points-observations')
         points_observations.setAttribute('distance-stdev', str(self.stdev_dist) + ' ' + str(self.stdev_dist1)) 
-        points_observations.setAttribute('direction-stdev', str(self.stdev_angle))
-        points_observations.setAttribute('angle-stdev', str(math.sqrt(self.stdev_angle * 2)))
-        points_observations.setAttribute('zenith-angle-stdev', str(self.stdev_angle))
+        points_observations.setAttribute('direction-stdev', str(self.stdev_angle / 3600.0 * 10000.0))
+        points_observations.setAttribute('angle-stdev', str(math.sqrt(2) * self.stdev_angle / 3600.0 * 10000))
+        points_observations.setAttribute('zenith-angle-stdev', str(self.stdev_angle / 3600.0 * 10000.0))
         network.appendChild(points_observations)
         for p, s in self.points:
             if self.dimension == 1:
@@ -310,7 +310,7 @@ class GamaIface(object):
                         o['std-residual'] = float(ppp.firstChild().nodeValue())
                 if o['std-residual'] > self.krit and \
                    o['std-residual'] > blunder['std-residual'] and \
-                   o['f'] > 10:
+                   o['f'] > 10:     # extra observations ratio
                     blunder = dict(o)
         xmlFile.close()
         # remove input xml and output xml
