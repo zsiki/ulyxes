@@ -35,7 +35,7 @@ class SqLiteWriter(Writer):
         """ Constructor
         """
         if angle == 'DMS':
-            angel = 'GON'
+            angle = 'GON'
             logging.warning('Angle type changed from DMS to GON')
         super(SqLiteWriter, self).__init__(name, angle, dist, dt, filt)
         if os.path.isfile(db):
