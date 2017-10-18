@@ -75,6 +75,7 @@ class Freestation(object):
         """
         # adjustment loop
         last_res = None
+        n = 0   # number of blunders removed
         while True:
             res, blunder = self.g.adjust()
             if res is None or not 'east' in res[0] or not 'north' in res[0] or \
@@ -90,12 +91,13 @@ class Freestation(object):
                 logging.warning("no blunders checked")
                 break
             elif blunder['std-residual'] < 1.0:
-                logging.info("blunders removed")
+                logging.info("{} blunders removed".format(n))
                 break
             else:
-                logging.info("%s - %s observation removed" % (blunder['from'], blunder['to']))
+                logging.info("{} - {} observation removed".format(blunder['from'], blunder['to']))
                 self.g.remove_observation(blunder['from'], blunder['to'])
                 last_res = res
+                n += 1
         return res
 
 if __name__ == "__main__":
