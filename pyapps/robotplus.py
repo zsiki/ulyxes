@@ -238,6 +238,7 @@ if __name__ == "__main__":
         'dimension': {'required': False, 'type': 'int', 'default': 3},
         'probability': {'required': False, 'type': 'float', 'default': 0.95},
         'blunders': {'required': False, 'type': 'int', 'default': 1},
+        'ts_off': {'required': False, 'type': 'int', 'default': 0},
         'met': {'required': False, 'set': ['WEBMET', 'BMP180', 'SENSEHAT']},
         'met_addr': {'required': False},
         'met_par': {'required': False},
@@ -261,12 +262,12 @@ if __name__ == "__main__":
             sys.exit(-1)
     else:
         print "Usage: robotplus.py config_file"
-        cr = ConfReader('robotplus', '/home/siki/monitoring/p103.json', None, config_pars)
-        cr.Load()
-        if not cr.Check():
-            logging.fatal("Config check failed")
+        #cr = ConfReader('robotplus', '/home/siki/monitoring/p103.json', None, config_pars)
+        #cr.Load()
+        #if not cr.Check():
+        #    logging.fatal("Config check failed")
         logging.fatal("Invalid parameters")
-        #sys.exit(-1)
+        sys.exit(-1)
     # logging
     logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
          filemode='a', level=cr.json['log_level'])
@@ -311,9 +312,9 @@ if __name__ == "__main__":
                     pres = data['pressure']
                 if 'temp' in data:
                     temp = data['temp']
-                if 'huminidity' in data:
+                if 'humidity' in data:
                     humi = data['humidity']
-                if 'temp' in data and 'huminidity' in data:
+                if 'temp' in data and 'humidity' in data:
                     wet = web_met.GetWetTemp(temp, humi)
         elif cr.json['met'].upper() == 'BMP180':
             from bmp180measureunit import BMP180MeasureUnit
@@ -345,14 +346,18 @@ if __name__ == "__main__":
             if re.search('^http[s]?://', cr.json['met_wr']):
                 wrtm = HttpWriter(
                     name='met', url=cr.json['met_wr'], mode='POST',
-                    filt=['id', 'temp', 'pressure', 'huminidity', 'wettemp',
+                    filt=['id', 'temp', 'pressure', 'humidity', 'wettemp',
+                          'datetime'])
+            elif re.search('^sqlite:', cr.json['met_wr']):
+                wrtm = SqLiteWriter(db=cr.json['met_wr'][7:],
+                    filt=['id', 'pressure', 'temp', 'humidity', 'wettemp',
                           'datetime'])
             else:
                 wrtm = CsvWriter(name='met', fname=cr.json['met_wr'],
-                                 filt=['id', 'temp', 'pressure', 'huminidity',
-                                 'wettemp', 'datetime'], mode='a')
+                    filt=['id', 'temp', 'pressure', 'humidity',
+                          'wettemp', 'datetime'], mode='a')
             data = {'id': cr.json['station_id'], 'temp': temp,
-                    'pressure': pres, 'huminidity': humi, 'wettemp': wet}
+                    'pressure': pres, 'humidity': humi, 'wettemp': wet}
             wrtm.WriteData(data)
             # TODO check result of write
     # get station coordinates
@@ -543,3 +548,5 @@ if __name__ == "__main__":
             # TODO check result of write
     # move telescope to safe position
     ans = ts.Move(Angle(0), Angle(180, "DEG")) # no ATR
+    #if cr.json['ts_off']:
+    #    ts.SwitchOff(1)
