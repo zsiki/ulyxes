@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS monitoring_grp;
 DROP TABLE IF EXISTS monitoring_met;
 DROP TABLE IF EXISTS monitoring_coo;
 DROP TABLE IF EXISTS monitoring_obs;
+DROP TABLE IF EXISTS monitoring_ref;
 SELECT DropGeometryTable('monitoring_poi');
 DROP TABLE IF EXISTS monitoring_poi;
 
@@ -23,6 +24,18 @@ CREATE TABLE monitoring_poi (
 	pc float NOT NULL DEFAULT 0
 );
 SELECT AddGeometryColumn('monitoring_poi', 'geom', 3857, 'POINT', 3);
+
+-- table for point coordinates in local reference system
+-- reference coordinates given by the user
+-- multiple reference canbe giventothe same point at different data
+CREATE TABLE monitoring_ref (
+	id varchar(50) NOT NULL REFERENCES monitoring_poi(id),
+	east double precision NOT NULL,
+	north double precision NOT NULL,
+	elev double precision NOT NULL,
+	datetime timestamp NOT NULL,
+	CONSTRAINT pkey_ref PRIMARY KEY (id, datetime)
+);
 
 -- table for point coordinates in local reference system
 -- coordinates calculated by Ulyxes
@@ -52,14 +65,14 @@ CREATE TABLE monitoring_obs (
 -- id point id for observation
 -- temp temperature celsius
 -- pressure air pressure hpa
--- huminidity
+-- humidity
 -- wettemp wet temperature
 -- datetime of observation
 CREATE TABLE monitoring_met (
 	id varchar(50) NOT NULL REFERENCES monitoring_poi(id),
 	temp double precision NOT NULL,
 	pressure double precision NOT NULL,
-	huminidity double precision,
+	humidity double precision,
 	wettemp double precision,
     datetime timestamp NOT NULL,
 	CONSTRAINT pkey_m PRIMARY KEY (id, datetime)

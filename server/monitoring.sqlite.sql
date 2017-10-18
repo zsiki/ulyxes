@@ -44,14 +44,14 @@ CREATE TABLE monitoring_obs (
 -- id point id for observation
 -- temp temperature celsius
 -- pressure air pressure hpa
--- huminidity
+-- humidity
 -- wettemp wet temperature
 -- datetime of observation
 CREATE TABLE monitoring_met (
 	id varchar(50) NOT NULL REFERENCES monitoring_poi(id),
 	temp double precision NOT NULL,
 	pressure double precision NOT NULL,
-	huminidity double precision,
+	humidity double precision,
 	wettemp double precision,
     datetime timestamp NOT NULL,
 	CONSTRAINT pkey_m PRIMARY KEY (id, datetime)
