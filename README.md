@@ -2,7 +2,7 @@ ulyxes (Ultimate Y X Estimation System)
 =======================================
 
 Surveyor's sensor data processing system
-[Project home page](http://www.geod.bme.hu/ulyxes)
+[Project home page](http://www.agt.bme.hu/ulyxes)
 
 * PyAPI - API written in Python using object oriented approache, beta version
 * PyApps - demo Python applications using PyAPI
