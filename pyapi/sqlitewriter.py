@@ -18,7 +18,7 @@ from angle import Angle
 from writer import Writer
 
 class SqLiteWriter(Writer):
-    """ Class to write observations to a local sqlite database
+    """ Class to write observations/coordinates to a local sqlite database
 
             :param name: name of writer (str)
             :param angle: angle unit to use (str), DMS not supported
