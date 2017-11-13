@@ -17,9 +17,6 @@ import json
 
 from reader import Reader
 
-# TODO extend float for all possible fields
-FLOATS = ['east', 'north', 'elev', 'pc']
-
 class HttpReader(Reader):
     """ Class to read data from web in JSON format
         No filter implemented filter by point name and point type TODO
@@ -29,6 +26,9 @@ class HttpReader(Reader):
         :param pids: point ids to query, list
         :param ptys: point types to query FIX/STA/MON list
     """
+
+    # TODO extend float for all possible fields
+    FLOATS = ['east', 'north', 'elev', 'pc']
 
     def __init__(self, name = None, url = None, pids = None, ptys = None, \
                 filt = None):
@@ -56,12 +56,14 @@ class HttpReader(Reader):
             :param row: dict of data
         """
         for key in row:
-            if key in FLOATS:
+            if key in self.FLOATS:
                 row[key] = float(row[key])
         return row
 
     def GetNext(self):
         """ Get next line from url
+
+            :returns: dictionay with values
         """
         if self.start:
             if len(self.res) > self.start:
