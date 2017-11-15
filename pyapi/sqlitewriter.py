@@ -76,16 +76,15 @@ class SqLiteWriter(Writer):
         for key, val in data.items():
             if self.filt is None or key in self.filt:
                 fields += key + ','
-                if type(val) is str or type(val) is type(datetime.datetime.now()):
-                    values += "'" + self.StrVal(val) + "'"
-                else:
+                if isinstance(val, (int, long, float, Angle)):
                     values += self.StrVal(val)
+                else:
+                    values += "'" + self.StrVal(val) + "'"
                 values += ','
         sqlstr = 'INSERT INTO ' + table + '(' + fields[:-1] + ')' + \
             ' VALUES (' + values[:-1] + ');'
         c = self.conn.cursor()
         c.execute(sqlstr)
-        # TODO error handling-> res
         self.conn.commit()
         return res
 
