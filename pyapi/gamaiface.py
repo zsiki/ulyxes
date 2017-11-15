@@ -263,6 +263,7 @@ class GamaIface(object):
         xmlParser = QXmlSimpleReader()
         xmlFile = QFile(tmp_name + 'out.xml')
         xmlInputSource = QXmlInputSource(xmlFile)
+        doc = QDomDocument()
         doc.setContent(xmlInputSource, xmlParser)
         
         # get adjusted coordinates
@@ -288,6 +289,29 @@ class GamaIface(object):
                         p['elev'] = float(ppp.firstChild().nodeValue())
                     # TODO standard deviation of coords to p
                 res.append(p)
+
+        adj_nodes = doc.elementsByTagName('orientation-shifts')
+        if adj_nodes.count() < 1:
+            logging.error("GNU gama no adjusted orientations")
+            return (None, None)
+        adj_node = adj_nodes.at(0)
+        for i in range(len(adj_node.childNodes())):
+            pp = adj_node.childNodes().at(i)
+            if pp.nodeName() == 'orientation':
+                for ii in range(len(pp.childNodes())):
+                    ppp = pp.childNodes().at(ii)
+                    if ppp.nodeName() == 'id':
+                        pid = str(ppp.firstChild().nodeValue())
+                        for p in res:
+                            if p['id'] == pid:
+                                break
+                        else:
+                            break
+                    elif ppp.nodeName() == 'approx':
+                        p['appr_ori'] = float(ppp.firstChild().nodeValue())
+                    elif ppp.nodeName() == 'adj':
+                        p['ori'] = float(ppp.firstChild().nodeValue())
+
         adj_nodes = doc.elementsByTagName('observations')
         if adj_nodes.count() < 1:
             logging.error("GNU gama no adjusted observations")

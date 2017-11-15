@@ -385,10 +385,10 @@ if __name__ == "__main__":
         else:
             wrt1 = wrt
     elif re.search('^sqlite:', cr.json['coo_wr']):
-        wrt = SqLiteWriter(db=cr.json['coo_wr'][7:],
+        wrt = SqLiteWriter(db=cr.json['coo_wr'][7:], dist=fmt, 
                            filt=['id', 'east', 'north', 'elev', 'datetime'])
         if 'obs_wr' in cr.json:
-            wrt1 = SqLiteWriter(db=cr.json['obs_wr'][7:],
+            wrt1 = SqLiteWriter(db=cr.json['obs_wr'][7:], dist=fmt,
                                 filt=['id', 'hz', 'v', 'distance',
                                 'crossincline', 'lengthincline', 'datetime'])
         else:
@@ -498,28 +498,39 @@ if __name__ == "__main__":
             st_coord[0]['datetime'] = act_date
             wrt.WriteData(st_coord[0])
             # TODO check write result
-            # update orientation using farest FIX
-            max_dist = 0
-            back_site = None
-            i = 0
-            for o in obs_out:
-                if 'distance' in o and o['distance'] > max_dist:
-                    max_dist = o['distance']
-                    back_site = o['id']
-                    back_indx = i
-                i += 1
-            if back_site is None:
-                logging.fatal("Backsite trouble")
-                sys.exit(1)
-            ori_p = [p for p in fix_coords if p['id'] == back_site][0]
-            bearing = Angle(math.atan2(ori_p['east'] - st_coord[0]['east'], \
-                                 ori_p['north'] - st_coord[0]['north']))
-            # rotate to farest FIX and set orientation
-            ts.Move(obs_out[back_indx]['hz'], obs_out[back_indx]['v'], 1)
-            ans = ts.SetOri(bearing)
-            if 'errCode' in ans:
-                logging.fatal("Cannot upload orientation to instrument")
-                sys.exit(-1)
+            #print st_coord
+            if 'ori' in st_coord[0]:
+                # rotate to Hz 0
+                ts.Move(Angle(0.0), Angle(90, 'DEG'), 0)
+                # set direction to orientation angle
+                ans = ts.SetOri(Angle(st_coord[0]['ori'], 'GON'))
+                #print (Angle(st_coord[0]['ori'], 'GON').GetAngle('DMS'))
+                if 'errCode' in ans:
+                    logging.fatal("Cannot upload orientation to instrument")
+                    sys.exit(-1)
+            else:
+                # update orientation using farest FIX
+                max_dist = 0
+                back_site = None
+                i = 0
+                for o in obs_out:
+                    if 'distance' in o and o['distance'] > max_dist:
+                        max_dist = o['distance']
+                        back_site = o['id']
+                        back_indx = i
+                    i += 1
+                if back_site is None:
+                    logging.fatal("Backsite trouble")
+                    sys.exit(1)
+                ori_p = [p for p in fix_coords if p['id'] == back_site][0]
+                bearing = Angle(math.atan2(ori_p['east'] - st_coord[0]['east'], \
+                                     ori_p['north'] - st_coord[0]['north']))
+                # rotate to farest FIX and set orientation
+                ts.Move(obs_out[back_indx]['hz'], obs_out[back_indx]['v'], 1)
+                ans = ts.SetOri(bearing)
+                if 'errCode' in ans:
+                    logging.fatal("Cannot upload orientation to instrument")
+                    sys.exit(-1)
     if 'mon_list' in cr.json and cr.json['mon_list'] is not None:
         # generate observations for monitoring points, first point is the station
         print "Generating observations for mon..."
