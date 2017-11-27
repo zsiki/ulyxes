@@ -20,7 +20,7 @@ class GamaIface(object):
     """ Interface class to GNU Gama
     """
     def __init__(self, gama_path, dimension=3, probability=0.95, stdev_angle=1,
-        stdev_dist=1, stdev_dist1=1.5):
+                 stdev_dist=1, stdev_dist1=1.5):
         """ Initialize a new GamaIface instance.
 
             :param gama_path: path to gama-local program
@@ -84,7 +84,7 @@ class GamaIface(object):
 
     def remove_observation(self, fr, to):
         """ Remove a polar observation
-            TODO it erases hz, v and distance 
+            TODO it erases hz, v and distance
             TODO it removes first occurance
         """
         for o in self.observations:
@@ -111,7 +111,7 @@ class GamaIface(object):
             # no unknowns or observations
             logging.error("GNU gama no unknowns or not enough observations")
             return (None, None)
-        
+
         doc = QDomDocument()
         doc.appendChild(doc.createComment('Gama XML created by Ulyxes'))
         gama_local = doc.createElement('gama-local')
@@ -138,7 +138,7 @@ class GamaIface(object):
         parameters.setAttribute('update-constrained-coordinates', 'yes')
         network.appendChild(parameters)
         points_observations = doc.createElement('points-observations')
-        points_observations.setAttribute('distance-stdev', str(self.stdev_dist) + ' ' + str(self.stdev_dist1)) 
+        points_observations.setAttribute('distance-stdev', str(self.stdev_dist) + ' ' + str(self.stdev_dist1))
         points_observations.setAttribute('direction-stdev', str(self.stdev_angle / 3600.0 * 10000.0))
         points_observations.setAttribute('angle-stdev', str(math.sqrt(2) * self.stdev_angle / 3600.0 * 10000))
         points_observations.setAttribute('zenith-angle-stdev', str(self.stdev_angle / 3600.0 * 10000.0))
@@ -147,7 +147,7 @@ class GamaIface(object):
             if self.dimension == 1:
                 tmp = doc.createElement('point')
                 tmp.setAttribute('id', p['id'])
-                if p['elev'] is not None:
+                if 'elev' in p and p['elev'] is not None:
                     tmp.setAttribute('z', str(p['elev']))
                 if s == 'FIX':
                     tmp.setAttribute('fix', 'z')
@@ -160,7 +160,8 @@ class GamaIface(object):
             elif self.dimension == 2:
                 tmp = doc.createElement('point')
                 tmp.setAttribute('id', p['id'])
-                if p['east'] is not None and p['north'] is not None:
+                if 'east' in p and 'north' in p and \
+                    p['east'] is not None and p['north'] is not None:
                     tmp.setAttribute('y', str(p['east']))
                     tmp.setAttribute('x', str(p['north']))
                 if s == 'FIX':
@@ -175,10 +176,11 @@ class GamaIface(object):
             elif self.dimension == 3:
                 tmp = doc.createElement('point')
                 tmp.setAttribute('id', p['id'])
-                if p['east'] is not None and p['north'] is not None:
+                if 'east' in p and 'north' in p and \
+                    p['east'] is not None and p['north'] is not None:
                     tmp.setAttribute('y', str(p['east']))
                     tmp.setAttribute('x', str(p['north']))
-                if p['elev'] is not None:
+                if 'elev' in p and p['elev'] is not None:
                     tmp.setAttribute('z', str(p['elev']))
                 if s == 'FIX':
                     tmp.setAttribute('fix', 'xyz')
@@ -240,7 +242,7 @@ class GamaIface(object):
                         tmp.setAttribute('val', str(o['v'].GetAngle('GON')))
                         tmp.setAttribute('from_dh', str(ih))
                         tmp.setAttribute('to_dh', str(th))
-                        sta.appendChild(tmp)                      
+                        sta.appendChild(tmp)
                 else:
                     # unknown dimension
                     logging.error("GNU gama unknown dimension")
@@ -252,20 +254,21 @@ class GamaIface(object):
         f = open(tmp_name + '.xml', 'w')
         f.write(doc.toByteArray())
         f.close()
-       
+
         # run gama-local
         status = os.system(self.gama_path + ' ' + tmp_name + '.xml --text ' +
-            tmp_name + '.txt --xml ' + tmp_name + 'out.xml')
+                           tmp_name + '.txt --xml ' + tmp_name + 'out.xml ' +
+                           '--cov-band 0')
         if status != 0:
             logging.error("GNU gama failed")
             return (None, None)
-        
+
         xmlParser = QXmlSimpleReader()
         xmlFile = QFile(tmp_name + 'out.xml')
         xmlInputSource = QXmlInputSource(xmlFile)
         doc = QDomDocument()
         doc.setContent(xmlInputSource, xmlParser)
-        
+
         # get adjusted coordinates
         adj_nodes = doc.elementsByTagName('adjusted')
         if adj_nodes.count() < 1:
@@ -287,7 +290,6 @@ class GamaIface(object):
                         p['north'] = float(ppp.firstChild().nodeValue())
                     elif ppp.nodeName() == 'Z' or ppp.nodeName() == 'z':
                         p['elev'] = float(ppp.firstChild().nodeValue())
-                    # TODO standard deviation of coords to p
                 res.append(p)
 
         adj_nodes = doc.elementsByTagName('orientation-shifts')
@@ -311,6 +313,31 @@ class GamaIface(object):
                         p['appr_ori'] = float(ppp.firstChild().nodeValue())
                     elif ppp.nodeName() == 'adj':
                         p['ori'] = float(ppp.firstChild().nodeValue())
+
+        # std-dev
+        # TODO usefull for one unknown point in 3D
+        # TODO band must be 0
+        adj_nodes = doc.elementsByTagName('cov-mat')
+        if adj_nodes.count() < 1:
+            logging.error("GNU gama no covariance matrix")
+            return (None, None)
+        adj_node = adj_nodes.at(0)
+        ii = 0
+        for i in range(len(adj_node.childNodes())):
+            pp = adj_node.childNodes().at(i)
+            if pp.nodeName() == 'flt':
+                w = float(pp.firstChild().nodeValue())
+                if ii == 0:
+                    res[0]['std_east'] = math.sqrt(w)
+                    ii += 1
+                elif ii == 1:
+                    res[0]['std_north'] = math.sqrt(w)
+                    ii += 1
+                elif ii == 2:
+                    res[0]['std_elev'] = math.sqrt(w)
+                elif ii == 3:
+                    res[0]['std_ori'] = math.sqrt(w)
+                    ii += 1
 
         adj_nodes = doc.elementsByTagName('observations')
         if adj_nodes.count() < 1:
@@ -341,7 +368,7 @@ class GamaIface(object):
         os.remove(tmp_name + '.xml')
         os.remove(tmp_name + '.txt')
         os.remove(tmp_name + 'out.xml')
-        
+
         return (res, blunder)
 
 if __name__ == "__main__":
@@ -364,7 +391,7 @@ if __name__ == "__main__":
     fn = fname[:-4] # remove extension
     g = GamaIface(gama_path, 3, 0.95, 1, 1, 1.5)
     # load coordinates
-    coo = GeoReader(fname = fn + '.coo')
+    coo = GeoReader(fname=fn + '.coo')
     while True:
         w = coo.GetNext()
         if w is None or len(w) == 0:
@@ -374,7 +401,7 @@ if __name__ == "__main__":
                 g.add_point(w, 'ADJ')
             else:
                 g.add_point(w, 'FIX')
-    obs = GeoReader(fname = fn + '.geo')
+    obs = GeoReader(fname=fn + '.geo')
     # load observations
     while True:
         w = obs.GetNext()
@@ -387,19 +414,19 @@ if __name__ == "__main__":
     while True:
         last_res = res
         res, blunder = g.adjust()
-        if not res is None:
+        if res is not None:
             print res[0]
         else:
             print "None"
-        if not blunder is None:
+        if blunder is not None:
             print blunder
         else:
             print "None"
-        if res is None  or not 'east' in res[0] or \
-           not 'north' in res[0] or not 'elev' in res[0]:
+        if res is None  or 'east' not in res[0] or \
+           'north' not in res[0] or 'elev' not in res[0]:
             print "adjustment failed"
             break
-        elif not blunder is None and blunder['std-residual'] < 1.0:
+        elif blunder is not None and blunder['std-residual'] < 1.0:
             print "blunders removed"
             break
         else:
