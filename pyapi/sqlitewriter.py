@@ -78,14 +78,19 @@ class SqLiteWriter(Writer):
                 fields += key + ','
                 if isinstance(val, (int, long, float, Angle)):
                     values += self.StrVal(val)
+                elif val is None:
+                    values += 'NULL'
                 else:
                     values += "'" + self.StrVal(val) + "'"
                 values += ','
         sqlstr = 'INSERT INTO ' + table + '(' + fields[:-1] + ')' + \
             ' VALUES (' + values[:-1] + ');'
         c = self.conn.cursor()
-        c.execute(sqlstr)
-        self.conn.commit()
+        try:
+            c.execute(sqlstr)
+            self.conn.commit()
+        except:
+            return -1
         return res
 
 if __name__ == "__main__":
