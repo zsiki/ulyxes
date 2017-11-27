@@ -335,10 +335,10 @@ class GamaIface(object):
                     ii += 1
                 elif ii == 2:
                     res[0]['std_elev'] = math.sqrt(w)
+                    ii += 1
                 elif ii == 3:
                     res[0]['std_ori'] = math.sqrt(w)
                     ii += 1
-
         adj_nodes = doc.elementsByTagName('observations')
         if adj_nodes.count() < 1:
             logging.error("GNU gama no adjusted observations")
