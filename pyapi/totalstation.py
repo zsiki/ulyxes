@@ -371,13 +371,13 @@ class TotalStation(Instrument):
         msg = self.measureUnit.SwitchOnMsg(mode)
         return self._process(msg)
 
-    def SwitchOff(self, mode):
+    def SwitchOff(self):
         """ Switch off instrument
 
             :param mode: 0/1 power down/sleep state
             :returns: processed answer from instrument
         """
-        msg = self.measureUnit.SwitchOffMsg(mode)
+        msg = self.measureUnit.SwitchOffMsg()
         return self._process(msg)
 
     def GetInstrumentNo(self):
@@ -435,14 +435,19 @@ class TotalStation(Instrument):
 
 if __name__ == "__main__":
     from leicatps1200 import LeicaTPS1200
+    from leicatcra1100 import LeicaTCRA1100
+    from leicatca1800 import LeicaTCA1800
     from serialiface import SerialIface
     from echowriter import EchoWriter
     logging.getLogger().setLevel(logging.DEBUG)
-    mu = LeicaTPS1200()
+    mu = LeicaTCA1800()
     iface = SerialIface("rs-232", "/dev/ttyUSB0")
     wrt = EchoWriter()
     ts = TotalStation("Leica", mu, iface, wrt)
-    ts.SetEDMMode(ts.measureUnit.edmModes['RLSTANDARD'])
+    ts.GetInstrumentNo()
+    ts.GetInstrumentName()
+    #ts.SetEDMMode(ts.measureUnit.edmModes['RLSTANDARD'])
     ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
-    ts.Measure()
-    print (ts.GetMeasure())
+    #ts.Measure()
+    #print (ts.GetMeasure())
+    ts.SwitchOff()
