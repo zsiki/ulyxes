@@ -204,7 +204,6 @@ if __name__ == "__main__":
         o['hz'] = Angle(o['hz'], 'GON')
         o['v'] = Angle(o['v'], 'GON')
         o['datetime'] = datetime.datetime.strptime(o['datetime'], '%Y-%m-%d %H:%M:%S')
-    #print obs[0]
     i = 0
     delta = datetime.timedelta(seconds=20)
     while i < n:
@@ -224,10 +223,7 @@ if __name__ == "__main__":
         if 'mon_list' in cr.json and cr.json['mon_list'] is not None:
             mon_obs = [o for o in obs_avg if o['id'] in cr.json['mon_list']]
         # process observations i..j-1
-        if len(fix_obs) < 2:
-            print fix_obs
         if len(fix_obs) == len(obs_avg) and len(fix_obs) > 1:
-            print len(fix_obs)
             # calculate station coordinates as freestation if gama_path set
             if 'gama_path' in cr.json and cr.json['gama_path'] is not None:
                 #print "Freestation..."
@@ -241,8 +237,6 @@ if __name__ == "__main__":
                 if w is None:
                     logging.fatal("No adjusted coordinates for station %s" % cr.json['station_id'])
                     sys.exit(-1)
-                #print st_coord[0]
-                #print w[0]
                 # update station coordinates
                 st_coord = w
                 # upload station coords to server
