@@ -99,7 +99,10 @@ class LeicaMeasureUnit(MeasureUnit):
         for msg, ans in zip(msgList, ansList):
             # get command id form message
             msgBufflist = re.split(':|,', msg)
-            commandID = int(msgBufflist[1])
+            try:
+                commandID = int(msgBufflist[1])
+            except:
+                commandID = -1
             # get error code from answer
             ansBufflist = re.split(':|,', ans)
             try:
@@ -437,12 +440,11 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         return '%R1Q,{0:d}:{1:d}'.format(self.codes['SWITCHON'], mode)
 
-    def SwitchOffMsg(self, offMode=0):
-        """ Switch off instrument or sleep
+    def SwitchOffMsg(self):
+        """ Switch off instrument
 
-            :param offMode: 0/1 power down/sleep state
         """
-        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SWITCHOFF'], offMode)
+        return 'b'
 
     def GetInstrumentNoMsg(self):
         """ Get instrument factory number
