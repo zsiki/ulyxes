@@ -17,13 +17,11 @@ Parameters are stored in config file using JSON format::
     station_coo_limit: limitation for station coordinate change from free station (default 0.01), optional
     fix_list: list of fix points to calculate station coordinates, optional (default: empty)
     mon_list: list of monitoring points to measure, optional (default: empty)
-    max_try: maximum trying to measure a point, optional (default: 3)
-    delay_try: delay between tries, optional (default: 0)
-    port: serial port to use (e.g. COM1 or /dev/ttyS0 or /dev/ttyUSB0)
     coo_rd: URL or local file to get coordinates from
     coo_wr: URL or local file to send coordinates to
     obs_wr: URL or local file to send observations to, oprional (default: no output)
-    met_wr: URL or local file to send meteorological observations to, optional (default: no output)
+    obs_wr_sql: SQL select command to execute
+    strict: 1/0 free station calculated if only all fix points observed in reound
     avg_wr: calculate averages from more faces if value 1, no average calculation if value is zero, optional (default: 1)
     decimals: number of decimals in output, optional (default: 4)
     gama_path: path to GNU Gama executable, optional (default: empty, no adjustment)
@@ -33,9 +31,6 @@ Parameters are stored in config file using JSON format::
     dimension: dimension of stored points (1D/2D/3D), optional (default: 3)
     probability: probability for data snooping, optional (default: 0.95)
     blunders: data snooping on/off 1/0, optional (default: 1)
-    met: met sensor name WEBMET/BMP180/SENSEHAT, optional default None
-    met_addr: URL to webmet data, optional (default: empty)
-    met_par: parameters to web met service, optional (default: empty)
 """
 
 import sys
@@ -63,22 +58,18 @@ if __name__ == "__main__":
         'log_level': {'required' : True, 'type': 'int',
             'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
-        'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1800', '1100']},
         'station_id': {'required' : True, 'type': 'str'},
         'station_height': {'required': False, 'default': 0, 'type': 'float'},
         'station_coo_limit': {'required': False, 'default': 0.01, 'type': 'float'},
         'orientation_limit': {'required': False, 'default': 0.1, 'type': 'float'},
-        'faces': {'required': False, 'default': 1, 'type': 'int'},
         'fix_list': {'required': False, 'type': 'list'},
         'mon_list': {'required': False, 'type': 'list'},
-        'max_try': {'required': False, 'type': 'int', 'default': 3},
-        'delay_try': {'required': False, 'type': 'float', 'default': 0},
-        'port': {'required' : True, 'type': 'str'},
         'coo_rd': {'required' : True},
         'coo_wr': {'required' : True},
         'obs_rd': {'required': False},
+        'obs_rd_sql': {'required': False},
+        'strict':{'required': False, 'type': 'int', 'default': 1},
         'obs_wr': {'required': False},
-        'met_wr': {'required': False},
         'avg_wr': {'required': False, 'type': 'int', 'default': 1},
         'decimals': {'required': False, 'type': 'int', 'default': 4},
         'gama_path': {'required': False, 'type': 'file'},
@@ -88,9 +79,6 @@ if __name__ == "__main__":
         'dimension': {'required': False, 'type': 'int', 'default': 3},
         'probability': {'required': False, 'type': 'float', 'default': 0.95},
         'blunders': {'required': False, 'type': 'int', 'default': 1},
-        'met': {'required': False, 'set': ['WEBMET', 'BMP180', 'SENSEHAT']},
-        'met_addr': {'required': False},
-        'met_par': {'required': False},
         '__comment__': {'required': False, 'type': 'str'}
     }
     # check command line param
@@ -111,7 +99,7 @@ if __name__ == "__main__":
             sys.exit(-1)
     else:
         print "Usage: coords.py config_file"
-        cr = ConfReader('coords', '/home/siki/tanszek/szelkapu/szk1/szk1.json', None, config_pars)
+        cr = ConfReader('coords', '/home/siki/tanszek/szelkapu/szk1/szk1_all.json', None, config_pars)
         cr.Load()
         if not cr.Check():
             logging.fatal("Config check failed")
@@ -194,7 +182,7 @@ if __name__ == "__main__":
     # load observations recorded by robotplus
     if re.search('^sqlite:', cr.json['obs_rd']):
         rd_obs = SqLiteReader(db=cr.json['obs_rd'][7:], \
-            sql="SELECT * FROM monitoring_obs ORDER BY datetime")
+            sql=cr.json['obs_rd_sql'])
     else:
         obs_rd = GeoReader(fname=cr.json['obs_rd'])
     obs = rd_obs.Load()
@@ -222,8 +210,10 @@ if __name__ == "__main__":
         mon_obs = []
         if 'mon_list' in cr.json and cr.json['mon_list'] is not None:
             mon_obs = [o for o in obs_avg if o['id'] in cr.json['mon_list']]
+        print "obs fix:%d all:%d" % (len(fix_obs), len(obs_avg))
         # process observations i..j-1
-        if len(fix_obs) == len(obs_avg) and len(fix_obs) > 1:
+        if len(fix_obs) > 1 and (cr.json['strict'] == 0 or \
+            (cr.json['strict'] == 1 and len(fix_obs) == len(obs_avg))):
             # calculate station coordinates as freestation if gama_path set
             if 'gama_path' in cr.json and cr.json['gama_path'] is not None:
                 #print "Freestation..."
@@ -248,7 +238,6 @@ if __name__ == "__main__":
                 # save observations with corrected time
                 if wrt.WriteData(st_coord[0]) <> 0:
                     logging.fatal("Cannot write station coordinates")
-                #print '%s;%.4f;%.4f;%.4f;%d;%s' % (st_coord[0]['id'], st_coord[0]['east'],st_coord[0]['north'],st_coord[0]['elev'], len(fix_obs), st_coord[0]['datetime'])
                 for o in fix_obs:
                     if wrt1.WriteData(o) <> 0:
                         logging.fatal("Cannot write observations")
