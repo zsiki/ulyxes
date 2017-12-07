@@ -130,8 +130,8 @@ def avg_obs(obs):
             if 'id' in o and o['id'] == k and o['v'].GetAngle() > math.pi]
         if len(hz1) != len(hz2):
             logging.warning('Different number of observations in two faces ' +
-                'at point: ' + k + ' FL: '+ str(len(hz1)) + ' FR: ' +
-                str(len(hz2)))
+                            'at point: ' + k + ' FL: '+ str(len(hz1)) + \
+                            ' FR: ' + str(len(hz2)))
         # check angles around 0/360 degree
         for i in range(1, len(hz1)):
             if hz1[i] - hz1[0] > math.pi:
@@ -162,8 +162,8 @@ def avg_obs(obs):
         # TODO limit from config
         if len([x for x in hz1 + hz2 if abs(x - hz) > 60.0 / 200000.0]):
             str_hz = [Angle(x).GetAngle('DMS') for x in hz1 + hz2]
-            logging.error("Large Hz difference from faces: " + str(str_hz) +
-                ' at point: ' + k)
+            logging.error('Large Hz difference from faces: ' + str(str_hz) +
+                          ' at point: ' + k)
             continue    # skip point
         v1 = [o['v'].GetAngle() for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi]
@@ -178,8 +178,8 @@ def avg_obs(obs):
         # TODO limit from config
         if len([x for x in v1 + v2 if abs(x - v) > 60.0 / 200000.0]):
             str_v = [Angle(x).GetAngle('DMS') for x in v1 + v2]
-            logging.error("Large V difference from faces: " + str(str_v) +
-                ' at point: ' + k)
+            logging.error('Large V difference from faces: ' + str(str_v) +
+                          ' at point: ' + k)
             continue    # skip point
         res_obs = {'id': k, 'hz': Angle(hz), 'v': Angle(v)}
         sd12 = [o['distance'] for o in obs \
@@ -189,8 +189,8 @@ def avg_obs(obs):
             # check before store average
             # TODO limit from config
             if len([x for x in sd12 if abs(x - sd) > 0.01]):
-                logging.error("Large dist difference from faces: " + str(sd) +
-                    'at point: ' + k)
+                logging.error('Large dist difference from faces: ' + str(sd) +
+                              'at point: ' + k)
                 continue    # skip point
             res_obs['distance'] = sd
         # cross & lengthincline
@@ -358,15 +358,13 @@ if __name__ == "__main__":
                           'wettemp', 'datetime'], mode='a')
             data = {'id': cr.json['station_id'], 'temp': temp,
                     'pressure': pres, 'humidity': humi, 'wettemp': wet}
-            wrtm.WriteData(data)
-            # TODO check result of write
+            if wrtm.WriteData(data) == -1:
+                logging.error('Met data write failed')
     # get station coordinates
     print "Loading station coords..."
     if re.search('^http[s]?://', cr.json['coo_rd']):
         rd_st = HttpReader(url=cr.json['coo_rd'], ptys=['STA'], \
                            filt=['id', 'east', 'north', 'elev'])
-        # TODO read from local file if HttpReader failed
-        # other file reader from config coo_rd_loc (optional)
     else:
         rd_st = GeoReader(fname=cr.json['coo_rd'], \
                           filt=['id', 'east', 'north', 'elev'])
@@ -385,7 +383,7 @@ if __name__ == "__main__":
         else:
             wrt1 = wrt
     elif re.search('^sqlite:', cr.json['coo_wr']):
-        wrt = SqLiteWriter(db=cr.json['coo_wr'][7:], dist=fmt, 
+        wrt = SqLiteWriter(db=cr.json['coo_wr'][7:], dist=fmt,
                            filt=['id', 'east', 'north', 'elev', 'datetime'])
         if 'obs_wr' in cr.json:
             wrt1 = SqLiteWriter(db=cr.json['obs_wr'][7:], dist=fmt,
@@ -475,8 +473,8 @@ if __name__ == "__main__":
             for o in obs_out:
                 o['datetime'] = act_date
                 if 'distance' in o:
-                    wrt1.WriteData(o)
-                    # TODO check result of write
+                    if wrt1.WriteData(o) == -1:
+                        logging.error('Observation data write failed')
             fs = Freestation(obs_avg, st_coord + fix_coords,
                              cr.json['gama_path'], cr.json['dimension'],
                              cr.json['probability'], cr.json['stdev_angle'],
@@ -496,9 +494,11 @@ if __name__ == "__main__":
             # upload station coords to server
             print "Uploading station coords..."
             st_coord[0]['datetime'] = act_date
-            wrt.WriteData(st_coord[0])
-            # TODO check write result
-            #print st_coord
+            logging.info("station stddevs: %.1f %.1f %.1f %.1f" % ( \
+                st_coords[0]['std_east'], st_coords[0]['std_north'], \
+                std_coords[0]['std_elev'], st_coords[0]['std_ori']))
+            if wrt.WriteData(st_coord[0]) == -1:
+                logging.error('Station coords write failed')
             if 'ori' in st_coord[0]:
                 # rotate to Hz 0
                 ts.Move(Angle(0.0), Angle(90, 'DEG'), 0)
@@ -548,15 +548,15 @@ if __name__ == "__main__":
         for o in obs_out:
             o['datetime'] = act_date
             if 'distance' in o:
-                wrt1.WriteData(o)
-                # TODO check result of write
+                if wrt1.WriteData(o) == -1:
+                    logging.error('Observation data write failed')
         # calculate coordinate average
         coo_out = avg_coo(coo_out)
         for c in coo_out:
             # add datetime to coords (same as obs)
             c['datetime'] = act_date
-            wrt.WriteData(c)
-            # TODO check result of write
+            if wrt.WriteData(c) == -1:
+                logging.error('Coord data write failed')
     # move telescope to safe position
     ans = ts.Move(Angle(0), Angle(180, "DEG")) # no ATR
     #if cr.json['ts_off']:
