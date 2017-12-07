@@ -57,6 +57,12 @@ Configuration Reader
 .. automodule:: confreader
    :members:
 
+SqLite Reader
+:::::::::::::
+
+.. automodule:: sqlitereader
+   :members:
+
 INTERFACES
 ==========
 
@@ -356,5 +362,11 @@ Robot+
 ::::::
 
 .. automodule:: robotplus
+   :members:
+
+Coords
+::::::
+
+.. automodule:: coords
    :members:
 
