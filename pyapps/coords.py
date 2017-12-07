@@ -22,6 +22,8 @@ Parameters are stored in config file using JSON format::
     obs_wr: URL or local file to send observations to, oprional (default: no output)
     obs_wr_sql: SQL select command to execute
     strict: 1/0 free station calculated if only all fix points observed in reound
+    mon_only: 1/0 calculate polars if only monitoring point in observations/do not calculate polar
+    st_only: 1/0 calculate monitoring point only in the same round with freestation
     avg_wr: calculate averages from more faces if value 1, no average calculation if value is zero, optional (default: 1)
     decimals: number of decimals in output, optional (default: 4)
     gama_path: path to GNU Gama executable, optional (default: empty, no adjustment)
@@ -69,6 +71,8 @@ if __name__ == "__main__":
         'obs_rd': {'required': False},
         'obs_rd_sql': {'required': False},
         'strict':{'required': False, 'type': 'int', 'default': 1},
+        'mon_only':{'required': False, 'type': 'int', 'default': 1},
+        'st_only':{'required': False, 'type': 'int', 'default': 0},
         'obs_wr': {'required': False},
         'avg_wr': {'required': False, 'type': 'int', 'default': 1},
         'decimals': {'required': False, 'type': 'int', 'default': 4},
@@ -99,7 +103,7 @@ if __name__ == "__main__":
             sys.exit(-1)
     else:
         print "Usage: coords.py config_file"
-        cr = ConfReader('coords', '/home/siki/tanszek/szelkapu/szk1/szk1_all.json', None, config_pars)
+        cr = ConfReader('coords', '/home/siki/tanszek/szelkapu/szk2/szk2_all.json', None, config_pars)
         cr.Load()
         if not cr.Check():
             logging.fatal("Config check failed")
@@ -212,8 +216,12 @@ if __name__ == "__main__":
             mon_obs = [o for o in obs_avg if o['id'] in cr.json['mon_list']]
         print "obs fix:%d all:%d" % (len(fix_obs), len(obs_avg))
         # process observations i..j-1
-        if len(fix_obs) > 1 and (cr.json['strict'] == 0 or \
-            (cr.json['strict'] == 1 and len(fix_obs) == len(obs_avg))):
+        n_fix = len(fix_obs)
+        n_all = len(obs_avg)
+        n_mon = len(mon_obs)
+        station = False
+        if n_fix > 1 and (cr.json['strict'] == 0 or \
+            (cr.json['strict'] == 1 and n_fix == n_all)):
             # calculate station coordinates as freestation if gama_path set
             if 'gama_path' in cr.json and cr.json['gama_path'] is not None:
                 #print "Freestation..."
@@ -241,10 +249,14 @@ if __name__ == "__main__":
                 for o in fix_obs:
                     if wrt1.WriteData(o) <> 0:
                         logging.fatal("Cannot write observations")
+                station = True
         #print "Saving calculated coords..."
         # TODO orientation????
-        if len(mon_obs):
-            for o in obs_avg:       # process all points (fix also)
+        if n_mon > 0 and \
+            (cr.json['st_only'] == 0 or station) and \
+            (cr.json['mon_only'] == 0 or \
+            cr.json['mon_only'] == 1 and n_all == n_mon):
+            for o in mon_obs:       # process monitoring points
                 v = o['v'].GetAngle()
                 hd = o['distance'] * math.sin(v)
                 a = (o['hz']).GetAngle()
@@ -255,4 +267,6 @@ if __name__ == "__main__":
                      'elev': elev, 'datetime': o['datetime']}
                 if wrt.WriteData(c) <> 0:
                     logging.fatal("Cannot write mon coordinates")
+                if wrt1.WriteData(o) <> 0:
+                    logging.fatal("Cannot write mon observations")
         i = j
