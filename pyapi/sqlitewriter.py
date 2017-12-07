@@ -12,7 +12,6 @@
 
 import os.path
 import logging
-import datetime
 import sqlite3
 from angle import Angle
 from writer import Writer
@@ -30,8 +29,8 @@ class SqLiteWriter(Writer):
 
     tables = {'coo': 'monitoring_coo', 'obs': 'monitoring_obs', 'met': 'monitoring_met'}
 
-    def __init__(self, db, name = None, angle = 'GON', dist = '.3f', 
-                dt = '%Y-%m-%d %H:%M:%S', filt = None):
+    def __init__(self, db, name=None, angle='GON', dist='.3f',
+                 dt='%Y-%m-%d %H:%M:%S', filt=None):
         """ Constructor
         """
         if angle == 'DMS':
@@ -48,7 +47,7 @@ class SqLiteWriter(Writer):
     def __del__(self):
         try:
             self.conn.close()
-        except:
+        except Exception:
             pass
 
     def WriteData(self, data):
@@ -89,15 +88,18 @@ class SqLiteWriter(Writer):
         try:
             c.execute(sqlstr)
             self.conn.commit()
-        except:
+        except Exception as e:
+            logging.error(str(e))
             return -1
         return res
 
 if __name__ == "__main__":
-    myfile = SqLiteWriter(db = "test.sqlite")
-    data = {'id': '1', 'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'distance': 123.6581, 'lengthincline': Angle(0.0015, 'GON'), 'crossincline': Angle(0.0020, 'GON')}
-    print (myfile.WriteData(data))
+    myfile = SqLiteWriter(db="test.sqlite")
+    data = {'id': '1', 'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), \
+            'distance': 123.6581, 'lengthincline': Angle(0.0015, 'GON'), \
+            'crossincline': Angle(0.0020, 'GON')}
+    print myfile.WriteData(data)
     data = {'id': '1', 'east': 0.12345, 'north': 100.2365, 'elev': 123.6581}
-    print (myfile.WriteData(data))
+    print myfile.WriteData(data)
     data = {'id': '1', 'temp': 12.45, 'pressure': 1017}
-    print (myfile.WriteData(data))
+    print myfile.WriteData(data)

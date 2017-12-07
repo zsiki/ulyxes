@@ -12,9 +12,7 @@
 
 import os.path
 import logging
-import datetime
 import sqlite3
-from angle import Angle
 from reader import Reader
 
 class SqLiteReader(Reader):
@@ -30,7 +28,7 @@ class SqLiteReader(Reader):
 
     tables = {'coo': 'monitoring_coo', 'obs': 'monitoring_obs', 'met': 'monitoring_met'}
 
-    def __init__(self, db, sql, name = None, filt = None):
+    def __init__(self, db, sql, name=None, filt=None):
         """ Constructor
         """
         super(SqLiteReader, self).__init__(name, filt)
@@ -45,13 +43,12 @@ class SqLiteReader(Reader):
         self.cur.execute(sql)
         self.keys = [description[0] for description in self.cur.description]
         #self.typs = [description[1] for description in self.cur.description]
-        # TODO datime conversion
 
     def __del__(self):
         try:
             self.cur.close()
             self.conn.close()
-        except:
+        except Exception:
             pass
 
     def GetNext(self):
@@ -69,4 +66,4 @@ class SqLiteReader(Reader):
 if __name__ == "__main__":
     myfile = SqLiteReader(db="/home/siki/tanszek/szelkapu/szk1/szk1.db",
                           sql="SELECT * FROM monitoring_obs WHERE datetime between '2017-11-17 12:00:00' and '2017-11-22 12:00:00' ORDER BY datetime")
-    print (myfile.GetNext())
+    print myfile.GetNext()
