@@ -73,7 +73,7 @@ class CsvWriter(FileWriter):
         except:
             logging.error(" file write failed")
             return -1
-        return 1
+        return 0
 
 if __name__ == "__main__":
     myfile = CsvWriter(header=True)

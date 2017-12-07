@@ -74,7 +74,7 @@ class FileWriter(Writer):
         except:
             logging.error(" file write failed")
             return -1
-        return 1
+        return 0
 
 if __name__ == "__main__":
     myfile = FileWriter()   # write to stdout

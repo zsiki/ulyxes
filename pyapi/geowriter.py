@@ -48,6 +48,7 @@ class GeoWriter(FileWriter):
         """ Write observation data to csv file
 
             :param data: dictionary with observation data
+            :returns: non zero if error
         """
         if data is None or self.DropData(data):
             logging.warning(" empty or inappropiate data not written")
@@ -70,6 +71,8 @@ class GeoWriter(FileWriter):
             self.fp.flush()
         except:
             logging.error(" file write failed")
+            return -1
+        return 0
 
 if __name__ == "__main__":
     myfile = GeoWriter()
