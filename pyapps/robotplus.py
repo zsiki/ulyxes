@@ -475,6 +475,8 @@ if __name__ == "__main__":
                 if 'distance' in o:
                     if wrt1.WriteData(o) == -1:
                         logging.error('Observation data write failed')
+                    logging.info('inclination: %.6f %.6f' % \
+                        (o['crossincline'].GetAngle(), o['lengthincline'].GetAngle()))
             fs = Freestation(obs_avg, st_coord + fix_coords,
                              cr.json['gama_path'], cr.json['dimension'],
                              cr.json['probability'], cr.json['stdev_angle'],
