@@ -495,8 +495,8 @@ if __name__ == "__main__":
             print "Uploading station coords..."
             st_coord[0]['datetime'] = act_date
             logging.info("station stddevs: %.1f %.1f %.1f %.1f" % ( \
-                st_coords[0]['std_east'], st_coords[0]['std_north'], \
-                std_coords[0]['std_elev'], st_coords[0]['std_ori']))
+                st_coord[0]['std_east'], st_coord[0]['std_north'], \
+                std_coord[0]['std_elev'], st_coord[0]['std_ori']))
             if wrt.WriteData(st_coord[0]) == -1:
                 logging.error('Station coords write failed')
             if 'ori' in st_coord[0]:
