@@ -25,7 +25,7 @@ Parameters are stored in config file using JSON format::
     coo_wr: URL or local file to send coordinates to
     obs_wr: URL or local file to send observations to, oprional (default: no output)
     met_wr: URL or local file to send meteorological observations to, optional (default: no output)
-    avg_wr: calculate averages from more faces if value 1, no average calculation if value is zero, optional (default: 1)
+    avg_wr: calculate averages from more faces if value 1, no average calculation if value is zero, optional (default: 1) DEPRICATED average always calculated if faces > 1
     decimals: number of decimals in output, optional (default: 4)
     gama_path: path to GNU Gama executable, optional (default: empty, no adjustment)
     stdev_angle: standard deviation of angle measurement (arc seconds), optional (default: 1)
@@ -229,7 +229,6 @@ if __name__ == "__main__":
         'coo_wr': {'required' : True},
         'obs_wr': {'required': False},
         'met_wr': {'required': False},
-        'avg_wr': {'required': False, 'type': 'int', 'default': 1},
         'decimals': {'required': False, 'type': 'int', 'default': 4},
         'gama_path': {'required': False, 'type': 'file'},
         'stdev_angle': {'required': False, 'type': 'float', 'default': 1},
@@ -456,7 +455,7 @@ if __name__ == "__main__":
         observations = og.run()
         # observation to fix points
         print "Measuring fix..."
-        act_date = datetime.datetime.now()  # strt of observations
+        act_date = datetime.datetime.now()  # start of observations
         r = Robot(observations, st_coord, ts, cr.json['max_try'],
                   cr.json['delay_try'], cr.json['dir_limit'])
         obs_out, coo_out = r.run()
@@ -464,12 +463,8 @@ if __name__ == "__main__":
         if 'gama_path' in cr.json and cr.json['gama_path'] is not None:
             print "Freestation..."
             if cr.json['faces'] > 1:
-                obs_avg = avg_obs(obs_out)
-            else:
-                obs_avg = obs_out
-            if cr.json['faces'] > 1 and 'avg_wr' in cr.json and cr.json['avg_wr']:
-                obs_out = obs_avg
-            # store observations to FIX points into the database
+                obs_out = avg_obs(obs_out)
+            # store observations to FIX points
             for o in obs_out:
                 o['datetime'] = act_date
                 if 'distance' in o:
@@ -477,7 +472,7 @@ if __name__ == "__main__":
                         logging.error('Observation data write failed')
                     logging.info('inclination: %.6f %.6f' % \
                         (o['crossincline'].GetAngle(), o['lengthincline'].GetAngle()))
-            fs = Freestation(obs_avg, st_coord + fix_coords,
+            fs = Freestation(obs_out, st_coord + fix_coords,
                              cr.json['gama_path'], cr.json['dimension'],
                              cr.json['probability'], cr.json['stdev_angle'],
                              cr.json['stdev_dist'], cr.json['stdev_dist1'],
@@ -545,7 +540,7 @@ if __name__ == "__main__":
         r = Robot(observations, st_coord, ts)
         obs_out, coo_out = r.run()
         # calculate average for observations
-        if cr.json['faces'] > 1 and 'avg_wr' in cr.json and cr.json['avg_wr']:
+        if cr.json['faces'] > 1:
             obs_out = avg_obs(obs_out)
         for o in obs_out:
             o['datetime'] = act_date
