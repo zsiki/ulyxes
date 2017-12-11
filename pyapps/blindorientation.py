@@ -115,6 +115,10 @@ class Orientation(object):
         if 'errorCode' in angles:
             logging.error("Cannot measure angles")
             return angles
+        if 'hz' not in angles:
+            logging.error("No Hz got from instrument")
+            angles['errorCode'] = 999
+            return angles
         act_hz = angles['hz'].GetAngle()
         while dhz < PI2:
             act_v = min_v
