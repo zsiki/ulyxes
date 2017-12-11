@@ -250,22 +250,22 @@ if __name__ == "__main__":
                 cr = ConfReader('robotplus', sys.argv[1], None, config_pars)
                 cr.Load()
             except:
-                logging.fatal("Error in config file: " + sys.argv[1])
+                print "Error in config file: {0}".format(sys.argv[1])
                 sys.exit(-1)
             if not cr.Check():
-                logging.fatal("Config check failed")
+                print "Config check failed"
                 sys.exit(-1)
         else:
             print "Config file not found " + sys.argv[1]
             logging.fatal("Config file not found " + sys.argv[1])
             sys.exit(-1)
     else:
+        print "Missing parameter"
         print "Usage: robotplus.py config_file"
         #cr = ConfReader('robotplus', '/home/siki/monitoring/p103.json', None, config_pars)
         #cr.Load()
         #if not cr.Check():
-        #    logging.fatal("Config check failed")
-        logging.fatal("Invalid parameters")
+        #    print "Config check failed"
         sys.exit(-1)
     # logging
     logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
