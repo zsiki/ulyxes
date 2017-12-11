@@ -10,8 +10,8 @@
 
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 """
-import logging
 import os
+import logging
 from jsonreader import JSONReader
 
 class ConfReader(JSONReader):
@@ -19,7 +19,7 @@ class ConfReader(JSONReader):
 
             :param name: name of reader (str), default None
             :param fname: name of input file
-            :param filt: obligatory fields for Load
+            :param filt: obligatory fields for load TODO not ued yet
             :param pars: a dictionary for parameter validation e.g. {key : {}}, valid keys for individual config parameters are: required (True/False), type (int/float/str/list)
     """
 
@@ -38,38 +38,38 @@ class ConfReader(JSONReader):
         # set default values for missing parameters
         for par in self.pars:
             if self.pars[par]['required'] and not par in self.json:
-                logging.error("missing required parameter: " + par)
+                print "missing required parameter: {0}".format(par)
                 return False
             if 'default' in self.pars[par] and not par in self.json:
                 self.json[par] = self.pars[par]['default']
         for par in self.json:
             if not par in self.pars:
-                logging.warning("unknown parameter: " + par)
+                print "unknown parameter: {0}".format(par)
                 continue
             # type checking
             pardef = self.pars[par]
             if 'type' in pardef:
                 if pardef['type'] == 'int' and type(self.json[par]) is not int:
-                    logging.error("type mismatch parameter: " + par)
+                    print "type mismatch parameter: {0}".format(par)
                     return False
                 elif pardef['type'] == 'float' and \
                     type(self.json[par]) is not int and \
                     type(self.json[par]) is not float:
-                    logging.error("type mismatch parameter: " + par)
+                    print "type mismatch parameter: ".format(par)
                     return False
                 elif pardef['type'] == 'list' and \
                     type(self.json[par]) is not list:
-                    logging.error("type mismatch parameter: " + par)
+                    print "type mismatch parameter: {0}".format(par)
                     return False
                 elif pardef['type'] == 'file' and \
                     type(self.json[par]) is not str and \
                     not os.path.isfile(self.json[par]):
-                    logging.error("type mismatch parameter or file does not exist: " + par)
+                    print "type mismatch parameter or file does not exist: {0}".format(par)
                     return False
                 # check set for valid values
                 if 'set' in pardef and \
                     not self.json[par] in pardef['set']:
-                    logging.error("invalid value: " + par)
+                    print "invalid value: {0}".format(par)
                     return False
                     # TODO reglist
         # TODO complex rules e.g. no fix but gama_path given
