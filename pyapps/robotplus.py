@@ -21,10 +21,11 @@ Parameters are stored in config file using JSON format::
     delay_try: delay between tries, optional (default: 0)
     dir_limit: angle limit for false direction in radians (default 0.015. 5')
     port: serial port to use (e.g. COM1 or /dev/ttyS0 or /dev/ttyUSB0)
-    coo_rd: URL or local file to get coordinates from
-    coo_wr: URL or local file to send coordinates to
-    obs_wr: URL or local file to send observations to, oprional (default: no output)
-    met_wr: URL or local file to send meteorological observations to, optional (default: no output)
+    coo_rd: source to get coordinates from
+    coo_wr: target to send coordinates to
+    obs_wr: target to send observations to
+    met_wr: target to send meteorological observations to, optional (default: no output)
+    inf_wr: target to send general information to
     avg_wr: calculate averages from more faces if value 1, no average calculation if value is zero, optional (default: 1) DEPRICATED average always calculated if faces > 1
     decimals: number of decimals in output, optional (default: 4)
     gama_path: path to GNU Gama executable, optional (default: empty, no adjustment)
@@ -193,7 +194,7 @@ def avg_obs(obs):
                               'at point: ' + k)
                 continue    # skip point
             res_obs['distance'] = sd
-        # cross & lengthincline
+        # cross & lengthincline from face left
         cross = [o['crossincline'] for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi and \
             'crossincline' in o]
@@ -227,8 +228,9 @@ if __name__ == "__main__":
         'port': {'required' : True, 'type': 'str'},
         'coo_rd': {'required' : True},
         'coo_wr': {'required' : True},
-        'obs_wr': {'required': False},
+        'obs_wr': {'required': True},
         'met_wr': {'required': False},
+        'inf_wr': {'required': False},
         'decimals': {'required': False, 'type': 'int', 'default': 4},
         'gama_path': {'required': False, 'type': 'file'},
         'stdev_angle': {'required': False, 'type': 'float', 'default': 1},
@@ -262,11 +264,11 @@ if __name__ == "__main__":
     else:
         print "Missing parameter"
         print "Usage: robotplus.py config_file"
-        #cr = ConfReader('robotplus', '/home/siki/monitoring/p103.json', None, config_pars)
-        #cr.Load()
-        #if not cr.Check():
-        #    print "Config check failed"
-        sys.exit(-1)
+        cr = ConfReader('robotplus', '/home/siki/monitoring/p103.json', None, config_pars)
+        cr.Load()
+        if not cr.Check():
+            print "Config check failed"
+        #sys.exit(-1)
     # logging
     logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
          filemode='a', level=cr.json['log_level'])
@@ -349,6 +351,7 @@ if __name__ == "__main__":
                           'datetime'])
             elif re.search('^sqlite:', cr.json['met_wr']):
                 wrtm = SqLiteWriter(db=cr.json['met_wr'][7:],
+                    table='monitoring_met',
                     filt=['id', 'pressure', 'temp', 'humidity', 'wettemp',
                           'datetime'])
             else:
@@ -372,28 +375,38 @@ if __name__ == "__main__":
     if len(st_coord) == 0:
         logging.fatal("Station not found: " + cr.json['station_id'])
         sys.exit(-1)
-    # coordinate writer & observation writer
+    # coordinate writer
     fmt = '.%df' % cr.json['decimals']
     if re.search('^http[s]?://', cr.json['coo_wr']):
         wrt = HttpWriter(url=cr.json['coo_wr'], mode='POST', dist=fmt)
-        # observation writer
-        if 'obs_wr' in cr.json:
-            wrt1 = HttpWriter(url=cr.json['obs_wr'], mode='POST', dist=fmt)
-        else:
-            wrt1 = wrt
     elif re.search('^sqlite:', cr.json['coo_wr']):
         wrt = SqLiteWriter(db=cr.json['coo_wr'][7:], dist=fmt,
+                           table='monitoring_coo',
                            filt=['id', 'east', 'north', 'elev', 'datetime'])
-        if 'obs_wr' in cr.json:
-            wrt1 = SqLiteWriter(db=cr.json['obs_wr'][7:], dist=fmt,
-                                filt=['id', 'hz', 'v', 'distance',
-                                'crossincline', 'lengthincline', 'datetime'])
-        else:
-            wrt1 = wrt
     else:
         wrt = GeoWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt)
-        if 'obs_wr' in cr.json:
-            wrt1 = GeoWriter(fname=cr.json['obs_wr'], mode='a', dist=fmt)
+    # observation writer
+    if re.search('^http[s]?://', cr.json['obs_wr']):
+        wrt1 = HttpWriter(url=cr.json['obs_wr'], mode='POST', dist=fmt)
+    elif re.search('^sqlite:', cr.json['obs_wr']):
+        wrt1 = SqLiteWriter(db=cr.json['obs_wr'][7:], dist=fmt,
+                            table='monitoring_obs',
+                            filt=['id', 'hz', 'v', 'distance',
+                            'crossincline', 'lengthincline', 'datetime'])
+    else:
+        wrt1 = GeoWriter(fname=cr.json['obs_wr'], mode='a', dist=fmt)
+    # information writer
+    if 'inf_wr' in cr.json:
+        if re.search('^http[s]?://', cr.json['inf_wr']):
+            wrt2 = HttpWriter(url=cr.json['inf_wr'], mode='POST', dist=fmt)
+        elif re.search('^sqlite:', cr.json['inf_wr']):
+            wrt2 = SqLiteWriter(db=cr.json['inf_wr'][7:], dist=fmt,
+                                table='monitoring_inf',
+                                filt=['datetime', 'nref', 'nrefobs', 'nmon',
+                                      'nmonobs', 'maxincl', 'std_east',
+                                      'std_north', 'std_elev', 'std_ori'])
+        else:
+            wrt2 = GeoWriter(fname=cr.json['inf_wr'], mode='a', dist=fmt)
     if 'fix_list' in cr.json and cr.json['fix_list'] is not None:
         # get fix coordinates from database
         print "Loading fix coords..."
@@ -491,11 +504,23 @@ if __name__ == "__main__":
             # upload station coords to server
             print "Uploading station coords..."
             st_coord[0]['datetime'] = act_date
-            logging.info("station stddevs: %.1f %.1f %.1f %.1f" % ( \
-                st_coord[0]['std_east'], st_coord[0]['std_north'], \
+            logging.info("station stddevs: %.1f %.1f %.1f %.1f" % (
+                st_coord[0]['std_east'], st_coord[0]['std_north'],
                 st_coord[0]['std_elev'], st_coord[0]['std_ori']))
             if wrt.WriteData(st_coord[0]) == -1:
                 logging.error('Station coords write failed')
+            if 'inf_wr' in cr.json:
+                maxincl = max([max(abs(o['crossincline'].GetAngle()),
+                              abs(o['lengthincline'].GetAngle())) for o in obs_out
+                              if 'crossincline' in o])
+                inf = {'datetime': act_date, 'nref': len(fix_coords),
+                       'nrefobs': len(obs_out)-1, 'maxincl': maxincl,
+                       'std_east': st_coord[0]['std_east'], 
+                       'std_north': st_coord[0]['std_north'],
+                       'std_elev': st_coord[0]['std_elev'],
+                       'std_ori': st_coord[0]['std_ori']}
+                if wrt2.WriteData(inf) == -1:
+                    logging.error('Station inf write failed')
             if 'ori' in st_coord[0]:
                 # rotate to Hz 0
                 ts.Move(Angle(0.0), Angle(90, 'DEG'), 0)
@@ -554,6 +579,14 @@ if __name__ == "__main__":
             c['datetime'] = act_date
             if wrt.WriteData(c) == -1:
                 logging.error('Coord data write failed')
+        if 'inf_wr' in cr.json:
+            maxincl = max([max(abs(o['crossincline'].GetAngle()),
+                          abs(o['lengthincline'].GetAngle())) for o in obs_out
+                              if 'crossincline' in o])
+            inf = {'datetime': act_date, 'nmon': len(mon_coords),
+                   'nmonobs': len(obs_out)-1, 'maxincl': maxincl}
+            if wrt2.WriteData(inf) == -1:
+                logging.error('Station inf write failed')
     # move telescope to safe position
     ans = ts.Move(Angle(0), Angle(180, "DEG")) # no ATR
     #if cr.json['ts_off']:
