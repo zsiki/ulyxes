@@ -8,7 +8,7 @@
 .. moduleauthor::Zoltan Siki <siki@agt.bme.hu>
 
     calculate 3D coordinates of a station from polar observations as a
-    free starion, blunders are eliminated 
+    free starion, blunders are eliminated
 
     :param argv[1]: input geo/coo or dmp/csv file
     :param argv[2]: gama-local path
@@ -23,9 +23,6 @@ sys.path.append('../pyapi/')
 from georeader import GeoReader
 from csvreader import CsvReader
 from gamaiface import GamaIface
-
-#logging.getLogger().setLevel(logging.WARNING)
-logging.getLogger().setLevel(logging.INFO)
 
 class Freestation(object):
     """ Calculate freestation and remove blunders
@@ -42,12 +39,12 @@ class Freestation(object):
     """
 
     def __init__(self, obs, coords, gama_path, dimension=3, probability=0.95,
-                stdev_angle=1, stdev_dist=1, stdev_dist1=1.5, blunders=True):
+                 stdev_angle=1, stdev_dist=1, stdev_dist1=1.5, blunders=True):
         """ initialize
         """
         # create gama interface
         self.g = GamaIface(gama_path, dimension, probability, stdev_angle,
-                        stdev_dist, stdev_dist1)
+                           stdev_dist, stdev_dist1)
         self.blunders = blunders
         ns = 0    # number of stations
         no = 0    # number of observations
@@ -78,10 +75,10 @@ class Freestation(object):
         n = 0   # number of blunders removed
         while True:
             res, blunder = self.g.adjust()
-            if res is None or not 'east' in res[0] or not 'north' in res[0] or \
-                              not 'elev' in res[0]:
+            if res is None or 'east' not in res[0] or 'north' not in res[0] or \
+                              'elev' not in res[0]:
                 # adjustment faild or too many blunders
-                if not last_res is None:
+                if last_res is not None:
                     logging.warning("blunders are not fully removed")
                     res = last_res
                 else:
@@ -91,16 +88,20 @@ class Freestation(object):
                 logging.warning("no blunders checked")
                 break
             elif blunder['std-residual'] < 1.0:
-                logging.info("{} blunders removed".format(n))
+                logging.info("%d blunders removed", n)
                 break
             else:
-                logging.info("{} - {} observation removed".format(blunder['from'], blunder['to']))
+                logging.info("%s - %s observation removed",
+                             blunder['from'], blunder['to'])
                 self.g.remove_observation(blunder['from'], blunder['to'])
                 last_res = res
                 n += 1
         return res
 
 if __name__ == "__main__":
+    #logging.getLogger().setLevel(logging.WARNING)
+    logging.getLogger().setLevel(logging.INFO)
+
     #fname = "/home/siki/GeoEasy/data/freestation.geo"
     #fname = "test.geo"
     #gama_path = '/home/siki/GeoEasy/gama-local'
@@ -113,7 +114,7 @@ if __name__ == "__main__":
     else:
         print "Usage: freestation.py input_file gama_path station_id station_height"
         sys.exit(-1)
-    if not fname[-4:] in ['.geo', '.coo', '.dmp', '.csv']:
+    if fname[-4:] not in ['.geo', '.coo', '.dmp', '.csv']:
         fname += '.geo'
     if len(sys.argv) > 2:
         gama_path = sys.argv[2]
@@ -124,16 +125,16 @@ if __name__ == "__main__":
     fn = fname[:-4] # remove extension
     ext = fname[-4:]
     if ext in ['.geo', '.coo']:
-        obs = GeoReader(fname = fn + '.geo')
+        obs = GeoReader(fname=fn+'.geo')
     else:
-        obs = CsvReader(fname = fn + '.dmp')
+        obs = CsvReader(fname=fn+'.dmp')
     # load observations
     observations = obs.Load()
     # load coordinates and add to adjustment
     if ext in ['.geo', '.coo']:
-        coo = GeoReader(fname = fn + '.coo')
+        coo = GeoReader(fname=fn+'.coo')
     else:
-        coo = CsvReader(fname = fn + '.csv')
+        coo = CsvReader(fname=fn+'.csv')
     n = 0   # number of points
     st = False  # station found
     coords = coo.Load()

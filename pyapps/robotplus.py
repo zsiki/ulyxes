@@ -105,8 +105,7 @@ def avg_coo(coords):
         if len([x for x in e if abs(x - avg_e) > 0.01]) or \
            len([y for y in n if abs(y - avg_n) > 0.01]) or \
            len([z for z in h if abs(z - avg_h) > 0.01]):
-            logging.error("Large coordinate difference from faces: " + str(e) +\
-                "; " + str(n) + "; " + str(h))
+            logging.error("Large coordinate difference from faces: %.3f %.3f %.3f", e, n, h)
             continue    # skip point
         res.append({'id': i, 'east': avg_e, 'north': avg_n, 'elev': avg_h})
     return res
@@ -130,9 +129,7 @@ def avg_obs(obs):
         hz2 = [o['hz'].GetAngle() for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() > math.pi]
         if len(hz1) != len(hz2):
-            logging.warning('Different number of observations in two faces ' +
-                            k + ' FL: '+ str(len(hz1)) + \
-                            ' FR: ' + str(len(hz2)))
+            logging.warning('Different number of observations in two faces %s FL: %d FR: %d', k, len(hz1), len(hz2))
         # check angles around 0/360 degree
         for i in range(1, len(hz1)):
             if hz1[i] - hz1[0] > math.pi:
@@ -151,8 +148,8 @@ def avg_obs(obs):
             else:
                 hz2 = [h - math.pi for h in hz2]
             kol = (sum(hz2) / len(hz2) - sum(hz1) / len(hz1)) / 2.0
-            logging.info('Collimation error [GON]: %.4f %s' %
-                         (Angle(kol).GetAngle('GON'), k))
+            logging.info('Collimation error [GON]: %.4f %s',
+                         Angle(kol).GetAngle('GON'), k)
         elif len(hz1) == 0:
             if hz2[0] > math.pi:
                 hz2 = [h - math.pi for h in hz2]
@@ -163,8 +160,8 @@ def avg_obs(obs):
         # TODO limit from config
         if len([x for x in hz1 + hz2 if abs(x - hz) > 60.0 / 200000.0]):
             str_hz = [Angle(x).GetAngle('GON') for x in hz1 + hz2]
-            logging.error('Large Hz difference from faces [GON]: %.4f %s' %
-                          (str_hz, k))
+            logging.error('Large Hz difference from faces [GON]: %.4f %s',
+                          str_hz, k)
             continue    # skip point
         v1 = [o['v'].GetAngle() for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi]
@@ -172,15 +169,15 @@ def avg_obs(obs):
             if 'id' in o and o['id'] == k and o['v'].GetAngle() > math.pi]
         if len(v1) and len(v2):
             ind = (sum(v2) / len(v2) - sum(v1) / len(v1)) / 2.0
-            logging.info('Index error [GON]: %.4f %s' %
-                         (Angle(ind).GetAngle('GON'), k))
+            logging.info('Index error [GON]: %.4f %s',
+                         Angle(ind).GetAngle('GON'), k)
         v = sum(v1 + v2) / (len(v1) + len(v2))
         # check before store average
         # TODO limit from config
         if len([x for x in v1 + v2 if abs(x - v) > 60.0 / 200000.0]):
-            str_v = [Angle(x).GetAngle('DMS') for x in v1 + v2]
-            logging.error('Large V difference from faces: ' + str(str_v) +
-                          ' at point: ' + k)
+            str_v = [Angle(x).GetAngle('GON') for x in v1 + v2]
+            logging.error('Large V difference from faces: %.4f at point %s',
+                          str_v, k)
             continue    # skip point
         res_obs = {'id': k, 'hz': Angle(hz), 'v': Angle(v)}
         sd12 = [o['distance'] for o in obs \
@@ -190,8 +187,7 @@ def avg_obs(obs):
             # check before store average
             # TODO limit from config
             if len([x for x in sd12 if abs(x - sd) > 0.01]):
-                logging.error('Large dist difference from faces: ' + str(sd) +
-                              'at point: ' + k)
+                logging.error('Large dist difference from faces: %.4f at point %s', sd, k)
                 continue    # skip point
             res_obs['distance'] = sd
         # cross & lengthincline from face left
@@ -258,8 +254,8 @@ if __name__ == "__main__":
                 print "Config check failed"
                 sys.exit(-1)
         else:
-            print "Config file not found " + sys.argv[1]
-            logging.fatal("Config file not found " + sys.argv[1])
+            print "Config file not found %s" % sys.argv[1]
+            logging.fatal("Config file not found %s", sys.argv[1])
             sys.exit(-1)
     else:
         print "Missing parameter"
@@ -351,9 +347,9 @@ if __name__ == "__main__":
                           'datetime'])
             elif re.search('^sqlite:', cr.json['met_wr']):
                 wrtm = SqLiteWriter(db=cr.json['met_wr'][7:],
-                    table='monitoring_met',
-                    filt=['id', 'pressure', 'temp', 'humidity', 'wettemp',
-                          'datetime'])
+                                    table='monitoring_met',
+                                    filt=['id', 'pressure', 'temp', 'humidity',
+                                    'wettemp', 'datetime'])
             else:
                 wrtm = CsvWriter(name='met', fname=cr.json['met_wr'],
                     filt=['id', 'temp', 'pressure', 'humidity',
@@ -373,7 +369,7 @@ if __name__ == "__main__":
     w = rd_st.Load()
     st_coord = [x for x in w if x['id'] == cr.json['station_id']]
     if len(st_coord) == 0:
-        logging.fatal("Station not found: " + cr.json['station_id'])
+        logging.fatal("Station not found: %s", cr.json['station_id'])
         sys.exit(-1)
     # coordinate writer
     fmt = '.%df' % cr.json['decimals']
@@ -450,14 +446,14 @@ if __name__ == "__main__":
         a['v'] = (Angle(360, 'DEG') - a['v']).Normalize()
         ans = ts.Move(a['hz'], a['v'], 0) # no ATR
         if 'errCode' in ans:
-            logging.fatal("Rotation to face left failed %d" % ans['errCode'])
+            logging.fatal("Rotation to face left failed %d", ans['errCode'])
             sys.exit(-1)
     # check/find orientation
     print "Orientation..."
     o = Orientation(observations, ts, cr.json['orientation_limit'])
     ans = o.Search()
     if 'errCode' in ans and cr.json['station_type'] != 'local':
-        logging.fatal("Orientation failed %d" % ans['errCode'])
+        logging.fatal("Orientation failed %d", ans['errCode'])
         sys.exit(-1)
 
     if 'fix_list' in cr.json and cr.json['fix_list'] is not None:
@@ -482,10 +478,11 @@ if __name__ == "__main__":
                 o['datetime'] = act_date
                 if 'distance' in o:
                     if wrt1.WriteData(o) == -1:
-                        logging.error('Observation data write failed %s' % o['id'])
-                    logging.info('inclination [GON]: %.4f %.4f %s' % \
-                        (o['crossincline'].GetAngle('GON'),
-                        o['lengthincline'].GetAngle('GON'), o['id']))
+                        logging.error('Observation data write failed %s',
+                                      o['id'])
+                    logging.info('inclination [GON]: %.4f %.4f %s',
+                                 o['crossincline'].GetAngle('GON'),
+                                 o['lengthincline'].GetAngle('GON'), o['id'])
             fs = Freestation(obs_out, st_coord + fix_coords,
                              cr.json['gama_path'], cr.json['dimension'],
                              cr.json['probability'], cr.json['stdev_angle'],
@@ -493,21 +490,22 @@ if __name__ == "__main__":
                              cr.json['blunders'])
             w = fs.Adjustment()
             if w is None:
-                logging.fatal("No adjusted coordinates for station %s" % cr.json['station_id'])
+                logging.fatal("No adjusted coordinates for station %s",
+                              cr.json['station_id'])
                 sys.exit(-1)
             if abs(st_coord[0]['east'] - w[0]['east']) > cr.json['station_coo_limit'] or \
                abs(st_coord[0]['north'] - w[0]['north']) > cr.json['station_coo_limit'] or \
                abs(st_coord[0]['elev'] - w[0]['elev']) > cr.json['station_coo_limit']:
-                logging.fatal("Station moved!!!" + str(w))
+                logging.fatal("Station moved!!! %s" + w[0]['id'])
                 sys.exit(-1)
             # update station coordinates
             st_coord = w
             # upload station coords to server
             print "Uploading station coords..."
             st_coord[0]['datetime'] = act_date
-            logging.info("station stddevs[mm/cc]: %.1f %.1f %.1f %.1f" % (
+            logging.info("station stddevs[mm/cc]: %.1f %.1f %.1f %.1f",
                 st_coord[0]['std_east'], st_coord[0]['std_north'],
-                st_coord[0]['std_elev'], st_coord[0]['std_ori']))
+                st_coord[0]['std_elev'], st_coord[0]['std_ori'])
             if wrt.WriteData(st_coord[0]) == -1:
                 logging.error('Station coords write failed')
             if 'inf_wr' in cr.json:

@@ -67,9 +67,6 @@ from csvreader import CsvReader
 from httpwriter import HttpWriter
 from totalstation import TotalStation
 
-#logging.getLogger().setLevel(logging.WARNING)
-logging.getLogger().setLevel(logging.INFO)
-
 class Robot(object):
     """ manage robotic observations
 
@@ -177,7 +174,7 @@ class Robot(object):
                                 if len(self.directions[i]['code']) > 3:
                                     self.ts.SetPrismType(int(self.directions[i]['code'][3:]))
                             res = self.ts.Move(Angle(hz), Angle(v), 1)
-                            if not 'errorCode' in res:
+                            if 'errorCode' not in res:
                                 res = self.ts.Measure()
                         elif self.directions[i]['code'][0:2] == 'PR':
                             if j == 0:
@@ -247,7 +244,7 @@ class Robot(object):
                                 continue    # try again
                             break   # observation OK
                     if j >= self.maxtry:
-                        logging.error("Cannot measure point %s" % pn)
+                        logging.error("Cannot measure point %s", pn)
                         continue
                     obs['id'] = pn
                     obs['face'] = self.ts.FACE_RIGHT if step < 0 else self.ts.FACE_LEFT
@@ -266,20 +263,23 @@ if __name__ == "__main__":
 
     import os.path
 
+    #logging.getLogger().setLevel(logging.WARNING)
+    logging.getLogger().setLevel(logging.INFO)
+
     # process commandline parameters
     config = False
     # input observations
     if len(sys.argv) > 1:
         ifname = sys.argv[1]
         if not os.path.isfile(ifname):
-            print ("Input file doesn't exists:" + ifname)
+            print "Input file doesn't exists: %s" % ifname
             exit(-1)
         if ifname[-3:] == '.py':  # configuration file given
             exec 'from ' + ifname[:-3] + ' import *'
             config = True
     else:
-        print ("Usage: robot.py input_file [output_file] [sensor] [serial_port] [max_try] [delay_try] [BMP180|webmet] [met_addr] [met_par]")
-        print ("  or   robot.py config_file.py")
+        print "Usage: robot.py input_file [output_file] [sensor] [serial_port] [max_try] [delay_try] [BMP180|webmet] [met_addr] [met_par]"
+        print "  or   robot.py config_file.py"
         exit(-1)
     # output file
     if len(sys.argv) > 2:
@@ -341,7 +341,7 @@ if __name__ == "__main__":
         else:
             ofname1 = ofname2 = ofname
         dmp_wrt = CsvWriter(angle='DMS', dist='.4f', \
-            filt=['station', 'id','hz','v','distance', 'datetime'], \
+            filt=['station', 'id', 'hz', 'v', 'distance', 'datetime'], \
             fname=ofname1, mode='a', sep=';')
         coo_wrt = CsvWriter(dist='.4f', \
             filt=['id', 'east', 'north', 'elev', 'datetime'], \
@@ -361,7 +361,7 @@ if __name__ == "__main__":
         # http output
         ofname1 = ofname2 = ofname
         dmp_wrt = HttpWriter(angle='RAD', dist='.4f', \
-            filt=['station', 'id','hz','v','distance', 'datetime'], \
+            filt=['station', 'id', 'hz', 'v', 'distance', 'datetime'], \
             url=ofname1, mode='POST')
         coo_wrt = HttpWriter(angle='RAD', dist='.4f', \
             filt=['id', 'east', 'north', 'elev', 'datetime'], \
@@ -391,7 +391,7 @@ if __name__ == "__main__":
     ts.GetATR()            # wake up instrument
     #ts.SwitchOn(1) TODO              # wake up instrument
     # met sensor
-    if not met is None:
+    if met is not None:
         atm = ts.GetAtmCorr()     # get current settings from ts
         if met == 'BMP180':
             from bmp180measureunit import BMP180MeasureUnit
@@ -422,8 +422,8 @@ if __name__ == "__main__":
             humi = data['humidity']
             wet = web.GetWetTemp(temp, humi)
         ts.SetAtmCorr(float(atm['lambda']), pres, temp, wet)
-        logging.info(" temperature: %f air pressure: %f wet termperature: %f" %
-        (temp, pres, wet))
+        logging.info("temperature: %f air pressure: %f wet termperature: %f",
+                     temp, pres, wet)
     r = Robot(directions, coordinates, ts, maxtry, delaytry)
     obs_out, coo_out = r.run()
     for obs in obs_out:

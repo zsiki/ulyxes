@@ -23,7 +23,6 @@ Modes::
 """
 import sys
 import re
-import logging
 
 sys.path.append('../pyapi/')
 
@@ -32,9 +31,10 @@ from geowriter import GeoWriter
 from csvwriter import CsvWriter
 from totalstation import TotalStation
 
-logging.getLogger().setLevel(logging.WARNING)
 modes = ['ATR', 'PR', 'RL', 'RLA', 'OR']
-modes1 = ['ATR', 'ATR0', 'ATR1', 'ATR2', 'ATR3', 'ATR4', 'ATR5', 'ATR6', 'ATR7', 'PR', 'PR0', 'PR1', 'PR2', 'PR3', 'PR4', 'PR5', 'PR6', 'PR7', 'RL', 'RLA', 'OR']
+modes1 = ['ATR', 'ATR0', 'ATR1', 'ATR2', 'ATR3', 'ATR4', 'ATR5', 'ATR6', \
+          'ATR7', 'PR', 'PR0', 'PR1', 'PR2', 'PR3', 'PR4', 'PR5', 'PR6', \
+          'PR7', 'RL', 'RLA', 'OR']
 modes_str = '/'.join(modes)
 
 if __name__ == "__main__":
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         ofname = sys.argv[1]
     else:
-        print ("Usage: filemaker.py output_file [sensor] [serial_port]")
+        print "Usage: filemaker.py output_file [sensor] [serial_port]"
         exit(-1)
     if ofname[-4:] == '.csv' or ofname[-4:] == '.dmp':
         ofname = ofname[:-4]
@@ -79,13 +79,13 @@ if __name__ == "__main__":
 
     iface = SerialIface("rs-232", port)
     if otype == 'geo':
-        geo_wrt = GeoWriter(dist = '.4f', angle = 'RAD', fname = ofname + '.geo', mode = 'w')
-        coo_wrt = GeoWriter(dist = '.4f', angle = 'RAD', fname = ofname + '.coo', mode = 'w')
+        geo_wrt = GeoWriter(dist='.4f', angle='RAD', fname=ofname+'.geo', mode='w')
+        coo_wrt = GeoWriter(dist='.4f', angle='RAD', fname=ofname + '.coo', mode='w')
     else:
-        geo_wrt = CsvWriter(dist = '.4f', fname = ofname + '.dmp', \
-            header = True, filt = ['station', 'id', 'hz', 'v', 'faces'])
-        coo_wrt = CsvWriter(dist = '.4f', fname = ofname + '.csv', \
-            header = True, filt = ['id', 'east', 'north', 'elev'])
+        geo_wrt = CsvWriter(dist='.4f', fname=ofname+'.dmp', \
+            header=True, filt=['station', 'id', 'hz', 'v', 'faces'])
+        coo_wrt = CsvWriter(dist='.4f', fname=ofname+'.csv', \
+            header=True, filt=['id', 'east', 'north', 'elev'])
     ts = TotalStation(stationtype, mu, iface)
 
     # get station data
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         if len(t_id) == 0:
             break
         t_mode = ""
-        while not t_mode in modes1:
+        while t_mode not in modes1:
             t_mode = raw_input("Target mode(" + modes_str + "): ").upper()
         raw_input("Target on point and press enter")
         angles = ts.GetAngles()
