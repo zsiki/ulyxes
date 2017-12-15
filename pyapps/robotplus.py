@@ -131,7 +131,7 @@ def avg_obs(obs):
             if 'id' in o and o['id'] == k and o['v'].GetAngle() > math.pi]
         if len(hz1) != len(hz2):
             logging.warning('Different number of observations in two faces ' +
-                            'at point: ' + k + ' FL: '+ str(len(hz1)) + \
+                            k + ' FL: '+ str(len(hz1)) + \
                             ' FR: ' + str(len(hz2)))
         # check angles around 0/360 degree
         for i in range(1, len(hz1)):
@@ -151,8 +151,8 @@ def avg_obs(obs):
             else:
                 hz2 = [h - math.pi for h in hz2]
             kol = (sum(hz2) / len(hz2) - sum(hz1) / len(hz1)) / 2.0
-            logging.info('Average collimation error [seconds]: ' +
-                         str(round(kol / math.pi * 648000)) + ' at point: ' + k)
+            logging.info('Collimation error [GON]: %.4f %s' %
+                         (Angle(kol).GetAngle('GON'), k))
         elif len(hz1) == 0:
             if hz2[0] > math.pi:
                 hz2 = [h - math.pi for h in hz2]
@@ -162,9 +162,9 @@ def avg_obs(obs):
         # check before store average
         # TODO limit from config
         if len([x for x in hz1 + hz2 if abs(x - hz) > 60.0 / 200000.0]):
-            str_hz = [Angle(x).GetAngle('DMS') for x in hz1 + hz2]
-            logging.error('Large Hz difference from faces: ' + str(str_hz) +
-                          ' at point: ' + k)
+            str_hz = [Angle(x).GetAngle('GON') for x in hz1 + hz2]
+            logging.error('Large Hz difference from faces [GON]: %.4f %s' %
+                          (str_hz, k))
             continue    # skip point
         v1 = [o['v'].GetAngle() for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi]
@@ -172,8 +172,8 @@ def avg_obs(obs):
             if 'id' in o and o['id'] == k and o['v'].GetAngle() > math.pi]
         if len(v1) and len(v2):
             ind = (sum(v2) / len(v2) - sum(v1) / len(v1)) / 2.0
-            logging.info('Average index error [seconds]: ' +
-                         str(round(ind / math.pi * 648000)) + ' at point: ' + k)
+            logging.info('Index error [GON]: %.4f %s' %
+                         (Angle(ind).GetAngle('GON'), k))
         v = sum(v1 + v2) / (len(v1) + len(v2))
         # check before store average
         # TODO limit from config
@@ -482,9 +482,10 @@ if __name__ == "__main__":
                 o['datetime'] = act_date
                 if 'distance' in o:
                     if wrt1.WriteData(o) == -1:
-                        logging.error('Observation data write failed')
-                    logging.info('inclination: %.6f %.6f' % \
-                        (o['crossincline'].GetAngle(), o['lengthincline'].GetAngle()))
+                        logging.error('Observation data write failed %s' % o['id'])
+                    logging.info('inclination [GON]: %.4f %.4f %s' % \
+                        (o['crossincline'].GetAngle('GON'),
+                        o['lengthincline'].GetAngle('GON'), o['id']))
             fs = Freestation(obs_out, st_coord + fix_coords,
                              cr.json['gama_path'], cr.json['dimension'],
                              cr.json['probability'], cr.json['stdev_angle'],
@@ -504,18 +505,18 @@ if __name__ == "__main__":
             # upload station coords to server
             print "Uploading station coords..."
             st_coord[0]['datetime'] = act_date
-            logging.info("station stddevs: %.1f %.1f %.1f %.1f" % (
+            logging.info("station stddevs[mm/cc]: %.1f %.1f %.1f %.1f" % (
                 st_coord[0]['std_east'], st_coord[0]['std_north'],
                 st_coord[0]['std_elev'], st_coord[0]['std_ori']))
             if wrt.WriteData(st_coord[0]) == -1:
                 logging.error('Station coords write failed')
             if 'inf_wr' in cr.json:
-                maxincl = max([max(abs(o['crossincline'].GetAngle()),
-                              abs(o['lengthincline'].GetAngle())) for o in obs_out
-                              if 'crossincline' in o])
+                maxincl = max([max(abs(o['crossincline'].GetAngle('GON')),
+                              abs(o['lengthincline'].GetAngle('GON')))
+                              for o in obs_out if 'crossincline' in o])
                 inf = {'datetime': act_date, 'nref': len(fix_coords),
                        'nrefobs': len(obs_out)-1, 'maxincl': maxincl,
-                       'std_east': st_coord[0]['std_east'], 
+                       'std_east': st_coord[0]['std_east'],
                        'std_north': st_coord[0]['std_north'],
                        'std_elev': st_coord[0]['std_elev'],
                        'std_ori': st_coord[0]['std_ori']}
@@ -580,9 +581,9 @@ if __name__ == "__main__":
             if wrt.WriteData(c) == -1:
                 logging.error('Coord data write failed')
         if 'inf_wr' in cr.json:
-            maxincl = max([max(abs(o['crossincline'].GetAngle()),
-                          abs(o['lengthincline'].GetAngle())) for o in obs_out
-                              if 'crossincline' in o])
+            maxincl = max([max(abs(o['crossincline'].GetAngle('GON')),
+                          abs(o['lengthincline'].GetAngle('GON')))
+                          for o in obs_out if 'crossincline' in o])
             inf = {'datetime': act_date, 'nmon': len(mon_coords),
                    'nmonobs': len(obs_out)-1, 'maxincl': maxincl}
             if wrt2.WriteData(inf) == -1:
