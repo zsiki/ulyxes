@@ -12,8 +12,9 @@ Parameters are stored in config file using JSON format::
     log_level: 10/20/30/40/50 for DEBUG/INFO/WARNING/ERROR/FATAL
     log_format: format string for log (default: "%(asctime)s %(levelname)s:%(message)s"), optional
     point_list: list of points to plot
-    coo_rd: URL or local file to get coordinates from
-    coo_ref: reference of coordinates
+    ref_line_points: two point ids to transform coordinates into the reference line defined by these two points
+    coo_rd: database to get coordinates from
+    coo_ref: reference of coordinates to et changes from
     range: range of plots, optional (default: 50 mm)
     date_from: date to plot coordinates from, optional (default: first date in the database/file)
     date_until: date to plot coordinates until (default: last date in the database/file)
