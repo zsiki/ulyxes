@@ -24,7 +24,7 @@ Parameters are stored in config file using JSON format::
     strict: 1/0 free station calculated if only all fix points observed in reound
     mon_only: 1/0 calculate polars if only monitoring point in observations/do not calculate polar
     st_only: 1/0 calculate monitoring point only in the same round with freestation
-    avg_wr: calculate averages from more faces if value 1, no average calculation if value is zero, optional (default: 1)
+    avg_wr: calculate averages from more faces if value 1, no average calculation if value is zero, optional (default: 1) OBSOLATE
     decimals: number of decimals in output, optional (default: 4)
     gama_path: path to GNU Gama executable, optional (default: empty, no adjustment)
     stdev_angle: standard deviation of angle measurement (arc seconds), optional (default: 1)
@@ -74,7 +74,6 @@ if __name__ == "__main__":
         'mon_only':{'required': False, 'type': 'int', 'default': 1},
         'st_only':{'required': False, 'type': 'int', 'default': 0},
         'obs_wr': {'required': False},
-        'avg_wr': {'required': False, 'type': 'int', 'default': 1},
         'decimals': {'required': False, 'type': 'int', 'default': 4},
         'gama_path': {'required': False, 'type': 'file'},
         'stdev_angle': {'required': False, 'type': 'float', 'default': 1},
@@ -103,7 +102,7 @@ if __name__ == "__main__":
             sys.exit(-1)
     else:
         print "Usage: coords.py config_file"
-        cr = ConfReader('coords', '/home/siki/tanszek/szelkapu/szk2/szk2_all.json', None, config_pars)
+        cr = ConfReader('coords', '/home/siki/tanszek/szelkapu/szk1/szk1_all.json', None, config_pars)
         cr.Load()
         if not cr.Check():
             logging.fatal("Config check failed")
@@ -134,6 +133,7 @@ if __name__ == "__main__":
         wrt = HttpWriter(url=cr.json['coo_wr'], mode='POST', dist=fmt)
     elif re.search('^sqlite:', cr.json['coo_wr']):
         wrt = SqLiteWriter(db=cr.json['coo_wr'][7:], dist=fmt,
+                           table='monitring_coo',
                            filt=['id', 'east', 'north', 'elev', 'datetime', 'n', 'ori', 'std_east', 'std_north', 'std_elev', 'std_ori'])
     else:
         wrt = GeoWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt)
@@ -143,7 +143,6 @@ if __name__ == "__main__":
         if re.search('^http[s]?://', cr.json['coo_rd']):
             rd_fix = HttpReader(url=cr.json['coo_rd'], ptys=['FIX'], \
                                 filt=['id', 'east', 'north', 'elev'])
-            # TODO read from local file if HttpReader failed
         elif re.search('^sqlite:', cr.json['coo_rd']):
             rd_fix = SqLiteReader(db=cr.json['coo_wr'][7:])
         else:
@@ -179,6 +178,7 @@ if __name__ == "__main__":
             wrt1 = HttpWriter(url=cr.json['obs_wr'], mode='POST', dist=fmt)
         elif re.search('^sqlite:', cr.json['obs_wr']):
             wrt1 = SqLiteWriter(db=cr.json['obs_wr'][7:], dist=fmt,
+                                table='monitoring_obs',
                                 filt=['id', 'hz', 'v', 'distance',
                                 'crossincline', 'lengthincline', 'datetime'])
         else:

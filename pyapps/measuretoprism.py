@@ -7,14 +7,14 @@
 
 Sample application of Ulyxes PyAPI to measure to a moving prism/object.
     Select different modes for different scenarios<br>
-    0 - determine the horizontal movement of a bridge pylon without prism using 
+    0 - determine the horizontal movement of a bridge pylon without prism using
     edm mode RLSTANDARD<br>
     1 - determine the movement of a sloly moving prism to determine 3D defomation<br>
     2 - determine vertical movement of a prism, deflection of a bridge, we suppose horizontal distance is not changed<br>
     3 - determine vertical movement of a moving prism on a car/machine, we suppose horizontal distance is not changed<br>
     4 - determine 3D movement of a moving prism on a car/machine<br>
     5 - measure points if the prism stopped for 3-5 seconds<br>
-   
+
     :param argv[1] (sensor): 110n/180n/120n, default 1200
     :param argv[2] (mode): 0/1/2/3/4/5 without ATR/with ATR/with ATR no distance/lock single distance/lock with distance/store if stopped, default 4
     :param argv[3] (edm): edm mode STANDARD/FAST, default FAST
@@ -32,16 +32,16 @@ from serialiface import SerialIface
 from totalstation import TotalStation
 from localiface import LocalIface
 
-logging.getLogger().setLevel(logging.ERROR)
 
 if __name__ == "__main__":
+    logging.getLogger().setLevel(logging.ERROR)
     # Process command line parameters
     # Instrument type
     if len(sys.argv) > 1:
         if re.search('110[0-9]$', sys.argv[1]):
             from leicatcra1100 import LeicaTCRA1100
             mu = LeicaTCRA1100()
-        elif re.search('180[0-9]$' , sys.argv[1]):
+        elif re.search('180[0-9]$', sys.argv[1]):
             from leicatca1800 import LeicaTCA1800
             mu = LeicaTCA1800()
         elif re.search('120[0-9]$', sys.argv[1]):
@@ -77,9 +77,9 @@ if __name__ == "__main__":
     # Writer
     if len(sys.argv) > 5:
         from csvwriter import CsvWriter
-        wrt = CsvWriter(angle = 'DMS', dist = '.3f', dt = '%Y-%m-%d %H:%M:%S',
-                        filt = ['id','hz','v','distance','east','north','elev'],
-                        fname = sys.argv[5], mode = 'a', sep = ';')
+        wrt = CsvWriter(angle='DMS', dist='.3f', dt='%Y-%m-%d %H:%M:%S',
+                        filt=['id','hz','v','distance','east','north','elev'],
+                        fname=sys.argv[5], mode='a', sep=';')
     else:
         from echowriter import EchoWriter
         wrt = EchoWriter()
@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
     ts = TotalStation("Leica", mu, iface)
     slopeDist = 0
-    if not edm in mu.edmModes:
+    if edm not in mu.edmModes:
         edm = 'FAST'
     ts.SetEDMMode(edm)
     # initialize instrument and variables
@@ -99,7 +99,7 @@ if __name__ == "__main__":
         measurement = ts.GetMeasure()
         if 'distance' in measurement:
             slopeDist = measurement['distance']
-            
+
         if mode in (3, 4, 5):
             ts.SetLock(1)
             ts.LockIn()
@@ -140,7 +140,7 @@ if __name__ == "__main__":
             if moving:
                 if abs(prev_hz.GetAngle() - measurement['hz'].GetAngle()) < limit.GetAngle() and \
                    abs(prev_v.GetAngle() - measurement['v'].GetAngle()) < limit.GetAngle():
-                    n  += 1
+                    n += 1
                     # store if the measured values within the angle limitation three times
                     if n <= 3:
                         continue
@@ -161,7 +161,7 @@ if __name__ == "__main__":
                    abs(last_v.GetAngle() - measurement['v'].GetAngle()) >= limit.GetAngle():
                     moving = True # still moving
                 continue
-            
+
         #  Get each measurement data
         if 'distance' in measurement:  # Check existance of 'distance' key
             slopeDist = measurement['distance']
@@ -171,13 +171,13 @@ if __name__ == "__main__":
             v = measurement['v']
 
         # Compute relative coordinates according to the instrument origin
-        if('hz' in measurement and 'v' in measurement):
+        if 'hz' in measurement and 'v' in measurement:
             measurement['east'] = slopeDist * math.sin(v.GetAngle()) * \
                 math.sin(hz.GetAngle())
             measurement['north'] = slopeDist * math.sin(v.GetAngle()) * \
                 math.cos(hz.GetAngle())
             measurement['elev'] = slopeDist * math.cos(v.GetAngle())
-            
+
             # Store in file the measurements
             wrt.WriteData(measurement)
             print measurement

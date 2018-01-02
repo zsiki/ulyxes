@@ -27,9 +27,8 @@ from serialiface import SerialIface
 from csvwriter import CsvWriter
 from totalstation import TotalStation
 
-logging.getLogger().setLevel(logging.WARNING)
-
 if __name__ == "__main__":
+    logging.getLogger().setLevel(logging.WARNING)
     # process commandline parameters
     if len(sys.argv) > 1:
         stepinterval = Angle(float(sys.argv[1]), 'DEG')
@@ -66,10 +65,10 @@ if __name__ == "__main__":
     if len(sys.argv) > 6:
         maxiter = int(sys.argv[6])
     iface = SerialIface("rs-232", port)
-    wrt = CsvWriter(angle = 'DMS', dist = '.3f', filt = ['id', 
-	'east', 'north', 'elev', 'hz', 'v', 'distance'], fname = 'stdout', mode = 'a', sep = ';')
+    wrt = CsvWriter(angle='DMS', dist='.3f',
+                    filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
+                    fname='stdout', mode='a', sep=';')
 
-	
     ts = TotalStation(stationtype, mu, iface)
     ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
     ts.Measure()    # initial measurement for startpoint
@@ -98,7 +97,7 @@ if __name__ == "__main__":
             ts.MoveRel(stepinterval, Angle(0))
             continue
 
-        if not 'v' in nextp or not 'distance' in nextp or not 'hz' in nextp:
+        if 'v' not in nextp or 'distance' not in nextp or 'hz' not in nextp:
             ts.MoveRel(stepinterval, Angle(0))
             continue
 
@@ -108,7 +107,7 @@ if __name__ == "__main__":
             w = True
             zenith = nextp['v'].GetAngle()
             zenith1 = math.acos(height0 / nextp['distance'])
-            ts.MoveRel(Angle(0), Angle(zenith1-zenith))   
+            ts.MoveRel(Angle(0), Angle(zenith1-zenith))
             ts.Measure()
             index += 1
             if index > maxiter or ts.measureIface.state != ts.measureIface.IF_OK:
@@ -117,7 +116,7 @@ if __name__ == "__main__":
                 logging.warning('Missing measurement')
                 break
             nextp = ts.GetMeasure()
-            if not 'v' in nextp or not 'distance' in nextp:
+            if 'v' not in nextp or 'distance' not in nextp:
                 break
             height = math.cos(nextp['v'].GetAngle()) * nextp['distance']
         if 'distance' in nextp and w:

@@ -57,6 +57,26 @@ CREATE TABLE monitoring_met (
 	CONSTRAINT pkey_m PRIMARY KEY (id, datetime)
 );
 
+-- table for extra info
+-- datetime of observation
+-- nref number of reference points
+-- nrefobs number of reference points measured
+-- nmon number of monitoring points
+-- nmonobs number of monitoring points measured
+CREATE TABLE monitoring_inf (
+    datetime timestamp NOT NULL,
+	nref integer,
+	nrefobs integer,
+	nmon integer,
+	nmonobs integer,
+	maxincl double precision,
+	std_east double precision,
+	std_north double precision,
+	std_elev double precision,
+	std_ori double precision,
+	CONSTRAINT pkey_i PRIMARY KEY (datetime)
+);
+
 -- table for point groups
 -- id name of group
 -- remark optional description of group

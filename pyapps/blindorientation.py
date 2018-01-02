@@ -28,7 +28,7 @@ class Orientation(object):
         :param dist_tol: distance tolerance, default 0.1 m
     """
 
-    def __init__(self, observations, ts, dist_tol = 0.1):
+    def __init__(self, observations, ts, dist_tol=0.1):
         """ initialize
         """
         self.dist_tol = dist_tol
@@ -38,12 +38,12 @@ class Orientation(object):
 
     def FindPoint(self, obs):
         """ Find point from observation (distance and zenith)
-            compering slope distances and heifgt differences
+            compering slope distances and heigth differences
 
             :param obs: observation data
-            :returns: orientation angle
+            :returns: bearing to actual instrument direction
         """
-        if not 'distance' in obs or not 'v' in obs:
+        if 'distance' not in obs or 'v' not in obs:
             return None
         d_elev = obs['distance'] * math.cos(obs['v'].GetAngle())
         for o in self.observations:
@@ -56,7 +56,7 @@ class Orientation(object):
 
     def Search(self):
         """ Search for a prism
-        
+
             :returns: dictionary on error with errorCode
         """
         self.ts.GetATR()    # wake up instrument
@@ -96,18 +96,18 @@ class Orientation(object):
                     # repeat power search to skip false prisms
                     for i in range(10):
                         ans = self.ts.PowerSearch(1)
-                        if not 'errorCode' in ans:
+                        if 'errorCode' not in ans:
                             self.ts.Measure()
                             obs = self.ts.GetMeasure()
                             w = self.FindPoint(obs)
                             if w is not None:
                                 ans = self.ts.SetOri(w)
                                 return ans
-        if not 'errorCode' in ans:
+        if 'errorCode' not in ans:
             self.ts.Measure()
             obs = self.ts.GetMeasure()
             w = self.FindPoint(obs)
-            if not w is None:
+            if w is not None:
                 ans = self.ts.SetOri(w)
                 return ans
         # try blind find
@@ -115,16 +115,20 @@ class Orientation(object):
         if 'errorCode' in angles:
             logging.error("Cannot measure angles")
             return angles
+        if 'hz' not in angles:
+            logging.error("No Hz got from instrument")
+            angles['errorCode'] = 999
+            return angles
         act_hz = angles['hz'].GetAngle()
         while dhz < PI2:
             act_v = min_v
             while act_v <= max_v:
                 ans = self.ts.Move(Angle(act_hz), Angle(act_v), 1)
-                if not 'errorCode' in ans:
+                if 'errorCode' not in ans:
                     self.ts.Measure()
                     obs = self.ts.GetMeasure()
                     w = self.FindPoint(obs)
-                    if not w is None:
+                    if w is not None:
                         ans = self.ts.SetOri(w)
                         return ans
                 act_v += self.step
@@ -149,9 +153,9 @@ if __name__ == '__main__':
     if ifname[-4:] != '.dmp' and ifname[-4:] != '.geo':
         ifname += '.geo'
     if ifname[-4:] == '.geo':
-        g = GeoReader(fname = ifname)
+        g = GeoReader(fname=ifname)
     else:
-        g = CsvReader(fname = ifname)
+        g = CsvReader(fname=ifname)
     data = g.Load()
     stationtype = '1100'
     if len(sys.argv) > 2:
