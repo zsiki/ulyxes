@@ -59,7 +59,7 @@ class GeoReader(FileReader):
                             res[self.codes[key]] = Angle(www[1], 'DMS')
                         else:
                             res[self.codes[key]] = Angle(float(www[1]))
-                    elif key in (3, 6, 9, 11, 37, 38, 39):
+                    elif key in (3, 6, 9, 11, 20, 37, 38, 39):
                         res[self.codes[key]] = float(www[1]) # numeric
                     elif key == 112:
                         res[self.codes[key]] = int(www[1]) # numeric
