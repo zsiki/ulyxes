@@ -21,7 +21,7 @@ Parameters are stored in config file using JSON format::
     coo_wr: URL or local file to send coordinates to
     obs_wr: URL or local file to send observations to, oprional (default: no output)
     obs_wr_sql: SQL select command to execute
-    strict: 1/0 free station calculated if only all fix points observed in reound
+    strict: 1/0 free station calculated if only all fix points observed in round
     mon_only: 1/0 calculate polars if only monitoring point in observations/do not calculate polar
     st_only: 1/0 calculate monitoring point only in the same round with freestation
     avg_wr: calculate averages from more faces if value 1, no average calculation if value is zero, optional (default: 1) OBSOLATE
