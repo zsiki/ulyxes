@@ -30,6 +30,9 @@ Sample geo file::
     {5 1} {7 6.002123} {8 1.172376} {4 PR} {112 2}
     {5 9} {7 6.235123} {8 1.178538} {4 RLA} {112 2}
 
+    instead of code=4 you can define prism constant using code=20
+    prism constant units are meter
+    
 Sample dmp file::
 
     station; id; hz; v; code;faces
@@ -173,6 +176,9 @@ class Robot(object):
                                 self.ts.SetEDMMode('STANDARD')
                                 if len(self.directions[i]['code']) > 3:
                                     self.ts.SetPrismType(int(self.directions[i]['code'][3:]))
+                                elif 'pc' in self.directions[i]:
+                                    self.ts.SetPc(self.directions[i]['pc'])
+                                    #print self.ts.GetPc()
                             res = self.ts.Move(Angle(hz), Angle(v), 1)
                             if 'errorCode' not in res:
                                 res = self.ts.Measure()
@@ -322,7 +328,7 @@ if __name__ == "__main__":
         met_par = None
 
     # load input data set
-    coo_filt = ['id', 'east', 'north', 'elev']
+    coo_filt = ['id', 'east', 'north', 'elev', 'pc', 'code']
     if ifname[-4:] in ('.geo', '.coo'):
         g = GeoReader(fname=ifname[:-4] + '.geo')
         f = GeoReader(fname=ifname[:-4] + '.coo', filt=coo_filt)

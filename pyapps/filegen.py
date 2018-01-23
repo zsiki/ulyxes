@@ -56,7 +56,7 @@ class ObsGen(object):
                 self.station_elev = w['elev']
 
     def run(self):
-        """ generate observetion list
+        """ generate observation list
 
             :returns: list of observation dicts ordered by hz
         """
@@ -81,8 +81,8 @@ class ObsGen(object):
             obs['faces'] = self.faces
             if 'pc' in coo:
                 obs['pc'] = coo['pc']
-            else:
-                obs['pc'] = 0
+            #else:                  # let pc set on instrument
+            #    obs['pc'] = 0
             if 'code' in coo and coo['code'] in modes1:
                 obs['code'] = coo['code']
             observations.append(obs)

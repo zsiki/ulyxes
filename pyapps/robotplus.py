@@ -5,6 +5,7 @@
 .. moduleauthor:: Zoltan Siki
 
 Sample application for complex monitoring for a station
+Different prism constants can be set with code 20/pc in input
 
 Parameters are stored in config file using JSON format::
 
@@ -260,7 +261,7 @@ if __name__ == "__main__":
     else:
         print "Missing parameter"
         print "Usage: robotplus.py config_file"
-        cr = ConfReader('robotplus', '/home/siki/monitoring/p103.json', None, config_pars)
+        cr = ConfReader('robotplus', '/home/siki/monitoring/p103_1.json', None, config_pars)
         cr.Load()
         if not cr.Check():
             print "Config check failed"
@@ -411,7 +412,7 @@ if __name__ == "__main__":
                                 filt=['id', 'east', 'north', 'elev'])
         else:
             rd_fix = GeoReader(fname=cr.json['coo_rd'], \
-                               filt=['id', 'east', 'north', 'elev'])
+                               filt=['id', 'east', 'north', 'elev', 'pc'])
         # remove other points
         fix_coords = [p for p in rd_fix.Load() if p['id'] in cr.json['fix_list']]
         if len(cr.json['fix_list']) != len(fix_coords):
@@ -456,7 +457,11 @@ if __name__ == "__main__":
         logging.fatal("Orientation failed %d", ans['errCode'])
         sys.exit(-1)
 
-    if 'fix_list' in cr.json and cr.json['fix_list'] is not None:
+    if 'fix_list' in cr.json and cr.json['fix_list'] is not None and \
+        len(fix_coords) < 2:
+        logging.warning('No enough fix points for freestation')
+    elif 'fix_list' in cr.json and cr.json['fix_list'] is not None and \
+        len(fix_coords) > 1:
         # generate observations for fix points, first point is the station
         print "Generating observations for fix..."
         og = ObsGen(st_coord + fix_coords, cr.json['station_id'], \
