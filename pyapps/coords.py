@@ -133,7 +133,7 @@ if __name__ == "__main__":
         wrt = HttpWriter(url=cr.json['coo_wr'], mode='POST', dist=fmt)
     elif re.search('^sqlite:', cr.json['coo_wr']):
         wrt = SqLiteWriter(db=cr.json['coo_wr'][7:], dist=fmt,
-                           table='monitring_coo',
+                           table='monitoring_coo',
                            filt=['id', 'east', 'north', 'elev', 'datetime', 'n', 'ori', 'std_east', 'std_north', 'std_elev', 'std_ori'])
     else:
         wrt = GeoWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt)
@@ -170,8 +170,6 @@ if __name__ == "__main__":
             #print mon_coords
     else:
         mon_coords = []
-    if re.search('^http[s]?://', cr.json['coo_wr']):
-        wrt = HttpWriter(url=cr.json['coo_wr'], mode='POST', dist=fmt)
     # observation writer
     if 'obs_wr' in cr.json:
         if re.search('^http[s]?://', cr.json['obs_wr']):
