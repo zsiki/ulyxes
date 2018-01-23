@@ -26,7 +26,8 @@ import sys
 import re
 import logging
 import os
-import pyGnuplot #https://sourceforge.net/projects/pygnuplot/
+#https://sourceforge.net/projects/pygnuplot/
+import pyGnuplot
 import math
 
 sys.path.append('../pyapi/')
@@ -107,7 +108,7 @@ if __name__ == "__main__":
             logging.error('No B point of reference line found: %s ' % cr.json['ref_line_points'][1])
         #TODO: tavolsag, iranyszog fuggveny nincs?
         if (iA and iB):
-            dAB = math.sqrt((iA['east'] - iB['east'])**2 + (iA['north'] - iB['north'])**2)
+            dAB = math.hypot(iB['east'] - iA['east'], iB['north'] - iA['north'])
             sinAB = (iB['east'] - iA['east']) / dAB
             cosAB = (iB['north'] - iA['north']) / dAB
             y0 = iA['east']
@@ -115,8 +116,8 @@ if __name__ == "__main__":
         else:
             y0 = 0
             x0 = 0
-            sinAB = 1
-            cosAB = 0
+            sinAB = 0
+            cosAB = 1
         logging.info('parameters of transformation into reference line: %.4f, %.4f, %.6f, %.6f' % (y0, x0, sinAB, cosAB))
 
     #plot each points
