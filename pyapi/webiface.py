@@ -22,12 +22,13 @@ class WebIface(Iface):
         :param url: address to read from (str)
     """
 
-    def __init__(self, name, url, fmt):
+    def __init__(self, name, url, fmt, timeout=15):
         """Create an instance of the web interface
         """
         super(WebIface, self).__init__(name)
         self.url = url
         self.fmt = fmt
+        self.timeout = timeout
 
     def Send(self, msg):
         """ send message to web
@@ -36,8 +37,8 @@ class WebIface(Iface):
             :returns: downloaded data
         """
         try:
-            response = urllib2.urlopen(self.url + '?' + msg)
-        except urllib2.URLError:
+            response = urllib2.urlopen(self.url + '?' + msg, timeout=self.timeout)
+        except:
             response = None
             data = None
         if response is not None:
