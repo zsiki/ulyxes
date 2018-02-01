@@ -21,7 +21,7 @@ class WebMetMeasureUnit(MeasureUnit):
     def __init__(self, name = None, typ = 'met sensor', msg = None):
         """ constructor for measure unit
         """
-        super(WebMetMeasureUnit, self).__init__(name, type)
+        super(WebMetMeasureUnit, self).__init__(name, typ)
         self.msg = msg
 
     def GetTempMsg(self):
