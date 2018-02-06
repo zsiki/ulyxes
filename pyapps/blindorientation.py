@@ -46,12 +46,21 @@ class Orientation(object):
         if 'distance' not in obs or 'v' not in obs:
             return None
         d_elev = obs['distance'] * math.cos(obs['v'].GetAngle())
+        min_o = None
+        mind = 1e10
+        # find nearest point
         for o in self.observations:
             if 'distance' in o and 'v' in o:
                 d_elev1 = o['distance'] * math.cos(o['v'].GetAngle())
-                if abs(o['distance'] - obs['distance']) < self.dist_tol and \
-                   abs(d_elev1 - d_elev) < self.dist_tol:
-                    return o['hz']
+                dd = abs(o['distance'] - obs['distance'])
+                de = abs(d_elev1 - d_elev)
+                if dd < self.dist_tol and de < self.dist_tol:
+                    ddd = math.sqrt(dd * dd + de * de)
+                    if mind > ddd:
+                        mind = ddd
+                        min_o = o
+        if min_o:
+            return min_o['hz']
         return None
 
     def Search(self):
