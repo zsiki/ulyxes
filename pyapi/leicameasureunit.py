@@ -11,10 +11,10 @@
 
 """
 
-from measureunit import MeasureUnit
-from angle import Angle
 import re
 import logging
+from measureunit import MeasureUnit
+from angle import Angle
 
 class LeicaMeasureUnit(MeasureUnit):
     """ This class contains the Leica robotic total station specific functions
@@ -281,16 +281,17 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         return '%R1Q,{0:d}:'.format(self.codes['GETREFCORR'])
 
-    def SetStationMsg(self, e, n, z):
+    def SetStationMsg(self, e, n, z, ih=0.0):
         """ Set station coordinates
 
             :param e: easting
             :param n: northing
             :param z: elevation
+            :param ih: instrument height (optional, default 0)
             :returns: set station coordinates message
         """
-        return '%R1Q,{0:d}:{1:f},{2:f},{3:f}'.format(self.codes['SETSTN'], \
-            e, n, z)
+        return '%R1Q,{0:d}:{1:f},{2:f},{3:f},{4:f}'.format( \
+            self.codes['SETSTN'], e, n, z, ih)
 
     def GetStationMsg(self):
         """ Get station coordinates
@@ -375,7 +376,7 @@ class LeicaMeasureUnit(MeasureUnit):
             prg = self.edmProg[prg]
         return '%R1Q,{0:d}:{1:d}'.format(self.codes['MEASUREANGDIST'], prg)
 
-    def CoordsMsg (self, wait=15000, incl=0):
+    def CoordsMsg(self, wait=15000, incl=0):
         """ Get coordinates
 
             :param wait: wait-time in ms, optional (default 15000), it must be greater than 12000, the default on instrument

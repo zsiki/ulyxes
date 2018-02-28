@@ -159,15 +159,16 @@ class TotalStation(Instrument):
         msg = self.measureUnit.GetRefCorrMsg()
         return self._process(msg)
 
-    def SetStation(self, easting, northing, elevation):
+    def SetStation(self, easting, northing, elevation, ih=0.0):
         """ Set station coordinates
 
             :param easting: easting of station
             :param northing: northing of station
             :param elevation: elevation of station
+            :param ih: instrument height
             :returns: ???
         """
-        msg = self.measureUnit.SetStationMsg(easting, northing, elevation)
+        msg = self.measureUnit.SetStationMsg(easting, northing, elevation, ih)
         return self._process(msg)
 
     def GetStation(self):
@@ -444,10 +445,14 @@ if __name__ == "__main__":
     iface = SerialIface("rs-232", "/dev/ttyUSB0")
     wrt = EchoWriter()
     ts = TotalStation("Leica", mu, iface, wrt)
-    ts.GetInstrumentNo()
-    ts.GetInstrumentName()
+    ts.SetStation(10.0, 20., 30., 1.0)
+    print ts.GetStation()
+    #ts.GetInstrumentNo()
+    #ts.GetInstrumentName()
     #ts.SetEDMMode(ts.measureUnit.edmModes['RLSTANDARD'])
-    ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
+    #ts.SetPc(-0.0087)
+    #print ts.GetPc()
+    #ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
     #ts.Measure()
     #print (ts.GetMeasure())
-    ts.SwitchOff()
+    #ts.SwitchOff()
