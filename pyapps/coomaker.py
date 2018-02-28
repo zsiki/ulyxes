@@ -24,14 +24,23 @@ from serialiface import SerialIface
 from geowriter import GeoWriter
 from totalstation import TotalStation
 
+def GetFloat(prompt, errstr="Invalid value!"):
+
+    val = None
+    while val is None:
+        try:
+            val = float(raw_input(prompt))
+        except ValueError:
+            print errstr
+    return val
+
 if __name__ == "__main__":
     # process commandline parameters
     if len(sys.argv) > 1:
         ofname = sys.argv[1]
     else:
         print "Usage: coomaker.py output_file [sensor] [serial_port]"
-        #exit(-1)
-        ofname = 'test.geo'
+        exit(-1)
     if ofname[-4:] == '.geo' or ofname[-4:] == '.coo':
         ofname = ofname[:-4]
         otype = 'geo'
@@ -70,11 +79,14 @@ if __name__ == "__main__":
     # get station data
     coo = {}
     coo['id'] = raw_input("Station id: ")
-    coo['east'] = float(raw_input("Station  east: "))
-    coo['north'] = float(raw_input("Station north: "))
-    coo['elev'] = float(raw_input("Station  elev: "))
+    coo['east'] = GetFloat("Station  east: ")
+    coo['north'] = GetFloat("Station north: ")
+    coo['elev'] = GetFloat("Station  elev: ")
+    ih = GetFloat("Instrument height: ")
     coo_wrt.WriteData(coo)
-    ih = float(raw_input("Instrument height: "))
+    # upload station coordinates and instrument height to the instrument
+    ts.SetStation(coo['east'], coo['north'], coo['elev'], ih)
+    print ts.GetStation()
     geo = {}
     if otype == 'geo':
         geo['station'] = coo['id']
