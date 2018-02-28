@@ -1,1 +1,6 @@
 *.pyc
+TODO
+*.log
+*.sqlite
+*.db
+*.txt
