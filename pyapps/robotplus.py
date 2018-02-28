@@ -159,10 +159,11 @@ def avg_obs(obs):
         hz = sum(hz1 + hz2) / (len(hz1) + len(hz2))
         # check before store average
         # TODO limit from config
-        if len([x for x in hz1 + hz2 if abs(x - hz) > 60.0 / 200000.0]):
-            str_hz = [Angle(x).GetAngle('GON') for x in hz1 + hz2]
+        str_hz = [Angle(abs(x - hz)).GetAngle('GON')
+            for x in hz1 + hz2 if abs(x - hz) > 60.0 / 200000.0]
+        if len(str_hz):
             logging.error('Large Hz difference from faces [GON]: %.4f %s',
-                          str_hz, k)
+                          max(str_hz), k)
             continue    # skip point
         v1 = [o['v'].GetAngle() for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi]
@@ -175,10 +176,11 @@ def avg_obs(obs):
         v = sum(v1 + v2) / (len(v1) + len(v2))
         # check before store average
         # TODO limit from config
-        if len([x for x in v1 + v2 if abs(x - v) > 60.0 / 200000.0]):
-            str_v = [Angle(x).GetAngle('GON') for x in v1 + v2]
+        str_v = [Angle(abs(x-v)).GetAngle('GON')
+            for x in v1 + v2  if abs(x - v) > 60.0 / 200000.0]
+        if len(str_v):
             logging.error('Large V difference from faces: %.4f at point %s',
-                          str_v, k)
+                          max(str_v), k)
             continue    # skip point
         res_obs = {'id': k, 'hz': Angle(hz), 'v': Angle(v)}
         sd12 = [o['distance'] for o in obs \
@@ -187,8 +189,9 @@ def avg_obs(obs):
             sd = sum(sd12) / len(sd12)
             # check before store average
             # TODO limit from config
-            if len([x for x in sd12 if abs(x - sd) > 0.01]):
-                logging.error('Large dist difference from faces: %.4f at point %s', sd, k)
+            str_d = [abs(x - sd) for x in sd12 if abs(x - sd) > 0.01]
+            if len(str_d):
+                logging.error('Large dist difference from faces: %.4f at point %s', max(str_d), k)
                 continue    # skip point
             res_obs['distance'] = sd
         # cross & lengthincline from face left
