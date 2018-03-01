@@ -24,14 +24,22 @@ from serialiface import SerialIface
 from geowriter import GeoWriter
 from totalstation import TotalStation
 
-def GetFloat(prompt, errstr="Invalid value!"):
-
+def GetFloat(prompt, default=0.0, errstr="Invalid value!"):
+    """ read a float value with error control & default
+        :param prompt: message to write out to the user
+        :param default: default value
+        :param errstr: error message if input not float
+    """
     val = None
     while val is None:
-        try:
-            val = float(raw_input(prompt))
-        except ValueError:
-            print errstr
+        ans = raw_input((prompt + "[{:.1f}]: ").format(default))
+        if len(ans):
+            try:
+                val = float(ans)
+            except ValueError:
+                print errstr
+        else:
+            val = default
     return val
 
 if __name__ == "__main__":
@@ -50,7 +58,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         stationtype = sys.argv[2]
     else:
-        stationtype = '1800'
+        stationtype = '1200'
     if re.search('120[0-9]$', stationtype):
         from leicatps1200 import LeicaTPS1200
         mu = LeicaTPS1200()
@@ -79,14 +87,20 @@ if __name__ == "__main__":
     # get station data
     coo = {}
     coo['id'] = raw_input("Station id: ")
-    coo['east'] = GetFloat("Station  east: ")
-    coo['north'] = GetFloat("Station north: ")
-    coo['elev'] = GetFloat("Station  elev: ")
-    ih = GetFloat("Instrument height: ")
+    coo['east'] = GetFloat("Station  east ")
+    coo['north'] = GetFloat("Station north ")
+    coo['elev'] = GetFloat("Station  elev ")
+    ih = GetFloat("Instrument height ")
     coo_wrt.WriteData(coo)
     # upload station coordinates and instrument height to the instrument
-    ts.SetStation(coo['east'], coo['north'], coo['elev'], ih)
-    print ts.GetStation()
+    res = {'errorCode': 0}
+    i = 1
+    while 'errorCode' in res and i < 3:
+        res = ts.SetStation(coo['east'], coo['north'], coo['elev'], ih)
+        i += 1
+    if 'errorCode' in res:
+        print "Failed to upload station coordinates code: {:d}".format(res['errorCode'])
+        exit()
     geo = {}
     if otype == 'geo':
         geo['station'] = coo['id']
@@ -95,11 +109,12 @@ if __name__ == "__main__":
 
     ts.SetATR(1)
     ts.SetEDMMode('STANDARD')
+    pc = 0.0
     while 1:
         t_id = raw_input("Target id: ")
         if len(t_id) == 0:
             break
-        pc = float(raw_input("Prism constant [mm]: ")) / 1000.0
+        pc = GetFloat("Prism constant [mm] ", pc * 1000) / 1000.0
         raw_input("Target on prism and press enter")
         ts.SetPc(pc)
         res = ts.MoveRel(Angle(0), Angle(0), 1)
