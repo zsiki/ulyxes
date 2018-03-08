@@ -438,21 +438,27 @@ if __name__ == "__main__":
     from leicatps1200 import LeicaTPS1200
     from leicatcra1100 import LeicaTCRA1100
     from leicatca1800 import LeicaTCA1800
+    from trimble5500 import Trimble5500
     from serialiface import SerialIface
     from echowriter import EchoWriter
     logging.getLogger().setLevel(logging.DEBUG)
-    mu = LeicaTCA1800()
+    #mu = LeicaTPS1200()
+    mu = Trimble5500()
     iface = SerialIface("rs-232", "/dev/ttyUSB0")
+    if isinstance(mu, Trimble5500):
+        # change default eol marker for read
+        iface.eomRead = b'>'
     wrt = EchoWriter()
     ts = TotalStation("Leica", mu, iface, wrt)
+    ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
     ts.SetStation(10.0, 20., 30., 1.0)
     print ts.GetStation()
     #ts.GetInstrumentNo()
     #ts.GetInstrumentName()
     #ts.SetEDMMode(ts.measureUnit.edmModes['RLSTANDARD'])
-    #ts.SetPc(-0.0087)
+    #ts.SetPc(0.0068)
     #print ts.GetPc()
-    #ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
-    #ts.Measure()
-    #print (ts.GetMeasure())
+    ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
+    ts.Measure()
+    print (ts.GetMeasure())
     #ts.SwitchOff()

@@ -74,28 +74,31 @@ class Trimble5500(MeasureUnit):
             :param anss: answers got from instrument
             :returns: dictionary
         """
-        msgList = re.split('\|', msgs)
-        ansList = re.split('\|', anss)
+        msgList = msgs.split('\|')
+        ansList = anss.split('\|')
         res = {}
         for msg, ans in zip(msgList, ansList):
             if len(msg.strip()) == 0:
                 continue
             # get command id form message
-            ansBufflist = re.split('\n=', ans)
-            commandID = ansBufflist[0]
-            if commandID == self.codes['HA']:
-                res['hz'] = Angle(float(ansBufflist[1]), 'PDEG')
-            elif commandID == self.codes['VA']:
-                res['v'] = Angle(float(ansBufflist[1]), 'PDEG')
-            elif commandID == self.codes['SD']:
-                res['distance'] = float(ansBufflist[1])
-            elif commandID == self.codes['EASTING']:
-                res['easting'] = float(ansBufflist[1])
-            elif commandID == self.codes['NORTHING']:
-                res['northing'] = float(ansBufflist[1])
-            elif commandID == self.codes['ELE']:
-                res['elevation'] = float(ansBufflist[1])
-            # TODO add all codes!
+            ansBufflist = ans.split('\n')
+            for ans1 in ansBufflist:
+                if '=' in ans1:
+                    buf = ans1.strip('\r|').split('=')
+                    commandID = int(buf[0])
+                    if commandID == self.codes['HA']:
+                        res['hz'] = Angle(float(buf[1]), 'PDEG')
+                    elif commandID == self.codes['VA']:
+                        res['v'] = Angle(float(buf[1]), 'PDEG')
+                    elif commandID == self.codes['SD']:
+                        res['distance'] = float(buf[1])
+                    elif commandID == self.codes['EASTING']:
+                        res['easting'] = float(buf[1])
+                    elif commandID == self.codes['NORTHING']:
+                        res['northing'] = float(buf[1])
+                    elif commandID == self.codes['ELE']:
+                        res['elevation'] = float(buf[1])
+                    # TODO add all codes!
         return res
 
     def SetPcMsg(self, pc):
@@ -158,12 +161,13 @@ class Trimble5500(MeasureUnit):
         return 'RG,{0:d}|RG,{1:d}'.format(
                 self.codes['EARAD'], self.codes['REFRAC'])
 
-    def SetStationMsg(self, e, n, z=None):
+    def SetStationMsg(self, e, n, z=None, ih=0):
         """ Set station coordinates
         
             :param e: easting
             :param n: northing
             :param z: elevation
+            :param ih: instrument height
             :returns: set station coordinates message
           
         """
@@ -171,6 +175,8 @@ class Trimble5500(MeasureUnit):
             self.codes['EASTING'], e, self.codes['NORTHING'], n)
         if z is not None:
             msg += '|WG,{0:d}={1:.3f}'.format(self.codes['ELE'], z)
+        # TODO instrumenrt height
+        msg += '|WG,{0:d}={1:.3f}'.format(self.codes['IH'], ih)
         return msg
 
     def GetStationMsg(self):
@@ -179,8 +185,9 @@ class Trimble5500(MeasureUnit):
             :returns: get station coordinates message
           
         """
-        return 'RG,{0:d}|RG,{1:d}|RG,{2:d}'.format(
-            self.codes['EASTING'], self.codes['NORTHING'], self.codes['ELE'])
+        return 'RG,{0:d}|RG,{1:d}|RG,{2:d}|RG,{3:d}'.format(
+            self.codes['EASTING'], self.codes['NORTHING'], self.codes['ELE'],
+            self.codes['IH'])
 
     def SetEDMModeMsg(self, mode):
         """ Set EDM mode
