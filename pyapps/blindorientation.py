@@ -157,7 +157,7 @@ if __name__ == '__main__':
         ifname = sys.argv[1]
     else:
         #ifname = 'test.geo'
-        print "Usage: blindorientation.py input_file totalstation port"
+        print("Usage: blindorientation.py input_file totalstation port")
         sys.exit(-1)
     if ifname[-4:] != '.dmp' and ifname[-4:] != '.geo':
         ifname += '.geo'
@@ -188,4 +188,4 @@ if __name__ == '__main__':
     iface = SerialIface("rs-232", port)
     ts = TotalStation(stationtype, mu, iface)
     o = Orientation(data, ts)
-    print o.Search()
+    print(o.Search())

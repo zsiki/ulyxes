@@ -109,10 +109,10 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         fname = sys.argv[1]
         if not os.path.isfile(fname):
-            print "File not found: " + fname
+            print("File not found: " + fname)
             sys.exit(-1)
     else:
-        print "Usage: freestation.py input_file gama_path station_id station_height"
+        print("Usage: freestation.py input_file gama_path station_id station_height")
         sys.exit(-1)
     if fname[-4:] not in ['.geo', '.coo', '.dmp', '.csv']:
         fname += '.geo'
@@ -139,4 +139,4 @@ if __name__ == "__main__":
     st = False  # station found
     coords = coo.Load()
     f = Freestation(observations, coords, gama_path)
-    print f.Adjustment()
+    print(f.Adjustment())

@@ -66,4 +66,4 @@ class SqLiteReader(Reader):
 if __name__ == "__main__":
     myfile = SqLiteReader(db="/home/siki/tanszek/szelkapu/szk1/szk1.db",
                           sql="SELECT * FROM monitoring_obs WHERE datetime between '2017-11-17 12:00:00' and '2017-11-22 12:00:00' ORDER BY datetime")
-    print myfile.GetNext()
+    print(myfile.GetNext())

@@ -56,4 +56,4 @@ class FileReader(Reader):
 
 if __name__ == '__main__':
     fr = FileReader('test', 'reader.py')
-    print fr.Load()
+    print(fr.Load())

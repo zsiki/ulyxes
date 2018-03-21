@@ -44,4 +44,4 @@ class JSONReader(FileReader):
 
 if __name__ == '__main__':
     jr = JSONReader('test', '../pyapps/test.json')
-    print jr.Load()
+    print(jr.Load())

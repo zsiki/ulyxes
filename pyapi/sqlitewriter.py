@@ -90,10 +90,10 @@ if __name__ == "__main__":
     data = {'id': '1', 'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), \
             'distance': 123.6581, 'lengthincline': Angle(0.0015, 'GON'), \
             'crossincline': Angle(0.0020, 'GON')}
-    print myfile.WriteData(data)
+    print(myfile.WriteData(data))
     myfile = SqLiteWriter(db="test.sqlite", table='monitoring_coo')
     data = {'id': '1', 'east': 0.12345, 'north': 100.2365, 'elev': 123.6581}
-    print myfile.WriteData(data)
+    print(myfile.WriteData(data))
     myfile = SqLiteWriter(db="test.sqlite", table='monitoring_met')
     data = {'id': '1', 'temp': 12.45, 'pressure': 1017}
-    print myfile.WriteData(data)
+    print(myfile.WriteData(data))

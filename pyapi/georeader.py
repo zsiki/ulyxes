@@ -72,4 +72,4 @@ class GeoReader(FileReader):
 if __name__ == "__main__":
     g = GeoReader(fname='/home/siki/GeoEasy/data/test1.geo')
     m = g.Load()
-    print m
+    print(m)

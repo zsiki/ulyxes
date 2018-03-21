@@ -150,11 +150,11 @@ if __name__ == "__main__":
     t = i2c.Send((('write8', 0xF4, 0x2E),
                 ('sleep', 0.005),
                 ( 'readU16BE', 0xF6)))
-    print "raw temperature %d" % t["data"]
+    print("raw temperature %d" % t["data"])
     p = i2c.Send((('write8', 0xF4, 0x34 + (1 << 6)),
                 ('sleep', 0.005),
                 ('readU8', 0xF6),
                 ('readU8', 0xF6+1),
                 ('readU8', 0xF6+2),
                 ('op', '((data[0] << 16) + (data[1] << 8) + data[2]) >> (8 - 1)')))
-    print "raw pressure %d" % p["data"]
+    print("raw pressure %d" % p["data"])

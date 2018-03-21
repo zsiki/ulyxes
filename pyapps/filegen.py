@@ -129,7 +129,7 @@ if __name__ == "__main__":
                     'code'])
     og = ObsGen(data, station_id, station_ih)
     if og.station_east is None or og.station_north is None or og.station_elev is None:
-        print "station coordinates not found: ", station_id
+        print("station coordinates not found: ", station_id)
         exit(-1)
     observations = og.run()
 

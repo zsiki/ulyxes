@@ -86,4 +86,4 @@ if __name__ == "__main__":
     # read most recent coordinates of all 3D monitoring points from server
     rd = HttpReader(url='http://localhost/monitoring/query.php', ptys='MON', \
                     filt = ['id', 'east', 'north', 'elev'])
-    print rd.Load()
+    print(rd.Load())

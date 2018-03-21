@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     # nmea data OK?
     if li.state != li.IF_OK:
-        print "input file/device?"
+        print("input file/device?")
         exit(1)
 
     # nmea processing unit

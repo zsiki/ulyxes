@@ -447,18 +447,18 @@ if __name__ == "__main__":
     iface = SerialIface("rs-232", "/dev/ttyUSB0")
     if isinstance(mu, Trimble5500):
         # change default eol marker for read
-        iface.eomRead = b'>'
+        iface.eomRead = '>'
     wrt = EchoWriter()
     ts = TotalStation("Leica", mu, iface, wrt)
     ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
     ts.SetStation(10.0, 20., 30., 1.0)
-    print ts.GetStation()
+    print(ts.GetStation())
     #ts.GetInstrumentNo()
     #ts.GetInstrumentName()
     #ts.SetEDMMode(ts.measureUnit.edmModes['RLSTANDARD'])
     #ts.SetPc(0.0068)
-    #print ts.GetPc()
+    #print(ts.GetPc())
     ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
     ts.Measure()
-    print (ts.GetMeasure())
+    print(ts.GetMeasure())
     #ts.SwitchOff()

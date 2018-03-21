@@ -38,38 +38,38 @@ class ConfReader(JSONReader):
         # set default values for missing parameters
         for par in self.pars:
             if self.pars[par]['required'] and not par in self.json:
-                print "missing required parameter: {0}".format(par)
+                print("missing required parameter: {0}".format(par))
                 return False
             if 'default' in self.pars[par] and not par in self.json:
                 self.json[par] = self.pars[par]['default']
         for par in self.json:
             if not par in self.pars:
-                print "unknown parameter: {0}".format(par)
+                print("unknown parameter: {0}".format(par))
                 continue
             # type checking
             pardef = self.pars[par]
             if 'type' in pardef:
                 if pardef['type'] == 'int' and type(self.json[par]) is not int:
-                    print "type mismatch parameter: {0}".format(par)
+                    print("type mismatch parameter: {0}".format(par))
                     return False
                 elif pardef['type'] == 'float' and \
                     type(self.json[par]) is not int and \
                     type(self.json[par]) is not float:
-                    print "type mismatch parameter: ".format(par)
+                    print("type mismatch parameter: ".format(par))
                     return False
                 elif pardef['type'] == 'list' and \
                     type(self.json[par]) is not list:
-                    print "type mismatch parameter: {0}".format(par)
+                    print("type mismatch parameter: {0}".format(par))
                     return False
                 elif pardef['type'] == 'file' and \
                     type(self.json[par]) is not str and \
                     not os.path.isfile(self.json[par]):
-                    print "type mismatch parameter or file does not exist: {0}".format(par)
+                    print("type mismatch parameter or file does not exist: {0}".format(par))
                     return False
                 # check set for valid values
                 if 'set' in pardef and \
                     not self.json[par] in pardef['set']:
-                    print "invalid value: {0}".format(par)
+                    print("invalid value: {0}".format(par))
                     return False
                     # TODO reglist
         # TODO complex rules e.g. no fix but gama_path given
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     }
     jr = ConfReader('test', '../pyapps/robotplus.json', None, config_pars)
     if jr.state == jr.RD_OK:
-        print jr.Load()
-        print jr.Check()
+        print(jr.Load())
+        print(jr.Check())
     else:
-        print "config file?"
+        print("config file?")

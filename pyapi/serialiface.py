@@ -13,7 +13,6 @@
 
 from iface import Iface
 import serial
-import re
 import logging
 
 class SerialIface(Iface):
@@ -31,8 +30,8 @@ class SerialIface(Iface):
             :param eomWrite: end of message char from computer (str), default '\\r\\n'
     """
     def __init__(self, name, port, baud=9600, byteSize=8,
-        parity=serial.PARITY_NONE, stop=1, timeout=15, eomRead=b'\r\n',
-        eomWrite=b'\r\n'):
+        parity=serial.PARITY_NONE, stop=1, timeout=15, eomRead='\r\n',
+        eomWrite='\r\n'):
         """ Constructor for serial interface
         """
         super(SerialIface, self).__init__(name)
@@ -79,17 +78,17 @@ class SerialIface(Iface):
         if self.ser is None or not self.opened or self.state != self.IF_OK:
             logging.error(" serial line not opened")
             return None
-        # read answer till end of line
-        ans = b''
+        # read answer till end of message marker
+        ans = ''
         w = -1 * len(self.eomRead)
         while (ans[w:] != self.eomRead):
-            ch = b''
+            ch = ''
             try:
-                ch = self.ser.read(1)
+                ch = (self.ser.read(1)).decode('ascii')
             except:
                 self.state = self.IF_READ
                 logging.error(" cannot read serial line")
-            if ch == b'':
+            if ch == '':
                 # timeout exit loop
                 self.state = self.IF_TIMEOUT
                 logging.error(" timeout on serial line")
@@ -132,18 +131,22 @@ class SerialIface(Iface):
             :param msg: message to send, it can be multipart message separated by '|' (str)
             :returns: answer from instrument (str)
         """
-        msglist = re.split("\|", msg)
-        res = b""
+        msglist = msg.split("|")
+        res = ''
         #sending
         for m in msglist:
             if self.PutLine(m) == 0:
-                res += self.GetLine() + b"|"
-        if res.endswith(b"|"):
+                res += self.GetLine() + '|'
+        if res.endswith('|'):
             res = res[:-1]
         return res
 
 if __name__ == "__main__":
-    a = SerialIface('test', '/dev/ttyUSB0')
-    print (a.GetName())
-    print (a.GetState())
-    print (a.Send('%R1Q,2008:1,0'))
+    a = SerialIface('test', '/dev/ttyUSB0', eomRead='>')
+    print(a.GetName())
+    print(a.GetState())
+    #print(a.Send('%R1Q,2008:1,0'))
+    print(a.Send('TG'))
+    print(a.Send('WG,20=0.008'))
+    print(a.Send('RG,20'))
+    print(a.GetState())

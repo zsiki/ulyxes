@@ -52,7 +52,7 @@ if __name__ == "__main__":
         from trimble5500 import Trimble5500
         mu = Trimble5500()
     else:
-        print "unsupported instrument type"
+        print("unsupported instrument type")
         exit(1)
 
     if len(sys.argv) > 3:
@@ -92,7 +92,7 @@ if __name__ == "__main__":
         obs = ts.GetMeasure()
         if ts.measureIface.state != ts.measureIface.IF_OK or \
            'errorCode' in obs:
-            print 'Start again!'
+            print('Start again!')
             exit(1)
         # Calculation of the directed coordinates according to the instrument's origin
         obs['east'] = obs['distance'] * math.sin(obs['v'].GetAngle()) * \
@@ -102,7 +102,7 @@ if __name__ == "__main__":
         obs['elev'] = obs['distance'] * math.cos(obs['v'].GetAngle())
         wrt.WriteData(obs)
         points.append(obs) # Appending the observations to the list of measured points
-        #print (points[i])
+        #print(points[i])
 
     # Definition of the different planes
     if numberOfPoints == 1:   # in case of horizontal section
@@ -247,7 +247,7 @@ if __name__ == "__main__":
                                   [math.sin(stepinterval.GetAngle()), math.cos(stepinterval.GetAngle()), 0.0],
                                   [0.0, 0.0, 1.0]]) # Rotation matrix with the stepinterval angle
 
-        #print np.array([nextp['east'], nextp['north'], nextp['elev']])
+        #print(np.array([nextp['east'], nextp['north'], nextp['elev']]))
 
         # Rotation of the normal vector into the plane
         nextpvar = np.dot(np.array([nextp['east'], nextp['north'], nextp['elev']]), np.dot(MZ, MEast))

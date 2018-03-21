@@ -52,4 +52,4 @@ if __name__ == "__main__":
     w = WebIface("demo", "http://api.openweathermap.org/data/2.5/weather", "json")
     print w.Send("q=budapest&appid=13152b0308b85a39cc9a161e241ec2cf")
     w = WebIface("demo", "http://www.geod.bme.hu/on_line/etrs2eov/etrs2eov.php", "txt")
-    print w.Send("e=650000&n=240000&sfradio=single&format=TXT")
+    print(w.Send("e=650000&n=240000&sfradio=single&format=TXT"))

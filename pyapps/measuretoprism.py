@@ -180,6 +180,6 @@ if __name__ == "__main__":
 
             # Store in file the measurements
             wrt.WriteData(measurement)
-            print measurement
+            print(measurement)
         else:
-            print "Some measurement data(s) are missing..."
+            print("Some measurement data(s) are missing...")

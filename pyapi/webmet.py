@@ -124,5 +124,5 @@ if __name__ == "__main__":
         data = web.GetPressure()
         data['temp'] = web.GetTemp()['temp']
         fw.WriteData(data)
-        print data
+        print(data)
         time.sleep(delay)

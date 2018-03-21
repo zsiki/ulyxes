@@ -386,7 +386,7 @@ if __name__ == "__main__":
     if fname[-4:] != '.geo' and fname[-4:] != '.coo':
         fname += '.geo'
     if not os.path.isfile(fname):
-        print "File not found: " + fname
+        print("File not found: " + fname)
         exit(-1)
     fn = fname[:-4] # remove extension
     g = GamaIface(gama_path, 3, 0.95, 1, 1, 1.5)
@@ -415,20 +415,20 @@ if __name__ == "__main__":
         last_res = res
         res, blunder = g.adjust()
         if res is not None:
-            print res[0]
+            print(res[0])
         else:
-            print "None"
+            print("None")
         if blunder is not None:
-            print blunder
+            print(blunder)
         else:
-            print "None"
+            print("None")
         if res is None  or 'east' not in res[0] or \
            'north' not in res[0] or 'elev' not in res[0]:
-            print "adjustment failed"
+            print("adjustment failed")
             break
         elif blunder is not None and blunder['std-residual'] < 1.0:
-            print "blunders removed"
+            print("blunders removed")
             break
         else:
-            print "%s - %s observation removed" % (blunder['from'], blunder['to'])
+            print("%s - %s observation removed" % (blunder['from'], blunder['to']))
             g.remove_observation(blunder['from'], blunder['to'])

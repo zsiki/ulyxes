@@ -16,6 +16,7 @@ coordinates and observations are written to csv file
     :param argv[6] (iteration): max iteration number for a point, default 10
 """
 import sys
+import time
 import re
 import math
 import logging
@@ -25,6 +26,9 @@ sys.path.append('../pyapi/')
 from angle import Angle, PI2
 from serialiface import SerialIface
 from csvwriter import CsvWriter
+from leicatps1200 import LeicaTPS1200
+from leicatcra1100 import LeicaTCRA1100
+from trimble5500 import Trimble5500
 from totalstation import TotalStation
 
 if __name__ == "__main__":
@@ -37,19 +41,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         stationtype = sys.argv[2]
     else:
-        stationtype = '1200'
-    if re.search('120[0-9]$', stationtype):
-        from leicatps1200 import LeicaTPS1200
-        mu = LeicaTPS1200()
-    elif re.search('110[0-9]$', stationtype):
-        from leicatcra1100 import LeicaTCRA1100
-        mu = LeicaTCRA1100()
-    elif re.search('550[0-9]$', stationtype):
-        from trimble5500 import Trimble5500
-        mu = Trimble5500()
-    else:
-        print "unsupported instrument type"
-        exit(1)
+        stationtype = '5500'
     if len(sys.argv) > 3:
         port = sys.argv[3]
     else:
@@ -65,16 +57,37 @@ if __name__ == "__main__":
     if len(sys.argv) > 6:
         maxiter = int(sys.argv[6])
     iface = SerialIface("rs-232", port)
+    if re.search('120[0-9]$', stationtype):
+        mu = LeicaTPS1200()
+    elif re.search('110[0-9]$', stationtype):
+        mu = LeicaTCRA1100()
+    elif re.search('550[0-9]$', stationtype):
+        mu = Trimble5500()
+        iface.eomRead = b'>'
+    else:
+        print("unsupported instrument type")
+        exit(1)
     wrt = CsvWriter(angle='DMS', dist='.3f',
                     filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
                     fname='stdout', mode='a', sep=';')
 
     ts = TotalStation(stationtype, mu, iface)
-    ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
+    if isinstance(mu, Trimble5500):
+        print("Set Trimble 550x to direct reflex (MNU 722) and press Enter")
+        raw_input('')
+    else:
+        ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
     ts.Measure()    # initial measurement for startpoint
-    startp = ts.GetMeasure()
+    if isinstance(mu, Trimble5500):
+        startp = ts.GetMeasure()
+        i = 0
+        while 'distance' not in startp ans i < 20:
+            i += 1
+            startp = ts.GetMeasure()
+    else:
+        startp = ts.GetMeasure()
     if ts.measureIface.state != ts.measureIface.IF_OK or 'errorCode' in startp:
-        print 'FATAL Cannot measure startpoint'
+        print('FATAL Cannot measure startpoint')
         exit(1)
 
     act = Angle(0)  # actual angle from startpoint
@@ -91,6 +104,8 @@ if __name__ == "__main__":
             ts.measureIface.state = ts.measureIface.IF_OK
             ts.MoveRel(stepinterval, Angle(0))
             continue
+        if isinstance(mu, Trimble5500):
+            time.sleep(5)
         nextp = ts.GetMeasure()  # get observation data
         if ts.measureIface.state != ts.measureIface.IF_OK:
             ts.measureIface.state = ts.measureIface.IF_OK
@@ -115,13 +130,16 @@ if __name__ == "__main__":
                 ts.measureIface.state = ts.measureIface.IF_OK
                 logging.warning('Missing measurement')
                 break
+            if isinstance(mu, Trimble5500):
+                time.sleep(5)
             nextp = ts.GetMeasure()
             if 'v' not in nextp or 'distance' not in nextp:
                 break
             height = math.cos(nextp['v'].GetAngle()) * nextp['distance']
         if 'distance' in nextp and w:
             coord = ts.Coords()
-            res = dict(nextp.items()+coord.items())
+            # TODO 
+            res = dict(nextp.items() + coord.items())
             wrt.WriteData(res)
         ts.MoveRel(stepinterval, Angle(0))
         act += stepinterval

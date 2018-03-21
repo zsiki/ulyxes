@@ -97,11 +97,11 @@ if __name__ == "__main__":
                 logging.fatal("Config check failed")
                 sys.exit(-1)
         else:
-            print "Config file not found " + sys.argv[1]
+            print("Config file not found " + sys.argv[1])
             logging.fatal("Config file not found " + sys.argv[1])
             sys.exit(-1)
     else:
-        print "Usage: coords.py config_file"
+        print("Usage: coords.py config_file")
         cr = ConfReader('coords', '/home/siki/tanszek/szelkapu/szk1/szk1_all.json', None, config_pars)
         cr.Load()
         if not cr.Check():
@@ -112,7 +112,7 @@ if __name__ == "__main__":
     logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
          filemode='a', level=cr.json['log_level'])
     # get station coordinates
-    #print "Loading station coords..."
+    #print("Loading station coords...")
     if re.search('^http[s]?://', cr.json['coo_rd']):
         rd_st = HttpReader(url=cr.json['coo_rd'], ptys=['STA'], \
                            filt=['id', 'east', 'north', 'elev'])
@@ -139,7 +139,7 @@ if __name__ == "__main__":
         wrt = GeoWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt)
     if 'fix_list' in cr.json and cr.json['fix_list'] is not None:
         # get fix coordinates from database
-        #print "Loading fix coords..."
+        #print("Loading fix coords...")
         if re.search('^http[s]?://', cr.json['coo_rd']):
             rd_fix = HttpReader(url=cr.json['coo_rd'], ptys=['FIX'], \
                                 filt=['id', 'east', 'north', 'elev'])
@@ -157,7 +157,7 @@ if __name__ == "__main__":
 
     if 'mon_list' in cr.json and cr.json['mon_list'] is not None:
         # get monitoring coordinates from database
-        #print "Loading mon coords..."
+        #print("Loading mon coords...")
         if re.search('^http[s]?://', cr.json['coo_rd']):
             rd_mon = HttpReader(url=cr.json['coo_rd'], ptys=['MON'], \
                                 filt=['id', 'east', 'north', 'elev'])
@@ -167,7 +167,7 @@ if __name__ == "__main__":
         mon_coords = [p for p in rd_mon.Load() if p['id'] in cr.json['mon_list']]
         if len(cr.json['mon_list']) != len(mon_coords):
             logging.error("Not all mon points found in database")
-            #print mon_coords
+            #print(mon_coords)
     else:
         mon_coords = []
     # observation writer
@@ -212,7 +212,7 @@ if __name__ == "__main__":
         mon_obs = []
         if 'mon_list' in cr.json and cr.json['mon_list'] is not None:
             mon_obs = [o for o in obs_avg if o['id'] in cr.json['mon_list']]
-        print "obs fix:%d all:%d" % (len(fix_obs), len(obs_avg))
+        print("obs fix:%d all:%d" % (len(fix_obs), len(obs_avg)))
         # process observations i..j-1
         n_fix = len(fix_obs)
         n_all = len(obs_avg)
@@ -222,7 +222,7 @@ if __name__ == "__main__":
             (cr.json['strict'] == 1 and n_fix == n_all)):
             # calculate station coordinates as freestation if gama_path set
             if 'gama_path' in cr.json and cr.json['gama_path'] is not None:
-                #print "Freestation..."
+                #print("Freestation...")
                 obs1 = [{'station': cr.json['station_id']}] + fix_obs
                 fs = Freestation(obs1, st_coord + fix_coords,
                                  cr.json['gama_path'], cr.json['dimension'],
@@ -236,7 +236,7 @@ if __name__ == "__main__":
                 # update station coordinates
                 st_coord = w
                 # upload station coords to server
-                #print "Uploading station coords..."
+                #print("Uploading station coords...")
                 # datetime from observations
                 st_coord[0]['datetime'] = fix_obs[0]['datetime']
                 # add number of known points
@@ -248,7 +248,7 @@ if __name__ == "__main__":
                     if wrt1.WriteData(o) <> 0:
                         logging.fatal("Cannot write observations")
                 station = True
-        #print "Saving calculated coords..."
+        #print("Saving calculated coords...")
         # TODO orientation????
         if n_mon > 0 and \
             (cr.json['st_only'] == 0 or station) and \

@@ -102,5 +102,5 @@ if __name__ == "__main__":
         data['elev'] = bmp.GetAltitude()
         data['temp'] = bmp.GetTemp()['temp']
         fw.WriteData(data)
-        print data
+        print(data)
         time.sleep(delay)

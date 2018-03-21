@@ -178,7 +178,7 @@ class Robot(object):
                                     self.ts.SetPrismType(int(self.directions[i]['code'][3:]))
                                 elif 'pc' in self.directions[i]:
                                     self.ts.SetPc(self.directions[i]['pc'])
-                                    #print self.ts.GetPc()
+                                    #print(self.ts.GetPc())
                             res = self.ts.Move(Angle(hz), Angle(v), 1)
                             if 'errorCode' not in res:
                                 res = self.ts.Measure()
@@ -278,14 +278,14 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         ifname = sys.argv[1]
         if not os.path.isfile(ifname):
-            print "Input file doesn't exists: %s" % ifname
+            print("Input file doesn't exists: %s" % ifname)
             exit(-1)
         if ifname[-3:] == '.py':  # configuration file given
             exec 'from ' + ifname[:-3] + ' import *'
             config = True
     else:
-        print "Usage: robot.py input_file [output_file] [sensor] [serial_port] [max_try] [delay_try] [BMP180|webmet] [met_addr] [met_par]"
-        print "  or   robot.py config_file.py"
+        print("Usage: robot.py input_file [output_file] [sensor] [serial_port] [max_try] [delay_try] [BMP180|webmet] [met_addr] [met_par]")
+        print("  or   robot.py config_file.py")
         exit(-1)
     # output file
     if len(sys.argv) > 2:
@@ -296,7 +296,7 @@ if __name__ == "__main__":
         #ofname = 'http://192.168.7.145/monitoring/get.php'
     if ofname[-4:] not in ['.dmp', '.csv', '.geo', '.coo'] and \
         ofname != 'stdout' and ofname[:4] != 'http':
-        print "Unknown output type"
+        print("Unknown output type")
         exit(1)
     if len(sys.argv) > 3:
         stationtype = sys.argv[3]
@@ -386,13 +386,13 @@ if __name__ == "__main__":
         from trimble5500 import Trimble5500
         mu = Trimble5500()
     else:
-        print "Invalid instrument type: " + stationtype
+        print("Invalid instrument type: " + stationtype)
         sys.exit()
     # interface to the totalstation
     iface = SerialIface("rs-232", port)
     ts = TotalStation(stationtype, mu, iface)
     if ts.measureIface.state != ts.measureIface.IF_OK:
-        print "no serial communication"
+        print("no serial communication")
         exit(-1)   # no serial communication available
     ts.GetATR()            # wake up instrument
     #ts.SwitchOn(1) TODO              # wake up instrument

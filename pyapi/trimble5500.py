@@ -74,8 +74,8 @@ class Trimble5500(MeasureUnit):
             :param anss: answers got from instrument
             :returns: dictionary
         """
-        msgList = msgs.split('\|')
-        ansList = anss.split('\|')
+        msgList = msgs.split('|')
+        ansList = anss.split('|')
         res = {}
         for msg, ans in zip(msgList, ansList):
             if len(msg.strip()) == 0:
@@ -265,8 +265,8 @@ class Trimble5500(MeasureUnit):
             :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
             :returns: get coordinates message
         """
-        # Coords must be calculated from observations
-        return None
+        return 'RG,{0:d}|RG,{1:d}|RG,{2:d}'.format(self.codes['NORTHING'],
+            self.codes['EASTING'], self.codes['ELE'])
 
     def GetAnglesMsg(self):
         """ Get angles

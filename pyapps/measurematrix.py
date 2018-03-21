@@ -31,7 +31,7 @@ if __name__ == "__main__":
         try:
             dh_nr = int(sys.argv[1])
         except ValueError:
-            print "invalid numeric value " + sys.argv[1]
+            print("invalid numeric value " + sys.argv[1])
             #sys.exit(1)
     # set vertical stepping interval dv_nr
     dv_nr = 1
@@ -39,7 +39,7 @@ if __name__ == "__main__":
         try:
             dv_nr = int(sys.argv[2])
         except ValueError:
-            print "invalid numeric value " + sys.argv[2]
+            print("invalid numeric value " + sys.argv[2])
             #sys.exit(1)
     # set instrument
     stationtype = '1100'
@@ -55,7 +55,7 @@ if __name__ == "__main__":
         from trimble5500 import Trimble5500
         mu = Trimble5500()
     else:
-        print "unsupported instrument type"
+        print("unsupported instrument type")
         #sys.exit(1)
     # set port
     port = 'COM5'

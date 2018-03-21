@@ -252,22 +252,22 @@ if __name__ == "__main__":
                 cr = ConfReader('robotplus', sys.argv[1], None, config_pars)
                 cr.Load()
             except:
-                print "Error in config file: {0}".format(sys.argv[1])
+                print("Error in config file: {0}".format(sys.argv[1]))
                 sys.exit(-1)
             if not cr.Check():
-                print "Config check failed"
+                print("Config check failed")
                 sys.exit(-1)
         else:
-            print "Config file not found %s" % sys.argv[1]
+            print("Config file not found %s" % sys.argv[1])
             logging.fatal("Config file not found %s", sys.argv[1])
             sys.exit(-1)
     else:
-        print "Missing parameter"
-        print "Usage: robotplus.py config_file"
+        print("Missing parameter")
+        print("Usage: robotplus.py config_file")
         cr = ConfReader('robotplus', '/home/siki/monitoring/p103_1.json', None, config_pars)
         cr.Load()
         if not cr.Check():
-            print "Config check failed"
+            print("Config check failed")
         #sys.exit(-1)
     # logging
     logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
@@ -296,7 +296,7 @@ if __name__ == "__main__":
         logging.fatal("Instrument wake up failed")
         sys.exit(-1)
     # get meteorology data
-    print "Getting met data..."
+    print("Getting met data...")
     if 'met' in cr.json and cr.json['met'] is not None:
         atm = ts.GetAtmCorr()     # get current settings from ts
         if cr.json['met'].upper() == 'WEBMET':
@@ -363,7 +363,7 @@ if __name__ == "__main__":
             if wrtm.WriteData(data) == -1:
                 logging.error('Met data write failed')
     # get station coordinates
-    print "Loading station coords..."
+    print("Loading station coords...")
     if re.search('^http[s]?://', cr.json['coo_rd']):
         rd_st = HttpReader(url=cr.json['coo_rd'], ptys=['STA'], \
                            filt=['id', 'east', 'north', 'elev'])
@@ -409,7 +409,7 @@ if __name__ == "__main__":
             wrt2 = GeoWriter(fname=cr.json['inf_wr'], mode='a', dist=fmt)
     if 'fix_list' in cr.json and cr.json['fix_list'] is not None:
         # get fix coordinates from database
-        print "Loading fix coords..."
+        print("Loading fix coords...")
         if re.search('^http[s]?://', cr.json['coo_rd']):
             rd_fix = HttpReader(url=cr.json['coo_rd'], ptys=['FIX'], \
                                 filt=['id', 'east', 'north', 'elev'])
@@ -425,7 +425,7 @@ if __name__ == "__main__":
 
     if 'mon_list' in cr.json and cr.json['mon_list'] is not None:
         # get monitoring coordinates from database
-        print "Loading mon coords..."
+        print("Loading mon coords...")
         if re.search('^http[s]?://', cr.json['coo_rd']):
             rd_mon = HttpReader(url=cr.json['coo_rd'], ptys=['MON'], \
                                 filt=['id', 'east', 'north', 'elev'])
@@ -439,7 +439,7 @@ if __name__ == "__main__":
         mon_coords = []
     # check orientation including FIX and MON points
     # generate observations for all target points, first point is the station
-    print "Generating observations for targets..."
+    print("Generating observations for targets...")
     og = ObsGen(st_coord + fix_coords + mon_coords, cr.json['station_id'], \
         cr.json['station_height'], cr.json['faces'])
     observations = og.run()
@@ -453,7 +453,7 @@ if __name__ == "__main__":
             logging.fatal("Rotation to face left failed %d", ans['errCode'])
             sys.exit(-1)
     # check/find orientation
-    print "Orientation..."
+    print("Orientation...")
     o = Orientation(observations, ts, cr.json['orientation_limit'])
     ans = o.Search()
     if 'errCode' in ans and cr.json['station_type'] != 'local':
@@ -466,19 +466,19 @@ if __name__ == "__main__":
     elif 'fix_list' in cr.json and cr.json['fix_list'] is not None and \
         len(fix_coords) > 1:
         # generate observations for fix points, first point is the station
-        print "Generating observations for fix..."
+        print("Generating observations for fix...")
         og = ObsGen(st_coord + fix_coords, cr.json['station_id'], \
             cr.json['station_height'], cr.json['faces'])
         observations = og.run()
         # observation to fix points
-        print "Measuring fix..."
+        print("Measuring fix...")
         act_date = datetime.datetime.now()  # start of observations
         r = Robot(observations, st_coord, ts, cr.json['max_try'],
                   cr.json['delay_try'], cr.json['dir_limit'])
         obs_out, coo_out = r.run()
         # calculate station coordinates as freestation if gama_path set
         if 'gama_path' in cr.json and cr.json['gama_path'] is not None:
-            print "Freestation..."
+            print("Freestation...")
             if cr.json['faces'] > 1:
                 obs_out = avg_obs(obs_out)
             # store observations to FIX points
@@ -509,7 +509,7 @@ if __name__ == "__main__":
             # update station coordinates
             st_coord = w
             # upload station coords to server
-            print "Uploading station coords..."
+            print("Uploading station coords...")
             st_coord[0]['datetime'] = act_date
             logging.info("station stddevs[mm/cc]: %.1f %.1f %.1f %.1f",
                 st_coord[0]['std_east'], st_coord[0]['std_north'],
@@ -533,7 +533,7 @@ if __name__ == "__main__":
                 ts.Move(Angle(0.0), Angle(90, 'DEG'), 0)
                 # set direction to orientation angle
                 ans = ts.SetOri(Angle(st_coord[0]['ori'], 'GON'))
-                #print (Angle(st_coord[0]['ori'], 'GON').GetAngle('DMS'))
+                #print(Angle(st_coord[0]['ori'], 'GON').GetAngle('DMS'))
                 if 'errCode' in ans:
                     logging.fatal("Cannot upload orientation to instrument")
                     sys.exit(-1)
@@ -562,12 +562,12 @@ if __name__ == "__main__":
                     sys.exit(-1)
     if 'mon_list' in cr.json and cr.json['mon_list'] is not None:
         # generate observations for monitoring points, first point is the station
-        print "Generating observations for mon..."
+        print("Generating observations for mon...")
         og = ObsGen(st_coord + mon_coords, cr.json['station_id'], \
             cr.json['station_height'], cr.json['faces'])
         observations = og.run()
         # observation to monitoring points
-        print "Measuring mon..."
+        print("Measuring mon...")
         act_date = datetime.datetime.now()  # start of observations
         r = Robot(observations, st_coord, ts)
         obs_out, coo_out = r.run()

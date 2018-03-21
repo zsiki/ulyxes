@@ -88,12 +88,12 @@ if __name__ == '__main__':
 
     s9dof = LSM9DS0('9 DOF', munit, [i1d, i6b], wunit)
     for i in range(5):
-        print "Accelerometer"
+        print("Accelerometer")
         w = s9dof.GetAccel()
-        print math.sqrt(w['acc_x']**2 + w['acc_y']**2 + w['acc_z']**2)
-        print "Magnetometer"
+        print(math.sqrt(w['acc_x']**2 + w['acc_y']**2 + w['acc_z']**2))
+        print("Magnetometer")
         w = s9dof.GetMag()
-        print math.sqrt(w['mag_x']**2 + w['mag_y']**2 + w['mag_z']**2)
-        #print "Gyro"
+        print(math.sqrt(w['mag_x']**2 + w['mag_y']**2 + w['mag_z']**2))
+        #print("Gyro")
         #w = s9dof.GetGyro()
-        #print math.sqrt(w['gyro_x']**2 + w['gyro_y']**2 + w['gyro_z']**2)
+        #print(math.sqrt(w['gyro_x']**2 + w['gyro_y']**2 + w['gyro_z']**2))

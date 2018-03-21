@@ -16,6 +16,7 @@ For each target point the point id and prism constant must be input
 """
 import sys
 import re
+import logging
 
 sys.path.append('../pyapi/')
 
@@ -29,6 +30,7 @@ def GetFloat(prompt, default=0.0, errstr="Invalid value!"):
         :param prompt: message to write out to the user
         :param default: default value
         :param errstr: error message if input not float
+        :returns: value entered or none
     """
     val = None
     while val is None:
@@ -37,7 +39,26 @@ def GetFloat(prompt, default=0.0, errstr="Invalid value!"):
             try:
                 val = float(ans)
             except ValueError:
-                print errstr
+                print(errstr)
+        else:
+            val = default
+    return val
+
+def GetInt(prompt, default=0.0, errstr="Invalid value!"):
+    """ read an int value with error control & default
+        :param prompt: message to write out to the user
+        :param default: default value
+        :param errstr: error message if input not float
+        :returns: value entered or none
+    """
+    val = None
+    while val is None:
+        ans = raw_input((prompt + "[{:d}]: ").format(default))
+        if len(ans):
+            try:
+                val = int(ans)
+            except ValueError:
+                print(errstr)
         else:
             val = default
     return val
@@ -47,13 +68,13 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         ofname = sys.argv[1]
     else:
-        print "Usage: coomaker.py output_file [sensor] [serial_port]"
+        print("Usage: coomaker.py output_file [sensor] [serial_port]")
         exit(-1)
     if ofname[-4:] == '.geo' or ofname[-4:] == '.coo':
         ofname = ofname[:-4]
         otype = 'geo'
     else:
-        print "invalid output type, allowed types: .geo, .coo, .csv, .dmp"
+        print("invalid output type, allowed types: .geo, .coo, .csv, .dmp")
         exit(-1)
     if len(sys.argv) > 2:
         stationtype = sys.argv[2]
@@ -72,13 +93,14 @@ if __name__ == "__main__":
         from trimble5500 import Trimble5500
         mu = Trimble5500()
     else:
-        print "unsupported instrument type"
+        print("unsupported instrument type")
         exit(1)
     if len(sys.argv) > 3:
         port = sys.argv[3]
     else:
         port = '/dev/ttyUSB0'
 
+    #logging.getLogger().setLevel(logging.DEBUG)
     iface = SerialIface("rs-232", port)
     geo_wrt = GeoWriter(dist='.4f', angle='RAD', fname=ofname+'.geo', mode='w')
     coo_wrt = GeoWriter(dist='.4f', angle='RAD', fname=ofname + '.coo', mode='w')
@@ -99,7 +121,7 @@ if __name__ == "__main__":
         res = ts.SetStation(coo['east'], coo['north'], coo['elev'], ih)
         i += 1
     if 'errorCode' in res:
-        print "Failed to upload station coordinates code: {:d}".format(res['errorCode'])
+        print("Failed to upload station coordinates code: {:d}".format(res['errorCode']))
         exit()
     geo = {}
     if otype == 'geo':
@@ -110,16 +132,33 @@ if __name__ == "__main__":
     ts.SetATR(1)
     ts.SetEDMMode('STANDARD')
     pc = 0.0
+    p = 0
+    if isinstance(ts.GetMeasureUnit(), LeicaTPS1200):
+        print("Prism types:")
+        for i in range(20):
+            res = ts.SetPrismType(i)
+            if 'errorCode' in res:
+                continue
+            res = ts.GetPc()
+            if 'errorCode' in res:
+                continue
+            if 'pc' in res:
+                print(i, res['pc'] * 1000, " mm")
     while 1:
         t_id = raw_input("Target id: ")
         if len(t_id) == 0:
             break
-        pc = GetFloat("Prism constant [mm] ", pc * 1000) / 1000.0
+        if isinstance(ts.GetMeasureUnit(), LeicaTPS1200):
+            p = GetInt("Prism number ", p)
+            ts.SetPrismType(p)
+        else:
+            pc = GetFloat("Prism constant [mm] ", pc * 1000) / 1000.0
+            ts.SetPc(pc)
+        print(ts.GetPc())
         raw_input("Target on prism and press enter")
-        ts.SetPc(pc)
         res = ts.MoveRel(Angle(0), Angle(0), 1)
         if 'errorCode' in res or ts.measureIface.state != ts.measureIface.IF_OK:
-            print "Cannot target on prism"
+            print("Cannot target on prism")
             ts.measureIface.state = ts.measureIface.IF_OK
             continue
         res = ts.Measure()

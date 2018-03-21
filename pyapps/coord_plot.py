@@ -66,11 +66,11 @@ if __name__ == "__main__":
                 logging.fatal("Config check failed")
                 sys.exit(-1)
         else:
-            print "Config file not found " + sys.argv[1]
+            print("Config file not found " + sys.argv[1])
             logging.fatal("Config file not found " + sys.argv[1])
             sys.exit(-1)
     else:
-        print "Usage: coord_plot.py config_file"
+        print("Usage: coord_plot.py config_file")
         sys.exit(-1)
 
     # logging
