@@ -29,7 +29,8 @@ class Writer(object):
 
     DEFAULT_FILTER = ['hz', 'v', 'dist', 'datetime']
 
-    def __init__(self, name = None, angle = 'GON', dist = '.3f', dt = '%Y-%m-%d %H:%M:%S', filt = None):
+    def __init__(self, name=None, angle='GON', dist='.3f', \
+                 dt='%Y-%m-%d %H:%M:%S', filt=None):
         """ Constructor
         """
         self.name = name
@@ -61,17 +62,15 @@ class Writer(object):
 
     def StrVal(self, val):
         """ Get string representation of value
-        
+
             :param val: value to convert to string
             :returns: value in string format
         """
-        if type(val) is Angle:
+        if isinstance(val, Angle):
             sval = str(val.GetAngle(self.angleFormat))
-        elif type(val) is float:
+        elif isinstance(val, float):
             sval = ("{0:" + self.distFormat + "}").format(val)
-        elif type(val) is int or type(val) is long:
-            sval = str(val)
-        elif type(val) is type(datetime.datetime.now()):
+        elif isinstance(val, datetime.datetime):
             sval = val.strftime(self.dtFormat)
         else:
             sval = str(val)
@@ -94,10 +93,10 @@ class Writer(object):
             :returns: extended data (dict)
         """
         # add datetime if not set
-        if not 'datetime' in data:
+        if 'datetime' not in data:
             data['datetime'] = datetime.datetime.now()
         # add record number if not set
-        if not 'id' in data:
+        if 'id' not in data:
             data['id'] = self.id
             self.id += 1
         return data
