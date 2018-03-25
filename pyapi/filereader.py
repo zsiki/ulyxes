@@ -56,4 +56,7 @@ class FileReader(Reader):
 
 if __name__ == '__main__':
     fr = FileReader('test', 'reader.py')
-    print(fr.Load())
+    if fr.state == fr.RD_OK:
+        print(fr.Load())
+    else:
+        print('File not found')

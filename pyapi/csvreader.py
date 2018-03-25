@@ -28,8 +28,11 @@ class CsvReader(FileReader):
         super(CsvReader, self).__init__(name, fname, filt)        
         self.separator = separator
         self.filt = filt
-        # get field name from header line
-        self.fields = [x.strip() for x in self.GetLine().split(self.separator)]
+        # get field names from header line
+        self.fields = []
+        if self.state == self.RD_OK:
+            self.fields = [
+                x.strip() for x in self.GetLine().split(self.separator)]
 
     def __del__(self):
         """ Destructor
@@ -53,4 +56,7 @@ class CsvReader(FileReader):
 
 if __name__ == '__main__':
     cr = CsvReader('test', 'test.csv')
-    print (cr.Load())
+    if cr.state == cr.RD_OK:
+        print (cr.Load())
+    else:
+        print("File not found")

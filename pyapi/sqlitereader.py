@@ -38,7 +38,9 @@ class SqLiteReader(Reader):
             # connect to local db
             self.conn = sqlite3.connect(db)
         else:
+            self.db = self.conn = self.cur = None
             logging.fatal('SqLite database does not exists: ' + db)
+            return
         self.cur = self.conn.cursor()
         self.cur.execute(sql)
         self.keys = [description[0] for description in self.cur.description]
