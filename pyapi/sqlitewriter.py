@@ -67,7 +67,7 @@ class SqLiteWriter(Writer):
         for key, val in data.items():
             if self.filt is None or key in self.filt:
                 fields += key + ','
-                if isinstance(val, (int, long, float, Angle)):
+                if isinstance(val, (int, float, Angle)):
                     values += self.StrVal(val)
                 elif val is None:
                     values += 'NULL'
