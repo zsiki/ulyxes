@@ -17,14 +17,22 @@ usage: python measurematrix.py 9 3 1100 COM5
 """
 import re
 import sys
+import time
 sys.path.append('../pyapi/')
 
 from angle import Angle
 from serialiface import SerialIface
 from totalstation import TotalStation
+from echowriter import EchoWriter
 from filewriter import FileWriter
+from leicatps1200 import LeicaTPS1200
+from leicatcra1100 import LeicaTCRA1100
+from trimble5500 import Trimble5500
 
 if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        print("Usage: {0:s} horizontal_step vertical_step instrument port".format(sys.argv[0]))
+        exit(1)
     # set horizontal stepping interval dh_nr
     dh_nr = 1
     if len(sys.argv) > 1:
@@ -32,7 +40,7 @@ if __name__ == "__main__":
             dh_nr = int(sys.argv[1])
         except ValueError:
             print("invalid numeric value " + sys.argv[1])
-            #sys.exit(1)
+            sys.exit(1)
     # set vertical stepping interval dv_nr
     dv_nr = 1
     if len(sys.argv) > 2:
@@ -46,34 +54,40 @@ if __name__ == "__main__":
     if len(sys.argv) > 3:
         stationtype = sys.argv[3]
     if re.search('120[0-9]$', stationtype):
-        from leicatps1200 import LeicaTPS1200
         mu = LeicaTPS1200()
     elif re.search('110[0-9]$', stationtype):
-        from leicatcra1100 import LeicaTCRA1100
         mu = LeicaTCRA1100()
     elif re.search('550[0-9]$', stationtype):
-        from trimble5500 import Trimble5500
         mu = Trimble5500()
     else:
         print("unsupported instrument type")
         #sys.exit(1)
     # set port
-    port = 'COM5'
+    port = '/dev/ttyUSB0'
     if len(sys.argv) > 4:
         port = sys.argv[4]
     iface = SerialIface("test", port)
     # set output file name
-    fn = 'measmtrx.txt'
+    fn = None
     if len(sys.argv) > 5:
         fn = sys.argv[5]
     # write out measurements
-    wrt = FileWriter(angle='DEG', dist = '.3f', fname=fn)
+    if fn:
+        wrt = FileWriter(angle='DEG', dist = '.3f', fname=fn)
+    else:
+        wrt = EchoWriter(angle='DEG', dist = '.3f')
     if wrt.GetState() != wrt.WR_OK:
         sys.exit(-1)    # open error
     ts = TotalStation(stationtype, mu, iface, wrt)
-    ts.SetATR(0) # turn ATR off
-    ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
-    ts.SetRedLaser(1) # turn red laser on
+    if isinstance(mu, Trimble5500):
+        iface.eomRead = '>'
+        print("Please change to reflectorless EDM mode (MNU 722 from keyboard)")
+        print("and turn on red laser (MNU 741 from keyboard")
+        raw_input()
+    else:
+        ts.SetATR(0) # turn ATR off
+        ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
+        ts.SetRedLaser(1) # turn red laser on
 
     w = raw_input("Target on lower left corner and press Enter")
     w1 = ts.GetAngles()
@@ -94,4 +108,7 @@ if __name__ == "__main__":
                 # move upward at event steps to right
                 ts.Move(hz, Angle(w2['v'].GetAngle() - j * dv, 'RAD'))
             ts.Measure()
-            ts.GetMeasure()
+            meas = ts.GetMeasure()
+            while 'distance' not in meas:   # wait for trimble 5500
+                time.sleep(2)
+                meas = ts.GetMeasure()
