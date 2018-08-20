@@ -22,10 +22,10 @@ class CsvReader(FileReader):
             :param filt: list of fields to use, default None (use all)
     """
 
-    def __init__(self, name = None, fname = None, separator = ';', filt = None):
+    def __init__(self, name=None, fname=None, separator=';', filt=None):
         """ Constructor
         """
-        super(CsvReader, self).__init__(name, fname, filt)        
+        super(CsvReader, self).__init__(name, fname, filt)
         self.separator = separator
         self.filt = filt
         # get field names from header line

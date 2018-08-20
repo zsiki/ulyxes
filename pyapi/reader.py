@@ -21,7 +21,7 @@ class Reader(object):
     RD_OPEN = -1
     RD_READ = -2
 
-    def __init__(self, name = None, filt = None):
+    def __init__(self, name=None, filt=None):
         """ Constructor
         """
         self.name = name
@@ -62,7 +62,7 @@ class Reader(object):
         if self.filt is None:
             return True
         for f in self.filt:
-            if not f in rec:
+            if f not in rec:
                 return False
         return True
 

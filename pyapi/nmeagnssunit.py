@@ -21,7 +21,7 @@ class NmeaGnssUnit(MeasureUnit):
             :param name: name of nmea unit (str), default 'Nmea Gnss'
             :param typ: type of nmea unit (str), default None
     """
-    def __init__(self, name = 'Nmea Gnss', typ = None):
+    def __init__(self, name='Nmea Gnss', typ=None):
         """ constructor for nmea measure unit
         """
         # call super class init
@@ -46,7 +46,7 @@ class NmeaGnssUnit(MeasureUnit):
         res = {}
         if ans[1:len(msg)+1] != msg:
             return None
-        # check checksum 
+        # check checksum
         data, cksum = re.split('\*', ans)
         cksum1 = 0
         for s in data[1:]:
@@ -74,6 +74,7 @@ class NmeaGnssUnit(MeasureUnit):
             pass
         return res
 
+    @staticmethod
     def MeasureMsg(self):
         """ NMEA sentence type for lat,lon
 

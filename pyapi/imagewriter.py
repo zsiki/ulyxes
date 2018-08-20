@@ -10,8 +10,8 @@
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 """
 import os
-import cv2
 import logging
+import cv2
 from writer import Writer
 
 class ImageWriter(Writer):
@@ -23,7 +23,7 @@ class ImageWriter(Writer):
             :param counter: id number for the first image (int)
     """
 
-    def __init__(self, name, dirName, counter = 0):
+    def __init__(self, name, dirName, counter=0):
         """ Constructor
         """
         super(ImageWriter, self).__init__(name)

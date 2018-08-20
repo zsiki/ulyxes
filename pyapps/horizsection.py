@@ -78,13 +78,11 @@ if __name__ == "__main__":
     else:
         ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
     ts.Measure()    # initial measurement for startpoint
-    if isinstance(mu, Trimble5500):
-        startp = ts.GetMeasure()
-        i = 0
-        while 'distance' not in startp ans i < 20:
-            i += 1
-            startp = ts.GetMeasure()
-    else:
+    startp = ts.GetMeasure()
+    i = 0
+    while 'distance' not in startp and i < 20:
+        i += 1
+        time.sleep(2)
         startp = ts.GetMeasure()
     if ts.measureIface.state != ts.measureIface.IF_OK or 'errorCode' in startp:
         print('FATAL Cannot measure startpoint')
@@ -130,15 +128,16 @@ if __name__ == "__main__":
                 ts.measureIface.state = ts.measureIface.IF_OK
                 logging.warning('Missing measurement')
                 break
-            if isinstance(mu, Trimble5500):
-                time.sleep(5)
             nextp = ts.GetMeasure()
+            while 'distance' not in nextp:   # wait for trimble 5500
+                time.sleep(2)
+                nextp = ts.GetMeasure()
+
             if 'v' not in nextp or 'distance' not in nextp:
                 break
             height = math.cos(nextp['v'].GetAngle()) * nextp['distance']
         if 'distance' in nextp and w:
             coord = ts.Coords()
-            # TODO 
             res = dict(nextp.items() + coord.items())
             wrt.WriteData(res)
         ts.MoveRel(stepinterval, Angle(0))

@@ -27,9 +27,9 @@ class CsvWriter(FileWriter):
             :param header: add header to file if true and mode is 'w'
     """
 
-    def __init__(self, name = 'None', angle = 'GON', dist = '.3f',
-                dt = '%Y-%m-%d %H:%M:%S', filt = None,
-                fname = None, mode = 'a', sep = ';', header = None):
+    def __init__(self, name='None', angle='GON', dist='.3f',
+                 dt='%Y-%m-%d %H:%M:%S', filt=None,
+                 fname=None, mode='a', sep=';', header=None):
         """ Constructor
         """
         super(CsvWriter, self).__init__(name, angle, dist, dt, filt, fname, mode)

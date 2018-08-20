@@ -17,7 +17,7 @@ class Iface(object):
 
         :param name: name of the interface (str) (default None)
     """
-    
+
     IF_OK = 0
     IF_EOF = -1
     IF_WRITE = -3
@@ -27,7 +27,7 @@ class Iface(object):
     IF_SOURCE = -7
     IF_ERROR = -8
 
-    def __init__(self, name = None):
+    def __init__(self, name=None):
         """ Constructor
         """
         self.name = name

@@ -23,7 +23,7 @@ CREATE TABLE monitoring_poi (
 	code char(4) NOT NULL DEFAULT 'ATR' CHECK (code in ('ATR', 'PR', 'ORI', 'RL', 'RLA')),
 	pc float NOT NULL DEFAULT 0
 );
-SELECT AddGeometryColumn('monitoring_poi', 'geom', 3857, 'POINT', 3);
+SELECT AddGeometryColumn('monitoring_poi', 'geom', 4326, 'POINT', 3);
 
 -- table for point coordinates in local reference system
 -- reference coordinates given by the user

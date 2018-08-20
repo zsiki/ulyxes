@@ -138,7 +138,9 @@ class GamaIface(object):
         parameters.setAttribute('update-constrained-coordinates', 'yes')
         network.appendChild(parameters)
         points_observations = doc.createElement('points-observations')
-        points_observations.setAttribute('distance-stdev', str(self.stdev_dist) + ' ' + str(self.stdev_dist1))
+        points_observations.setAttribute('distance-stdev', \
+                                         str(self.stdev_dist) + ' ' + \
+                                         str(self.stdev_dist1))
         points_observations.setAttribute('direction-stdev', str(self.stdev_angle / 3600.0 * 10000.0))
         points_observations.setAttribute('angle-stdev', str(math.sqrt(2) * self.stdev_angle / 3600.0 * 10000))
         points_observations.setAttribute('zenith-angle-stdev', str(self.stdev_angle / 3600.0 * 10000.0))

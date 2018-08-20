@@ -6,7 +6,6 @@
 .. moduleauthor:: Jozsef Attila Janko, Bence Takacs, Zoltan Siki (code optimalization)
 
 Sample application of Ulyxes PyAPI to measure within a rectangular area
-   
    :param argv[1] (int): number of horizontal intervals (between measurements), default 1 (perimeter only)
    :param argv[2] (int): number of vertical intervals(between measurements), default 1 (perimeter only)
    :param argv[3] (sensor): 1100/1800/1200, default 1100
@@ -73,9 +72,9 @@ if __name__ == "__main__":
         fn = sys.argv[5]
     # write out measurements
     if fn:
-        wrt = FileWriter(angle='DEG', dist = '.3f', fname=fn)
+        wrt = FileWriter(angle='DEG', dist='.3f', fname=fn)
     else:
-        wrt = EchoWriter(angle='DEG', dist = '.3f')
+        wrt = EchoWriter(angle='DEG', dist='.3f')
     if wrt.GetState() != wrt.WR_OK:
         sys.exit(-1)    # open error
     ts = TotalStation(stationtype, mu, iface, wrt)
@@ -108,7 +107,12 @@ if __name__ == "__main__":
                 # move upward at event steps to right
                 ts.Move(hz, Angle(w2['v'].GetAngle() - j * dv, 'RAD'))
             ts.Measure()
+
             meas = ts.GetMeasure()
-            while 'distance' not in meas:   # wait for trimble 5500
+            i = 0
+            while 'distance' not in meas and i < 20:   # wait for trimble 5500
+                i += 1
                 time.sleep(2)
                 meas = ts.GetMeasure()
+            if ts.measureIface.state != ts.measureIface.IF_OK or 'errorCode' in meas:
+                print('FATAL Cannot measure point')

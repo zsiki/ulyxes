@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """
-.. module:: instrument.py 
+.. module:: instrument.py
   :platform: Unix, Windows
   :synopsis: Ulyxes - an open source project to drive total stations and
       publish observation results.
@@ -51,7 +51,7 @@ class Instrument(object):
             :param MeasureIface: interface to physical intrument (Iface)
             :param writerUnit: unit to save observed data (Writer), optional
     """
-    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
+    def __init__(self, name, measureUnit, measureIface, writerUnit=None):
         """ constructor
         """
         self.name = name
@@ -72,17 +72,17 @@ class Instrument(object):
             :returns: reference to measure unit
         """
         return self.measureUnit
- 
+
     def GetWriterUnit(self):
         """ Get the writer unit
 
             :returns: reference to writer unit
         """
         return self.writerUnit
-    
+
     def GetName(self):
         """ Get the name of the Instrument
-        
+
             :returns: instrument name
         """
         return self.name

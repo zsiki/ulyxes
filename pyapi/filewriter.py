@@ -11,9 +11,9 @@
 """
 
 import sys
+import logging
 from angle import Angle
 from writer import Writer
-import logging
 
 class FileWriter(Writer):
     """ Class to write observations to file, in the form key=value;key=value,...
@@ -27,9 +27,9 @@ class FileWriter(Writer):
             :param mode: mode of file open (a or w) (str)
     """
 
-    def __init__(self, name = 'None', angle = 'GON', dist = '.3f',
-                dt = '%Y-%m-%d %H:%M:%S', filt = None, fname = None,
-                mode = 'a'):
+    def __init__(self, name='None', angle='GON', dist='.3f',
+                 dt='%Y-%m-%d %H:%M:%S', filt=None, fname=None,
+                 mode='a'):
         """ Constructor
         """
         super(FileWriter, self).__init__(name, angle, dist, dt, filt)

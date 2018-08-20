@@ -18,12 +18,12 @@ class WifiCollector(Instrument):
         This modul depends on https://github.com/rockymeza/wifi
 
             :param name: name of instrument
-            :param measureUnit: measure unit part of instrument 
+            :param measureUnit: measure unit part of instrument
             :param measureIface: interface to measure unit, default None
             :param writerUnit: store data, default None
     """
 
-    def __init__(self, name, measureUnit, measureIface = None, writerUnit = None):
+    def __init__(self, name, measureUnit, measureIface=None, writerUnit=None):
         """ Constructor
         """
         # call super class init
@@ -37,11 +37,11 @@ class WifiCollector(Instrument):
         wlist = wifi.Cell.all(self.measureUnit.wlan)
         res = []
         for w in wlist:
-            r = {'ssid': w.ssid, 'address': w.address, 
-                'quality': eval(w.quality + '.0'), 'signal': w.signal}
+            r = {'ssid': w.ssid, 'address': w.address,
+                 'quality': eval(w.quality + '.0'), 'signal': w.signal}
             if len(r):
                 if self.writerUnit is not None:
-                    self.writerUnit.WriteData(r) 
+                    self.writerUnit.WriteData(r)
                 res.append(r)
         return res
 
@@ -50,8 +50,8 @@ if __name__ == '__main__':
     from csvwriter import CsvWriter
 
     wu = WifiUnit()
-    wr = CsvWriter(fname = 'wifitest.csv', mode = 'w',
-        filt = ['ssid', 'address', 'quality', 'signal', 'datetime'])
+    wr = CsvWriter(fname='wifitest.csv', mode='w',
+                   filt=['ssid', 'address', 'quality', 'signal', 'datetime'])
     wc = WifiCollector('wc', wu, None, wr)
     while 1:
         wc.GetWifis()

@@ -21,10 +21,10 @@ class FileReader(Reader):
             :param filt: obligatory fields for Load
     """
 
-    def __init__(self, name = None, fname = None, filt = None):
+    def __init__(self, name=None, fname=None, filt=None):
         """ Constructor
         """
-        super(FileReader, self).__init__(name, filt)        
+        super(FileReader, self).__init__(name, filt)
         self.fp = None
         try:
             self.fp = open(fname, 'r')

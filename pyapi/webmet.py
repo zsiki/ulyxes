@@ -22,7 +22,7 @@ class WebMet(Instrument):
             :param MeasureIface: interface to physical sensor (Iface)
             :param writerUnit: unit to save observed data (Writer), optional
     """
-    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
+    def __init__(self, name, measureUnit, measureIface, writerUnit=None):
         """ constructor
         """
         super(WebMet, self).__init__(name, measureUnit, measureIface, writerUnit)
@@ -39,13 +39,14 @@ class WebMet(Instrument):
             res['temp'] = res['temp'] - 273.1
         return res
 
-    def GetPressure(self):
+    def GetPressure(self, withTemp=0):
         """ Get pressure in HPa from sensor
 
+            :param withTemp: dummy parameter for inherited classes
             :returns: temperature data as dict
         """
         return self.GetTemp()
-        
+
 
     def GetHumi(self):
         """ Get humidity from sensor
@@ -54,7 +55,7 @@ class WebMet(Instrument):
         """
         return self.GetTemp()
 
-    def SetSealevel(self, altitude, pressure = None):
+    def SetSealevel(self, altitude, pressure=None):
         """ calculate sealevel pressure from known elevation and pressure
 
             :param altitude: known elevation (float) meters

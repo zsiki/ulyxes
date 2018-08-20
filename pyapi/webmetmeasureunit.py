@@ -18,7 +18,7 @@ class WebMetMeasureUnit(MeasureUnit):
             :param name: name of measure unit (str), default None
             :param typ: type of measure unit (str), default None
     """
-    def __init__(self, name = None, typ = 'met sensor', msg = None):
+    def __init__(self, name=None, typ='met sensor', msg=None):
         """ constructor for measure unit
         """
         super(WebMetMeasureUnit, self).__init__(name, typ)

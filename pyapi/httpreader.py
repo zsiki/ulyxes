@@ -30,8 +30,8 @@ class HttpReader(Reader):
     # TODO extend float for all possible fields
     FLOATS = ['east', 'north', 'elev', 'pc']
 
-    def __init__(self, name = None, url = None, pids = None, ptys = None, \
-                filt = None):
+    def __init__(self, name=None, url=None, pids=None, ptys=None, \
+                 filt=None):
         """ Constructor
         """
         super(HttpReader, self).__init__(name, filt)
@@ -56,7 +56,7 @@ class HttpReader(Reader):
             :param row: dict of data
         """
         for key in row:
-            if key in self.FLOATS:
+            if key in HttpReader.FLOATS:
                 row[key] = float(row[key])
         return row
 
@@ -72,9 +72,9 @@ class HttpReader(Reader):
             return None
         else:
             par = {}
-            if not self.pids is None:
+            if self.pids is not None:
                 par['pids'] = ','.join(self.pids)
-            if not self.ptys is None:
+            if self.ptys is not None:
                 par['ptys'] = ','.join(self.ptys)
             self.res = json.loads(urllib.urlopen(self.url + urllib.urlencode(par)).read())
             if len(self.res):
@@ -85,5 +85,5 @@ class HttpReader(Reader):
 if __name__ == "__main__":
     # read most recent coordinates of all 3D monitoring points from server
     rd = HttpReader(url='http://localhost/monitoring/query.php', ptys='MON', \
-                    filt = ['id', 'east', 'north', 'elev'])
+                    filt=['id', 'east', 'north', 'elev'])
     print(rd.Load())

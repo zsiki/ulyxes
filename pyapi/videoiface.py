@@ -10,9 +10,9 @@
 
 """
 
-import cv2
 import logging
 import os.path
+import cv2
 from iface import Iface
 
 class VideoIface(Iface):
@@ -21,7 +21,7 @@ class VideoIface(Iface):
             :param name: name of interface (str), default 'webcam'
             :param source: id of device or file name (int/str), default = 0
     """
-    def __init__(self, name = 'webcam', source = 0):
+    def __init__(self, name='webcam', source=0):
         """ Constructor
         """
         super(VideoIface, self).__init__(name)

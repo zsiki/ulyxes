@@ -12,7 +12,6 @@
 
 from measureunit import MeasureUnit
 from angle import Angle
-import re
 
 class Trimble5500(MeasureUnit):
     """ This class contains the Trimble 5500 robotic total station specific
@@ -49,15 +48,15 @@ class Trimble5500(MeasureUnit):
 
     # Constants for EMD modes
     edmModes = {'STANDARD': 0, 'TRACKING': 1, 'D-BAR': 2, 'FAST': 3,
-               'HRD_BAR': 4}
+                'HRD_BAR': 4}
     edmProg = {'DEFAULT': None}
 
-    def __init__(self, name = 'Trimble 5500', typ = 'TPS'):
+    def __init__(self, name='Trimble 5500', typ='TPS'):
         """ Constructor to leica generic ts
         """
         # call super class init
         super(Trimble5500, self).__init__(name, typ)
-        self.edmMode = None
+        self.edmMode = 0    # standard
 
     @staticmethod
     def GetCapabilities():
@@ -119,7 +118,7 @@ class Trimble5500(MeasureUnit):
     def SetAtmCorrMsg(self, ppm, pres=None, dry=None, wet=None):
         """ Set atmospheric correction settings using ppm or
             presure, dry and wet temperature
-        
+
             :param ppm: atmospheric correction [mm/km] (int)
             :param pres: air presure (optional)
             :param dry: dry temperature (optional)
@@ -135,41 +134,40 @@ class Trimble5500(MeasureUnit):
 
     def GetAtmCorrMsg(self):
         """ Get atmospheric correction settings
-        
+
             :returns: atmospheric correction message
         """
         return 'RG,{0:d}'.format(self.codes['PPM'])
 
     def SetRefCorrMsg(self, status, earthRadius, refrac):
         """ Set refraction correction settings
-        
+
         :param status: not used
         :param earthRadius: radius ot the Earth (int)
         :param refrac: refraction (float)
         :returns: set refraction correction message
-          
+
         """
         return 'WG,{0:d}={1:d}|WG,{2:d}={3:.2f}'.format(
-                self.codes['EARAD'], earthRadius, self.codes['REFRAC'], refrac)
+            self.codes['EARAD'], earthRadius, self.codes['REFRAC'], refrac)
 
     def GetRefCorrMsg(self):
         """ Get refraction correction setting
-      
+
             :return: refraction correction message
-          
+
         """
-        return 'RG,{0:d}|RG,{1:d}'.format(
-                self.codes['EARAD'], self.codes['REFRAC'])
+        return 'RG,{0:d}|RG,{1:d}'.format(self.codes['EARAD'], self.codes['REFRAC'])
 
     def SetStationMsg(self, e, n, z=None, ih=0):
         """ Set station coordinates
-        
+
             :param e: easting
             :param n: northing
             :param z: elevation
             :param ih: instrument height
             :returns: set station coordinates message
-          
+
         """
         msg = 'WG,{0:d}={1:.3f}|WG,{2:d}={3:.3f}'.format(
             self.codes['EASTING'], e, self.codes['NORTHING'], n)
@@ -181,9 +179,9 @@ class Trimble5500(MeasureUnit):
 
     def GetStationMsg(self):
         """ Get station co-ordinates
-        
+
             :returns: get station coordinates message
-          
+
         """
         return 'RG,{0:d}|RG,{1:d}|RG,{2:d}|RG,{3:d}'.format(
             self.codes['EASTING'], self.codes['NORTHING'], self.codes['ELE'],
@@ -191,7 +189,7 @@ class Trimble5500(MeasureUnit):
 
     def SetEDMModeMsg(self, mode):
         """ Set EDM mode
-        
+
             :param mode: mode name (str) or code (int)
             :returns: set edm mode message
         """
@@ -203,24 +201,24 @@ class Trimble5500(MeasureUnit):
 
     def GetEDMModeMsg(self):
         """ Get EDM mode
-        
+
             :returns: None
         """
-        return None
+        return self.edmMode
 
     def SetOriMsg(self, ori):
         """ Set orientation angle
-        
+
             :param ori: bearing of direction (Angle)
             :returns: set orientation angle message
-          
+
         """
         return 'WG,{0:d}={1:.4f}'.format(self.codes['HAREF'],
-            ori.GetAngle('PDEG'))
+                                         ori.GetAngle('PDEG'))
 
     def MoveMsg(self, hz, v, dummy=None):
         """ Rotate instrument to direction
-        
+
             :param hz: horizontal direction (Angle)
             :param v: zenith angle (Angle)
             :param dummy: dummy parameter for compatibility with Leica
@@ -233,13 +231,13 @@ class Trimble5500(MeasureUnit):
 
     def MeasureMsg(self, dummy1=None, dummy2=None):
         """ Measure distance
-        
+
             :param dummy1: dummy parameter for compatibility with Leica
             :param dummy2: dummy parameter for compatibility with Leica
             :returns: measure message
         """
         return 'TG'
-        
+
     def GetMeasureMsg(self, dummy1=None, dummy2=None):
         """ Get measured distance
 
@@ -258,9 +256,9 @@ class Trimble5500(MeasureUnit):
         """
         return 'TG|RG'
 
-    def CoordsMsg (self, wait = 1000, incl = 0):
+    def CoordsMsg(self, wait=1000, incl=0):
         """ Get coordinates
-        
+
             :param wait: wait-time in ms, optional (default 1000)
             :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
             :returns: get coordinates message

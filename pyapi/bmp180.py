@@ -22,7 +22,7 @@ class BMP180(WebMet):
             :param MeasureIface: interface to physical sensor (Iface)
             :param writerUnit: unit to save observed data (Writer), optional
     """
-    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
+    def __init__(self, name, measureUnit, measureIface, writerUnit=None):
         """ constructor
         """
         super(BMP180, self).__init__(name, measureUnit, measureIface, writerUnit)
@@ -35,7 +35,7 @@ class BMP180(WebMet):
         msg = self.measureUnit.LoadCalibrationMsg()
         return self._process(msg)
 
-    def GetPressure(self, withTemp = 1):
+    def GetPressure(self, withTemp=1):
         """ Get pressure in hecto Pascals (hPa) from sensor
 
             :param withTemp: measure temperature also for fresh correction value (B5 stored in measure unit)
@@ -92,7 +92,7 @@ if __name__ == "__main__":
         elevation = 100                # default elevation for start point
     mu = BMP180MeasureUnit()
     i2c = I2CIface(None, 0x77)
-    fw = FileWriter(fname = 'bmp180.log', filt=['elev', 'pressure', 'temp', 'datetime'])
+    fw = FileWriter(fname='bmp180.log', filt=['elev', 'pressure', 'temp', 'datetime'])
     bmp = BMP180('BMP180', mu, i2c)
     bmp.LoadCalibration()
     bmp.SetSealevel(elevation)

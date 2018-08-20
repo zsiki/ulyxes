@@ -31,6 +31,11 @@ from angle import Angle
 from serialiface import SerialIface
 from totalstation import TotalStation
 from localiface import LocalIface
+from csvwriter import CsvWriter
+from echowriter import EchoWriter
+from leicatcra1100 import LeicaTCRA1100
+from leicatca1800 import LeicaTCA1800
+from leicatps1200 import LeicaTPS1200
 
 
 if __name__ == "__main__":
@@ -39,19 +44,14 @@ if __name__ == "__main__":
     # Instrument type
     if len(sys.argv) > 1:
         if re.search('110[0-9]$', sys.argv[1]):
-            from leicatcra1100 import LeicaTCRA1100
             mu = LeicaTCRA1100()
         elif re.search('180[0-9]$', sys.argv[1]):
-            from leicatca1800 import LeicaTCA1800
             mu = LeicaTCA1800()
         elif re.search('120[0-9]$', sys.argv[1]):
-            from leicatps1200 import LeicaTPS1200
             mu = LeicaTPS1200()
         else:
-            from leicatps1200 import LeicaTPS1200
             mu = LeicaTPS1200()
     else:
-        from leicatps1200 import LeicaTPS1200
         mu = LeicaTPS1200()
 
     # Measure mode
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 3:
         edm = sys.argv[3]
     # Serial port
-    com = 'COM7'
+    com = '/dev/ttyUSB0'
     if len(sys.argv) > 4:
         com = sys.argv[4]
     if re.search('^COM[0-9]+', com) or re.search('^/dev/.*tty', com):
@@ -76,12 +76,10 @@ if __name__ == "__main__":
 
     # Writer
     if len(sys.argv) > 5:
-        from csvwriter import CsvWriter
-        wrt = CsvWriter(angle='DMS', dist='.3f', dt='%Y-%m-%d %H:%M:%S',
-                        filt=['id','hz','v','distance','east','north','elev'],
+        wrt = CsvWriter(angle='GON', dist='.3f', dt='%Y-%m-%d %H:%M:%S',
+                        filt=['id', 'hz', 'v', 'distance', 'east', 'north', 'elev'],
                         fname=sys.argv[5], mode='a', sep=';')
     else:
-        from echowriter import EchoWriter
         wrt = EchoWriter()
 
 
@@ -180,6 +178,6 @@ if __name__ == "__main__":
 
             # Store in file the measurements
             wrt.WriteData(measurement)
-            print(measurement)
+            #print(measurement)
         else:
             print("Some measurement data(s) are missing...")

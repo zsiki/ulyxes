@@ -17,7 +17,7 @@ class VideoMeasureUnit(MeasureUnit):
             :param name: name of measure unit (str), default 'webcam'
             :param typ: type of measure unit (str), default 'video'
     """
-    def __init__(self, name = 'webcam', typ = 'video'):
+    def __init__(self, name='webcam', typ='video'):
         """ Constructor
         """
         super(VideoMeasureUnit, self).__init__(name, typ)

@@ -174,7 +174,8 @@ class LeicaMeasureUnit(MeasureUnit):
             if errCode != 0:
                 logging.error(" error from instrument: %d", errCode)
                 res['errorCode'] = errCode
-                #if not errCode in (1283, 1284, 1285, 1288): # do not stop if accuracy is not perfect
+                #if not errCode in (1283, 1284, 1285, 1288):
+                # do not stop if accuracy is not perfect
         return res
 
     def SetPcMsg(self, pc):

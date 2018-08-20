@@ -23,7 +23,7 @@ class ConfReader(JSONReader):
             :param pars: a dictionary for parameter validation e.g. {key : {}}, valid keys for individual config parameters are: required (True/False), type (int/float/str/list)
     """
 
-    def __init__(self, name = None, fname = None, filt = None, pars = None):
+    def __init__(self, name=None, fname=None, filt=None, pars=None):
         """ Constructor
         """
         super(ConfReader, self).__init__(name, fname, filt)
@@ -37,13 +37,13 @@ class ConfReader(JSONReader):
         # check for required pars and
         # set default values for missing parameters
         for par in self.pars:
-            if self.pars[par]['required'] and not par in self.json:
+            if self.pars[par]['required'] and par not in self.json:
                 print("missing required parameter: {0}".format(par))
                 return False
-            if 'default' in self.pars[par] and not par in self.json:
+            if 'default' in self.pars[par] and par not in self.json:
                 self.json[par] = self.pars[par]['default']
         for par in self.json:
-            if not par in self.pars:
+            if par not in self.pars:
                 print("unknown parameter: {0}".format(par))
                 continue
             # type checking
@@ -68,7 +68,7 @@ class ConfReader(JSONReader):
                     return False
                 # check set for valid values
                 if 'set' in pardef and \
-                    not self.json[par] in pardef['set']:
+                    self.json[par] not in pardef['set']:
                     print("invalid value: {0}".format(par))
                     return False
                     # TODO reglist
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     config_pars = {
         'log_file': {'required' : True, 'type': 'file'},
         'log_level': {'required' : True, 'type': 'int',
-        'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR ]},
+        'set':[logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR ]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
         'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1800', '1100']},
         'station_id': {'required' : True, 'type': 'str'},

@@ -27,7 +27,7 @@ class I2CIface(Iface):
         :param busnum: i2c bus number (int), default 1 (Raspberry PI B/B+)
     """
 
-    def __init__(self, name, address, busnum = 1):
+    def __init__(self, name, address, busnum=1):
         """Create an instance of the I2C device at the specified address on the
         specified I2C bus number."""
         super(I2CIface, self).__init__(name)
@@ -80,7 +80,7 @@ class I2CIface(Iface):
         """Read an unsigned 16-bit value from the specified register, with the
         specified endianness (default little endian, or least significant byte
         first)."""
-        result = self._bus.read_word_data(self._address,register) & 0xFFFF
+        result = self._bus.read_word_data(self._address, register) & 0xFFFF
         # Swap bytes if using big endian because read_word_data assumes little
         # endian on ARM (little endian) systems.
         if not little_endian:
@@ -148,13 +148,13 @@ if __name__ == "__main__":
     mode = 1
     i2c = I2CIface('BMP180', 0x77, 1)
     t = i2c.Send((('write8', 0xF4, 0x2E),
-                ('sleep', 0.005),
-                ( 'readU16BE', 0xF6)))
+                  ('sleep', 0.005),
+                  ('readU16BE', 0xF6)))
     print("raw temperature %d" % t["data"])
     p = i2c.Send((('write8', 0xF4, 0x34 + (1 << 6)),
-                ('sleep', 0.005),
-                ('readU8', 0xF6),
-                ('readU8', 0xF6+1),
-                ('readU8', 0xF6+2),
-                ('op', '((data[0] << 16) + (data[1] << 8) + data[2]) >> (8 - 1)')))
+                  ('sleep', 0.005),
+                  ('readU8', 0xF6),
+                  ('readU8', 0xF6+1),
+                  ('readU8', 0xF6+2),
+                  ('op', '((data[0] << 16) + (data[1] << 8) + data[2]) >> (8 - 1)')))
     print("raw pressure %d" % p["data"])

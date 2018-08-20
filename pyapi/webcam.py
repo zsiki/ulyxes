@@ -15,12 +15,12 @@ class WebCam(Instrument):
     """ WebCam or video device
 
             :param name: name of instrument
-            :param measureUnit: measure unit part of instrument 
+            :param measureUnit: measure unit part of instrument
             :param measureIface: interface to measure unit
             :param writerUnit: store data, default None
     """
 
-    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
+    def __init__(self, name, measureUnit, measureIface, writerUnit=None):
         """ Constructor
         """
         # call super class init

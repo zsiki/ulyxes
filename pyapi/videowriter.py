@@ -9,8 +9,8 @@
 
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 """
-import cv2
 import logging
+import cv2
 from writer import Writer
 
 class VideoWriter(Writer):
@@ -22,12 +22,12 @@ class VideoWriter(Writer):
             :param fps: frame per sec (int), default 10
             :param size: image size (int, int), default (640, 480)
     """
-    codecs = { 'JPEG': cv2.cv.CV_FOURCC('J', 'P', 'E', 'G'),
-               'MJPG': cv2.cv.CV_FOURCC('M', 'J', 'P', 'G'),
-               'FLV1': cv2.cv.CV_FOURCC('F', 'L', 'V', '1'),
-               'PIM1': cv2.cv.CV_FOURCC('P', 'I', 'M', '1') }
+    codecs = {'JPEG': cv2.cv.CV_FOURCC('J', 'P', 'E', 'G'),
+              'MJPG': cv2.cv.CV_FOURCC('M', 'J', 'P', 'G'),
+              'FLV1': cv2.cv.CV_FOURCC('F', 'L', 'V', '1'),
+              'PIM1': cv2.cv.CV_FOURCC('P', 'I', 'M', '1')}
 
-    def __init__(self, name, fname, codec, fps = 10, size = (640, 480)):
+    def __init__(self, name, fname, codec, fps=10, size=(640, 480)):
         """ Constructor
         """
         super(VideoWriter, self).__init__(name)

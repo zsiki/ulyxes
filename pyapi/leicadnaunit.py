@@ -9,8 +9,8 @@
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>, Daniel Moka <mokbme@gmail.com>
 """
 
-from measureunit import MeasureUnit
 import re
+from measureunit import MeasureUnit
 
 class LeicaDnaUnit(MeasureUnit):
     """ Leica DNA measure unit
@@ -23,9 +23,9 @@ class LeicaDnaUnit(MeasureUnit):
     SETAUTOOFF = "SET/95/"
     GETAUTOOFF = "CONF/95"
     unitDiv = [1000.0, 1000.0 / 0.3048, None, None, None, None, 10000.0,
-        10000.0 / 0.3048, 100000.0]
+               10000.0 / 0.3048, 100000.0]
 
-    def __init__(self, name = 'Leica level', typ = 'Level'):
+    def __init__(self, name='Leica level', typ='Level'):
         """ Construnctor for leica dna unit
         """
         # call super class init
@@ -75,25 +75,25 @@ class LeicaDnaUnit(MeasureUnit):
 
     def MeasureMsg(self):
         """ Start measure message
-        
+
             :returns: measure message
         """
         return self.MEASURE
 
     def TemperatureMsg(self):
         """ Get temperature message
-        
+
             :returns: temperature message
         """
         return self.TEMPERATURE
-    
+
     def SetAutoOffMsg(self, par):
         """ Set auto off message
 
             :param par: 0/1/2 Off/On/Sleep mode
             :return: auto off message
         """
-        return "{0}{1:d}".format(self.SETAUTOOFF, par) 
+        return "{0}{1:d}".format(self.SETAUTOOFF, par)
 
     def GetAutoOffMsg(self):
         """ Get auto off message

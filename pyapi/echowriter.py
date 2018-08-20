@@ -12,8 +12,6 @@
 
 from angle import Angle
 from filewriter import FileWriter
-import logging
-import datetime
 
 class EchoWriter(FileWriter):
     """ Class to write observations to consol
@@ -25,8 +23,8 @@ class EchoWriter(FileWriter):
             :param filt: list of allowed keys (list)
     """
 
-    def __init__(self, name = 'None', angle = 'GON', dist = '.3f',
-                 dt = '%Y-%m-%d %H:%M:%S', filt = None):
+    def __init__(self, name='None', angle='GON', dist='.3f',
+                 dt='%Y-%m-%d %H:%M:%S', filt=None):
         """ Constructor
         """
         super(EchoWriter, self).__init__(name, angle, dist, dt, filt, None, 'w')

@@ -11,9 +11,9 @@
     Daniel Moka <mokadaniel@citromail.hu>
 """
 
-from iface import Iface
-import serial
 import logging
+import serial
+from iface import Iface
 
 class SerialIface(Iface):
     """ Interface to communicate through serial interface. This class depends
@@ -30,8 +30,8 @@ class SerialIface(Iface):
             :param eomWrite: end of message char from computer (str), default '\\r\\n'
     """
     def __init__(self, name, port, baud=9600, byteSize=8,
-        parity=serial.PARITY_NONE, stop=1, timeout=15, eomRead='\r\n',
-        eomWrite='\r\n'):
+                 parity=serial.PARITY_NONE, stop=1, timeout=15, eomRead='\r\n',
+                 eomWrite='\r\n'):
         """ Constructor for serial interface
         """
         super(SerialIface, self).__init__(name)
@@ -47,7 +47,7 @@ class SerialIface(Iface):
         self.Close()
 
     def Open(self, port, baud=9600, byteSize=8,
-            parity=serial.PARITY_NONE, stop=1, timeout=12):
+             parity=serial.PARITY_NONE, stop=1, timeout=12):
         """ Open searial line
         """
         try:
@@ -72,7 +72,7 @@ class SerialIface(Iface):
 
     def GetLine(self):
         """ read from serial interface until end of line
-            
+
         :returns: line read from serial (str) or empty string on timeout or error, state is set also
         """
         if self.ser is None or not self.opened or self.state != self.IF_OK:
@@ -81,7 +81,7 @@ class SerialIface(Iface):
         # read answer till end of message marker
         ans = ''
         w = -1 * len(self.eomRead)
-        while (ans[w:] != self.eomRead):
+        while ans[w:] != self.eomRead:
             ch = ''
             try:
                 ch = (self.ser.read(1)).decode('ascii')
@@ -111,7 +111,7 @@ class SerialIface(Iface):
             return -1
         # add CR/LF to message end
         w = -1 * len(self.eomWrite)
-        if (msg[w:] != self.eomWrite):
+        if msg[w:] != self.eomWrite:
             msg += self.eomWrite
         # remove special characters
         msg = msg.encode('ascii', 'ignore')

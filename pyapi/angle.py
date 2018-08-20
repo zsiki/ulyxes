@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 """
-.. module:: angle.py 
+.. module:: angle.py
   :platform: Unix, Windows
   :synopsis: Ulyxes - an open source project to drive total stations and
       publish observation results.
@@ -140,14 +140,14 @@ Operators supported:
 
     # jump table to import from
     im = {'DMS': _dms2rad, 'DEG': _deg2rad,
-        'GON': _gon2rad, 'NMEA': _dm2rad,
-        'PDEG': _pdeg2rad, 'SEC': _sec2rad,
-        'MIL': _mil2rad}
+          'GON': _gon2rad, 'NMEA': _dm2rad,
+          'PDEG': _pdeg2rad, 'SEC': _sec2rad,
+          'MIL': _mil2rad}
     # jump table for convert to
     ex = {'DMS': _dms, 'DEG': _rad2deg,
-        'GON': _rad2gon, 'NMEA': _rad2dm,
-        'PDEG': _rad2pdeg, 'SEC': _rad2sec,
-        'MIL': _rad2mil}
+          'GON': _rad2gon, 'NMEA': _rad2dm,
+          'PDEG': _rad2pdeg, 'SEC': _rad2sec,
+          'MIL': _rad2mil}
 
     def __init__(self, value, unit='RAD'):
         """ Constructor for an angle instance.

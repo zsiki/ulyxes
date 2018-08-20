@@ -20,7 +20,7 @@ class DigitalLevel(Instrument):
             :param writerUnit: store data
     """
 
-    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
+    def __init__(self, name, measureUnit, measureIface, writerUnit=None):
         """ Constructor to Leica DNA level
         """
         # call super class init
@@ -59,7 +59,6 @@ class DigitalLevel(Instrument):
 
 if __name__ == "__main__":
     from leicadnaunit import LeicaDnaUnit
-    from digitallevel import DigitalLevel
     from serialiface import SerialIface
 
     mu = LeicaDnaUnit()

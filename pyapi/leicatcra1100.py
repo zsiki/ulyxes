@@ -21,7 +21,7 @@ class LeicaTCRA1100(LeicaMeasureUnit):
             :param type: type od ts (str), default=TPS
     """
 
-    def __init__(self, name = 'Leica TCRA1100', typ = 'TPS'):
+    def __init__(self, name='Leica TCRA1100', typ='TPS'):
         """ Constructor to leica generic ts
         """
         # call super class init

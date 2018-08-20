@@ -1,5 +1,18 @@
+#!/usr/bin/env python
+"""
+.. module:: lsm9ds0.py
+   :platform: Unix, Windows
+   :synopsis: Ulyxes - an open source project to drive total stations and
+       publish observation results.  GPL v2.0 license Copyright (C)
+       2010-2013 Zoltan Siki <siki@agt.bme.hu>
+
+.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>,
+    Daniel Moka <mokadaniel@citromail.hu>
+"""
+
 from instrument import Instrument
-from lsm9ds0unit import *
+from lsm9ds0unit import LSM9DS0Unit, A_SCALE_2G, A_ODR_3125, \
+            M_SCALE_2GS, M_ODR_3125, G_SCALE_245DPS, G_ODR_95_BW_125
 
 class LSM9DS0(Instrument):
     """ LSM9DS0 9DOF sensor
@@ -10,7 +23,7 @@ class LSM9DS0(Instrument):
             :param writerUnit: unit to save observed data (Writer), optional, default None
     """
 
-    def __init__(self, name, measureUnit, measureIfaces, writerUnit = None):
+    def __init__(self, name, measureUnit, measureIfaces, writerUnit=None):
         """ Constructor
         """
         super(LSM9DS0, self).__init__(name, measureUnit, measureIfaces, \
@@ -32,9 +45,9 @@ class LSM9DS0(Instrument):
             self.writerUnit.WriteData(res)
         return res
 
-    def Init(self, a_sc = A_SCALE_2G, a_odr = A_ODR_3125, \
-            m_sc = M_SCALE_2GS, m_odr = M_ODR_3125, \
-            g_sc = G_SCALE_245DPS, g_odr = G_ODR_95_BW_125):
+    def Init(self, a_sc=A_SCALE_2G, a_odr=A_ODR_3125, \
+            m_sc=M_SCALE_2GS, m_odr=M_ODR_3125, \
+            g_sc=G_SCALE_245DPS, g_odr=G_ODR_95_BW_125):
         """ initialize sensors: accelometer/magnetometer and gyroscope
         """
         msg = self.measureUnit.WhoAmIMsg()

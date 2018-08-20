@@ -21,7 +21,7 @@ class LeicaTPS1200(LeicaMeasureUnit):
             :param type: type od ts (str), default=TPS
     """
 
-    def __init__(self, name = 'Leica TPS1200', typ = 'TPS'):
+    def __init__(self, name='Leica TPS1200', typ='TPS'):
         """ Constructor to leica generic ts
         """
         # call super class init
@@ -83,7 +83,7 @@ class LeicaTPS1200(LeicaMeasureUnit):
         return ['ROBOT', 'ANGLE', 'EDM', 'ATR', 'LOCK', 'RL', 'POWERSEARCH', \
             'LASER', 'POSITION']
 
-    def SetSearchAreaMsg(self, hzCenter, vCenter, hzRange, vRange, on = 1):
+    def SetSearchAreaMsg(self, hzCenter, vCenter, hzRange, vRange, on=1):
         """ set search area for power search
 
             :param hzCenter: center direction (Angle)
@@ -98,7 +98,7 @@ class LeicaTPS1200(LeicaMeasureUnit):
 
     def PowerSearchMsg(self, direction):
         """ Power search
-        
+
             :param direction: 1/-1 clockwise/counter clockwise
             :returns: Power search message
         """

@@ -17,7 +17,7 @@ import logging
 from iface import Iface
 
 class LocalIface(Iface):
-    """ This local interface stands for using PyAPI without any instrument. 
+    """ This local interface stands for using PyAPI without any instrument.
         A file is used to read data instread of instrument.
         It is mainly for developing or testing
 
@@ -25,7 +25,7 @@ class LocalIface(Iface):
             :param fname: name of the file the data read from
             :param mode: seq/rand, seq=read the input sequentially (e.g. NMEA GNSS), rand=get line with given key (e.g. leica totalstation)
     """
-    def __init__(self, name = 'Local', fname = 'None', mode='seq'):
+    def __init__(self, name='Local', fname='None', mode='seq'):
         """ Constructor
         """
         super(LocalIface, self).__init__(name)
@@ -79,7 +79,7 @@ class LocalIface(Iface):
             self.state = self.IF_EOF
             logging.warning('End of file')
         return w
-        
+
 if __name__ == "__main__":
     a = LocalIface('test', '/home/siki/meresfeldolgozas/nmea1.txt')
     print (a.GetName())

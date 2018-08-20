@@ -10,9 +10,9 @@
 
 """
 
+import logging
 from picamera.array import PiRGBArray
 from picamera import PiCamera
-import logging
 from iface import Iface
 
 class PiCamIface(Iface):
@@ -21,7 +21,7 @@ class PiCamIface(Iface):
             :param name: name of interface (str), default 'picam'
             :param source: id of device, dummy not used yet, default = 0
     """
-    def __init__(self, name = 'picam', source = 0):
+    def __init__(self, name='picam', source=0):
         """ Constructor
         """
         super(PiCamIface, self).__init__(name)

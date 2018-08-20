@@ -12,14 +12,14 @@
 from measureunit import MeasureUnit
 
 class WifiUnit(MeasureUnit):
-    """ Collect wifi information 
+    """ Collect wifi information
 
         :param name: name of nmea unit (str), default 'Nmea Gnss'
         :param typ: type of nmea unit (str), default None
         :param wlan: wifi interface, default wlan0
     """
 
-    def __init__(self, name = 'wlan', typ = 'wifi', wlan = 'wlan0'):
+    def __init__(self, name='wlan', typ='wifi', wlan='wlan0'):
         """ constructor for wifi measure unit
         """
         # call super class init

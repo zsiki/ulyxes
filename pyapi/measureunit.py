@@ -16,7 +16,7 @@ class MeasureUnit(object):
             :param name: name of measure unit (str), default None
             :param typ: type of measure unit (str), default None
     """
-    def __init__(self, name = None, typ = None):
+    def __init__(self, name=None, typ=None):
         """ constructor for measure unit
         """
         self.name = name

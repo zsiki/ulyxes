@@ -17,7 +17,7 @@ class TotalStation(Instrument):
     """ Generic total station instrument
 
             :param name: name of instrument
-            :param measureUnit: measure unit part of instrument 
+            :param measureUnit: measure unit part of instrument
             :param measureIface: interface to physical unit
             :param writerUnit: store data, default None
     """
@@ -25,25 +25,25 @@ class TotalStation(Instrument):
     FACE_RIGHT = 1
     FACE_AVG = 2
 
-    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
+    def __init__(self, name, measureUnit, measureIface, writerUnit=None):
         """ Constructor
         """
         # call super class init
         super(TotalStation, self).__init__(name, measureUnit, measureIface,
-            writerUnit)
+                                           writerUnit)
 
 #        self.__class__.add_totalStation(self)
 
     def __str__(self):
         return '<{} object from {} module at {} address | MeasureUnit: {} | MeasureInterface: {} >'\
-            .format( type(self).__name__,self.__module__, hex(id(self)),
+            .format(type(self).__name__, self.__module__, hex(id(self)),
                     self.measureUnit.GetName(), self.measureIface.name)
 
     def __repr__(self):
         muString = self.measureUnit.GetName()
         muString = muString.replace(' ', '') + '()'
         return "{}('{}',{},'{}')".format(type(self).__name__, self.name,
-            muString, self.measureIface.GetName())
+                                         muString, self.measureIface.GetName())
 
     def SetPc(self, pc):
         """ Set prism constant
@@ -53,7 +53,7 @@ class TotalStation(Instrument):
         """
         msg = self.measureUnit.SetPcMsg(pc)
         return self._process(msg)
-            
+
     def GetPc(self):
         """ Get prism constant
 
@@ -61,9 +61,9 @@ class TotalStation(Instrument):
         """
         msg = self.measureUnit.GetPcMsg()
         return self._process(msg)
-            
+
     def SetATR(self, atr):
-        """ Set ATR on 
+        """ Set ATR on
 
             :param atr: 0/1 ATR off/on
             :returns: processed answer from instrument
@@ -80,13 +80,12 @@ class TotalStation(Instrument):
         return self._process(msg)
 
     def SetPrismType(self, typ):
-        """ Set prism type 
-
-
+        """ Set prism type
+            :param typ: prizm type
         """
         msg = self.measureUnit.SetPrismTypeMsg(typ)
         return self._process(msg)
-        
+
     def GetPrismType(self):
         """ Get prism type
         """
@@ -118,7 +117,7 @@ class TotalStation(Instrument):
         msg = self.measureUnit.LockInMsg()
         return self._process(msg)
 
-    def SetAtmCorr(self, valueOfLambda, pres, dryTemp, wetTemp = None):
+    def SetAtmCorr(self, valueOfLambda, pres, dryTemp, wetTemp=None):
         """ Set atmospheric correction
 
             :param valueOfLambda: instrument specific constant
@@ -129,7 +128,7 @@ class TotalStation(Instrument):
         if wetTemp is None:
             wetTemp = dryTemp - 5.0
         msg = self.measureUnit.SetAtmCorrMsg(valueOfLambda, pres, dryTemp,
-            wetTemp)
+                                             wetTemp)
         return self._process(msg)
 
     def GetAtmCorr(self):
@@ -148,7 +147,7 @@ class TotalStation(Instrument):
             :param refracticeScale: ???
         """
         msg = self.measureUnit.SetRefCorrMsg(status, earthRadius,
-            refracticeScale)
+                                             refracticeScale)
         return self._process(msg)
 
     def GetRefCorr(self):
@@ -239,7 +238,7 @@ class TotalStation(Instrument):
         msg = self.measureUnit.MeasureMsg(prg, incl)
         return self._process(msg)
 
-    def GetMeasure(self, wait = 15000, incl = 0):
+    def GetMeasure(self, wait=15000, incl=0):
         """ Get measured values
 
             :param wait: waiting time in ms
@@ -259,7 +258,7 @@ class TotalStation(Instrument):
         msg = self.measureUnit.MeasureDistAngMsg(prg)
         return self._process(msg)
 
-    def Coords(self, wait = 15000, incl = 0):
+    def Coords(self, wait=15000, incl=0):
         """ Read coordinates from instrument
 
             :param wait: waiting time ms
@@ -305,8 +304,8 @@ class TotalStation(Instrument):
         msg = self.measureUnit.SetRedLaserMsg(on)
         return self._process(msg)
 
-    def SetSearchArea(self, hzCenter = None, vCenter = None, \
-        hzRange = None, vRange = None, on = 1):
+    def SetSearchArea(self, hzCenter=None, vCenter=None, \
+                      hzRange=None, vRange=None, on=1):
         """ Set range for power search
 
             :param hzCenter: center direction (Angle)
@@ -326,10 +325,10 @@ class TotalStation(Instrument):
             if vRange is None:
                 vRange = Angle(95, 'DEG')
         msg = self.measureUnit.SetSearchAreaMsg(hzCenter, vCenter, hzRange,
-            vRange, on)
+                                                vRange, on)
         return self._process(msg)
 
-    def PowerSearch(self, direction = 1):
+    def PowerSearch(self, direction=1):
         """ Start power search
 
             :param direction: 1/-1 clockwise/counter clockwise
@@ -435,6 +434,7 @@ class TotalStation(Instrument):
         return None
 
 if __name__ == "__main__":
+    import time
     from leicatps1200 import LeicaTPS1200
     from leicatcra1100 import LeicaTCRA1100
     from leicatca1800 import LeicaTCA1800
@@ -450,7 +450,6 @@ if __name__ == "__main__":
         iface.eomRead = '>'
     wrt = EchoWriter()
     ts = TotalStation("Leica", mu, iface, wrt)
-    ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
     ts.SetStation(10.0, 20., 30., 1.0)
     print(ts.GetStation())
     #ts.GetInstrumentNo()
@@ -458,7 +457,12 @@ if __name__ == "__main__":
     #ts.SetEDMMode(ts.measureUnit.edmModes['RLSTANDARD'])
     #ts.SetPc(0.0068)
     #print(ts.GetPc())
-    ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
+    #ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
+    ts.SetEDMMode(ts.measureUnit.edmModes['STANDARD'])
     ts.Measure()
-    print(ts.GetMeasure())
+    meas = ts.GetMeasure()
+    while 'distance' not in meas:
+        time.sleep(2)
+        meas = ts.GetMeasure()
+    print(meas)
     #ts.SwitchOff()

@@ -19,7 +19,7 @@ class Gnss(Instrument):
             :param measureUnit: reference to measure unit
             :param measureIface: reference to measure interface
     """
-    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
+    def __init__(self, name, measureUnit, measureIface, writerUnit=None):
         """ constructor for gnss
         """
         super(Gnss, self).__init__(name, measureUnit, measureIface, writerUnit)
@@ -51,12 +51,12 @@ class Gnss(Instrument):
 
 
 if __name__ == '__main__':
+    import logging
     from echowriter import EchoWriter
     #from serialiface import SerialIface
     #from httpwriter import HttpWriter
     from localiface import LocalIface
     from nmeagnssunit import NmeaGnssUnit
-    import logging
     logging.basicConfig()
     #iface = SerialIface("", "COM5")
     iface = LocalIface('test', '/home/siki/meresfeldolgozas/nmea1.txt')
