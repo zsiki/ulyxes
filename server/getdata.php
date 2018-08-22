@@ -13,6 +13,10 @@
  * 	point_names - comma separated list of point names to get data for
  * 	start_date - start date/datetime
  * 	end_date - end date/datetime
+ * type=relcoords - get coordinate changes from first
+ * 	point_names - comma separated list of point names to get data for
+ * 	start_date - start date/datetime
+ * 	end_date - end date/datetime
  * type=obs - get observations to targets from station
  *  station - station name/id
  * 	point_names - comma separated list of point names/ids to get data for
@@ -127,6 +131,50 @@ var_dump($point_names);
 		$stmt->closeCursor();
 		break;
 
+	// create JSON string of coordinate data
+	case "relcoords":
+		$point_names = preg_split('/,/', $_REQUEST["point_names"]);
+var_dump($point_names);
+		$buf = "{'relcoords':\n[";
+		$sql = sprintf("SELECT %s as id, %s as dt, %s as east, %s as north, %s as elev FROM %s WHERE %s=:name",
+			$conf["coo_id"], $conf["coo_date"], $conf["coo_east"],
+			$conf["coo_north"], $conf["coo_elev"], $conf["coo_table"],
+			$conf["coo_id"]);
+		if (!empty($_REQUEST["start_date"]) && !empty($_REQUEST["end_date"])) {
+			$sql .= sprintf(" AND %s BETWEEN '%s' AND '%s'", 
+				$conf["coo_date"], $_REQUEST["start_date"], $_REQUEST["end_date"]);
+		}
+		$sql .= " ORDER BY 2";
+		$stmt = $conn->prepare($sql);
+		if (! $stmt) {
+			echo "<br/>prepare";
+		}
+		for ($i=0 ; $i < count($point_names) ; $i++) {
+			$res = $stmt->bindParam(':name', $point_names[$i]);
+			if (! $res) die ("Bind error");
+			$res = $stmt->execute();
+			if (! $res) die ("Execute error");
+			$buf .= "{'point_id': '" . $point_names[$i] . "' , 'data': [\n";
+			$first = true;
+			while (($r=$stmt->fetch(PDO::FETCH_ASSOC))) {
+				if ($first) {
+					$r0 = $r;
+					$first = false;
+				}
+				$buf .= "{'dt': '" . $r["dt"] .
+					"' , 'east': '" . ($r["east"] - $r0["east"]) . 
+					"' , 'north':" . ($r["north"] - $r0["north"]) . 
+					"' , 'elev':" . ($r["elev"] - $r0["elev"]) . "'},\n";
+			}
+			$buf = trim($buf, ",\n");
+			$buf .= "\n]\n},\n";
+		}
+		$buf = trim($buf, ",\n");
+		$buf .= "\n]\n}"; //json ends
+		echo $buf;
+		$stmt->closeCursor();
+		break;
+
 	// create JSON string of observation data
 	// TODO handle more stations
 	case "obs":
@@ -184,7 +232,7 @@ echo "<br />" . $sql;
 		echo $buf;
 		break;
 
-	default: die ("Incorrect parameters.");
+	default: die ("Incorrect GET/POST parameters.");
 }
-pg_close();
+$conn = null;
 ?>
