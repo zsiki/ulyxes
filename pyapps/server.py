@@ -1,6 +1,5 @@
 import sys
-sys.path.append('ulyxes/pyapi')
-sys.path.append('lib')
+sys.path.append('../pyapi/')
 from totalstationrequesthandler import TotalStationRequestHandler
 from leicatps1200 import LeicaTPS1200
 from serialiface import SerialIface

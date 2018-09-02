@@ -1,6 +1,5 @@
 import sys
-sys.path.append('../ulyxes/pyapi')
-sys.path.append('../lib/')
+sys.path.append('../pyapi/')
 from camerastation import CameraStation
 from totalstation import TotalStation
 from remotemeasureunit  import RemoteMeasureUnit
