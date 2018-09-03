@@ -22,6 +22,12 @@ import os
 
 
 class RemoteMeasureUnit(MeasureUnit):
+    """RemoteMeasureUnit class send and adopt the requests via internet (for example TCP/IP protocol)
+
+            :param name: name of measure unit (str), default REMOTE STAION
+            :param typ: type of measure unit (str), default VIRTUAL
+    """
+
 
 
     codes = {
@@ -117,6 +123,14 @@ class RemoteMeasureUnit(MeasureUnit):
             return anss
     @staticmethod
     def execCmd(ts, msg):
+        """Execute the adopted requests
+
+            :param ts: totalstation what execute the requests
+            :param msg: adtopted requests
+
+            :returns: response to client and photo if it was taken
+
+        """
         msgBufflist = json.loads(msg.decode('ascii'))
         cmd = msgBufflist['cmd']
         params = msgBufflist['params']
@@ -218,33 +232,50 @@ class RemoteMeasureUnit(MeasureUnit):
         return json.dumps(res).encode('ascii'), file
 
     def TakePhotoMsg(self, pic, resolution):
+        """Take photo
+
+            :param pic: writable binary file
+            :param resolution: resolution of picture
+
+            :returns: request msg in json
+        """
 
         params = {'pic': pic.name, 'resolution': resolution}
         msg = {'cmd': self.codes['TAKEPHOTO'], 'params': params}
         return json.dumps(msg)
 
     def StartCameraViewMsg(self):
+        """Start camera preview
 
+            :returns: request msg in json
+        """
         params = {}
         msg = {'cmd': self.codes['STARTCAMVIEW'], 'params': params}
         return json.dumps(msg)
 
     def StopCameraViewMsg(self):
+        """Stop camera preview
 
+            :returns: request msg in json
+        """
         params = {}
         msg = {'cmd': self.codes['STOPCAMVIEW'], 'params': params}
         return json.dumps(msg)
 
-    def AutoFocusMsg(dir):
+    #def AutoFocusMsg(dir):
 
-        params = {'dir': dir}
-        msg = {'cmd': self.codes['AUTOFOCUS'], 'params': params}
-        return json.dumps(msg)
+        #params = {'dir': dir}
+        #msg = {'cmd': self.codes['AUTOFOCUS'], 'params': params}
+        #return json.dumps(msg)
 
 
-    def GetContrastMsg(self):
+    def GetContrastMsg(self, mask):
+        """Get contrast
 
-        params = {}
+            :param mask: picture mask
+            :returns: request msg in json
+        """
+        params = {'mask': mask}
         msg = {'cmd': self.codes['GETCONTRAST'], 'params': params}
         return json.dumps(msg)
 
@@ -429,7 +460,6 @@ class RemoteMeasureUnit(MeasureUnit):
 
             :param ori: bearing of direction (Angle)
             :returns: 0 or error code
-
         """
         params = {'ori': ori.GetAngle('RAD')}
         msg = {'cmd': self.codes['SETORI'], 'params': params}
@@ -500,7 +530,7 @@ class RemoteMeasureUnit(MeasureUnit):
     def GetAnglesMsg(self):
         """ Get angles
 
-                :returns: get angles message
+            :returns: get angles message
         """
         params = {}
         msg = {'cmd': self.codes['GETANGLES'], 'params': params}
@@ -509,8 +539,7 @@ class RemoteMeasureUnit(MeasureUnit):
     def ClearDistanceMsg(self):
         """ Clearing distance
 
-                :returns: clear distance message
-
+            :returns: clear distance message
         """
         return self.MeasureMsg(self, 3)
 
@@ -565,6 +594,7 @@ class RemoteMeasureUnit(MeasureUnit):
     def SwitchOffMsg(self):
         """ Switch off instrument
 
+            :returns: switch off message
         """
         params = {}
         msg = {'cmd': self.codes['SWITCHOFF'], 'params': params}
@@ -603,4 +633,8 @@ class RemoteMeasureUnit(MeasureUnit):
         return json.dumps(msg)
 
     def __repr__(self):
+        """
+        RemoteMeasureUnit object representation
+            :returns: RemoteMeasureUnit object string
+        """
         return type(self).__name__+'(name="{0:s}", typ="{1:s}", measuerUnit="{2:s}")'.format(str(self.name), str(self.typ), repr(self.measureUnit))

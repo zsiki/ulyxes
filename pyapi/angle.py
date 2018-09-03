@@ -9,6 +9,7 @@
       Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
 
 .. moduleauthor:: dr. Zoltan Siki <siki@agt.bme.hu>
+                Bence Turak <bence.turak@gmail.com>
 """
 
 import math

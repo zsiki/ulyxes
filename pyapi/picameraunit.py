@@ -19,28 +19,52 @@ try:
 except:
     pass
 class PiCameraUnit(MeasureUnit):
+    """ Picamera Unit for handle Picamera device
+
+            :param name: name of measure unit (str), default None
+            :param typ: type of measure unit (str), default None
+    """
 
     def __init__(self, name = None, typ = None):
+        """constructor
+        """
         MeasureUnit.__init__(self, name, typ)
         self.cam = picamera.PiCamera()
 
 
     def TakePhotoMsg(self, pic, resolution = (720, 480)):
+        """Take photo
+
+            :param pic: writable binary file
+            :param resolution: resolution of picture (tuple)
+            :returns: dictionary contain picture in binary file
+        """
         self.cam.resolution = resolution
         self.cam.capture(pic)
         return {'ret': {}, 'pic': pic}
 
     def StartCameraViewMsg(self):
+        """Start camera preview
 
+            :returns: empty dictionary
+        """
         self.cam.start_preview()
         return {'ret': {}}
 
     def StopCameraViewMsg(self):
+        """Stop camera preview
 
+            :returns: empty dictionary
+        """
         self.cam.stop_preview()
         return {'ret': {}}
 
     def GetContrastMsg(self, mask):
+        """Get contrast of picture (beta)
+
+            :param mask: picture mask
+            :returns: contrast
+        """
         picName = 'focus_pics/focusPic.png'
         self.TakePhotoMsg(picName)
         img = cv2.imread(picName)
@@ -56,4 +80,6 @@ class PiCameraUnit(MeasureUnit):
         return {'ret': 0, 'contrast': dev[0][0]}
 
     def __del__(self):
+        """destructor
+        """
         self.cam.close()
