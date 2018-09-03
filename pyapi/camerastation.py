@@ -13,10 +13,9 @@ import sys
 #sys.path.append('ulyxes/pyapi/')
 #sys.path.append('lib/')
 from totalstation import TotalStation
-from serialiface import SerialIface
+#from serialiface import SerialIface
 from camera import Camera
-from camcalibparams import CamCalibParams
-from steppermotor import StepperMotor
+#from steppermotor import StepperMotor
 from imgprocess import ImgProcess
 import numpy as np
 import os
@@ -68,10 +67,12 @@ class CameraStation(TotalStation, Camera):
             print(photoName)
             file = open(photoName, 'w+b')
             print((int(self._affinParams[0,3]), int(self._affinParams[1,3])))
+
+            ang = self.GetAngles()
             self.TakePhoto(file, (int(self._affinParams[0,3]), int(self._affinParams[1,3])))
 
             file.close()
-            ang = self.GetAngles()
+
             try:
 
                 img = cv2.imread(photoName, 1)

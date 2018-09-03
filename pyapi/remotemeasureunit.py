@@ -192,8 +192,6 @@ class RemoteMeasureUnit(MeasureUnit):
             res['params'] = ts.GetMeasure()
         elif cmd == RemoteMeasureUnit.codes['MOVE']:
             res['params'] = ts.Move(Angle(params['hz']), Angle(params['v']), params['atr'])
-        elif cmd == RemoteMeasureUnit.codes['GETCONTRAST']:
-            res['params'] = ts.GetContrast()
         #elif cmd == RemoteMeasureUnit.codes['AUTOFOCUS']:
             #res['params'] = ts.AutoFocus(params['dir'])
         elif cmd == RemoteMeasureUnit.codes['TAKEPHOTO']:

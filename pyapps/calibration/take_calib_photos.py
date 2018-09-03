@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../pyapi/')
+sys.path.append('../../pyapi/')
 from camerastation import CameraStation
 from totalstation import TotalStation
 from remotemeasureunit  import RemoteMeasureUnit

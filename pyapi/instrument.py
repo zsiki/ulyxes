@@ -106,7 +106,7 @@ class Instrument(object):
             if res['binsize'] and res['binsize'] > 0:
                 res = self.measureIface.GetLine(res['binsize'])
                 if pic != None:
-                    file.write(res)
+                    pic.write(res)
                     res['pic'] = pic
         except:
             pass

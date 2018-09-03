@@ -212,6 +212,13 @@ Operators supported:
         """
         return "{0:.4f}".format(self.GetAngle('GON'))
 
+    def __repr__(self):
+        """
+        angle object representation
+            :returns: angle object string
+        """
+        return type(self).__name__+"({0:f})".format(self.GetAngle())
+
     def __add__(self, a):
         """ add angles
 

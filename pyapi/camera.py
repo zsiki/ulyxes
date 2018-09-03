@@ -14,7 +14,6 @@ import sys
 import os
 import cv2
 from instrument import Instrument
-from camcalibparams import CamCalibParams
 from tcpiface import TCPIface
 
 try:
@@ -40,7 +39,7 @@ class Camera(Instrument):
     def TakePhoto(self, pic, resolution = (480,720)):
         '''taking photo method
 
-            :param name: name of image file
+            :param pic: name of image file
             :param resolution: resolution of picture (tuple)
         '''
         msg = self.measureUnit.TakePhotoMsg(pic, resolution)

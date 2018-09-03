@@ -2,7 +2,7 @@ import glob
 import cv2
 import numpy as np
 import sys
-sys.path.append('../pyapi/')
+sys.path.append('../../pyapi/')
 import math
 import recognition as rec
 import math
