@@ -76,7 +76,7 @@ Optional, used by robotplus.py
 
 .. code:: bash
 
-	sudo apt-get install libqt4-core python-qt4
+	sudo apt-get install libqtcore4 python-qt4
 
 SpatiaLite/SqLite
 ~~~~~~~~~~~~~~~~~
