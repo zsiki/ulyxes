@@ -247,6 +247,7 @@ class Robot(object):
                             if abs(hz - obs['hz'].GetAngle()) > self.dirLimit \
                                or abs(v - obs['v'].GetAngle()) > self.dirLimit:
                                 j += 1
+                                logging.warning("False direction %s", pn)
                                 continue    # try again
                             break   # observation OK
                     if j >= self.maxtry:
