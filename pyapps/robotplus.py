@@ -212,7 +212,7 @@ if __name__ == "__main__":
     config_pars = {
         'log_file': {'required' : True, 'type': 'file'},
         'log_level': {'required' : True, 'type': 'int',
-            'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR]},
+            'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.FATAL]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
         'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1800', '1100']},
         'station_id': {'required' : True, 'type': 'str'},
@@ -264,7 +264,7 @@ if __name__ == "__main__":
     else:
         print("Missing parameter")
         print("Usage: robotplus.py config_file")
-        cr = ConfReader('robotplus', '/home/siki/monitoring/p103_1.json', None, config_pars)
+        cr = ConfReader('robotplus', '/home/siki/monitoring/xxx.json', None, config_pars)
         cr.Load()
         if not cr.Check():
             print("Config check failed")
@@ -569,7 +569,8 @@ if __name__ == "__main__":
         # observation to monitoring points
         print("Measuring mon...")
         act_date = datetime.datetime.now()  # start of observations
-        r = Robot(observations, st_coord, ts)
+        r = Robot(observations, st_coord, ts, cr.json['max_try'],
+                  cr.json['delay_try'], cr.json['dir_limit'])
         obs_out, coo_out = r.run()
         # calculate average for observations
         if cr.json['faces'] > 1:
@@ -587,9 +588,13 @@ if __name__ == "__main__":
             if wrt.WriteData(c) == -1:
                 logging.error('Coord data write failed')
         if 'inf_wr' in cr.json:
-            maxincl = max([max(abs(o['crossincline'].GetAngle('GON')),
-                          abs(o['lengthincline'].GetAngle('GON')))
-                          for o in obs_out if 'crossincline' in o])
+            maxi = [max(abs(o['crossincline'].GetAngle('GON')),
+                        abs(o['lengthincline'].GetAngle('GON')))
+                        for o in obs_out if 'crossincline' in o]
+            if len(maxi) > 0:
+                maxincl = max(maxi)
+            else:
+                maxincl = -99
             inf = {'datetime': act_date, 'nmon': len(mon_coords),
                    'nmonobs': len(obs_out)-1, 'maxincl': maxincl}
             if wrt2.WriteData(inf) == -1:
