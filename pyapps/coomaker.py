@@ -75,8 +75,7 @@ if __name__ == "__main__":
         ofname = sys.argv[1]
     else:
         print("Usage: coomaker.py output_file [sensor] [serial_port]")
-        #exit(-1)
-        ofname = "/home/siki/monitoring/xxx.coo"
+        exit(-1)
     if ofname[-4:] == '.geo' or ofname[-4:] == '.coo':
         ofname = ofname[:-4]
         otype = 'geo'
