@@ -68,12 +68,15 @@ def GetInt(prompt, default=0.0, errstr="Invalid value!"):
     return val
 
 if __name__ == "__main__":
+    if sys.version_info[0] > 2:
+        raw_input = input
     # process commandline parameters
     if len(sys.argv) > 1:
         ofname = sys.argv[1]
     else:
         print("Usage: coomaker.py output_file [sensor] [serial_port]")
-        exit(-1)
+        #exit(-1)
+        ofname = "/home/siki/monitoring/xxx.coo"
     if ofname[-4:] == '.geo' or ofname[-4:] == '.coo':
         ofname = ofname[:-4]
         otype = 'geo'
@@ -83,7 +86,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         stationtype = sys.argv[2]
     else:
-        stationtype = '1200'
+        stationtype = '1800'
     if re.search('120[0-9]$', stationtype):
         mu = LeicaTPS1200()
     elif re.search('110[0-9]$', stationtype):
@@ -128,7 +131,6 @@ if __name__ == "__main__":
         geo['station'] = coo['id']
         geo['ih'] = ih
         geo_wrt.WriteData(geo)
-
     ts.SetATR(1)
     ts.SetEDMMode('STANDARD')
     pc = 0.0
@@ -149,11 +151,16 @@ if __name__ == "__main__":
         if len(t_id) == 0:
             break
         if isinstance(ts.GetMeasureUnit(), LeicaTPS1200):
-            p = GetInt("Prism number ", p)
-            ts.SetPrismType(p)
+            p = GetInt("Prism number (-1 for none) ", p)
+            if p >= 0:
+                ts.SetPrismType(p)
+            else:
+                pc = -99
         else:
-            pc = GetFloat("Prism constant [mm] ", pc * 1000) / 1000.0
-            ts.SetPc(pc)
+            pc = GetFloat("Prism constant [mm] (-99 for none) ", pc * 1000) / 1000.0
+            if pc > -99:
+                ts.SetPc(pc)
+                #pc = -99
         print(ts.GetPc())
         raw_input("Target on prism and press enter")
         res = ts.MoveRel(Angle(0), Angle(0), 1)
@@ -167,5 +174,8 @@ if __name__ == "__main__":
         geo_wrt.WriteData(obs)
         coo = ts.Coords()
         coo['id'] = t_id
-        coo['pc'] = pc
+        if pc > -99:
+            coo['pc'] = pc
+        elif 'pc' in coo:
+            del coo['pc']
         coo_wrt.WriteData(coo)
