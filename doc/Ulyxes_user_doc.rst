@@ -78,12 +78,12 @@ solution.
 Sensor Managers
 ***************
 
-The system contains two different API independent from eachother: the 
+The system contains two different API independent from each other: the 
 **TclAPI** and the **PyAPI**. The TclAPI is the old and its development is 
-finished. Tha PyAPI is the new and actively developed.
+finished (depricated). Tha PyAPI is the new and actively developed.
 
-TclAPI
-======
+TclAPI (depricated)
+===================
 
 The TclAPI consist of a couple of Tcl (Tool Command Language) files/procs which
 give a higher level interface to drive RTSs and GPSs from computer. The TclAPI 
