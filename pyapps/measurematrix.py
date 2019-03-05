@@ -30,7 +30,7 @@ from trimble5500 import Trimble5500
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
-        print("Usage: {0:s} horizontal_step vertical_step instrument port".format(sys.argv[0]))
+        print("Usage: {0:s} horizontal_step vertical_step instrument port output_file".format(sys.argv[0]))
         exit(1)
     # set horizontal stepping interval dh_nr
     dh_nr = 1
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         mu = Trimble5500()
     else:
         print("unsupported instrument type")
-        #sys.exit(1)
+        sys.exit(1)
     # set port
     port = '/dev/ttyUSB0'
     if len(sys.argv) > 4:
