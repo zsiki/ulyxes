@@ -16,6 +16,7 @@ Parameters are stored in config file using JSON format::
     station_id: pont id for the station
     station_height: instrument height above point, optional (default: 0)
     station_coo_limit: limitation for station coordinate change from free station (default 0.01), optional
+    orientation_limit: distance limit for orientation to identify a target
     fix_list: list of fix points to calculate station coordinates, optional (default: empty)
     mon_list: list of monitoring points to measure, optional (default: empty)
     max_try: maximum trying to measure a point, optional (default: 3)
@@ -415,7 +416,7 @@ if __name__ == "__main__":
                                 filt=['id', 'east', 'north', 'elev'])
         else:
             rd_fix = GeoReader(fname=cr.json['coo_rd'], \
-                               filt=['id', 'east', 'north', 'elev', 'pc'])
+                               filt=['id', 'east', 'north', 'elev'])
         # remove other points
         fix_coords = [p for p in rd_fix.Load() if p['id'] in cr.json['fix_list']]
         if len(cr.json['fix_list']) != len(fix_coords):

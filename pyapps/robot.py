@@ -282,7 +282,7 @@ if __name__ == "__main__":
             print("Input file doesn't exists: %s" % ifname)
             exit(-1)
         if ifname[-3:] == '.py':  # configuration file given
-            exec 'from ' + ifname[:-3] + ' import *'
+            exec('from ' + ifname[:-3] + ' import *')
             config = True
     else:
         print("Usage: robot.py input_file [output_file] [sensor] [serial_port] [max_try] [delay_try] [BMP180|webmet] [met_addr] [met_par]")

@@ -254,7 +254,8 @@ class GamaIface(object):
         tmp_name = f.name
         f.close()
         f = open(tmp_name + '.xml', 'w')
-        f.write(doc.toByteArray())
+        f.write(doc.toString())
+        #f.write(doc.toByteArray())
         f.close()
 
         # run gama-local

@@ -442,8 +442,9 @@ if __name__ == "__main__":
     from serialiface import SerialIface
     from echowriter import EchoWriter
     logging.getLogger().setLevel(logging.DEBUG)
-    #mu = LeicaTPS1200()
-    mu = Trimble5500()
+    mu = LeicaTPS1200()
+    #mu = LeicaTCA1800()
+    #mu = Trimble5500()
     iface = SerialIface("rs-232", "/dev/ttyUSB0")
     if isinstance(mu, Trimble5500):
         # change default eol marker for read
@@ -452,17 +453,17 @@ if __name__ == "__main__":
     ts = TotalStation("Leica", mu, iface, wrt)
     ts.SetStation(10.0, 20., 30., 1.0)
     print(ts.GetStation())
-    #ts.GetInstrumentNo()
+    print(ts.GetInstrumentNo())
     #ts.GetInstrumentName()
     #ts.SetEDMMode(ts.measureUnit.edmModes['RLSTANDARD'])
     #ts.SetPc(0.0068)
     #print(ts.GetPc())
-    #ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
-    ts.SetEDMMode(ts.measureUnit.edmModes['STANDARD'])
-    ts.Measure()
-    meas = ts.GetMeasure()
-    while 'distance' not in meas:
-        time.sleep(2)
-        meas = ts.GetMeasure()
-    print(meas)
+    ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
+    #ts.SetEDMMode(ts.measureUnit.edmModes['STANDARD'])
+    #ts.Measure()
+    #meas = ts.GetMeasure()
+    #while 'distance' not in meas:
+    #    time.sleep(2)
+    #    meas = ts.GetMeasure()
+    #print(meas)
     #ts.SwitchOff()
