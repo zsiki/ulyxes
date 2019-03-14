@@ -140,7 +140,9 @@ class Robot(object):
             :returns: (obs_out, coo_out)
         """
         target_msg = "Target on %s point(%s) in face %d and press enter or press 's' to skip the point"
-        n = 0  # number of faces measured fo far
+        wait = False
+        ww = ''
+        n = 0  # number of faces measured fo far                                                                        
         obs_out = []
         coo_out = []
         # write station record to output
@@ -155,8 +157,9 @@ class Robot(object):
                 i1 = len(self.directions) - 1
                 i2 = 0
                 step = -1
-
-            for i in range(i1, i2, step):
+            i = i1
+            while i != i2:
+                wait = False
                 if 'id' in self.directions[i] and \
                     self.directions[i]['faces'] > n:
                     pn = self.directions[i]['id']
@@ -170,15 +173,29 @@ class Robot(object):
                     ans = ''
                     while j < self.maxtry:
                         res = {}
-                        if self.directions[i]['code'][0:3] == 'ATR':
+                        code = self.directions[i]['code']
+                        if code[0:3] == 'ATR':
                             if j == 0: # first try set target
                                 self.ts.SetATR(1)
                                 self.ts.SetEDMMode('STANDARD')
-                                if len(self.directions[i]['code']) > 3:
+                                if code[3:4] == '-':
+                                    wait = True
+                                    code = code[0:3] + code[4:]
+                                if len(code) > 3:
                                     self.ts.SetPrismType(int(self.directions[i]['code'][3:]))
                                 elif 'pc' in self.directions[i]:
                                     self.ts.SetPc(self.directions[i]['pc'])
-                                    #print(self.ts.GetPc())
+                                    #print(self.ts.GetPc())                                    
+                            if wait:
+                                ww = input('b/s/Enter] b - back, s - skip %s: ' % pn)
+                                if ww == 'b':
+                                    i -= step
+                                    if i not in range(i1, i2):
+                                        i = i1
+                                    break
+                                if ww == 's':
+                                    i += step
+                                    break
                             res = self.ts.Move(Angle(hz), Angle(v), 1)
                             if 'errorCode' not in res:
                                 res = self.ts.Measure()
@@ -192,7 +209,7 @@ class Robot(object):
                                     self.ts.SetPrismType(int(self.directions[i]['code'][2:]))
                             res = self.ts.Move(Angle(hz), Angle(v), 0)
                             # wait for user to target on point
-                            ans = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
+                            ans = input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
                             if ans == 's':
                                 j = self.maxtry
                                 break
@@ -253,6 +270,8 @@ class Robot(object):
                     if j >= self.maxtry:
                         logging.error("Cannot measure point %s", pn)
                         continue
+                    if ww in ['b', 's']:
+                        continue
                     obs['id'] = pn
                     obs['face'] = self.ts.FACE_RIGHT if step < 0 else self.ts.FACE_LEFT
                     obs_out.append(obs)
@@ -261,6 +280,7 @@ class Robot(object):
                         coo['id'] = pn
                         coo['east'], coo['north'], coo['elev'] = self.polar(obs)
                         coo_out.append(coo)
+                i += step
             n = n + 1
         # rotate back to first point
         self.ts.Move(self.directions[1]['hz'], self.directions[1]['v'], 0)
