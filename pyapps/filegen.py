@@ -77,7 +77,10 @@ class ObsGen(object):
             obs['hz'] = Angle(bearing).Positive()
             obs['v'] = Angle(zenith).Positive()
             obs['distance'] = math.hypot(dist, d_elev)
-            obs['code'] = 'ATR'
+            if 'code' in coo:
+                obs['code'] = coo['code']
+            else:
+                obs['code'] = 'ATR'
             obs['faces'] = self.faces
             if 'pc' in coo:
                 obs['pc'] = coo['pc']
