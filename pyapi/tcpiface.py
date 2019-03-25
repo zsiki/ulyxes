@@ -11,11 +11,11 @@
 """
 
 import sys
-#sys.path.append('../ulyxes/pyapi/')
-from iface import Iface
 import socket
 import logging
 import re
+#sys.path.append('../ulyxes/pyapi/')
+from iface import Iface
 
 class TCPIface(Iface):
     """Interface to communicate on TCP/IP protocol. This class requires socket.
@@ -30,15 +30,17 @@ class TCPIface(Iface):
         """ Constructor for TCP socket interface
         """
         super(TCPIface, self).__init__(name)
-        # open serial port
         self.sock = None
         self.bufSize = None
 
+        # open socket
         self.Open(address, bufSize, timeout)
+
     def __del__(self):
         """ Destructor for TCP socket interface
         """
         self.Close()
+
     def Open(self, address, bufSize = 1024, timeout=15):
         """ Open TCP socket
         """
@@ -53,6 +55,7 @@ class TCPIface(Iface):
             self.opened = False
             self.state = self.IF_ERROR
             logging.error(" cannot open TCP socket")
+
     def Close(self):
         """ Close TCP socket
         """
@@ -63,12 +66,13 @@ class TCPIface(Iface):
         except:
             self.state = self.IF_ERROR
             logging.error(" cannot close TCP socet")
+
     def GetLine(self, fileSize = None):
         """ read from TCP interface until end of line
 
             :param fileSize: the size of the expected file (int)
 
-        :returns: line read from TCP (str) or empty string on timeout or error, state is set also
+            :returns: line read from TCP (str) or empty string on timeout or error, state is set also
         """
         if self.sock is None or not self.opened or self.state != self.IF_OK:
             logging.error(" TCP socket not opened")
@@ -79,7 +83,6 @@ class TCPIface(Iface):
         a = b''
         try:
             if fileSize != None:
-
                 a = self.sock.recv(self.bufSize)
                 ans += a
                 while sys.getsizeof(ans) < fileSize + 17:
@@ -116,12 +119,11 @@ class TCPIface(Iface):
             logging.error(" TCP socket not opened or in error state")
             return -1
         # add CR/LF to message end
-        w = -1 * len('\n')
-        if (msg[w:] != '\n'):
+        if (msg[-1:] != '\n'):
             msg += '\n'
         # remove special characters
         msg = msg.encode('ascii', 'ignore')
-        # send message to serial interface
+        # send message to socket
         logging.debug(" message sent: %s", msg)
         try:
             self.sock.send(msg)
@@ -139,7 +141,7 @@ class TCPIface(Iface):
         """
         msglist = re.split("\|", msg)
         res = b''
-        #sending
+        # sending
         for m in msglist:
             if self.PutLine(m) == 0:
                 res += self.GetLine() + b"|"
@@ -149,7 +151,7 @@ class TCPIface(Iface):
         return res
 
 if __name__ == "__main__":
-    a = TCPIface('test', ('192.168.0.50', 8081), 1024, 15)
+    a = TCPIface('test', ('127.0.0.1', 80), 1024, 15)
     print (a.GetName())
     print (a.GetState())
-    print (a.Send('%R1Q,2008:1,0'))
+    print (a.Send('GET /index.html HTTP/1.1'))
