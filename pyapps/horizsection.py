@@ -4,8 +4,8 @@
 
 .. moduleauthor:: Viktoria Zubaly, Zoltan Siki
 
-Sample application of Ulyxes PyAPI to measure a horizontal section
-target on the first point of the section and start this app
+Sample application of Ulyxes PyAPI to measure a horizontal section(s)
+target on the first point of the first section and start this app
 coordinates and observations are written to csv file
 
     :param argv[1] (angle step): angle step between points in DEG, default 45
@@ -14,6 +14,7 @@ coordinates and observations are written to csv file
     :param argv[4] (max angle): stop at this direction, default 360 degree
     :param argv[5] (tolerance): acceptable tolerance (meter) from the horizontal plane, default 0.01
     :param argv[6] (iteration): max iteration number for a point, default 10
+    :param argv[7].. (elevations): elevations for horizontal sections
 """
 import sys
 import time
@@ -26,6 +27,7 @@ sys.path.append('../pyapi/')
 from angle import Angle, PI2
 from serialiface import SerialIface
 from csvwriter import CsvWriter
+from confreader import ConfReader
 from leicatps1200 import LeicaTPS1200
 from leicatcra1100 import LeicaTCRA1100
 from trimble5500 import Trimble5500
@@ -131,36 +133,78 @@ class HorizontalSection(object):
                 res = dict(nextp.items() + coord.items())
                 wrt.WriteData(res)
             self.ts.MoveRel(self.stepinterval, Angle(0))
-            act += self.stepinterval
+            act += self.stepself.ts.Move(startp['hz'], startp['v'])
         # rotate back to start
         self.ts.Move(startp['hz'], startp['v'])
         return 0
 
 if __name__ == "__main__":
+    config_pars = {
+        'log_file': {'required' : True, 'type': 'file'},
+        'log_level': {'required' : True, 'type': 'int',
+            'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.FATAL]},
+        'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
+        'angle_step' : {'required': False, 'type': "float", 'default': 45.0},
+
+        'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1100']},
+        'port': {'required' : True, 'type': 'str', 'default': '/dev/ttyUSB0'},
+        'max_angle': {'required': False, 'type': "float", 'default': 360.0},
+        'tolerance': {'required': False, 'type': "float", 'default': 0.01},
+        'iteration': {'required': False, 'type': 'int', 'default': 10},
+        'height_list': {'required': False, 'type': 'list'},
+        'wrt': {'required' : False, 'default': 'stdout'},
+        '__comment__': {'required': False, 'type': 'str'}
+    }
     logging.getLogger().setLevel(logging.WARNING)
     # process commandline parameters
-    if len(sys.argv) > 1:
-        stepinterval = Angle(float(sys.argv[1]), 'DEG')
+    pat = re.compile('\.json$')
+    sys.argv.append('horiz.json')
+    if len(sys.argv) == 2 and pat.search(sys.argv[1]):
+        # load json config
+        cr = ConfReader('HorizontalSection', sys.argv[1], None, config_pars)
+        cr.Load()
+        if not cr.Check():
+            print("Config check failed")
+            sys.exit(-1)
+        logging.basicConfig(format=cr.json['log_format'],
+            filename=cr.json['log_file'], filemode='a',
+            level=cr.json['log_level'])
+        stepinterval = Angle(cr.json['angle_step'])
+        stationtype = cr.json['station_type']
+        port = cr.json['port']
+        max_angle = cr.json['max_angle'] / 180.0 * math.pi
+        tol = cr.json['tolerance']
+        maxiter = cr.json['iteration']
+        wrt = CsvWriter(angle='DMS', dist='.3f',
+            filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
+            fname=cr.json['wrt'], mode='a', sep=';')
     else:
-        stepinterval = Angle(45, 'DEG')
-    if len(sys.argv) > 2:
-        stationtype = sys.argv[2]
-    else:
-        stationtype = '1200'
-    if len(sys.argv) > 3:
-        port = sys.argv[3]
-    else:
-        port = '/dev/ttyUSB0'
-    if len(sys.argv) > 4:
-        maxa = float(sys.argv[4]) / 180.0 * math.pi
-    else:
-        maxa = PI2
-    tol = 0.01
-    if len(sys.argv) > 5:
-        tol = float(sys.argv[5])
-    maxiter = 10    # number of iterations to find point on horizontal plan
-    if len(sys.argv) > 6:
-        maxiter = int(sys.argv[6])
+        if len(sys.argv) > 1:
+            stepinterval = Angle(float(sys.argv[1]), 'DEG')
+        else:
+            stepinterval = Angle(45, 'DEG')
+        if len(sys.argv) > 2:
+            stationtype = sys.argv[2]
+        else:
+            stationtype = '1200'
+        if len(sys.argv) > 3:
+            port = sys.argv[3]
+        else:
+            port = '/dev/ttyUSB0'
+        if len(sys.argv) > 4:
+            maxa = float(sys.argv[4]) / 180.0 * math.pi
+        else:
+            maxa = PI2
+        tol = 0.01
+        if len(sys.argv) > 5:
+            tol = float(sys.argv[5])
+        maxiter = 10    # number of iterations to find point on horizontal plan
+        if len(sys.argv) > 6:
+            maxiter = int(sys.argv[6])
+        wrt = CsvWriter(angle='DMS', dist='.3f',
+            filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
+            fname='stdout', mode='a', sep=';')
+
     iface = SerialIface("rs-232", port)
     if iface.state != iface.IF_OK:
         print("serial error")
@@ -180,10 +224,16 @@ if __name__ == "__main__":
                     fname='stdout', mode='a', sep=';')
 
     ts = TotalStation(stationtype, mu, iface)
+    ts.SetStation(0.0, 0.0, 0.0)
     if isinstance(mu, Trimble5500):
         print("Set Trimble 550x to direct reflex (MNU 722) and press Enter")
         raw_input('')
     else:
         ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
-    h_sec = HorizontalSection(ts)
-    h_sec.run()
+    if len(sys.argv) > 7:
+        for i in range(7, len(argv)):
+            h_sec = HorizontalSection(ts, float(argv[i]))
+            h_sec.run()
+    else:
+        h_sec = HorizontalSection(ts)
+        h_sec.run()
