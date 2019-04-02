@@ -24,7 +24,8 @@ class DigitalLevel(Instrument):
         """ Constructor to Leica DNA level
         """
         # call super class init
-        super(DigitalLevel, self).__init__(name, measureUnit, measureIface)
+        super(DigitalLevel, self).__init__(name, measureUnit, measureIface,
+              writerUnit)
 
     def Measure(self):
         """ Start reading on staff
@@ -60,11 +61,16 @@ class DigitalLevel(Instrument):
 if __name__ == "__main__":
     from leicadnaunit import LeicaDnaUnit
     from serialiface import SerialIface
+    from csvwriter import CsvWriter
 
     mu = LeicaDnaUnit()
-    iface = SerialIface('x', '/dev/ttyS0')
-    dna = DigitalLevel('DNA03', mu, iface)
+    iface = SerialIface('x', '/dev/ttyUSB0')
+    wrt = CsvWriter(angle='DMS', dist='.5f',
+                    filt=['id', 'distance', 'staff', 'datetime'],
+                    fname='stdout', mode='a', sep=';')
+    dna = DigitalLevel('DNA03', mu, iface, wrt)
     dna.SetAutoOff(0)
     #print (dna.GetAutoOff())
     print (dna.Temperature())
-    print (dna.Measure())
+    for i in range(10):
+        dna.Measure()
