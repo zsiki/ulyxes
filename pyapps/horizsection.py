@@ -61,11 +61,9 @@ class HorizontalSection(object):
         if self.hz_start is not None:
             # rotate to start position, keeping zenith angle
             a = self.ts.GetAngles()
-            print (a)
-            print (self.hz_start.GetAngle())
-            print (a['v'].GetAngle())
             self.ts.Move(self.hz_start, a['v'])
         startp = self.ts.GetMeasure()
+        startp0 = None
         i = 0
         while 'distance' not in startp and i < 20:
             i += 1
@@ -112,7 +110,10 @@ class HorizontalSection(object):
                 zenith = nextp['v'].GetAngle()
                 zenith1 = math.acos(height0 / nextp['distance'])
                 self.ts.MoveRel(Angle(0), Angle(zenith1-zenith))
-                self.ts.Measure()
+                ans = self.ts.Measure()
+                if 'errCode' in ans:
+                    print ('Cannot measure point')
+                    break
                 index += 1
                 if index > self.maxiter or \
                     self.ts.measureIface.state != self.ts.measureIface.IF_OK:
@@ -128,14 +129,16 @@ class HorizontalSection(object):
                 if 'v' not in nextp or 'distance' not in nextp:
                     break
                 height = math.cos(nextp['v'].GetAngle()) * nextp['distance']
+            if 'distance' in nextp and startp0 is None:
+                startp0 = nextp # store first valid point on section
             if 'distance' in nextp and w:
                 coord = self.ts.Coords()
                 res = dict(nextp.items() + coord.items())
                 wrt.WriteData(res)
             self.ts.MoveRel(self.stepinterval, Angle(0))
-            act += self.stepself.ts.Move(startp['hz'], startp['v'])
+            act += self.stepinterval
         # rotate back to start
-        self.ts.Move(startp['hz'], startp['v'])
+        self.ts.Move(startp0['hz'], startp0['v'])
         return 0
 
 if __name__ == "__main__":
@@ -148,6 +151,7 @@ if __name__ == "__main__":
 
         'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1100']},
         'port': {'required' : True, 'type': 'str', 'default': '/dev/ttyUSB0'},
+        'hz_start': {"required": False, 'type': "str", 'default': None},
         'max_angle': {'required': False, 'type': "float", 'default': 360.0},
         'tolerance': {'required': False, 'type': "float", 'default': 0.01},
         'iteration': {'required': False, 'type': 'int', 'default': 10},
@@ -158,7 +162,7 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(logging.WARNING)
     # process commandline parameters
     pat = re.compile('\.json$')
-    sys.argv.append('horiz.json')
+    #sys.argv.append('horiz.json')
     if len(sys.argv) == 2 and pat.search(sys.argv[1]):
         # load json config
         cr = ConfReader('HorizontalSection', sys.argv[1], None, config_pars)
@@ -169,15 +173,19 @@ if __name__ == "__main__":
         logging.basicConfig(format=cr.json['log_format'],
             filename=cr.json['log_file'], filemode='a',
             level=cr.json['log_level'])
-        stepinterval = Angle(cr.json['angle_step'])
+        hz_start = None
+        if cr.json['hz_start'] is not None:
+            hz_start = Angle(float(cr.json['hz_start']), 'DEG')
+        stepinterval = Angle(cr.json['angle_step'], 'DEG')
         stationtype = cr.json['station_type']
         port = cr.json['port']
-        max_angle = cr.json['max_angle'] / 180.0 * math.pi
+        maxa = cr.json['max_angle'] / 180.0 * math.pi
         tol = cr.json['tolerance']
         maxiter = cr.json['iteration']
         wrt = CsvWriter(angle='DMS', dist='.3f',
             filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
             fname=cr.json['wrt'], mode='a', sep=';')
+        levels = cr.json['height_list']
     else:
         if len(sys.argv) > 1:
             stepinterval = Angle(float(sys.argv[1]), 'DEG')
@@ -191,6 +199,7 @@ if __name__ == "__main__":
             port = sys.argv[3]
         else:
             port = '/dev/ttyUSB0'
+        hz_start = None
         if len(sys.argv) > 4:
             maxa = float(sys.argv[4]) / 180.0 * math.pi
         else:
@@ -204,7 +213,10 @@ if __name__ == "__main__":
         wrt = CsvWriter(angle='DMS', dist='.3f',
             filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
             fname='stdout', mode='a', sep=';')
-
+        if len(sys.argv) > 7:
+            levels = [float(a) for a in sys.argv[7:]]
+        else:
+            levels = None
     iface = SerialIface("rs-232", port)
     if iface.state != iface.IF_OK:
         print("serial error")
@@ -230,10 +242,12 @@ if __name__ == "__main__":
         raw_input('')
     else:
         ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
-    if len(sys.argv) > 7:
-        for i in range(7, len(argv)):
-            h_sec = HorizontalSection(ts, float(argv[i]))
+    if len(levels) > 0:
+        for i in levels:
+            h_sec = HorizontalSection(ts, i, hz_start, stepinterval, maxa,
+                                      maxiter, tol)
             h_sec.run()
     else:
-        h_sec = HorizontalSection(ts)
+        h_sec = HorizontalSection(ts, hz_start, stepinterval, maxa,
+                                  maxiter, tol)
         h_sec.run()
