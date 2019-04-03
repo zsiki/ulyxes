@@ -29,6 +29,9 @@ from leicatcra1100 import LeicaTCRA1100
 from trimble5500 import Trimble5500
 
 if __name__ == "__main__":
+    if sys.version_info[0] > 2:  # Python 3 compatibility
+        raw_input = input
+
     if len(sys.argv) == 1:
         print("Usage: {0:s} horizontal_step vertical_step instrument port output_file".format(sys.argv[0]))
         exit(1)

@@ -142,6 +142,9 @@ class HorizontalSection(object):
         return 0
 
 if __name__ == "__main__":
+    if sys.version_info[0] > 2:  # Python 3 compatibility
+        raw_input = input
+
     config_pars = {
         'log_file': {'required' : True, 'type': 'file'},
         'log_level': {'required' : True, 'type': 'int',

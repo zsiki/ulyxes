@@ -38,6 +38,9 @@ modes1 = ['ATR', 'ATR0', 'ATR1', 'ATR2', 'ATR3', 'ATR4', 'ATR5', 'ATR6', \
 modes_str = '/'.join(modes)
 
 if __name__ == "__main__":
+    if sys.version_info[0] > 2:  # Python 3 compatibility
+        raw_input = input
+
     # process commandline parameters
     if len(sys.argv) > 1:
         ofname = sys.argv[1]

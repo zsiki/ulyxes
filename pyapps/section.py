@@ -31,6 +31,9 @@ from csvwriter import CsvWriter
 from totalstation import TotalStation
 
 if __name__ == "__main__":
+    if sys.version_info[0] > 2:  # Python 3 compatibility
+        raw_input = input
+
     logging.getLogger().setLevel(logging.ERROR)
     # Process command line parameters
     if len(sys.argv) > 1:
