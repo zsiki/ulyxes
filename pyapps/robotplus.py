@@ -16,7 +16,9 @@ Parameters are stored in config file using JSON format::
     station_id: pont id for the station
     station_height: instrument height above point, optional (default: 0)
     station_coo_limit: limitation for station coordinate change from free station (default 0.01), optional
-    orientation_limit: distance limit for orientation to identify a target
+    orientation_limit: distance limit for orientation to identify a target (default 0.1)
+    faces: number of faces to measure (first face left for all pointt then face right) (default 1)
+    directfaces: number of faces to measure (face left and right are measured directly) (default 1)
     fix_list: list of fix points to calculate station coordinates, optional (default: empty)
     mon_list: list of monitoring points to measure, optional (default: empty)
     max_try: maximum trying to measure a point, optional (default: 3)
@@ -104,9 +106,9 @@ def avg_coo(coords):
         avg_h = sum(h) / len(h)
         # check before store average
         # TODO limit from config
-        if len([x for x in e if abs(x - avg_e) > 0.01]) or \
-           len([y for y in n if abs(y - avg_n) > 0.01]) or \
-           len([z for z in h if abs(z - avg_h) > 0.01]):
+        if [x for x in e if abs(x - avg_e) > 0.01] or \
+           [y for y in n if abs(y - avg_n) > 0.01] or \
+           [z for z in h if abs(z - avg_h) > 0.01]:
             logging.error("Large coordinate difference from faces: %.3f %.3f %.3f", e, n, h)
             continue    # skip point
         res.append({'id': i, 'east': avg_e, 'north': avg_n, 'elev': avg_h})
@@ -144,7 +146,7 @@ def avg_obs(obs):
             elif hz2[0] - hz2[i] > math.pi:
                 hz2[i] += math.pi * 2.0
         # rotate face right by 180 degree
-        if len(hz2) and len(hz1):
+        if hz2 and hz1:
             if hz1[0] > hz2[0]:
                 hz2 = [h + math.pi for h in hz2]
             else:
@@ -152,7 +154,7 @@ def avg_obs(obs):
             kol = (sum(hz2) / len(hz2) - sum(hz1) / len(hz1)) / 2.0
             logging.info('Collimation error [GON]: %.4f %s',
                          Angle(kol).GetAngle('GON'), k)
-        elif len(hz1) == 0:
+        elif hz2:
             if hz2[0] > math.pi:
                 hz2 = [h - math.pi for h in hz2]
             else:
@@ -161,8 +163,8 @@ def avg_obs(obs):
         # check before store average
         # TODO limit from config
         str_hz = [Angle(abs(x - hz)).GetAngle('GON')
-            for x in hz1 + hz2 if abs(x - hz) > 60.0 / 200000.0]
-        if len(str_hz):
+                  for x in hz1 + hz2 if abs(x - hz) > 60.0 / 200000.0]
+        if str_hz:
             logging.error('Large Hz difference from faces [GON]: %.4f %s',
                           max(str_hz), k)
             continue    # skip point
@@ -170,7 +172,7 @@ def avg_obs(obs):
             if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi]
         v2 = [math.pi * 2.0 - o['v'].GetAngle() for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() > math.pi]
-        if len(v1) and len(v2):
+        if v1 and v2:
             ind = (sum(v2) / len(v2) - sum(v1) / len(v1)) / 2.0
             logging.info('Index error [GON]: %.4f %s',
                          Angle(ind).GetAngle('GON'), k)
@@ -178,20 +180,20 @@ def avg_obs(obs):
         # check before store average
         # TODO limit from config
         str_v = [Angle(abs(x-v)).GetAngle('GON')
-            for x in v1 + v2  if abs(x - v) > 60.0 / 200000.0]
-        if len(str_v):
+                 for x in v1 + v2  if abs(x - v) > 60.0 / 200000.0]
+        if str_v:
             logging.error('Large V difference from faces: %.4f at point %s',
                           max(str_v), k)
             continue    # skip point
         res_obs = {'id': k, 'hz': Angle(hz), 'v': Angle(v)}
         sd12 = [o['distance'] for o in obs \
             if 'id' in o and o['id'] == k and 'distance' in o]
-        if len(sd12):
+        if sd12:
             sd = sum(sd12) / len(sd12)
             # check before store average
             # TODO limit from config
             str_d = [abs(x - sd) for x in sd12 if abs(x - sd) > 0.01]
-            if len(str_d):
+            if str_d:
                 logging.error('Large dist difference from faces: %.4f at point %s', max(str_d), k)
                 continue    # skip point
             res_obs['distance'] = sd
@@ -199,12 +201,12 @@ def avg_obs(obs):
         cross = [o['crossincline'] for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi and \
             'crossincline' in o]
-        if len(cross):
+        if cross:
             res_obs['crossincline'] = cross[0]
         length = [o['lengthincline'] for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi and \
             'lengthincline' in o]
-        if len(length):
+        if length:
             res_obs['lengthincline'] = length[0]
         res.append(res_obs)
     return res
@@ -213,7 +215,7 @@ if __name__ == "__main__":
     config_pars = {
         'log_file': {'required' : True, 'type': 'file'},
         'log_level': {'required' : True, 'type': 'int',
-            'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.FATAL]},
+                      'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.FATAL]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
         'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1800', '1100']},
         'station_id': {'required' : True, 'type': 'str'},
@@ -221,6 +223,7 @@ if __name__ == "__main__":
         'station_coo_limit': {'required': False, 'default': 0.01, 'type': 'float'},
         'orientation_limit': {'required': False, 'default': 0.1, 'type': 'float'},
         'faces': {'required': False, 'default': 1, 'type': 'int'},
+        'directfaces': {'required': False, 'default': 1, 'type': 'int'},
         'fix_list': {'required': False, 'type': 'list'},
         'mon_list': {'required': False, 'type': 'list'},
         'max_try': {'required': False, 'type': 'int', 'default': 3},
@@ -354,11 +357,11 @@ if __name__ == "__main__":
                 wrtm = SqLiteWriter(db=cr.json['met_wr'][7:],
                                     table='monitoring_met',
                                     filt=['id', 'pressure', 'temp', 'humidity',
-                                    'wettemp', 'datetime'])
+                                          'wettemp', 'datetime'])
             else:
                 wrtm = CsvWriter(name='met', fname=cr.json['met_wr'],
-                    filt=['id', 'temp', 'pressure', 'humidity',
-                          'wettemp', 'datetime'], mode='a')
+                                 filt=['id', 'temp', 'pressure', 'humidity',
+                                       'wettemp', 'datetime'], mode='a')
             data = {'id': cr.json['station_id'], 'temp': temp,
                     'pressure': pres, 'humidity': humi, 'wettemp': wet}
             if wrtm.WriteData(data) == -1:
@@ -393,7 +396,7 @@ if __name__ == "__main__":
         wrt1 = SqLiteWriter(db=cr.json['obs_wr'][7:], dist=fmt,
                             table='monitoring_obs',
                             filt=['id', 'hz', 'v', 'distance',
-                            'crossincline', 'lengthincline', 'datetime'])
+                                  'crossincline', 'lengthincline', 'datetime'])
     else:
         wrt1 = GeoWriter(fname=cr.json['obs_wr'], mode='a', dist=fmt)
     # information writer
@@ -442,7 +445,7 @@ if __name__ == "__main__":
     # generate observations for all target points, first point is the station
     print("Generating observations for targets...")
     og = ObsGen(st_coord + fix_coords + mon_coords, cr.json['station_id'], \
-        cr.json['station_height'], cr.json['faces'])
+        cr.json['station_height'], cr.json['faces'], cr.json['directfaces'])
     observations = og.run()
     # change to face left
     if ts.GetFace()['face'] == ts.FACE_RIGHT:
@@ -469,7 +472,7 @@ if __name__ == "__main__":
         # generate observations for fix points, first point is the station
         print("Generating observations for fix...")
         og = ObsGen(st_coord + fix_coords, cr.json['station_id'], \
-            cr.json['station_height'], cr.json['faces'])
+            cr.json['station_height'], cr.json['faces'], cr.json['directfaces'])
         observations = og.run()
         # observation to fix points
         print("Measuring fix...")
@@ -513,14 +516,14 @@ if __name__ == "__main__":
             print("Uploading station coords...")
             st_coord[0]['datetime'] = act_date
             logging.info("station stddevs[mm/cc]: %.1f %.1f %.1f %.1f",
-                st_coord[0]['std_east'], st_coord[0]['std_north'],
-                st_coord[0]['std_elev'], st_coord[0]['std_ori'])
+                         st_coord[0]['std_east'], st_coord[0]['std_north'],
+                         st_coord[0]['std_elev'], st_coord[0]['std_ori'])
             if wrt.WriteData(st_coord[0]) == -1:
                 logging.error('Station coords write failed')
             if 'inf_wr' in cr.json:
                 maxincl = max([max(abs(o['crossincline'].GetAngle('GON')),
-                              abs(o['lengthincline'].GetAngle('GON')))
-                              for o in obs_out if 'crossincline' in o])
+                                   abs(o['lengthincline'].GetAngle('GON')))
+                               for o in obs_out if 'crossincline' in o])
                 inf = {'datetime': act_date, 'nref': len(fix_coords),
                        'nrefobs': len(obs_out)-1, 'maxincl': maxincl,
                        'std_east': st_coord[0]['std_east'],
@@ -591,7 +594,7 @@ if __name__ == "__main__":
         if 'inf_wr' in cr.json:
             maxi = [max(abs(o['crossincline'].GetAngle('GON')),
                         abs(o['lengthincline'].GetAngle('GON')))
-                        for o in obs_out if 'crossincline' in o]
+                    for o in obs_out if 'crossincline' in o]
             if len(maxi) > 0:
                 maxincl = max(maxi)
             else:

@@ -46,6 +46,7 @@ Sample dmp file::
 Codes describe target type::
 
     ATRn - prism and automatic targeting, n referes to prism type 0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini
+    ATR-n - prims and automatictargeting but wait for a keypress to measure
     PRn - prism, n referes to prism type 0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini, manual targeting
     RL - refrectorless observation, manual targeting
     RLA - reflectorless observation (automatic)
@@ -148,6 +149,8 @@ class Robot(object):
         # write station record to output
         obs = {'station': self.directions[0]['station'], 'ih': self.ih}
         obs_out.append(obs)
+        # TODO  !!!!!!!!!!!
+        # !!!!!!!!!!!!!
         while n < self.max_faces:
             if n % 2 == 0:   # face left
                 i1 = 1
@@ -159,127 +162,129 @@ class Robot(object):
                 step = -1
             i = i1
             while i != i2:
-                wait = False
                 if 'id' in self.directions[i] and \
                     self.directions[i]['faces'] > n:
-                    pn = self.directions[i]['id']
-                    hz = self.directions[i]['hz'].GetAngle()
-                    v = self.directions[i]['v'].GetAngle()
-                    if step < 0:
-                        # change angles to face right
-                        hz = hz - math.pi if hz > math.pi else hz + math.pi
-                        v = PI2 - v
-                    j = 0   # try count
-                    ans = ''
-                    while j < self.maxtry:
-                        res = {}
-                        code = self.directions[i]['code']
-                        if code[0:3] == 'ATR':
-                            if j == 0: # first try set target
-                                self.ts.SetATR(1)
-                                self.ts.SetEDMMode('STANDARD')
-                                if code[3:4] == '-':
-                                    wait = True
-                                    code = code[0:3] + code[4:]
-                                if len(code) > 3:
-                                    self.ts.SetPrismType(int(self.directions[i]['code'][3:]))
-                                elif 'pc' in self.directions[i]:
-                                    self.ts.SetPc(self.directions[i]['pc'])
-                                    #print(self.ts.GetPc())                                    
-                            if wait:
-                                ww = input('b/s/Enter] b - back, s - skip %s: ' % pn)
-                                if ww == 'b':
-                                    i -= step
-                                    if i not in range(i1, i2):
-                                        i = i1
+                    # loop for directfaces
+                    for k in range(self.directions[i]['directfaces']):
+                        wait = False
+                        pn = self.directions[i]['id']
+                        hz = self.directions[i]['hz'].GetAngle()
+                        v = self.directions[i]['v'].GetAngle()
+                        if step < 0 or k % 2 == 1:
+                            # change angles to face right
+                            hz = hz - math.pi if hz > math.pi else hz + math.pi
+                            v = PI2 - v
+                        j = 0   # try count
+                        ans = ''
+                        while j < self.maxtry:
+                            res = {}
+                            code = self.directions[i]['code']
+                            if code[0:3] == 'ATR':
+                                if j == 0: # first try set target
+                                    self.ts.SetATR(1)
+                                    self.ts.SetEDMMode('STANDARD')
+                                    if code[3:4] == '-':
+                                        if k == 0:  #wait only in first face left
+                                            wait = True
+                                        code = code[0:3] + code[4:]
+                                    if len(code) > 3:
+                                        self.ts.SetPrismType(int(self.directions[i]['code'][3:]))
+                                    elif 'pc' in self.directions[i]:
+                                        self.ts.SetPc(self.directions[i]['pc'])
+                                if wait:
+                                    ww = raw_input('b/s/Enter] b - back, s - skip %s: ' % pn)
+                                    if ww == 'b':
+                                        i -= step
+                                        if i not in range(i1, i2):
+                                            i = i1
+                                        break
+                                    if ww == 's':
+                                        i += step
+                                        break
+                                res = self.ts.Move(Angle(hz), Angle(v), 1)
+                                if 'errorCode' not in res:
+                                    res = self.ts.Measure()
+                            elif self.directions[i]['code'][0:2] == 'PR':
+                                if j == 0:
+                                    # prism type: 0/1/2/3/4/5/6/7
+                                    # round/mini/tape/360/user1/user2/user3/360 mini
+                                    self.ts.SetATR(0)
+                                    self.ts.SetEDMMode('STANDARD')
+                                    if len(self.directions[i]['code']) > 2:
+                                        self.ts.SetPrismType(int(self.directions[i]['code'][2:]))
+                                res = self.ts.Move(Angle(hz), Angle(v), 0)
+                                # wait for user to target on point
+                                ans = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
+                                if ans == 's':
+                                    j = self.maxtry
                                     break
-                                if ww == 's':
-                                    i += step
-                                    break
-                            res = self.ts.Move(Angle(hz), Angle(v), 1)
-                            if 'errorCode' not in res:
                                 res = self.ts.Measure()
-                        elif self.directions[i]['code'][0:2] == 'PR':
-                            if j == 0:
-                                # prism type: 0/1/2/3/4/5/6/7
-                                # round/mini/tape/360/user1/user2/user3/360 mini
-                                self.ts.SetATR(0)
-                                self.ts.SetEDMMode('STANDARD')
-                                if len(self.directions[i]['code']) > 2:
-                                    self.ts.SetPrismType(int(self.directions[i]['code'][2:]))
-                            res = self.ts.Move(Angle(hz), Angle(v), 0)
-                            # wait for user to target on point
-                            ans = input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
-                            if ans == 's':
-                                j = self.maxtry
-                                break
-                            res = self.ts.Measure()
-                        elif self.directions[i]['code'] == 'RL':
-                            self.ts.SetATR(0)
-                            self.ts.SetEDMMode('RLSTANDARD')
-                            self.ts.Move(Angle(hz), Angle(v), 0)
-                            # wait for user to target on point
-                            ans = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
-                            if ans == 's':
-                                j = self.maxtry
-                                break
-                            res = self.ts.Measure()
-                        elif self.directions[i]['code'] == 'RLA':
-                            if j == 0:
+                            elif self.directions[i]['code'] == 'RL':
                                 self.ts.SetATR(0)
                                 self.ts.SetEDMMode('RLSTANDARD')
-                            res = self.ts.Move(Angle(hz), Angle(v), 0)
-                            if 'errorCode' not in res:
+                                self.ts.Move(Angle(hz), Angle(v), 0)
+                                # wait for user to target on point
+                                ans = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
+                                if ans == 's':
+                                    j = self.maxtry
+                                    break
                                 res = self.ts.Measure()
-                        elif self.directions[i]['code'] == 'OR':
-                            res = self.ts.Move(Angle(hz), Angle(v), 0)
-                            # wait for user to target on point
-                            ans = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
-                            if ans == 's':
+                            elif self.directions[i]['code'] == 'RLA':
+                                if j == 0:
+                                    self.ts.SetATR(0)
+                                    self.ts.SetEDMMode('RLSTANDARD')
+                                res = self.ts.Move(Angle(hz), Angle(v), 0)
+                                if 'errorCode' not in res:
+                                    res = self.ts.Measure()
+                            elif self.directions[i]['code'] == 'OR':
+                                res = self.ts.Move(Angle(hz), Angle(v), 0)
+                                # wait for user to target on point
+                                ans = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
+                                if ans == 's':
+                                    j = self.maxtry
+                                    break
+                            else:
+                                # unknown code skip
                                 j = self.maxtry
                                 break
-                        else:
-                            # unknown code skip
-                            j = self.maxtry
-                            break
-                        if 'errorCode' in res:
-                            j += 1
-                            time.sleep(self.delaytry)
-                            continue
-                        if self.directions[i]['code'] == 'OR':
-                            obs = self.ts.GetAngles()
-                        else:
-                            obs = self.ts.GetMeasure()
-                            # add inclination data to obs
-                            w = self.ts.GetAngles()
-                            if 'crossincline' in w and 'lengthincline' in w:
-                                obs['crossincline'] = w['crossincline']
-                                obs['lengthincline'] = w['lengthincline']
-                        if self.ts.measureIface.state != self.ts.measureIface.IF_OK or 'errorCode' in obs:
-                            self.ts.measureIface.state = self.ts.measureIface.IF_OK
-                            j += 1
-                            continue
-                        else:
-                            # check false direction
-                            if abs(hz - obs['hz'].GetAngle()) > self.dirLimit \
-                               or abs(v - obs['v'].GetAngle()) > self.dirLimit:
+                            if 'errorCode' in res:
                                 j += 1
-                                logging.warning("False direction %s", pn)
-                                continue    # try again
-                            break   # observation OK
-                    if j >= self.maxtry:
-                        logging.error("Cannot measure point %s", pn)
-                        continue
-                    if ww in ['b', 's']:
-                        continue
-                    obs['id'] = pn
-                    obs['face'] = self.ts.FACE_RIGHT if step < 0 else self.ts.FACE_LEFT
-                    obs_out.append(obs)
-                    coo = {}
-                    if self.directions[i]['code'] != 'OR':
-                        coo['id'] = pn
-                        coo['east'], coo['north'], coo['elev'] = self.polar(obs)
-                        coo_out.append(coo)
+                                time.sleep(self.delaytry)
+                                continue
+                            if self.directions[i]['code'] == 'OR':
+                                obs = self.ts.GetAngles()
+                            else:
+                                obs = self.ts.GetMeasure()
+                                # add inclination data to obs
+                                w = self.ts.GetAngles()
+                                if 'crossincline' in w and 'lengthincline' in w:
+                                    obs['crossincline'] = w['crossincline']
+                                    obs['lengthincline'] = w['lengthincline']
+                            if self.ts.measureIface.state != self.ts.measureIface.IF_OK or 'errorCode' in obs:
+                                self.ts.measureIface.state = self.ts.measureIface.IF_OK
+                                j += 1
+                                continue
+                            else:
+                                # check false direction
+                                if abs(hz - obs['hz'].GetAngle()) > self.dirLimit \
+                                   or abs(v - obs['v'].GetAngle()) > self.dirLimit:
+                                    j += 1
+                                    logging.warning("False direction %s", pn)
+                                    continue    # try again
+                                break   # observation OK
+                        if j >= self.maxtry:
+                            logging.error("Cannot measure point %s", pn)
+                            continue
+                        if ww in ['b', 's']:
+                            continue
+                        obs['id'] = pn
+                        obs['face'] = self.ts.FACE_RIGHT if step < 0 else self.ts.FACE_LEFT
+                        obs_out.append(obs)
+                        coo = {}
+                        if self.directions[i]['code'] != 'OR':
+                            coo['id'] = pn
+                            coo['east'], coo['north'], coo['elev'] = self.polar(obs)
+                            coo_out.append(coo)
                 i += step
             n = n + 1
         # rotate back to first point
@@ -289,6 +294,9 @@ class Robot(object):
 if __name__ == "__main__":
 
     import os.path
+
+    if sys.version_info[0] > 2: # Python 3 compatibility
+        raw_input = input
 
     #logging.getLogger().setLevel(logging.WARNING)
     logging.getLogger().setLevel(logging.INFO)
