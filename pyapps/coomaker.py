@@ -68,7 +68,7 @@ def GetInt(prompt, default=0.0, errstr="Invalid value!"):
     return val
 
 if __name__ == "__main__":
-    if sys.version_info[0] > 2:
+    if sys.version_info[0] > 2:  # Python 3 compatibility
         raw_input = input
     # process commandline parameters
     if len(sys.argv) > 1:
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         stationtype = sys.argv[2]
     else:
-        stationtype = '1800'
+        stationtype = '1200'
     if re.search('120[0-9]$', stationtype):
         mu = LeicaTPS1200()
     elif re.search('110[0-9]$', stationtype):
@@ -130,7 +130,7 @@ if __name__ == "__main__":
         geo['station'] = coo['id']
         geo['ih'] = ih
         geo_wrt.WriteData(geo)
-    ts.SetATR(1)
+    atr = 1
     ts.SetEDMMode('STANDARD')
     pc = 0.0
     p = 0
@@ -155,18 +155,22 @@ if __name__ == "__main__":
                 ts.SetPrismType(p)
             else:
                 pc = -99
+            atr = 0 if p == 2 else 1
         else:
             pc = GetFloat("Prism constant [mm] (-99 for none) ", pc * 1000) / 1000.0
             if pc > -99:
                 ts.SetPc(pc)
                 #pc = -99
+            atr = 0 if pc == 0.00344 else 1
         print(ts.GetPc())
+        ts.SetATR(atr)
         raw_input("Target on prism and press enter")
-        res = ts.MoveRel(Angle(0), Angle(0), 1)
-        if 'errorCode' in res or ts.measureIface.state != ts.measureIface.IF_OK:
-            print("Cannot target on prism")
-            ts.measureIface.state = ts.measureIface.IF_OK
-            continue
+        if atr:
+            res = ts.MoveRel(Angle(0), Angle(0), atr)
+            if 'errorCode' in res or ts.measureIface.state != ts.measureIface.IF_OK:
+                print("Cannot target on prism")
+                ts.measureIface.state = ts.measureIface.IF_OK
+                continue
         res = ts.Measure()
         obs = ts.GetMeasure()
         obs['id'] = t_id
