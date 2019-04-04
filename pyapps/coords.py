@@ -24,7 +24,7 @@ Parameters are stored in config file using JSON format::
     strict: 1/0 free station calculated if only all fix points observed in round
     mon_only: 1/0 calculate polars if only monitoring point in observations/do not calculate polar
     st_only: 1/0 calculate monitoring point only in the same round with freestation
-    avg_wr: calculate averages from more faces if value 1, no average calculation if value is zero, optional (default: 1) OBSOLATE
+    avg_wr: calculate averages from more faces if value 1, no average calculation if value is zero, optional (default: 1) OBSOLATE average always calculated
     decimals: number of decimals in output, optional (default: 4)
     gama_path: path to GNU Gama executable, optional (default: empty, no adjustment)
     stdev_angle: standard deviation of angle measurement (arc seconds), optional (default: 1)
