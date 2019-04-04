@@ -30,7 +30,7 @@ Parameters are stored in config file using JSON format::
     obs_wr: target to send observations to
     met_wr: target to send meteorological observations to, optional (default: no output)
     inf_wr: target to send general information to
-    avg_wr: calculate averages from more faces if value 1, no average calculation if value is zero, optional (default: 1) DEPRICATED average always calculated if faces > 1
+    avg_wr: calculate averages from more faces if value 1, no average calculation if value is zero, optional (default: 1) DEPRICATED average always calculated
     decimals: number of decimals in output, optional (default: 4)
     gama_path: path to GNU Gama executable, optional (default: empty, no adjustment)
     stdev_angle: standard deviation of angle measurement (arc seconds), optional (default: 1)
@@ -568,7 +568,7 @@ if __name__ == "__main__":
         # generate observations for monitoring points, first point is the station
         print("Generating observations for mon...")
         og = ObsGen(st_coord + mon_coords, cr.json['station_id'], \
-            cr.json['station_height'], cr.json['faces'])
+            cr.json['station_height'], cr.json['faces'], cr.json['directfaces'])
         observations = og.run()
         # observation to monitoring points
         print("Measuring mon...")
