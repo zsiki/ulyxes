@@ -264,7 +264,9 @@ if __name__ == "__main__":
         else:
             print("Config file not found %s" % sys.argv[1])
             logging.fatal("Config file not found %s", sys.argv[1])
-            sys.exit(-1)
+            #sys.exit(-1)
+            cr = ConfReader('robotplus', '/home/siki/monitoring/robotplus_ATRn_PR-n/points/probafolia.json', None, config_pars)
+            cr.Load()
     else:
         print("Missing parameter")
         print("Usage: robotplus.py config_file")
@@ -376,7 +378,7 @@ if __name__ == "__main__":
                           filt=['id', 'east', 'north', 'elev'])
     w = rd_st.Load()
     st_coord = [x for x in w if x['id'] == cr.json['station_id']]
-    if len(st_coord) == 0:
+    if not st_coord:
         logging.fatal("Station not found: %s", cr.json['station_id'])
         sys.exit(-1)
     # coordinate writer
@@ -595,7 +597,7 @@ if __name__ == "__main__":
             maxi = [max(abs(o['crossincline'].GetAngle('GON')),
                         abs(o['lengthincline'].GetAngle('GON')))
                     for o in obs_out if 'crossincline' in o]
-            if len(maxi) > 0:
+            if maxi:
                 maxincl = max(maxi)
             else:
                 maxincl = -99

@@ -32,7 +32,7 @@ Sample geo file::
 
     instead of code=4 you can define prism constant using code=20
     prism constant units are meter
-    
+
 Sample dmp file::
 
     station; id; hz; v; code;faces
@@ -59,8 +59,12 @@ import time
 import re
 import math
 import logging
+import os.path
 
 sys.path.append('../pyapi/')
+
+if sys.version_info[0] > 2: # Python 3 compatibility
+    raw_input = input
 
 from angle import Angle, PI2
 from serialiface import SerialIface
@@ -140,17 +144,15 @@ class Robot(object):
 
             :returns: (obs_out, coo_out)
         """
-        target_msg = "Target on %s point(%s) in face %d and press enter or press 's' to skip the point"
+        target_msg = "Target on point {}({}) in face {} and press Enter/s to measure/skip the point"
+        target_msg1 = "Press Enter/b/s to measure/back/skip point {}({}) in face {}"
         wait = False
-        ww = ''
-        n = 0  # number of faces measured fo far                                                                        
+        n = 0  # number of faces measured fo far
         obs_out = []
         coo_out = []
         # write station record to output
         obs = {'station': self.directions[0]['station'], 'ih': self.ih}
         obs_out.append(obs)
-        # TODO  !!!!!!!!!!!
-        # !!!!!!!!!!!!!
         while n < self.max_faces:
             if n % 2 == 0:   # face left
                 i1 = 1
@@ -175,8 +177,8 @@ class Robot(object):
                             hz = hz - math.pi if hz > math.pi else hz + math.pi
                             v = PI2 - v
                         j = 0   # try count
-                        ans = ''
                         while j < self.maxtry:
+                            ww = ''
                             res = {}
                             code = self.directions[i]['code']
                             if code[0:3] == 'ATR':
@@ -191,17 +193,12 @@ class Robot(object):
                                         self.ts.SetPrismType(int(self.directions[i]['code'][3:]))
                                     elif 'pc' in self.directions[i]:
                                         self.ts.SetPc(self.directions[i]['pc'])
-                                if wait:
-                                    ww = raw_input('b/s/Enter] b - back, s - skip %s: ' % pn)
-                                    if ww == 'b':
-                                        i -= step
-                                        if i not in range(i1, i2):
-                                            i = i1
-                                        break
-                                    if ww == 's':
-                                        i += step
-                                        break
                                 res = self.ts.Move(Angle(hz), Angle(v), 1)
+                                if wait:
+                                    ww = raw_input(target_msg1.format(pn, self.directions[i]['code'], k % 2 + 1))
+                                    if ww == 'b' or ww == 's':
+                                        j = self.maxtry
+                                        break
                                 if 'errorCode' not in res:
                                     res = self.ts.Measure()
                             elif self.directions[i]['code'][0:2] == 'PR':
@@ -214,8 +211,8 @@ class Robot(object):
                                         self.ts.SetPrismType(int(self.directions[i]['code'][2:]))
                                 res = self.ts.Move(Angle(hz), Angle(v), 0)
                                 # wait for user to target on point
-                                ans = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
-                                if ans == 's':
+                                ww = raw_input(target_msg.format(pn, self.directions[i]['code'], k % 2 + 1))
+                                if ww == 's':
                                     j = self.maxtry
                                     break
                                 res = self.ts.Measure()
@@ -224,8 +221,8 @@ class Robot(object):
                                 self.ts.SetEDMMode('RLSTANDARD')
                                 self.ts.Move(Angle(hz), Angle(v), 0)
                                 # wait for user to target on point
-                                ans = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
-                                if ans == 's':
+                                ww = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
+                                if ww == 's':
                                     j = self.maxtry
                                     break
                                 res = self.ts.Measure()
@@ -239,12 +236,13 @@ class Robot(object):
                             elif self.directions[i]['code'] == 'OR':
                                 res = self.ts.Move(Angle(hz), Angle(v), 0)
                                 # wait for user to target on point
-                                ans = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
-                                if ans == 's':
+                                ww = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
+                                if ww == 's':
                                     j = self.maxtry
                                     break
                             else:
                                 # unknown code skip
+                                logging.warning("Invalid code %s(%s)", pn, self.directions[i]['code'])
                                 j = self.maxtry
                                 break
                             if 'errorCode' in res:
@@ -285,19 +283,18 @@ class Robot(object):
                             coo['id'] = pn
                             coo['east'], coo['north'], coo['elev'] = self.polar(obs)
                             coo_out.append(coo)
-                i += step
+                if ww == 'b':
+                    i -= step
+                    if i not in range(min(i1, i2), max(i1, i2)):
+                        i = i1
+                else:
+                    i += step   # switch to next point
             n = n + 1
         # rotate back to first point
         self.ts.Move(self.directions[1]['hz'], self.directions[1]['v'], 0)
         return (obs_out, coo_out)
 
 if __name__ == "__main__":
-
-    import os.path
-
-    if sys.version_info[0] > 2: # Python 3 compatibility
-        raw_input = input
-
     #logging.getLogger().setLevel(logging.WARNING)
     logging.getLogger().setLevel(logging.INFO)
 
@@ -321,8 +318,6 @@ if __name__ == "__main__":
         ofname = sys.argv[2]
     elif not config:
         ofname = 'stdout'
-        #ofname = 'http://192.168.1.108/monitoring/get.php'
-        #ofname = 'http://192.168.7.145/monitoring/get.php'
     if ofname[-4:] not in ['.dmp', '.csv', '.geo', '.coo'] and \
         ofname != 'stdout' and ofname[:4] != 'http':
         print("Unknown output type")
