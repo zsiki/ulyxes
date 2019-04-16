@@ -178,6 +178,7 @@ class Robot(object):
                             v = PI2 - v
                         j = 0   # try count
                         while j < self.maxtry:
+                            print (i, pn, k, j)
                             ww = ''
                             res = {}
                             code = self.directions[i]['code']
@@ -189,15 +190,16 @@ class Robot(object):
                                         if k == 0:  #wait only in first face left
                                             wait = True
                                         code = code[0:3] + code[4:]
+                                    print(code)
                                     if len(code) > 3:
-                                        self.ts.SetPrismType(int(self.directions[i]['code'][3:]))
+                                        self.ts.SetPrismType(int(code[3:]))
                                     elif 'pc' in self.directions[i]:
                                         self.ts.SetPc(self.directions[i]['pc'])
                                 res = self.ts.Move(Angle(hz), Angle(v), 1)
                                 if wait:
-                                    ww = raw_input(target_msg1.format(pn, self.directions[i]['code'], k % 2 + 1))
-                                    if ww == 'b' or ww == 's':
-                                        j = self.maxtry
+                                    ww = raw_input(target_msg1.format(pn, self.directions[i]['code'], (n + k) % 2 + 1))
+                                    if ww in ['b', 's']:
+                                        print ("break j")
                                         break
                                 if 'errorCode' not in res:
                                     res = self.ts.Measure()
@@ -211,9 +213,8 @@ class Robot(object):
                                         self.ts.SetPrismType(int(self.directions[i]['code'][2:]))
                                 res = self.ts.Move(Angle(hz), Angle(v), 0)
                                 # wait for user to target on point
-                                ww = raw_input(target_msg.format(pn, self.directions[i]['code'], k % 2 + 1))
+                                ww = raw_input(target_msg.format(pn, self.directions[i]['code'], (n + k) % 2 + 1))
                                 if ww == 's':
-                                    j = self.maxtry
                                     break
                                 res = self.ts.Measure()
                             elif self.directions[i]['code'] == 'RL':
@@ -221,9 +222,8 @@ class Robot(object):
                                 self.ts.SetEDMMode('RLSTANDARD')
                                 self.ts.Move(Angle(hz), Angle(v), 0)
                                 # wait for user to target on point
-                                ww = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
+                                ww = raw_input(target_msg % (pn, self.directions[i]['code'], (n + k) % 2 + 1))
                                 if ww == 's':
-                                    j = self.maxtry
                                     break
                                 res = self.ts.Measure()
                             elif self.directions[i]['code'] == 'RLA':
@@ -236,14 +236,12 @@ class Robot(object):
                             elif self.directions[i]['code'] == 'OR':
                                 res = self.ts.Move(Angle(hz), Angle(v), 0)
                                 # wait for user to target on point
-                                ww = raw_input(target_msg % (pn, self.directions[i]['code'], n % 2 + 1))
+                                ww = raw_input(target_msg % (pn, self.directions[i]['code'], (n + k) % 2 + 1))
                                 if ww == 's':
-                                    j = self.maxtry
                                     break
                             else:
                                 # unknown code skip
                                 logging.warning("Invalid code %s(%s)", pn, self.directions[i]['code'])
-                                j = self.maxtry
                                 break
                             if 'errorCode' in res:
                                 j += 1
@@ -274,7 +272,8 @@ class Robot(object):
                             logging.error("Cannot measure point %s", pn)
                             continue
                         if ww in ['b', 's']:
-                            continue
+                            print("break from k")
+                            break
                         obs['id'] = pn
                         obs['face'] = self.ts.FACE_RIGHT if step < 0 else self.ts.FACE_LEFT
                         obs_out.append(obs)
@@ -284,6 +283,7 @@ class Robot(object):
                             coo['east'], coo['north'], coo['elev'] = self.polar(obs)
                             coo_out.append(coo)
                 if ww == 'b':
+                    print("back")
                     i -= step
                     if i not in range(min(i1, i2), max(i1, i2)):
                         i = i1
