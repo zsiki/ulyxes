@@ -172,7 +172,7 @@ class Robot(object):
                         pn = self.directions[i]['id']
                         hz = self.directions[i]['hz'].GetAngle()
                         v = self.directions[i]['v'].GetAngle()
-                        if step < 0 or k % 2 == 1:
+                        if (n + k) % 2 == 1:
                             # change angles to face right
                             hz = hz - math.pi if hz > math.pi else hz + math.pi
                             v = PI2 - v
