@@ -485,7 +485,7 @@ if __name__ == "__main__":
         # calculate station coordinates as freestation if gama_path set
         if 'gama_path' in cr.json and cr.json['gama_path'] is not None:
             print("Freestation...")
-            if cr.json['faces'] > 1:
+            if cr.json['faces'] > 1 or cr.json['directfaces'] > 1:
                 obs_out = avg_obs(obs_out)
             # store observations to FIX points
             for o in obs_out:
@@ -510,7 +510,7 @@ if __name__ == "__main__":
             if abs(st_coord[0]['east'] - w[0]['east']) > cr.json['station_coo_limit'] or \
                abs(st_coord[0]['north'] - w[0]['north']) > cr.json['station_coo_limit'] or \
                abs(st_coord[0]['elev'] - w[0]['elev']) > cr.json['station_coo_limit']:
-                logging.fatal("Station moved!!! %s" + w[0]['id'])
+                logging.fatal("Station moved!!! %s", w[0]['id'])
                 sys.exit(-1)
             # update station coordinates
             st_coord = w
@@ -579,7 +579,7 @@ if __name__ == "__main__":
                   cr.json['delay_try'], cr.json['dir_limit'])
         obs_out, coo_out = r.run()
         # calculate average for observations
-        if cr.json['faces'] > 1:
+        if cr.json['faces'] > 1 or cr.json['directfaces'] > 1:
             obs_out = avg_obs(obs_out)
         for o in obs_out:
             o['datetime'] = act_date
