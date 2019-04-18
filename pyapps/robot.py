@@ -196,12 +196,12 @@ class Robot(object):
                                     elif 'pc' in self.directions[i]:
                                         self.ts.SetPc(self.directions[i]['pc'])
                                 res = self.ts.Move(Angle(hz), Angle(v), 1)
-                                if wait:
-                                    ww = raw_input(target_msg1.format(pn, self.directions[i]['code'], (n + k) % 2 + 1))
-                                    if ww in ['b', 's']:
-                                        print ("break j")
-                                        break
                                 if 'errorCode' not in res:
+                                    if wait:
+                                        ww = raw_input(target_msg1.format(pn, self.directions[i]['code'], (n + k) % 2 + 1))
+                                        if ww in ['b', 's']:
+                                            print ("break j")
+                                            break
                                     res = self.ts.Measure()
                             elif self.directions[i]['code'][0:2] == 'PR':
                                 if j == 0:
@@ -212,20 +212,22 @@ class Robot(object):
                                     if len(self.directions[i]['code']) > 2:
                                         self.ts.SetPrismType(int(self.directions[i]['code'][2:]))
                                 res = self.ts.Move(Angle(hz), Angle(v), 0)
-                                # wait for user to target on point
-                                ww = raw_input(target_msg.format(pn, self.directions[i]['code'], (n + k) % 2 + 1))
-                                if ww == 's':
-                                    break
-                                res = self.ts.Measure()
+                                if 'errorCode' not in res:
+                                    # wait for user to target on point
+                                    ww = raw_input(target_msg.format(pn, self.directions[i]['code'], (n + k) % 2 + 1))
+                                    if ww == 's':
+                                        break
+                                    res = self.ts.Measure()
                             elif self.directions[i]['code'] == 'RL':
                                 self.ts.SetATR(0)
                                 self.ts.SetEDMMode('RLSTANDARD')
                                 self.ts.Move(Angle(hz), Angle(v), 0)
-                                # wait for user to target on point
-                                ww = raw_input(target_msg % (pn, self.directions[i]['code'], (n + k) % 2 + 1))
-                                if ww == 's':
-                                    break
-                                res = self.ts.Measure()
+                                if 'errorCode' not in res:
+                                    # wait for user to target on point
+                                    ww = raw_input(target_msg % (pn, self.directions[i]['code'], (n + k) % 2 + 1))
+                                    if ww == 's':
+                                        break
+                                    res = self.ts.Measure()
                             elif self.directions[i]['code'] == 'RLA':
                                 if j == 0:
                                     self.ts.SetATR(0)
@@ -235,10 +237,11 @@ class Robot(object):
                                     res = self.ts.Measure()
                             elif self.directions[i]['code'] == 'OR':
                                 res = self.ts.Move(Angle(hz), Angle(v), 0)
-                                # wait for user to target on point
-                                ww = raw_input(target_msg % (pn, self.directions[i]['code'], (n + k) % 2 + 1))
-                                if ww == 's':
-                                    break
+                                if 'errorCode' not in res:
+                                    # wait for user to target on point
+                                    ww = raw_input(target_msg % (pn, self.directions[i]['code'], (n + k) % 2 + 1))
+                                    if ww == 's':
+                                        break
                             else:
                                 # unknown code skip
                                 logging.warning("Invalid code %s(%s)", pn, self.directions[i]['code'])
