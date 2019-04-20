@@ -78,12 +78,12 @@ solution.
 Sensor Managers
 ***************
 
-The system contains two different API independent from eachother: the 
+The system contains two different API independent from each other: the 
 **TclAPI** and the **PyAPI**. The TclAPI is the old and its development is 
-finished. Tha PyAPI is the new and actively developed.
+finished (depricated). Tha PyAPI is the new and actively developed.
 
-TclAPI
-======
+TclAPI (depricated)
+===================
 
 The TclAPI consist of a couple of Tcl (Tool Command Language) files/procs which
 give a higher level interface to drive RTSs and GPSs from computer. The TclAPI 
@@ -352,6 +352,25 @@ georeader.py
 
 Class to read GeoEasy geo and coo files.
 
+sqlitereader.py
+^^^^^^^^^^^^^^^
+
+TODO
+
+httpreader.py
+^^^^^^^^^^^^^
+
+TODO
+
+jsonreader.py
+^^^^^^^^^^^^^
+
+TODO
+
+configreader.py
+^^^^^^^^^^^^^^^
+
+TODO
 
 External Python modules
 ***********************
@@ -443,7 +462,7 @@ It has several modes:
 * 0 - determine horizontal movement of a point using reflectorless (RL) EDM
 * 1 - determine movement ofa slowly moving prism
 * 2 - determine vertical movement of a prims (supposing horizontal distance not changed
-* 3 - ???
+* 3 - determine vertical movement of a moving prism on a car/machine, we suppose horizontal distance is not changed
 * 4 - determine 3D movement of a moving prism
 * 5 - measure if prism stop moving for few seconds (stop and go) obsevations
 
@@ -458,25 +477,34 @@ Command line parameters:
 Measurematrix
 *************
 
+TODO
+
 NMEA_demo
 *********
+
+TODO
 
 Horizsection
 ************
 
+TODO
+
 Section
 *******
+
+TODO
 
 Monitoring
 **********
 
 This block consist of several apps to solve simple tasks for monitoring.
 
-- *FileMaker* creates an input file for monitoring using manual targeting
-- *FileGen* creates an input file for monitoring from coordinates automaticly
-- *Blindorientation* search for a prism from a known station az calculate orientation
-- *Robot* makes automatic observation using a file from FileMaker or FileGen
-- *Robotplus* complex monitoring application using FileGen, Blindorientation and Robot
+- *filemaker* creates an input file for monitoring using manual targeting
+- *filegen* creates an input file for monitoring from coordinates automaticly
+- *coomaker* creates a GeoEasy format input file for monitoring using manual targeting
+- *blindorientation* search for a prism from a known station az calculate orientation
+- *robot* makes automatic observation using a file from FileMaker or FileGen
+- *robotplus* complex monitoring application using FileGen, Blindorientation and Robot
 
 FileMaker
 =========

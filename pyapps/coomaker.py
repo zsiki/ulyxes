@@ -24,6 +24,10 @@ from angle import Angle
 from serialiface import SerialIface
 from geowriter import GeoWriter
 from totalstation import TotalStation
+from leicatps1200 import LeicaTPS1200
+from leicatcra1100 import LeicaTCRA1100
+from leicatca1800 import LeicaTCA1800
+from trimble5500 import Trimble5500
 
 def GetFloat(prompt, default=0.0, errstr="Invalid value!"):
     """ read a float value with error control & default
@@ -64,6 +68,8 @@ def GetInt(prompt, default=0.0, errstr="Invalid value!"):
     return val
 
 if __name__ == "__main__":
+    if sys.version_info[0] > 2:  # Python 3 compatibility
+        raw_input = input
     # process commandline parameters
     if len(sys.argv) > 1:
         ofname = sys.argv[1]
@@ -81,16 +87,12 @@ if __name__ == "__main__":
     else:
         stationtype = '1200'
     if re.search('120[0-9]$', stationtype):
-        from leicatps1200 import LeicaTPS1200
         mu = LeicaTPS1200()
     elif re.search('110[0-9]$', stationtype):
-        from leicatcra1100 import LeicaTCRA1100
         mu = LeicaTCRA1100()
     elif re.search('180[0-9]$', stationtype):
-        from leicatca1800 import LeicaTCA1800
         mu = LeicaTCA1800()
     elif re.search('550[0-9]$', stationtype):
-        from trimble5500 import Trimble5500
         mu = Trimble5500()
     else:
         print("unsupported instrument type")
@@ -128,8 +130,7 @@ if __name__ == "__main__":
         geo['station'] = coo['id']
         geo['ih'] = ih
         geo_wrt.WriteData(geo)
-
-    ts.SetATR(1)
+    atr = 1
     ts.SetEDMMode('STANDARD')
     pc = 0.0
     p = 0
@@ -149,23 +150,35 @@ if __name__ == "__main__":
         if len(t_id) == 0:
             break
         if isinstance(ts.GetMeasureUnit(), LeicaTPS1200):
-            p = GetInt("Prism number ", p)
-            ts.SetPrismType(p)
+            p = GetInt("Prism number (-1 for none) ", p)
+            if p >= 0:
+                ts.SetPrismType(p)
+            else:
+                pc = -99
+            atr = 0 if p == 2 else 1
         else:
-            pc = GetFloat("Prism constant [mm] ", pc * 1000) / 1000.0
-            ts.SetPc(pc)
+            pc = GetFloat("Prism constant [mm] (-99 for none) ", pc * 1000) / 1000.0
+            if pc > -99:
+                ts.SetPc(pc)
+                #pc = -99
+            atr = 0 if pc == 0.00344 else 1
         print(ts.GetPc())
+        ts.SetATR(atr)
         raw_input("Target on prism and press enter")
-        res = ts.MoveRel(Angle(0), Angle(0), 1)
-        if 'errorCode' in res or ts.measureIface.state != ts.measureIface.IF_OK:
-            print("Cannot target on prism")
-            ts.measureIface.state = ts.measureIface.IF_OK
-            continue
+        if atr:
+            res = ts.MoveRel(Angle(0), Angle(0), atr)
+            if 'errorCode' in res or ts.measureIface.state != ts.measureIface.IF_OK:
+                print("Cannot target on prism")
+                ts.measureIface.state = ts.measureIface.IF_OK
+                continue
         res = ts.Measure()
         obs = ts.GetMeasure()
         obs['id'] = t_id
         geo_wrt.WriteData(obs)
         coo = ts.Coords()
         coo['id'] = t_id
-        coo['pc'] = pc
+        if pc > -99:
+            coo['pc'] = pc
+        elif 'pc' in coo:
+            del coo['pc']
         coo_wrt.WriteData(coo)

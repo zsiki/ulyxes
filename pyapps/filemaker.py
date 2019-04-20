@@ -38,11 +38,14 @@ modes1 = ['ATR', 'ATR0', 'ATR1', 'ATR2', 'ATR3', 'ATR4', 'ATR5', 'ATR6', \
 modes_str = '/'.join(modes)
 
 if __name__ == "__main__":
+    if sys.version_info[0] > 2:  # Python 3 compatibility
+        raw_input = input
+
     # process commandline parameters
     if len(sys.argv) > 1:
         ofname = sys.argv[1]
     else:
-        print "Usage: filemaker.py output_file [sensor] [serial_port]"
+        print("Usage: filemaker.py output_file [sensor] [serial_port]")
         exit(-1)
     if ofname[-4:] == '.csv' or ofname[-4:] == '.dmp':
         ofname = ofname[:-4]
@@ -51,7 +54,7 @@ if __name__ == "__main__":
         ofname = ofname[:-4]
         otype = 'geo'
     else:
-        print "invalid output type, allowed types: .geo, .coo, .csv, .dmp"
+        print("invalid output type, allowed types: .geo, .coo, .csv, .dmp")
         exit(-1)
     if len(sys.argv) > 2:
         stationtype = sys.argv[2]
@@ -70,7 +73,7 @@ if __name__ == "__main__":
         from trimble5500 import Trimble5500
         mu = Trimble5500()
     else:
-        print "unsupported instrument type"
+        print("unsupported instrument type")
         exit(1)
     if len(sys.argv) > 3:
         port = sys.argv[3]
@@ -113,7 +116,7 @@ if __name__ == "__main__":
         raw_input("Target on point and press enter")
         angles = ts.GetAngles()
         if 'errorCode' in angles or ts.measureIface.state != ts.measureIface.IF_OK:
-            print "Cannot get angles from instrument"
+            print("Cannot get angles from instrument")
             ts.measureIface.state = ts.measureIface.IF_OK
             continue
         if otype == 'csv':

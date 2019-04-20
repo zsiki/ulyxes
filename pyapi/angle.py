@@ -9,6 +9,7 @@
       Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
 
 .. moduleauthor:: dr. Zoltan Siki <siki@agt.bme.hu>
+                Bence Turak <bence.turak@gmail.com>
 """
 
 import math
@@ -211,6 +212,13 @@ Operators supported:
             :returns: GON string
         """
         return "{0:.4f}".format(self.GetAngle('GON'))
+
+    def __repr__(self):
+        """
+        angle object representation
+            :returns: angle object string
+        """
+        return type(self).__name__+"({0:f})".format(self.GetAngle())
 
     def __add__(self, a):
         """ add angles

@@ -10,6 +10,7 @@
 
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>,
     Daniel Moka <mokadaniel@citromail.hu>
+    Bence Turak <bence.turak@gmail.com>
 
 
 codes handles by descendent classes:
@@ -42,7 +43,7 @@ codes handles by descendent classes:
 - vRange: vertical search range, totalstation
 - wetTemp: wet temperature, met sensor
 """
-
+import sys
 class Instrument(object):
     """ Base class for different instruments
 
@@ -51,7 +52,7 @@ class Instrument(object):
             :param MeasureIface: interface to physical intrument (Iface)
             :param writerUnit: unit to save observed data (Writer), optional
     """
-    def __init__(self, name, measureUnit, measureIface, writerUnit=None):
+    def __init__(self, name, measureUnit, measureIface, writerUnit = None):
         """ constructor
         """
         self.name = name
@@ -87,18 +88,28 @@ class Instrument(object):
         """
         return self.name
 
-    def _process(self, msg):
+    def _process(self, msg, pic = None):
         """ Send message to measure unit and process answer
 
             :param msg: message to send
+            :param pic: when using a camera you have tive give writable binary file
             :returns: parsed answer (dictionary)
         """
         ans = self.measureIface.Send(msg)
         if self.measureIface.state != self.measureIface.IF_OK:
             return {}
         res = self.measureUnit.Result(msg, ans)
+
         if self.writerUnit is not None and res is not None and len(res) > 0:
             self.writerUnit.WriteData(res)
+        try:
+            if res['binsize'] and res['binsize'] > 0:
+                res = self.measureIface.GetLine(res['binsize'])
+                if pic != None:
+                    pic.write(res)
+                    res['pic'] = pic
+        except:
+            pass
         return res
 
 if __name__ == "__main__":

@@ -36,12 +36,13 @@ class ObsGen(object):
     """
 
     def __init__(self, coords, station_id = None, instrument_height = 0, \
-                faces =1):
+                faces =1, directfaces=1):
         """ Initialize
         """
         self.station_id = station_id
         self.station_ih = instrument_height
         self.faces = faces
+        self.directfaces = directfaces
         self.station_east = None
         self.station_north = None
         self.station_elev = None
@@ -77,8 +78,12 @@ class ObsGen(object):
             obs['hz'] = Angle(bearing).Positive()
             obs['v'] = Angle(zenith).Positive()
             obs['distance'] = math.hypot(dist, d_elev)
-            obs['code'] = 'ATR'
+            if 'code' in coo:
+                obs['code'] = coo['code']
+            else:
+                obs['code'] = 'ATR'
             obs['faces'] = self.faces
+            obs['directfaces'] = self.directfaces
             if 'pc' in coo:
                 obs['pc'] = coo['pc']
             #else:                  # let pc set on instrument

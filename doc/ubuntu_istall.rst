@@ -30,6 +30,14 @@ PySerial
 
 	sudo pip install pyserial
 
+On Linux the serial ports are protected. The root user and those are in the
+dialout group are able to read/write serial ports. To add yourself to the
+dialout group use the following command
+
+.. code:: bash
+
+	sudo usermode -a -G dialout YOUR_USER_NAME
+
 GNU GaMa
 ~~~~~~~~
 
@@ -76,7 +84,7 @@ Optional, used by robotplus.py
 
 .. code:: bash
 
-	sudo apt-get install libqt4-core python-qt4
+	sudo apt-get install libqtcore4 python-qt4
 
 SpatiaLite/SqLite
 ~~~~~~~~~~~~~~~~~

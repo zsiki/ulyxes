@@ -4,3 +4,6 @@ TODO
 *.sqlite
 *.db
 *.txt
+*.npy
+pics
+.ftpconfig
