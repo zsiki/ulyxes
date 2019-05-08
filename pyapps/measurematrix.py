@@ -83,7 +83,7 @@ if __name__ == "__main__":
     ts = TotalStation(stationtype, mu, iface, wrt)
     if isinstance(mu, Trimble5500):
         print("Please change to reflectorless EDM mode (MNU 722 from keyboard)")
-        print("and turn on red laser (MNU 741 from keyboard")
+        print("and turn on red laser (MNU 741 from keyboard) and press enter!")
         raw_input()
     else:
         ts.SetATR(0) # turn ATR off
