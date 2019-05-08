@@ -44,10 +44,11 @@ class HorizontalSection(object):
         :param tol: tolerance for horizontal angle
     """
 
-    def __init__(self, ts, elev=None, hz_start=None,
+    def __init__(self, ts, wrt, elev=None, hz_start=None,
                  stepinterval=Angle(45, "DEG"), maxa=PI2, maxiter=10, tol=0.02):
         """ initialize """
         self.ts = ts
+        self.wrt = wrt
         self.elev = elev
         self.hz_start = hz_start
         self.stepinterval = stepinterval
@@ -134,7 +135,7 @@ class HorizontalSection(object):
             if 'distance' in nextp and w:
                 coord = self.ts.Coords()
                 res = dict(nextp.items() + coord.items())
-                wrt.WriteData(res)
+                self.wrt.WriteData(res)
             self.ts.MoveRel(self.stepinterval, Angle(0))
             act += self.stepinterval
         # rotate back to start
@@ -164,7 +165,7 @@ if __name__ == "__main__":
     }
     logging.getLogger().setLevel(logging.WARNING)
     # process commandline parameters
-    pat = re.compile('\.json$')
+    pat = re.compile(r'\.json$')
     #sys.argv.append('horiz.json')
     if len(sys.argv) == 2 and pat.search(sys.argv[1]):
         # load json config
@@ -234,12 +235,10 @@ if __name__ == "__main__":
     else:
         print("unsupported instrument type")
         exit(1)
-    wrt = CsvWriter(angle='DMS', dist='.3f',
-                    filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
-                    fname='stdout', mode='a', sep=';')
 
     ts = TotalStation(stationtype, mu, iface)
-    ts.SetStation(0.0, 0.0, 0.0)
+    #ts.SetStation(0.0, 0.0, 0.0)
+    print(ts.GetStation())
     if isinstance(mu, Trimble5500):
         print("Set Trimble 550x to direct reflex (MNU 722) and press Enter")
         raw_input('')
@@ -251,6 +250,6 @@ if __name__ == "__main__":
                                       maxiter, tol)
             h_sec.run()
     else:
-        h_sec = HorizontalSection(ts, hz_start, stepinterval, maxa,
+        h_sec = HorizontalSection(ts, wrt, hz_start, stepinterval, maxa,
                                   maxiter, tol)
         h_sec.run()
