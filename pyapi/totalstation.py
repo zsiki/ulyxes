@@ -10,6 +10,7 @@
     Daniel Moka <mokadaniel@citromail.hu>
 """
 import logging
+import time
 from instrument import Instrument
 from angle import Angle
 from leicatps1200 import LeicaTPS1200
@@ -255,7 +256,13 @@ class TotalStation(Instrument):
             :returns: observations in a dictionary
         """
         msg = self.measureUnit.GetMeasureMsg(wait, incl)
-        return self._process(msg)
+        i = 0
+        meas = self._process(msg)
+        while 'distance' not in meas and i < 20:   # wait for trimble 5500
+            i += 1
+            time.sleep(2)
+            meas = self._process(msg)
+        return meas
 
     def MeasureDistAng(self, prg='DEFAULT'):
         """ Measure distance and return observations
@@ -460,10 +467,10 @@ if __name__ == "__main__":
     #print(ts.GetPc())
     ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
     #ts.SetEDMMode(ts.measureUnit.edmModes['STANDARD'])
-    #ts.Measure()
-    #meas = ts.GetMeasure()
+    ts.Measure()
+    meas = ts.GetMeasure()
     #while 'distance' not in meas:
-    #    time.sleep(2)
-    #    meas = ts.GetMeasure()
+    #time.sleep(5)
+    #meas = ts.GetMeasure()
     #print(meas)
     #ts.SwitchOff()
