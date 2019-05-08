@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 """
 .. module:: horizsection.py
-
 .. moduleauthor:: Viktoria Zubaly, Zoltan Siki
-
 Sample application of Ulyxes PyAPI to measure a horizontal section(s)
 target on the first point of the first section and start this app
 coordinates and observations are written to csv file
-
     :param argv[1] (angle step): angle step between points in DEG, default 45
     :param argv[2] (sensor): 1100/1800/1200, default 1200
     :param argv[3] (port): serial port, default /dev/ttyUSB0
@@ -64,11 +61,6 @@ class HorizontalSection(object):
             self.ts.Move(self.hz_start, a['v'])
         startp = self.ts.GetMeasure()
         startp0 = None
-        i = 0
-        while 'distance' not in startp and i < 20:
-            i += 1
-            time.sleep(2)
-            startp = self.ts.GetMeasure()   # wait for trimble 5500
         if self.ts.measureIface.state != self.ts.measureIface.IF_OK or 'errorCode' in startp:
             print('FATAL Cannot measure startpoint')
             return 1
@@ -90,8 +82,6 @@ class HorizontalSection(object):
                 self.ts.measureIface.state = self.ts.measureIface.IF_OK
                 self.ts.MoveRel(self.stepinterval, Angle(0))
                 continue
-            if isinstance(self.ts.measureUnit, Trimble5500):
-                time.sleep(5)
             nextp = self.ts.GetMeasure()  # get observation data
             if self.ts.measureIface.state != self.ts.measureIface.IF_OK:
                 # cannot measure, skip
@@ -122,9 +112,6 @@ class HorizontalSection(object):
                     logging.warning('Missing measurement')
                     break
                 nextp = self.ts.GetMeasure()
-                while 'distance' not in nextp:   # wait for trimble 5500
-                    time.sleep(2)
-                    nextp = self.ts.GetMeasure()
 
                 if 'v' not in nextp or 'distance' not in nextp:
                     break
@@ -234,17 +221,15 @@ if __name__ == "__main__":
     else:
         print("unsupported instrument type")
         exit(1)
-    wrt = CsvWriter(angle='DMS', dist='.3f',
-                    filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
-                    fname='stdout', mode='a', sep=';')
 
     ts = TotalStation(stationtype, mu, iface)
-    ts.SetStation(0.0, 0.0, 0.0)
     if isinstance(mu, Trimble5500):
-        print("Set Trimble 550x to direct reflex (MNU 722) and press Enter")
-        raw_input('')
+        print("Please change to reflectorless EDM mode (MNU 722 from keyboard)")
+        print("and turn on red laser (MNU 741 from keyboard")
+        raw_input()
     else:
         ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
+    ts.SetStation(0.0, 0.0, 0.0)
     if len(levels) > 0:
         for i in levels:
             h_sec = HorizontalSection(ts, i, hz_start, stepinterval, maxa,
@@ -253,4 +238,4 @@ if __name__ == "__main__":
     else:
         h_sec = HorizontalSection(ts, hz_start, stepinterval, maxa,
                                   maxiter, tol)
-        h_sec.run()
+h_sec.run()

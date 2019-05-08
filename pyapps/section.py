@@ -82,10 +82,14 @@ if __name__ == "__main__":
                     filt=['id', 'east', 'north', 'elev'],
                     fname='section.txt', mode='w', sep=';')
     ts = TotalStation(stationtype, mu, iface)
-    ts.SetATR(0)    # ATR mode off
-    ts.SetLock(0)   # Lock mode off
-    ts.SetEDMMode("RLSTANDARD")   # Reflectorless distance measurement
-    ts.SetRedLaser(1)
+    if isinstance(mu, Trimble5500):
+        print("Set Trimble 550x to direct reflex (MNU 722)")
+        raw_input()
+    else:
+        ts.SetATR(0)    # ATR mode off
+        ts.SetLock(0)   # Lock mode off
+        ts.SetEDMMode("RLSTANDARD")   # Reflectorless distance measurement
+        ts.SetRedLaser(1)
 
     # Direction of the points to defining the plane
     points = []
