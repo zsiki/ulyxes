@@ -29,6 +29,7 @@ class SenseHat(Instrument, sense_hat.SenseHat):
 
     def get_humidity(self):
         res =  super(SenseHat, self).get_humidity()
+        res['time'] = time.time()
         self.write({'hum': res})
         return res
 
@@ -38,10 +39,12 @@ class SenseHat(Instrument, sense_hat.SenseHat):
 
     def get_temperature_from_humidity(self):
         res =  super(SenseHat, self).get_temperature_from_humidity()
+        res['time'] = time.time()
         self.write({'temp_hum': res})
         return res
     def get_temperature_from_pressure(self):
         res =  super(SenseHat, self).get_temperature_from_pressure()
+        res['time'] = time.time()
         self.write({'temp_pres': res})
         return res
     def get_temperature(self):
@@ -59,12 +62,16 @@ class SenseHat(Instrument, sense_hat.SenseHat):
 
     def get_pressure(self):
         res =  super(SenseHat, self).get_pressure()
+        res['time'] = time.time()
         self.write({'pres': res})
+
         return res
 
     def get_orientation_radians(self):
         res =  super(SenseHat, self).get_orientation_radians()
+        res['time'] = time.time()
         self.write(res)
+
         return res
     @property
     def orientation_radians(self):
@@ -72,10 +79,27 @@ class SenseHat(Instrument, sense_hat.SenseHat):
     @property
     def orientation(self):
         res =  super(SenseHat, self).get_orientation_radians()
+        res2 = {}
         for key, val in res.items():
-            res['ori_'+key] = Angle(val)
-        self.write(res)
-        return res
+            res2['ori_'+key] = Angle(val)
+        res2['time'] = time.time()
+        self.write(res2)
+
+        return res2
+
+
+    def get_compass_raw(self):
+        res =  super(SenseHat, self).get_compass_raw()
+        res2 = {}
+        for key, val in res.items():
+            res2['comp_raw_'+key] = val
+        res2['time'] = time.time()
+        self.write(res2)
+
+        return res2
+    @property
+    def compass_raw(self):
+        return self.get_compass_raw()
 
 
     @property
@@ -96,6 +120,7 @@ class SenseHat(Instrument, sense_hat.SenseHat):
         res2 = {}
         for key, val in res.items():
             res2['gyro_raw_'+key] = Angle(val)
+        res2['time'] = time.time()
         self.write(res2)
 
         return res2
@@ -115,7 +140,9 @@ class SenseHat(Instrument, sense_hat.SenseHat):
         res2 = {}
         for key, val in res.items():
             res2['accel_'+key] = val
+        res2['time'] = time.time()
         self.write(res2)
+
         return res2
 
     @property
