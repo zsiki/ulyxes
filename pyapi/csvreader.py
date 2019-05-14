@@ -47,8 +47,8 @@ class CsvReader(FileReader):
         """
         w = [x.strip() for x in self.GetLine().split(self.separator)]
         res = {}
-        if len(w) == 0 or w[0] == '':
-            return None
+        if len(w) == 0:
+            return None         # empty line
         for i in range(len(w)):
             if self.filt is None or self.fields[i] in self.filt:
                 res[self.fields[i]] = w[i]
