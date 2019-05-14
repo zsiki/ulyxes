@@ -455,7 +455,7 @@ if __name__ == "__main__":
     #mu = LeicaTPS1200()
     #mu = LeicaTCA1800()
     mu = Trimble5500()
-    iface = SerialIface("rs-232", "/dev/ttyUSB4")
+    iface = SerialIface("rs-232", "/dev/ttyUSB0")
     wrt = EchoWriter()
     ts = TotalStation("Leica", mu, iface, wrt)
     #ts.SetStation(10.0, 20., 30., 1.0)
