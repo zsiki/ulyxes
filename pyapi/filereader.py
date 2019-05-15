@@ -43,7 +43,7 @@ class FileReader(Reader):
     def GetLine(self):
         """ Get next line from file
         """
-        return self.fp.readline().lstrip('\r\n')
+        return self.fp.readline().strip('\r\n')
 
     def GetNext(self):
         return self.GetLine()
