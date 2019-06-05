@@ -42,10 +42,20 @@ class FileReader(Reader):
 
     def GetLine(self):
         """ Get next line from file
+            
+            :returns: next line from file or None in case of EOF
         """
-        return self.fp.readline().strip('\r\n')
+        buf = self.fp.readline()
+        if buf:
+            buf = buf.strip('\r\n')
+        else:
+            buf = None
+            self.state = self.RD_EOF
+        return buf
 
     def GetNext(self):
+        """ Get next line from file
+        """
         return self.GetLine()
 
     def Rewind(self):
@@ -57,6 +67,7 @@ class FileReader(Reader):
 if __name__ == '__main__':
     fr = FileReader('test', 'reader.py')
     if fr.state == fr.RD_OK:
-        print(fr.Load())
+        for line in fr.Load():
+            print(line)
     else:
         print('File not found')

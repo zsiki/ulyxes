@@ -45,10 +45,13 @@ class CsvReader(FileReader):
     def GetNext(self):
         """ Get fields in dictionary from next line
         """
-        w = [x.strip() for x in self.GetLine().split(self.separator)]
-        res = {}
+        buf = self.GetLine()
+        if self.state != self.RD_OK:
+            return None
+        w = [x.strip() for x in buf.split(self.separator)]
         if len(w) == 0:
             return None         # empty line
+        res = {}
         for i in range(len(w)):
             if self.filt is None or self.fields[i] in self.filt:
                 res[self.fields[i]] = w[i]
