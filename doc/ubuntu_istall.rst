@@ -16,19 +16,19 @@ Optional for testing serial connection to the instrument.
 
 	sudo apt-get install cutecom
 
-Python 2.7.x & pip
+Python 3.x & pip
 ~~~~~~~~~~~~~~~~~~
 
 .. code:: bash
 
-	sudo apt-get install python python-pip
+	sudo apt-get install python3 python3-pip
 
 PySerial
 ~~~~~~~~
 
 .. code:: bash
 
-	sudo pip install pyserial
+	sudo pip3 install pyserial
 
 On Linux the serial ports are protected. The root user and those are in the
 dialout group are able to read/write serial ports. To add yourself to the
@@ -36,7 +36,7 @@ dialout group use the following command
 
 .. code:: bash
 
-	sudo usermode -a -G dialout YOUR_USER_NAME
+	sudo usermod -a -G dialout YOUR_USER_NAME
 
 GNU GaMa
 ~~~~~~~~
@@ -46,7 +46,8 @@ GNU GaMa is built from sources
 
 .. code:: bash
 
-	git clone git:/git.sv.gnu.org/gama.git
+	sudo apt-get install autoconf automake libtools
+	git clone https://git.savannah.gnu.org/git/gama.git
 	cd gama
 	./autogen.sh
 	./configure
@@ -60,7 +61,7 @@ Optional used by WebCam class.
 
 .. code:: bash
 
-	sudo apt-get install libopencv-dev python-opencv
+	sudo apt-get install libopencv-dev python3-opencv
 	
 Wifi
 ~~~~
@@ -69,7 +70,7 @@ Optional used by WifiCollector class.
 
 .. code:: bash
 
-	sudo pip install wifi
+	sudo pip3 install wifi
 	
 I2C interface
 ~~~~~~~~~~~~~
@@ -114,4 +115,6 @@ Make a local copy of the git repository:
 	cd ~
 	git clone https://github.com/zsiki/ulyxes.git
 
-You can move the whole ulyxes install directory to any other place inyour file system and you can also rename the ulyxes install directory. You had better not to change directory and file names under the install directory.
+You can move the whole ulyxes install directory to any other place in your 
+file system and you can also rename the ulyxes install directory. You had 
+better not to change directory and file names under the install directory.

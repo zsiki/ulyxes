@@ -321,18 +321,10 @@ Readers
 
 reader.py is the base class for all readers (virtual).
 
-filereader.py
-^^^^^^^^^^^^^
+configreader.py
+^^^^^^^^^^^^^^^
 
-Class to read file. It is mostly used as a base class for other readers
-loading information from file.
-
-.. code:: python
-    
-    # create a filereader object
-    fr = FileReader('test', 'test.txt')
-    # print the lines
-    print (fr.GetLine())
+TODO
 
 csvreader.py
 ^^^^^^^^^^^^
@@ -347,18 +339,58 @@ Default separator is semicolon (;).
     # load the whole file into a list
     lines = cr.Load()
 
+filereader.py
+^^^^^^^^^^^^^
+
+Class to read file. It is mostly used as a base class for other readers
+loading information from file.
+
+.. code:: python
+    
+    # create a filereader object
+    fr = FileReader('test', 'test.txt')
+    # read and print the next line
+    print (fr.GetNext())
+
 georeader.py
 ^^^^^^^^^^^^
 
-Class to read GeoEasy geo and coo files.
+Class to read GeoEasy geo or coo files. Data are loaded into a list of
+dictionaries. Possible keys in dictionaries:
 
-sqlitereader.py
-^^^^^^^^^^^^^^^
+* station - station ID
+* ih - instrument height
+* code - additional textual information to point
+* id - target ID
+* th - target height
+* hz - horizontal direction
+* v - zenith angle
+* distance - slope distance
+* hd - horizontal distance
+* pc - prism constant
+* north - north coordinate
+* east - east coordinate
+* elev - elevation
+* datetime - date and time of observation
+* faces - number of faces
 
-TODO
+Creating a new GeoReader instance a file name and a filter can be specified.
+The filter is a list of the keys above. Only those lines are kept where all
+filter keys are present. One can use a filter to load only 3D points from
+the coordinate list.
+
+.. code:: python
+    
+	# load 3D points from a GeoEasy coo file
+	g = GeoReader(fname='your_file.coo', filt=['east', 'north', 'elev'])
+	m = g.Load()	# load 3D points
+	print(m)
 
 httpreader.py
 ^^^^^^^^^^^^^
+
+Read data from a remote web server using HTTP protocol and server side service
+for POST/GET requests.
 
 TODO
 
@@ -367,9 +399,10 @@ jsonreader.py
 
 TODO
 
-configreader.py
+sqlitereader.py
 ^^^^^^^^^^^^^^^
 
+Load coordinates or observations from a spatialite database.
 TODO
 
 External Python modules
@@ -377,7 +410,8 @@ External Python modules
 
 Logging
 =======
-This module defines functions and classes which implement a flexible event logging system for applications and libraries.
+This module defines functions and classes which implement a flexible event
+logging system for applications and libraries.
 
 For more information, please visit the `official Logging documentation <https://docs.python.org/2/library/logging.html>`_.
 
@@ -389,18 +423,23 @@ For more information, please visit the `official PyUSB Github page <https://gith
 
 Pyserial
 ========
-This module encapsulates the access for the serial port. It provides backends for Python running on Windows, Linux, BSD (possibly any POSIX compliant system), Jython and IronPython (.NET and Mono).
+This module encapsulates the access for the serial port. It provides backends
+for Python running on Windows, Linux, BSD (possibly any POSIX compliant system),
+Jython and IronPython (.NET and Mono).
 
 For more information, please visit the `official PySerial documentation <http://pyserial.sourceforge.net/pyserial.html#overview>`_.
-
-
 
 Smbus
 =====
 
+TODO
+
 Cv2/cv (OpenCV)
 ===============
-OpenCV (Open Source Computer Vision Library: http://opencv.org) is an open-source BSD-licensed library that includes several hundreds of computer vision algorithms.
+
+OpenCV (Open Source Computer Vision Library: http://opencv.org) is an
+open-source BSD-licensed library that includes several hundreds of computer
+vision algorithms.
 
 For more information, please visit the `official OpenCV documentation <http://docs.opencv.org/modules/core/doc/intro.html>`_.
 
@@ -411,8 +450,8 @@ PyAPI Tutorials
 Most of the Python modules contain a unit test part at the end (after
 the if __name__ == "__main__":). These are also usage examples.
 
-Use the SerialInterface
-***********************
+Use of the SerialInterface
+**************************
 
 The SearialIface class can be used alone to drive an instrument through the
 serial chanel or as a building block of an Instrument instance.
@@ -436,9 +475,9 @@ class. A sensor consists of three building blocks:
 
 .. code:: python
 
-    from leicatps1200 import LeicaTPS1200
-    from leicatcra1100 import LeicaTCRA1100
-    from serialiface import SerialIface
+    import logging
+	from leicatps1200 import LeicaTPS1200
+	from serialiface import SerialIface
     from echowriter import EchoWriter
     logging.getLogger().setLevel(logging.DEBUG)
     mu = LeicaTPS1200()
