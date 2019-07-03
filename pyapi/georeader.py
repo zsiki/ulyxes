@@ -46,7 +46,10 @@ class GeoReader(FileReader):
             :returns: values in dict, empty dict on EOF
         """
         res = {}
-        w = self.GetLine().strip('\n\r')
+        w = self.GetLine()
+        if self.state != self.RD_OK:
+            return res
+        w = w.strip('\n\r')
         buf = re.split('[\{\}]', w)
         for ww in buf:
             if len(ww) > 2:
