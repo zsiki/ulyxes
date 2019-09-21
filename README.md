@@ -10,7 +10,8 @@ Surveyor's sensor data processing system
 
 Documentation
 * [Ulyxes User's Guide](https://github.com/zsiki/ulyxes/blob/master/doc/Ulyxes_user_doc.rst)
-* [installation on Ubuntu/Debian/Raspbian](https://github.com/zsiki/ulyxes/blob/master/doc/ubuntu_istall.rst)
+* [Installation on Ubuntu/Debian/Raspbian](https://github.com/zsiki/ulyxes/blob/master/doc/ubuntu_istall.rst)
+* [Presentation](https://www.slideshare.net/ZoltanSiki/ulyxes) at OGRS 2018, Lugano
 ---
 Depricated module/API
 
