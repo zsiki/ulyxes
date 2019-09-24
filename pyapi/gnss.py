@@ -59,7 +59,7 @@ if __name__ == '__main__':
     from nmeagnssunit import NmeaGnssUnit
     logging.basicConfig()
     #iface = SerialIface("", "COM5")
-    iface = LocalIface('test', '/home/siki/meresfeldolgozas/nmea1.txt')
+    iface = LocalIface('test', '../data/nmea2.txt')
     mu = NmeaGnssUnit()
     wrt = EchoWriter()
     #wrt = HttpWriter(url='http://localhost/get.php', angle='DEG')

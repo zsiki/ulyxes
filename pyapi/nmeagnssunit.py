@@ -75,7 +75,7 @@ class NmeaGnssUnit(MeasureUnit):
         return res
 
     @staticmethod
-    def MeasureMsg(self):
+    def MeasureMsg():
         """ NMEA sentence type for lat,lon
 
             :returns: GPGGA
