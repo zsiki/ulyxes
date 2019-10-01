@@ -13,9 +13,9 @@
 
 import logging
 import bluetooth
-from iface import IFace
+from iface import Iface
 
-class BluetoothIface(IFace):
+class BluetoothIface(Iface):
     """ Interface to communicate through bluetooth interfacei as a client. 
         This class depends on pybluez.
 
@@ -132,5 +132,8 @@ class BluetoothIface(IFace):
         return res
 
 if __name__ == "__main__":
-    mac = 'TCRP 1201 address'
-    bt = BluetoothIface('test', mac)
+    a = BluetoothIface('test', '')
+    print(a.GetName())
+    print(a.GetState())
+    print(a.GetLine())
+    print(a.GetState())
