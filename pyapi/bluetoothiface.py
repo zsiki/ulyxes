@@ -13,6 +13,7 @@
 
 import logging
 import bluetooth
+import time
 from iface import Iface
 
 class BluetoothIface(Iface):
@@ -37,6 +38,7 @@ class BluetoothIface(Iface):
         self.eomRead = eomRead
         self.eomWrite = eomWrite
         self.socket = None
+        self.Open()
 
     def __del__(self):
         """ Destructor for bluetooth client
@@ -44,13 +46,15 @@ class BluetoothIface(Iface):
         self.Close()
         self.socket = None
 
-    def Open(self, port):
+    def Open(self):
         """ Open bluetooth communication
         """
         self.socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
         try:
             self.socket.connect((self.mac, self.port))
         except:
+            logging.error(" error opening bluetooth connection")
+            self.state = self.IF_SOURCE
             self.socket = None
 
     def Close(self):
@@ -77,6 +81,7 @@ class BluetoothIface(Iface):
             except:
                 self.state = self.IF_READ
                 logging.error(" cannot read bluetooth connection")
+                break
             if ch == '':
                 # timeout exit loop
                 self.state = self.IF_TIMEOUT
@@ -107,8 +112,8 @@ class BluetoothIface(Iface):
         # send message to bluetooth interface
         logging.debug(" message sent: %s", msg)
         try:
+            self.socket.settimeout(self.timeout)
             self.socket.send(msg)
-            self.socket.timeout(self.timeout)
         except:
             self.state = self.IF_WRITE
             logging.error(" cannot write to bluetooth connection")
@@ -126,14 +131,14 @@ class BluetoothIface(Iface):
         #sending
         for m in msglist:
             if self.PutLine(m) == 0:
+                time.sleep(5)
                 res += self.GetLine() + '|'
         if res.endswith('|'):
             res = res[:-1]
         return res
 
 if __name__ == "__main__":
-    a = BluetoothIface('test', '')
-    print(a.GetName())
-    print(a.GetState())
-    print(a.GetLine())
-    print(a.GetState())
+    a = BluetoothIface('test', '00:12:F3:04:ED:06', 1)
+    if a.GetState() == a.IF_OK:
+        print(a.Send('%R1Q,2008:1,0'))
+        print(a.GetState())

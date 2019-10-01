@@ -18,6 +18,7 @@ from leicatcra1100 import LeicaTCRA1100
 from leicatca1800 import LeicaTCA1800
 from trimble5500 import Trimble5500
 from serialiface import SerialIface
+from bluetoothiface import BluetoothIface
 from echowriter import EchoWriter
 
 class TotalStation(Instrument):
@@ -452,10 +453,11 @@ class TotalStation(Instrument):
 if __name__ == "__main__":
     import time
     logging.getLogger().setLevel(logging.DEBUG)
-    #mu = LeicaTPS1200()
+    mu = LeicaTPS1200()
     #mu = LeicaTCA1800()
-    mu = Trimble5500()
-    iface = SerialIface("rs-232", "/dev/ttyUSB0")
+    #mu = Trimble5500()
+    #iface = SerialIface("rs-232", "/dev/ttyUSB0")
+    iface = BluetoothIface('test', '00:12:F3:04:ED:06', 1)
     wrt = EchoWriter()
     ts = TotalStation("Leica", mu, iface, wrt)
     #ts.SetStation(10.0, 20., 30., 1.0)
