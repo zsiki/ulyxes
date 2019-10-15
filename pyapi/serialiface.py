@@ -139,11 +139,11 @@ class SerialIface(Iface):
         return res
 
 if __name__ == "__main__":
-    a = SerialIface('test', '/dev/ttyUSB0', eomRead='>')
+    a = SerialIface('test', '/dev/ttyUSB0')
     print(a.GetName())
     print(a.GetState())
-    #print(a.Send('%R1Q,2008:1,0'))
-    print(a.Send('TG'))
-    print(a.Send('WG,20=0.008'))
-    print(a.Send('RG,20'))
+    print(a.Send('%R1Q,2008:1,0'))
+    #print(a.Send('TG'))
+    #print(a.Send('WG,20=0.008'))
+    #print(a.Send('RG,20'))
     print(a.GetState())

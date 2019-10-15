@@ -240,7 +240,8 @@ class GamaIface(object):
         tmp_name = f.name
         f.close()
         f = open(tmp_name + '.xml', 'w')
-        f.write(ET.tostring(gama_local))
+        w = ET.tostring(gama_local).decode('utf-8')
+        f.write(w)
         f.close()
         print(tmp_name)
 
@@ -270,9 +271,9 @@ class GamaIface(object):
                                 for pdata in ggchild:
                                     if root_tag + "id" == pdata.tag:
                                         p['id'] = pdata.text
-                                    elif root_tag + "x" == pdata.tag:
-                                        p['east'] = float(pdata.text)
                                     elif root_tag + "y" == pdata.tag:
+                                        p['east'] = float(pdata.text)
+                                    elif root_tag + "x" == pdata.tag:
                                         p['north'] = float(pdata.text)
                                     elif root_tag + "z" == pdata.tag:
                                         p['elev'] = float(pdata.text)
