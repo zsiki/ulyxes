@@ -81,6 +81,7 @@ See http://www.instructables.com/id/Raspberry-Pi-I2C-Python/step2/Enable-I2C/
 Qt4
 ~~~
 
+NOT NEEDED, xml.etree.ElementTree IS USED AFTER 2019 SUMMER
 Optional, used by robotplus.py
 
 .. code:: bash
