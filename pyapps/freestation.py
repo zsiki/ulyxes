@@ -87,7 +87,7 @@ class Freestation(object):
             elif not self.blunders:
                 logging.warning("no blunders checked")
                 break
-            elif blunder['std-residual'] < 1.0:
+            elif blunder['std-residual'] <= self.g.krit:
                 logging.info("%d blunders removed", n)
                 break
             else:
@@ -96,7 +96,7 @@ class Freestation(object):
                 self.g.remove_observation(blunder['from'], blunder['to'])
                 last_res = res
                 n += 1
-        return res
+        return [res]
 
 if __name__ == "__main__":
     #logging.getLogger().setLevel(logging.WARNING)
