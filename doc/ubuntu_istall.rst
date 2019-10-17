@@ -1,5 +1,5 @@
-Installing pyapi and pyapps on Ubuntu Linux
-===========================================
+Installing pyapi and pyapps on Ubuntu/debian Linux
+==================================================
 
 Prerequisites
 -------------
@@ -53,6 +53,10 @@ GNU GaMa is built from sources
 	./configure
 	make
 	sudo make install
+
+.. note::
+	remove libtools from install on rasbian
+
 
 OpenCV
 ~~~~~~
@@ -109,7 +113,7 @@ Install only the latest version from GitHub:
 	wget https://github.com/zsiki/ulyxes/zipball/master/ -O ulyxes.zip
 	unzip ulyxes.zip
 
-Make a local copy of the git repository:
+Or make a local copy of the git repository:
 
 .. code::
 
