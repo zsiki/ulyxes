@@ -1,5 +1,5 @@
-Installing pyapi and pyapps on Ubuntu Linux
-===========================================
+Installing pyapi and pyapps on Ubuntu/debian/raspbian Linux
+===========================================================
 
 Prerequisites
 -------------
@@ -23,8 +23,11 @@ Python 3.x & pip
 
 	sudo apt-get install python3 python3-pip
 
-PySerial
-~~~~~~~~
+.. note::
+	Ulyxes is Python 2 compatible. Please install the correspondent Python 2 libraries in that case.
+
+PySerial (Serial communication to sensor)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: bash
 
@@ -37,6 +40,15 @@ dialout group use the following command
 .. code:: bash
 
 	sudo usermod -a -G dialout YOUR_USER_NAME
+
+PyBluez (Bleutooth communication to sensor)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+	
+	sudo apt-get install bluetooth libbluetooth-dev
+	sudo python3 -m pip install pybluez
+
 
 GNU GaMa
 ~~~~~~~~
@@ -53,6 +65,10 @@ GNU GaMa is built from sources
 	./configure
 	make
 	sudo make install
+
+.. note::
+	remove libtools from install on rasbian
+
 
 OpenCV
 ~~~~~~
@@ -109,7 +125,7 @@ Install only the latest version from GitHub:
 	wget https://github.com/zsiki/ulyxes/zipball/master/ -O ulyxes.zip
 	unzip ulyxes.zip
 
-Make a local copy of the git repository:
+Or make a local copy of the git repository:
 
 .. code::
 
