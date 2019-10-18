@@ -47,7 +47,7 @@ PyBluez (Bleutooth communication to sensor)
 .. code:: bash
 	
 	sudo apt-get install bluetooth libbluetooth-dev
-	sudo python3 -m pip install pybluez
+	sudo pip3 install pybluez
 
 
 GNU GaMa
@@ -93,16 +93,6 @@ I2C interface
 
 Optional available only on Raspberry Pi.
 See http://www.instructables.com/id/Raspberry-Pi-I2C-Python/step2/Enable-I2C/
-
-Qt4
-~~~
-
-NOT NEEDED, xml.etree.ElementTree IS USED AFTER 2019 SUMMER
-Optional, used by robotplus.py
-
-.. code:: bash
-
-	sudo apt-get install libqtcore4 python-qt4
 
 SpatiaLite/SqLite
 ~~~~~~~~~~~~~~~~~
