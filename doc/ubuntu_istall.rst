@@ -58,17 +58,13 @@ GNU GaMa is built from sources
 
 .. code:: bash
 
-	sudo apt-get install autoconf automake libtools
+	sudo apt-get install autoconf automake
 	git clone https://git.savannah.gnu.org/git/gama.git
 	cd gama
 	./autogen.sh
 	./configure
 	make
 	sudo make install
-
-.. note::
-	remove libtools from install on rasbian
-
 
 OpenCV
 ~~~~~~
