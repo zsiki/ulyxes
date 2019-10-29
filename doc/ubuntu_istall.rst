@@ -73,7 +73,8 @@ Optional used by WebCam class.
 
 .. code:: bash
 
-	sudo apt-get install libopencv-dev python3-opencv
+	sudo apt-get install libopencv-dev 
+	sudo pip3 install opencv-python
 	
 Wifi
 ~~~~
