@@ -21,7 +21,8 @@ Python 3.x & pip
 
 .. code:: bash
 
-	sudo apt-get install python3 python3-pip
+	sudo apt-get install python3 python3-pip python3-dev
+	sudo pip3 install setuptools
 
 .. note::
 	Ulyxes is Python 2 compatible. Please install the correspondent Python 2 libraries in that case.
