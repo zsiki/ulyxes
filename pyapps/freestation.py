@@ -111,7 +111,7 @@ if __name__ == "__main__":
             print("File not found: " + fname)
             sys.exit(-1)
     else:
-        print("Usage: freestation.py input_file gama_path station_id station_height")
+        print("Usage: freestation.py input_file gama_path")
         sys.exit(-1)
     if fname[-4:] not in ['.geo', '.coo', '.dmp', '.csv']:
         fname += '.geo'
