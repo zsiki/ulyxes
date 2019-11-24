@@ -27,8 +27,6 @@ class Writer(object):
     WR_OPEN = -1
     WR_WRITE = -2
 
-    DEFAULT_FILTER = ['hz', 'v', 'dist', 'datetime']
-
     def __init__(self, name=None, angle='GON', dist='.3f', \
                  dt='%Y-%m-%d %H:%M:%S', filt=None):
         """ Constructor

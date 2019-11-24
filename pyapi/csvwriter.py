@@ -10,9 +10,9 @@
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 """
 
+import logging
 from angle import Angle
 from filewriter import FileWriter
-import logging
 
 class CsvWriter(FileWriter):
     """ Class to write observations to csv file
@@ -33,9 +33,6 @@ class CsvWriter(FileWriter):
         """ Constructor
         """
         super(CsvWriter, self).__init__(name, angle, dist, dt, filt, fname, mode)
-        # use default filter if not defined
-        if filt is None:
-            self.filt = self.DEFAULT_FILTER
         self.sep = sep
         if header and self.mode == 'w':
             try:
@@ -56,10 +53,11 @@ class CsvWriter(FileWriter):
         """ Write observation data to csv file
 
             :param data: dictionary with observation data
+            :returns: 0/-1/-2 OK/write error/empty not written
         """
         if data is None or self.DropData(data):
             logging.warning(" empty or inappropiate data not written")
-            return
+            return -2
         # add datetime and/or id
         data = self.ExtendData(data)
         linelist = ['' for i in range(len(self.filt))]
