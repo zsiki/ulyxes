@@ -11,7 +11,7 @@
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 """
 import re
-import time
+from datetime import datetime
 from angle import Angle
 from filereader import FileReader
 
@@ -68,7 +68,7 @@ class GeoReader(FileReader):
                         res[self.codes[key]] = int(www[1]) # numeric
                     elif key == 51:
                         try:
-                            res[self.codes[key]] = time.strptime(' '.join(www[1:]), '%Y-%m-%d %H:%M:%S')
+                            res[self.codes[key]] = datetime.strptime(' '.join(www[1:]), '%Y-%m-%d %H:%M:%S')
                         except:
                             pass    # skip if datetime format is not valid
                     else:
