@@ -12,7 +12,7 @@
 
 import re
 import logging
-from datetime import datetime
+from datetime import datetime, date
 from angle import Angle
 from measureunit import MeasureUnit
 
@@ -61,6 +61,15 @@ class NmeaGnssUnit(MeasureUnit):
             if int(anslist[6]) == 0:
                 return None
             try:
+                hour = int(anslist[1][0:2])
+                minute = int(anslist[1][2:4])
+                second = int(anslist[1][4:6])
+                if len(anslist[1]) > 6:
+                    ms = int(float(anslist[1][6:]) * 1000)
+                else:
+                    ms = 0
+                d = date.today()
+                res['datetime'] = datetime(d.year, d.month, d.day, hour, minute, second, ms)
                 mul = 1 if anslist[3] == 'N' else -1
                 res['latitude'] = Angle(mul * float(anslist[2]), 'NMEA')
                 mul = 1 if anslist[5] == 'E' else -1
@@ -69,18 +78,6 @@ class NmeaGnssUnit(MeasureUnit):
                 res['nsat'] = int(anslist[7])
                 res['altitude'] = float(anslist[9])
                 res['hdop'] = float(anslist[8])
-                if self.date_time is not None:
-                    res['datetime'] = self.date_time
-                    self.date_time = None
-            except:
-                logging.error(" invalid nmea sentence: " + ans)
-                return None
-        elif msg == 'ZDA':
-            try:
-                # TODO microseconds
-                self.date_time = datetime(int(anslist[4]), int(anslist[3]),
-                    int(anslist[2]), int(anslist[1][0:2]),
-                    int(anslist[1][2:4]), int(anslist[1][4:6]))
             except:
                 logging.error(" invalid nmea sentence: " + ans)
                 return None
