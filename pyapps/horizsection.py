@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 """
 .. module:: horizsection.py
+
 .. moduleauthor:: Viktoria Zubaly, Zoltan Siki
+
 Sample application of Ulyxes PyAPI to measure a horizontal section(s)
-target on the first point of the first section and start this app
-coordinates and observations are written to csv file
+    target on the first point of the first section and start this app
+    coordinates and observations are written to csv file
     :param argv[1] (angle step): angle step between points in DEG, default 45
     :param argv[2] (sensor): 1100/1200/5500, default 1200
     :param argv[3] (port): serial port, default /dev/ttyUSB0
