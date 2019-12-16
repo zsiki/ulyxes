@@ -119,9 +119,9 @@ class Angle(object):
     """ Angle class, value stored in radian internally. Angle units supported:
 
 * RAD  radians (e.g. 1.54678432)
-* DMS sexagesimal (Degree-Minit-Second, e.g. 123-54-24)
+* DMS sexagesimal (Degree-Minute-Second, e.g. 123-54-24)
 * DEG decimal degree (e.g. 25.87659)
-* GON gradian whole circle is 400g (e.g. 387.7857)
+* GON gradians, the whole circle is 400g (e.g. 387.7857)
 * NMEA ddmm.mmmm used in NMEA sentences (e.g. 47.338765)
 * PDEG pseudo sexagesimal (e.g. 156.2745 = 156-27-45)
 * SEC sexagesimal seconds
