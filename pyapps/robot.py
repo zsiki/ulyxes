@@ -84,10 +84,11 @@ class Robot(object):
         :param maxtry: max retry for a point, default 3
         :param delaytry: delay in seconds between retries, default 0
         :param dirLimit: max angle difference [radians], default 0.015 (5')
+        :param distLimit: max slope distance difference [m], default 0.1 m
     """
 
     def __init__(self, directions, coordinates, ts, maxtry=3, delaytry=0,
-                 dirLimit=0.015):
+                 dirLimit=0.015, distLimit=0.1):
         """ initialize
         """
         if maxtry < 1:
@@ -99,6 +100,7 @@ class Robot(object):
             logging.warning("delaytry changed to 0")
         self.delaytry = delaytry # delay between retries
         self.dirLimit = dirLimit
+        self.distLimit = distLimit
         self.directions = directions
         self.coordinates = coordinates
         self.ts = ts
@@ -172,6 +174,7 @@ class Robot(object):
                         pn = self.directions[i]['id']
                         hz = self.directions[i]['hz'].GetAngle()
                         v = self.directions[i]['v'].GetAngle()
+                        distance = self.directions[i]['distance'] if 'distance' in self.directions[i] else None
                         if (n + k) % 2 == 1:
                             # change angles to face right
                             hz = hz - math.pi if hz > math.pi else hz + math.pi
@@ -262,8 +265,10 @@ class Robot(object):
                                 continue
                             else:
                                 # check false direction
-                                if abs(hz - obs['hz'].GetAngle()) > self.dirLimit \
-                                   or abs(v - obs['v'].GetAngle()) > self.dirLimit:
+                                if abs(hz - obs['hz'].GetAngle()) > self.dirLimit or \
+                                   abs(v - obs['v'].GetAngle()) > self.dirLimit or \
+                                   'distance' in obs and distance is not None and \
+                                   abs(obs['distance'] - distance) > self.distLimit:
                                     j += 1
                                     logging.warning("False direction %s", pn)
                                     continue    # try again

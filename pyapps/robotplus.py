@@ -27,6 +27,7 @@ Parameters are stored in config file using JSON format::
     max_try: maximum trying to measure a point, optional (default: 3)
     delay_try: delay between tries, optional (default: 0)
     dir_limit: angle limit for false direction in radians (default 0.015. 5')
+    dist_limit: distance limit for false direction in meters (default 0.1)
     port: serial port to use (e.g. COM1 or /dev/ttyS0 or /dev/ttyUSB0)
     coo_rd: source to get coordinates from
     coo_wr: target to send coordinates to
@@ -234,6 +235,7 @@ if __name__ == "__main__":
         'max_try': {'required': False, 'type': 'int', 'default': 3},
         'delay_try': {'required': False, 'type': 'float', 'default': 0},
         'dir_limit': {'required': False, 'type': 'float', 'default': 0.015},
+        'dist_limit': {'required': False, 'type': 'float', 'default': 0.1},
         'port': {'required' : True, 'type': 'str'},
         'coo_rd': {'required' : True},
         'coo_wr': {'required' : True},
@@ -479,7 +481,8 @@ if __name__ == "__main__":
         print("Measuring fix...")
         act_date = datetime.datetime.now()  # start of observations
         r = Robot(observations, st_coord, ts, cr.json['max_try'],
-                  cr.json['delay_try'], cr.json['dir_limit'])
+                  cr.json['delay_try'], cr.json['dir_limit'],
+                  cr.json['dist_limit'])
         obs_out, coo_out = r.run()
         # calculate station coordinates as freestation if gama_path set
         if 'gama_path' in cr.json and cr.json['gama_path'] is not None:
@@ -576,7 +579,8 @@ if __name__ == "__main__":
         print("Measuring mon...")
         act_date = datetime.datetime.now()  # start of observations
         r = Robot(observations, st_coord, ts, cr.json['max_try'],
-                  cr.json['delay_try'], cr.json['dir_limit'])
+                  cr.json['delay_try'], cr.json['dir_limit'],
+                  cr.json['dist_limit'])
         obs_out, coo_out = r.run()
         # calculate average for observations
         if cr.json['faces'] > 1 or cr.json['directfaces'] > 1:
