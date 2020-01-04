@@ -54,7 +54,7 @@ PyBluez (Bleutooth communication to sensor)
 GNU GaMa
 ~~~~~~~~
 
-Optional used only by robotplus.py
+Optional used only by robotplus.py and freestation.py
 GNU GaMa is built from sources
 
 .. code:: bash

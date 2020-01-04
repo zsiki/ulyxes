@@ -13,7 +13,7 @@ User's Guide
 
 
 
-    :Date: 2015-09-13
+    :Date: 2020-01-04
     :Authors: **Daniel Moka** <mokabme@gmail.com>, **Zoltan Siki** <siki@agt.bme.hu>
     :Version: 1.0
 
@@ -149,6 +149,7 @@ The TclAPI is a part of Ulyxes system. In order to install the API, the whole Ul
     3. Clone the Ulyxes Git directory, so type: git clone https://github.com/zsiki/ulyxes.git
     4. The TclAPI can be found at: “MyFolder/Ulyxes/TclAPI”
 
+
 *If you have no git client on your machine:*
 
     #. Open your browser
@@ -194,7 +195,7 @@ Specification
 *Supported OS (Operating System):*
 
     * Linux (probably any distro, tested on Fedora, Ubuntu, Raspbian) 
-    * Windows XP/Vista/7/8/10 (32 and 64 bit) (tested on XP/7) 
+    * Windows XP/Vista/7/8/10 (32 and 64 bit) (tested on XP/7/10) 
     * any other OS with Python 2.7.x/3.x installed (not tested)
 
 *Requirements:*
@@ -207,7 +208,7 @@ Specification
 How to install Python 3.x
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. warning:: TODO: How to install python 2 or 3...
+See: https://realpython.com/installing-python/
 
 Required Python modules
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -220,29 +221,27 @@ Required Python modules
     * math
     * os
     * re
+    * socket
     * sys
     * tempfile
     * time
     * urllib
-    * urllib2
+    * xml.etree.ElementTree
     
 *Extra modules*:
 
-    * serial
+    * pyserial
+	* pybluez
     * smbus
+    * sqlite3
     * wifi 
     * numpy
-    * cv/cv2
-    * PyQt4.QtCore
-    * PyQt4.QtXml
-
-cv install
-
-sudo apt-get install libopencv-dev python-opencv
+    * opencv
 
 
 *External dependencies*:
     * GNU Gama
+	* sqlite3, spatialite-bin
 
 How to install PyAPI
 ^^^^^^^^^^^^^^^^^^^^
@@ -516,22 +515,38 @@ Command line parameters:
 Measurematrix
 *************
 
-TODO
+An application to scan a region with given angle steps. Parameters are given in
+the command line, the corners of the region are given by targeting manually on 
+the points.
+Commands line parameters are positional:
+
+# number of horizontal intervals in the region
+# number of vertical intervals in the region
+# sensor (total station) type
+# serial port
+# output file
+
+After starting the program the user have to target on the lower left corner of 
+the region and the upper right corner of the region. The automatic observations
+are started then. If no output file given the observations are written to the 
+standard output.
 
 NMEA_demo
 *********
 
-TODO
+A simple demo application to read NMEA GGA sentences from GNSS receiver in an
+infinite loop.
 
 Horizsection
 ************
 
-TODO
+Scan horizontally around the total station with a given angle step in several
+horizontal sections.
 
 Section
 *******
 
-TODO
+Scan in an arbitrary plain aroun the total station with a given angle step.
 
 Monitoring
 **********
@@ -541,9 +556,10 @@ This block consist of several apps to solve simple tasks for monitoring.
 - *filemaker* creates an input file for monitoring using manual targeting
 - *filegen* creates an input file for monitoring from coordinates automaticly
 - *coomaker* creates a GeoEasy format input file for monitoring using manual targeting
-- *blindorientation* search for a prism from a known station az calculate orientation
+- *blindorientation* searches for a prism from a known station and calculates orientation angle
+- *freestation* calculates station coordinates and orientation using GNU gama
 - *robot* makes automatic observation using a file from FileMaker or FileGen
-- *robotplus* complex monitoring application using FileGen, Blindorientation and Robot
+- *robotplus* complex monitoring application using FileGen, Blindorientation, FreeStation and Robot
 
 FileMaker
 =========
@@ -574,11 +590,202 @@ Target modes:
 FileGen
 =======
 
+A simple application to create input observations file for robot.py. 
+The input is a coordinate list in GeoEasy coo or CSV format. The output is a 
+GeoEasy geo or DMP file with bearings, zenith angles and distances from
+the station to the points in the coordinate list.
+
+Usage: filegen.py input_coo_file output_obs_file station_id instrument_height
+
+Tha station_id is optional, if not given the first point in the coordinate list
+is considered as the station. Instrument height is also optional, the default
+value is 0.
+
+CooMaker
+========
+
+A simple application to create coordinate and observation data for robot.py
+and robotplus.py. User have to set up and orient the total station on the 
+station and observe targets.
+
+Usage: coomaker.py output_file sensor port
+
+- output file: two files are created with the same name extensions .geo/.coo
+- sensor: total station type 1100/1800/1200/5500
+- port: serial port e.g. COM1 or /dev/ttyUSB0
+
+Further data are given at the prompt of the program.
+
+FreeStation
+===========
+
+An application to calculate free station from observations and coordinates.
+A least squaers estimation is used based on GNU gama.
+
 Blindorientation
 ================
+
+This apllication tries to solve orientation. It searches for prisms.
+First tries if a prism is in the view of telescope using Automatic Target Recognition (ATR).
+If a target found it checks the distance and the zenith angle to find the 
+target in the coordinate list and set the orientation angle on the 
+instrument.
+
+If no target found in the actial view it rotates the instrument to the first 
+target supposing oriented instrument and set the orientation angle.
+
+Finally it starts search using Power Search if it is available on the total 
+station or starts a long searching algorithm.
 
 Robot
 =====
 
+Sample application of Ulyxes PyAPI to measure a serie of points.
+
+Usage: robot.py input_file output_file sensor port retry delay met met_addr met_par
+
+Positional command line parameters:
+
+- input_file: input file with directions .geo or .dmp
+- output_file: output file with observations default stdout
+- sensor: tcra1103/1100/tca1800/1800/tps1201/1200, default 1200
+- port: serial port, default COM1
+- retry: number of retry if target not found, default 3
+- delay: delay between retries default 0
+- met: name of met sensor BMP180/webmet, default None
+- met_addr address of met sensor, i2c addres for BMP180 or internet address of webmet service
+- met_par: parameters for webmet sensor
+
+Input file is a GeoEasy geo file or a dmp (can be created by filemaker.py
+or filegen.py).
+Sample geo file::
+
+    {2 S2} {3 0.0}                                   # station id & istrumnt h.
+    {5 2} {7 6.283145} {8 1.120836} {4 PR0} {112 2}  # target id, hz, v, code,
+    {5 T1} {7 2.022707} {8 1.542995} {4 RL} {112 2}  # number of faces
+    {5 3} {7 3.001701} {8 1.611722} {4 OR} {112 2}
+    {5 T2} {7 3.006678} {8 1.550763} {4 ATR1} {112 2}
+    {5 4} {7 3.145645} {8 1.610680} {4 PR2} {112 2}
+    {5 1} {7 6.002123} {8 1.172376} {4 PR} {112 2}
+    {5 9} {7 6.235123} {8 1.178538} {4 RLA} {112 2}
+
+    instead of code=4 you can define prism constant using code=20
+    prism constant units are meter
+
+Sample dmp file::
+
+    station; id; hz; v; code;faces
+    S2;2;6.283145;1.120836;PR0;2
+    S2;T1;2.022707;1.542995;RL;2
+    S2;3;3.001701;1.611722;OR;2
+    S2;T2;3.006678;1.550763;ATR1;2
+    S2;4;3.145645;1.610680;PR2;2
+    S2;1;6.002123;1.172376;PR;2
+
+Codes describe target type:
+
+- ATRn: prism and automatic targeting, n referes to prism type 0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini
+- ATR-n: prims and automatictargeting but wait for a keypress to measure
+- PRn: prism, n referes to prism type 0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini, manual targeting
+- RL: refrectorless observation, manual targeting
+- RLA: reflectorless observation (automatic)
+- OR: do not measure distance (orientation), manual targeting
+
+In case of PR/RL/OR the program stops and the user have to aim at the target
+
 Robotplus
 =========
+
+RobotPlus is the most comprehensive application. It is based on FileGen, 
+BlindOrientation, FreeStation and Robot applications.
+Besides the total station metheorological sensors are also supported.
+
+There are so many parameters to this aplication that a JSON configuration 
+file is applied to describe parameters.
+
+The whole process consists of the following steps:
+
+# Load JSON configuration file
+# Generate the observations from the input coordinate list (using FileGen)
+# Orientate total station (usinf BlindOrientation)
+# Make observations to the reference/fix points (using Robot)
+# Calculate station coordinates and precise orientation (using FreeStation)
+# Make observations to the monitoring points and store data
+
+During the process a log file is written, the log level DEBUG/INFO/WARNING/ERROR/FATAL can be set in the JSON config.
+
+Usage: robotplus.py config.json
+
+- config.json: JSON file describing parameters
+
+There are several parameters in a config file, most parameters are optional.
+Parameters:
+
+- log_file: path to log file, file must exist!
+- log_level: 10/20/30/40/50 for DEBUG/INFO/WARNING/ERROR/FATAL
+- log_format: format string for log (default: "%(asctime)s %(levelname)s:%(message)s"), optional
+- station_type: 1100/1200/1800
+- station_id: pont id for the station
+- station_height: instrument height above point, optional (default: 0)
+- station_coo_limit: limitation for station coordinate change from free station (default 0.01 m), optional
+- orientation_limit: distance limit for orientation to identify a target (default 0.1 m)
+- faces: number of faces to measure (first face left for all pointt then face right) (default 1)
+- face_coo_limit: maximum difference for face left and face right coords (m) (default: 0.01 m)
+- face_dir_limit: maximum difference for face left and face right angle (rad) (default 0.0029 60")
+- face_dist_limit: maximum difference for face left and face right dist (m) (default 0.01 m)
+- directfaces: number of faces to measure (face left and right are measured directly) (default 1)
+- fix_list: list of fix points to calculate station coordinates, optional (default: empty)
+- mon_list: list of monitoring points to measure, optional (default: empty)
+- max_try: maximum trying to measure a point, optional (default: 3)
+- delay_try: delay between tries, optional (default: 0)
+- dir_limit: angle limit for false direction in radians (default 0.015. 5')
+- dist_limit: distance limit for false direction in meters (default 0.1 m)
+- port: serial port to use (e.g. COM1 or /dev/ttyS0 or /dev/ttyUSB0)
+- coo_rd: source to get coordinates from
+- coo_wr: target to send coordinates to
+- obs_wr: target to send observations to
+- met_wr: target to send meteorological observations to, optional (default: no output)
+- inf_wr: target to send general information to
+- decimals: number of decimals in output (coords and distances), optional (default: 4)
+- gama_path: path to GNU Gama executable, optional (default: empty, no adjustment)
+- stdev_angle: standard deviation of angle measurement (arc seconds), optional (default: 1)
+- stdev_dist: additive tag for standard deviation of distance measurement (mm), optional (default: 1)
+- stdev_dist1: multiplicative tag for standard deviation of distance measurement (mm), optional (default: 1.5)
+- dimension: dimension of stored points (1D/2D/3D), optional (default: 3)
+- probability: probability for data snooping, optional (default: 0.95)
+- blunders: data snooping on/off 1/0, optional (default: 1)
+- met: met sensor name WEBMET/BMP180/SENSEHAT, optional default None
+- met_addr: URL to webmet data, optional (default: empty)
+- met_par: parameters to webmet service, optional (default: empty)
+
+Sample config file::
+
+	{ "log_file": "/home/siki/ulyxes/data/rp103.log",
+	  "log_level": 10,
+	  "station_type": "1200",
+	  "station_id": "103",
+	  "station_height": 0.369,
+	  "station_coo_limit": 0.1,
+	  "orientation_limit": 0.05,
+	  "faces": 1,
+	  "directfaces": 1,
+	  "fix_list": ["601", "603", "605", "607"],
+	  "mon_list": ["602", "604", "606", "608", "601", "603", "605", "607"],
+	  "max_try": 3,
+	  "delay_try": 0,
+	  "dir_limit": 0.015,
+	  "port": "/dev/ttyUSB0",
+	  "coo_rd": "/home/siki/ulyxes/data/labor.coo",
+	  "coo_wr": "/home/siki/ulyxes/data/labor_out.coo",
+	  "obs_wr": "/home/siki/ulyxes/data/labor_obs.geo",
+	  "met_wr": "",
+	  "inf_wr": "/home/siki/ulyxes/data/labor_inf.csv",
+	  "decimals": 4,
+	  "gama_path": "/home/siki/gama-2.07/bin/gama-local",
+	  "stdev_angle": 1,
+	  "stdev_dist": 1,
+	  "stdev_dist1": 1.5,
+	  "dimension": 3,
+	  "probability": 0.95,
+	  "blunders": 0
+	}
