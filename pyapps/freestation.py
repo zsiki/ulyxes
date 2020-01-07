@@ -60,7 +60,7 @@ class Freestation(object):
                 no += 1 # number of observations
                 self.g.add_observation(w)
         for w in coords:
-            if w['id'] == self.station:
+            if 'id' in w and w['id'] == self.station:
                 self.g.add_point(w, 'ADJ')
             elif 'east' in w and 'north' in w and 'elev' in w:
                 self.g.add_point(w, 'FIX')
@@ -75,8 +75,8 @@ class Freestation(object):
         n = 0   # number of blunders removed
         while True:
             res, blunder = self.g.adjust()
-            if res is None or 'east' not in res[0] or 'north' not in res[0] or \
-                              'elev' not in res[0]:
+            if res is None or 'east' not in res or 'north' not in res or \
+                              'elev' not in res:
                 # adjustment faild or too many blunders
                 if last_res is not None:
                     logging.warning("blunders are not fully removed")
@@ -87,7 +87,7 @@ class Freestation(object):
             elif not self.blunders:
                 logging.warning("no blunders checked")
                 break
-            elif blunder['std-residual'] < 1.0:
+            elif blunder['std-residual'] <= self.g.krit:
                 logging.info("%d blunders removed", n)
                 break
             else:
@@ -96,15 +96,14 @@ class Freestation(object):
                 self.g.remove_observation(blunder['from'], blunder['to'])
                 last_res = res
                 n += 1
-        return res
+        return [res]
 
 if __name__ == "__main__":
     #logging.getLogger().setLevel(logging.WARNING)
     logging.getLogger().setLevel(logging.INFO)
 
-    #fname = "/home/siki/GeoEasy/data/freestation.geo"
-    #fname = "test.geo"
-    #gama_path = '/home/siki/GeoEasy/gama-local'
+    fname = "/home/siki/GeoEasy_old/data/freestation.geo"
+    gama_path = '/home/siki/GeoEasy/gama-local'
 
     if len(sys.argv) > 1:
         fname = sys.argv[1]
@@ -112,7 +111,7 @@ if __name__ == "__main__":
             print("File not found: " + fname)
             sys.exit(-1)
     else:
-        print("Usage: freestation.py input_file gama_path station_id station_height")
+        print("Usage: freestation.py input_file gama_path")
         sys.exit(-1)
     if fname[-4:] not in ['.geo', '.coo', '.dmp', '.csv']:
         fname += '.geo'

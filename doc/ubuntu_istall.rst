@@ -1,5 +1,5 @@
-Installing pyapi and pyapps on Ubuntu Linux
-===========================================
+Installing pyapi and pyapps on Ubuntu/debian/raspbian Linux
+===========================================================
 
 Prerequisites
 -------------
@@ -16,19 +16,23 @@ Optional for testing serial connection to the instrument.
 
 	sudo apt-get install cutecom
 
-Python 2.7.x & pip
+Python 3.x & pip
 ~~~~~~~~~~~~~~~~~~
 
 .. code:: bash
 
-	sudo apt-get install python python-pip
+	sudo apt-get install python3 python3-pip python3-dev
+	sudo pip3 install setuptools
 
-PySerial
-~~~~~~~~
+.. note::
+	Ulyxes is Python 2 compatible. Please install the correspondent Python 2 libraries in that case.
+
+PySerial (Serial communication to sensor)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: bash
 
-	sudo pip install pyserial
+	sudo pip3 install pyserial
 
 On Linux the serial ports are protected. The root user and those are in the
 dialout group are able to read/write serial ports. To add yourself to the
@@ -36,17 +40,27 @@ dialout group use the following command
 
 .. code:: bash
 
-	sudo usermode -a -G dialout YOUR_USER_NAME
+	sudo usermod -a -G dialout YOUR_USER_NAME
+
+PyBluez (Bleutooth communication to sensor)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+	
+	sudo apt-get install bluetooth libbluetooth-dev
+	sudo pip3 install pybluez
+
 
 GNU GaMa
 ~~~~~~~~
 
-Optional used only by robotplus.py
+Optional used only by robotplus.py and freestation.py
 GNU GaMa is built from sources
 
 .. code:: bash
 
-	git clone git:/git.sv.gnu.org/gama.git
+	sudo apt-get install autoconf automake
+	git clone https://git.savannah.gnu.org/git/gama.git
 	cd gama
 	./autogen.sh
 	./configure
@@ -60,7 +74,8 @@ Optional used by WebCam class.
 
 .. code:: bash
 
-	sudo apt-get install libopencv-dev python-opencv
+	sudo apt-get install libopencv-dev 
+	sudo pip3 install opencv-python
 	
 Wifi
 ~~~~
@@ -69,22 +84,13 @@ Optional used by WifiCollector class.
 
 .. code:: bash
 
-	sudo pip install wifi
+	sudo pip3 install wifi
 	
 I2C interface
 ~~~~~~~~~~~~~
 
 Optional available only on Raspberry Pi.
 See http://www.instructables.com/id/Raspberry-Pi-I2C-Python/step2/Enable-I2C/
-
-Qt4
-~~~
-
-Optional, used by robotplus.py
-
-.. code:: bash
-
-	sudo apt-get install libqtcore4 python-qt4
 
 SpatiaLite/SqLite
 ~~~~~~~~~~~~~~~~~
@@ -107,11 +113,13 @@ Install only the latest version from GitHub:
 	wget https://github.com/zsiki/ulyxes/zipball/master/ -O ulyxes.zip
 	unzip ulyxes.zip
 
-Make a local copy of the git repository:
+Or make a local copy of the git repository:
 
 .. code::
 
 	cd ~
 	git clone https://github.com/zsiki/ulyxes.git
 
-You can move the whole ulyxes install directory to any other place inyour file system and you can also rename the ulyxes install directory. You had better not to change directory and file names under the install directory.
+You can move the whole ulyxes install directory to any other place in your 
+file system and you can also rename the ulyxes install directory. You had 
+better not to change directory and file names under the install directory.

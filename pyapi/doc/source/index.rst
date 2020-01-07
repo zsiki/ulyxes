@@ -86,6 +86,12 @@ Serial Iface
 .. automodule:: serialiface
    :members:
 
+Bluetoth Iface
+::::::::::::::
+
+.. automodule:: bluetoothiface
+   :members:
+
 Video Iface
 :::::::::::
 

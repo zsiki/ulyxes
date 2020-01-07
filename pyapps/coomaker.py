@@ -8,7 +8,7 @@ Sample application of Ulyxes PyAPI to create input coo file for robot/robotplus
 Output file uses GeoEasy coo
 
     :param argv[1]: output file with observations
-    :param argv[2] (sensor): 1100/1800/1200, default 1200
+    :param argv[2] (sensor): 1100/1800/1200/5500, default 1200
     :param argv[3] (port): serial port, default COM1
 
 For each target point the point id and prism constant must be input
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         ofname = ofname[:-4]
         otype = 'geo'
     else:
-        print("invalid output type, allowed types: .geo, .coo, .csv, .dmp")
+        print("invalid output type, allowed types: .geo, .coo")
         exit(-1)
     if len(sys.argv) > 2:
         stationtype = sys.argv[2]

@@ -92,11 +92,11 @@ class Trimble5500(MeasureUnit):
                     elif commandID == self.codes['SD']:
                         res['distance'] = float(buf[1])
                     elif commandID == self.codes['EASTING']:
-                        res['easting'] = float(buf[1])
+                        res['east'] = float(buf[1])
                     elif commandID == self.codes['NORTHING']:
-                        res['northing'] = float(buf[1])
+                        res['north'] = float(buf[1])
                     elif commandID == self.codes['ELE']:
-                        res['elevation'] = float(buf[1])
+                        res['elev'] = float(buf[1])
                     # TODO add all codes!
         return res
 

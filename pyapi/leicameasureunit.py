@@ -172,7 +172,7 @@ class LeicaMeasureUnit(MeasureUnit):
             except IndexError:
                 errCode = -2   # instrument off?
             if errCode != 0:
-                logging.error(" error from instrument: %d", errCode)
+                logging.error(" error from instrument: %d (command %d)", errCode, commandID)
                 res['errorCode'] = errCode
                 #if not errCode in (1283, 1284, 1285, 1288):
                 # do not stop if accuracy is not perfect

@@ -20,6 +20,7 @@ class Reader(object):
     RD_OK = 0
     RD_OPEN = -1
     RD_READ = -2
+    RD_EOF = -3
 
     def __init__(self, name=None, filt=None):
         """ Constructor
@@ -51,7 +52,7 @@ class Reader(object):
     def Rewind(self):
         """ Dummy function implemented in descendant objects
         """
-        pass
+        self.state = self.RD_OK
 
     def Filt(self, rec):
         """ Filter a record
@@ -74,12 +75,12 @@ class Reader(object):
         res = []
         w = None
         #self.Rewind()
-        while True:
+        while self.state == self.RD_OK:
             try:
                 w = self.GetNext()
             except IOError:
-                pass
-            if w:
+                self.sate = self.RD_READ
+            if w is not None:
                 if self.Filt(w):
                     res.append(w)   # keep record passed filter
             else:

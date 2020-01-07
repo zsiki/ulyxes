@@ -242,10 +242,10 @@ if __name__ == "__main__":
                 # add number of known points
                 st_coord[0]['n'] = len(fix_obs)
                 # save observations with corrected time
-                if wrt.WriteData(st_coord[0]) <> 0:
+                if wrt.WriteData(st_coord[0]) != 0:
                     logging.fatal("Cannot write station coordinates")
                 for o in fix_obs:
-                    if wrt1.WriteData(o) <> 0:
+                    if wrt1.WriteData(o) != 0:
                         logging.fatal("Cannot write observations")
                 station = True
         #print("Saving calculated coords...")
@@ -263,8 +263,8 @@ if __name__ == "__main__":
                 elev = st_coord[0]['elev'] + hd / math.tan(v)
                 c = {'id': o['id'], 'east': east, 'north': north, \
                      'elev': elev, 'datetime': o['datetime']}
-                if wrt.WriteData(c) <> 0:
+                if wrt.WriteData(c) != 0:
                     logging.fatal("Cannot write mon coordinates")
-                if wrt1.WriteData(o) <> 0:
+                if wrt1.WriteData(o) != 0:
                     logging.fatal("Cannot write mon observations")
         i = j

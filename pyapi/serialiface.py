@@ -30,7 +30,7 @@ class SerialIface(Iface):
             :param eomWrite: end of message char from computer (str), default '\\r\\n'
     """
     def __init__(self, name, port, baud=9600, byteSize=8,
-                 parity=serial.PARITY_NONE, stop=1, timeout=15, eomRead='\r\n',
+                 parity=serial.PARITY_NONE, stop=1, timeout=17, eomRead='\r\n',
                  eomWrite='\r\n'):
         """ Constructor for serial interface
         """
@@ -52,10 +52,8 @@ class SerialIface(Iface):
         """
         try:
             self.ser = serial.Serial(port, baud, byteSize, parity, stop, timeout)
-            self.opened = True
             self.state = self.IF_OK
         except:
-            self.opened = False
             self.state = self.IF_ERROR
             logging.error(" cannot open serial line")
 
@@ -64,7 +62,6 @@ class SerialIface(Iface):
         """
         try:
             self.ser.close()
-            self.opened = False
             self.state = self.IF_OK
         except:
             self.state = self.IF_ERROR
@@ -75,7 +72,7 @@ class SerialIface(Iface):
 
         :returns: line read from serial (str) or empty string on timeout or error, state is set also
         """
-        if self.ser is None or not self.opened or self.state != self.IF_OK:
+        if self.ser is None or self.state != self.IF_OK:
             logging.error(" serial line not opened")
             return None
         # read answer till end of message marker
@@ -106,7 +103,7 @@ class SerialIface(Iface):
             :returns: 0 - on OK, -1 on error or interface is in error state
         """
         # do nothing if interface is in error state
-        if self.ser is None or not self.opened or self.state != self.IF_OK:
+        if self.ser is None or self.state != self.IF_OK:
             logging.error(" serial line not opened or in error state")
             return -1
         # add CR/LF to message end
@@ -142,11 +139,11 @@ class SerialIface(Iface):
         return res
 
 if __name__ == "__main__":
-    a = SerialIface('test', '/dev/ttyUSB0', eomRead='>')
+    a = SerialIface('test', '/dev/ttyUSB0')
     print(a.GetName())
     print(a.GetState())
-    #print(a.Send('%R1Q,2008:1,0'))
-    print(a.Send('TG'))
-    print(a.Send('WG,20=0.008'))
-    print(a.Send('RG,20'))
+    print(a.Send('%R1Q,2008:1,0'))
+    #print(a.Send('TG'))
+    #print(a.Send('WG,20=0.008'))
+    #print(a.Send('RG,20'))
     print(a.GetState())

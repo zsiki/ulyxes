@@ -18,12 +18,16 @@ Parameters are stored in config file using JSON format::
     station_coo_limit: limitation for station coordinate change from free station (default 0.01), optional
     orientation_limit: distance limit for orientation to identify a target (default 0.1)
     faces: number of faces to measure (first face left for all pointt then face right) (default 1)
+    face_coo_limit: maximum difference for face left and face right coords (m) (default: 0.01)
+    face_dir_limit: maximum difference for face left and face right angle (rad) (default 0.0029 60")
+    face_dist_limit: maximum difference for face left and face right dist (m) (default 0.01)
     directfaces: number of faces to measure (face left and right are measured directly) (default 1)
     fix_list: list of fix points to calculate station coordinates, optional (default: empty)
     mon_list: list of monitoring points to measure, optional (default: empty)
     max_try: maximum trying to measure a point, optional (default: 3)
     delay_try: delay between tries, optional (default: 0)
     dir_limit: angle limit for false direction in radians (default 0.015. 5')
+    dist_limit: distance limit for false direction in meters (default 0.1)
     port: serial port to use (e.g. COM1 or /dev/ttyS0 or /dev/ttyUSB0)
     coo_rd: source to get coordinates from
     coo_wr: target to send coordinates to
@@ -89,10 +93,11 @@ def get_mu(t):
         return LeicaTPS1200()
     return False
 
-def avg_coo(coords):
+def avg_coo(coords, face_coo_limit=0.01):
     """ Calculate average coordinates
 
         :param coords: input coordinate list (duplicates)
+        :params face_coo_limit: difference limit from average coords (m)
         :returns: average coordinates no duplicates
     """
     res = []    # output list
@@ -105,19 +110,20 @@ def avg_coo(coords):
         avg_n = sum(n) / len(n)
         avg_h = sum(h) / len(h)
         # check before store average
-        # TODO limit from config
-        if [x for x in e if abs(x - avg_e) > 0.01] or \
-           [y for y in n if abs(y - avg_n) > 0.01] or \
-           [z for z in h if abs(z - avg_h) > 0.01]:
+        if [x for x in e if abs(x - avg_e) > face_coo_limit] or \
+           [y for y in n if abs(y - avg_n) > face_coo_limit] or \
+           [z for z in h if abs(z - avg_h) > face_coo_limit]:
             logging.error("Large coordinate difference from faces: %.3f %.3f %.3f", e, n, h)
             continue    # skip point
         res.append({'id': i, 'east': avg_e, 'north': avg_n, 'elev': avg_h})
     return res
 
-def avg_obs(obs):
+def avg_obs(obs, face_dir_limit=0.0029, face_dist_limit=0.01):
     """ Calculate average observations in faces
 
         :param obs: list of observations
+        :params face_dir_limit: difference limit from average angles (rad)
+        :params face_dist_limit: difference limit from average distance (m)
         :returns: average observations
     """
     res = []    # output list
@@ -161,9 +167,8 @@ def avg_obs(obs):
                 hz2 = [h + math.pi for h in hz2]
         hz = sum(hz1 + hz2) / (len(hz1) + len(hz2))
         # check before store average
-        # TODO limit from config
         str_hz = [Angle(abs(x - hz)).GetAngle('GON')
-                  for x in hz1 + hz2 if abs(x - hz) > 60.0 / 200000.0]
+                  for x in hz1 + hz2 if abs(x - hz) > face_dir_limit]
         if str_hz:
             logging.error('Large Hz difference from faces [GON]: %.4f %s',
                           max(str_hz), k)
@@ -178,9 +183,8 @@ def avg_obs(obs):
                          Angle(ind).GetAngle('GON'), k)
         v = sum(v1 + v2) / (len(v1) + len(v2))
         # check before store average
-        # TODO limit from config
         str_v = [Angle(abs(x-v)).GetAngle('GON')
-                 for x in v1 + v2  if abs(x - v) > 60.0 / 200000.0]
+                 for x in v1 + v2  if abs(x - v) > face_dir_limit]
         if str_v:
             logging.error('Large V difference from faces: %.4f at point %s',
                           max(str_v), k)
@@ -191,8 +195,7 @@ def avg_obs(obs):
         if sd12:
             sd = sum(sd12) / len(sd12)
             # check before store average
-            # TODO limit from config
-            str_d = [abs(x - sd) for x in sd12 if abs(x - sd) > 0.01]
+            str_d = [abs(x - sd) for x in sd12 if abs(x - sd) > face_dist_limit]
             if str_d:
                 logging.error('Large dist difference from faces: %.4f at point %s', max(str_d), k)
                 continue    # skip point
@@ -223,12 +226,16 @@ if __name__ == "__main__":
         'station_coo_limit': {'required': False, 'default': 0.01, 'type': 'float'},
         'orientation_limit': {'required': False, 'default': 0.1, 'type': 'float'},
         'faces': {'required': False, 'default': 1, 'type': 'int'},
+        'face_coo_limit': {'required': False, 'default': 0.01, 'type': 'float'},
+        'face_dir_limit': {'required': False, 'default': 0.0029, 'type': 'float'},
+        'face_dist_limit': {'required': False, 'default': 0.01, 'type': 'float'},
         'directfaces': {'required': False, 'default': 1, 'type': 'int'},
         'fix_list': {'required': False, 'type': 'list'},
         'mon_list': {'required': False, 'type': 'list'},
         'max_try': {'required': False, 'type': 'int', 'default': 3},
         'delay_try': {'required': False, 'type': 'float', 'default': 0},
         'dir_limit': {'required': False, 'type': 'float', 'default': 0.015},
+        'dist_limit': {'required': False, 'type': 'float', 'default': 0.1},
         'port': {'required' : True, 'type': 'str'},
         'coo_rd': {'required' : True},
         'coo_wr': {'required' : True},
@@ -474,13 +481,15 @@ if __name__ == "__main__":
         print("Measuring fix...")
         act_date = datetime.datetime.now()  # start of observations
         r = Robot(observations, st_coord, ts, cr.json['max_try'],
-                  cr.json['delay_try'], cr.json['dir_limit'])
+                  cr.json['delay_try'], cr.json['dir_limit'],
+                  cr.json['dist_limit'])
         obs_out, coo_out = r.run()
         # calculate station coordinates as freestation if gama_path set
         if 'gama_path' in cr.json and cr.json['gama_path'] is not None:
             print("Freestation...")
             if cr.json['faces'] > 1 or cr.json['directfaces'] > 1:
-                obs_out = avg_obs(obs_out)
+                obs_out = avg_obs(obs_out, cr.json['face_dir_limit'],
+                                  cr.json['face_dist_limit'])
             # store observations to FIX points
             for o in obs_out:
                 o['datetime'] = act_date
@@ -497,7 +506,7 @@ if __name__ == "__main__":
                              cr.json['stdev_dist'], cr.json['stdev_dist1'],
                              cr.json['blunders'])
             w = fs.Adjustment()
-            if w is None:
+            if w is None or 'east' not in w or 'north' not in w:
                 logging.fatal("No adjusted coordinates for station %s",
                               cr.json['station_id'])
                 sys.exit(-1)
@@ -570,18 +579,20 @@ if __name__ == "__main__":
         print("Measuring mon...")
         act_date = datetime.datetime.now()  # start of observations
         r = Robot(observations, st_coord, ts, cr.json['max_try'],
-                  cr.json['delay_try'], cr.json['dir_limit'])
+                  cr.json['delay_try'], cr.json['dir_limit'],
+                  cr.json['dist_limit'])
         obs_out, coo_out = r.run()
         # calculate average for observations
         if cr.json['faces'] > 1 or cr.json['directfaces'] > 1:
-            obs_out = avg_obs(obs_out)
+            obs_out = avg_obs(obs_out, cd.json['face_dir_limit'],
+                              cd.json['face_dist_limit'])
         for o in obs_out:
             o['datetime'] = act_date
             if 'distance' in o:
                 if wrt1.WriteData(o) == -1:
                     logging.error('Observation data write failed')
         # calculate coordinate average
-        coo_out = avg_coo(coo_out)
+        coo_out = avg_coo(coo_out, cr.json['face_coo_limit'])
         for c in coo_out:
             # add datetime to coords (same as obs)
             c['datetime'] = act_date

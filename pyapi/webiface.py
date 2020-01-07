@@ -10,8 +10,11 @@
 .. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
 
 """
+try:
+    from urllib2 import urlopen
+except:
+    from urllib.request import urlopen
 
-import urllib2
 import json
 from iface import Iface
 
@@ -37,7 +40,7 @@ class WebIface(Iface):
             :returns: downloaded data
         """
         try:
-            response = urllib2.urlopen(self.url + '?' + msg, timeout=self.timeout)
+            response = urlopen(self.url + '?' + msg, timeout=self.timeout)
         except:
             response = None
             data = None

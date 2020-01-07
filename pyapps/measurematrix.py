@@ -8,7 +8,7 @@
 Sample application of Ulyxes PyAPI to measure within a rectangular area
    :param argv[1] (int): number of horizontal intervals (between measurements), default 1 (perimeter only)
    :param argv[2] (int): number of vertical intervals(between measurements), default 1 (perimeter only)
-   :param argv[3] (sensor): 1100/1800/1200, default 1100
+   :param argv[3] (sensor): 1100/1800/1200/5500, default 1100
    :param argv[4] (port): serial port, default COM5
    :param argv[5]: output file, default stdout
    
@@ -16,7 +16,7 @@ usage: python measurematrix.py 9 3 1100 COM5
 """
 import re
 import sys
-import time
+
 sys.path.append('../pyapi/')
 
 from angle import Angle
@@ -82,9 +82,8 @@ if __name__ == "__main__":
         sys.exit(-1)    # open error
     ts = TotalStation(stationtype, mu, iface, wrt)
     if isinstance(mu, Trimble5500):
-        iface.eomRead = '>'
         print("Please change to reflectorless EDM mode (MNU 722 from keyboard)")
-        print("and turn on red laser (MNU 741 from keyboard")
+        print("and turn on red laser (MNU 741 from keyboard) and press enter!")
         raw_input()
     else:
         ts.SetATR(0) # turn ATR off
@@ -112,10 +111,5 @@ if __name__ == "__main__":
             ts.Measure()
 
             meas = ts.GetMeasure()
-            i = 0
-            while 'distance' not in meas and i < 20:   # wait for trimble 5500
-                i += 1
-                time.sleep(2)
-                meas = ts.GetMeasure()
             if ts.measureIface.state != ts.measureIface.IF_OK or 'errorCode' in meas:
                 print('FATAL Cannot measure point')

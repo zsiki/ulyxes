@@ -12,6 +12,7 @@
 
 import re
 import logging
+from datetime import datetime, date
 from angle import Angle
 from measureunit import MeasureUnit
 
@@ -44,7 +45,7 @@ class NmeaGnssUnit(MeasureUnit):
             :returns: processed message or None if msg and ans do not match
         """
         res = {}
-        if ans[1:len(msg)+1] != msg:
+        if ans[3:len(msg)+3] != msg:
             return None
         # check checksum
         data, cksum = re.split('\*', ans)
@@ -55,34 +56,43 @@ class NmeaGnssUnit(MeasureUnit):
             logging.error(' Checksum error')
             return None
         anslist = ans.split(',')
-        if msg == 'GPGGA':
+        if msg == 'GGA':
             # no fix
             if int(anslist[6]) == 0:
                 return None
-            mul = 1 if anslist[3] == 'N' else -1
-            res['latitude'] = Angle(mul * float(anslist[2]), 'NMEA')
-            mul = 1 if anslist[5] == 'E' else -1
-            res['longitude'] = Angle(mul * float(anslist[4]), 'NMEA')
-            res['quality'] = int(anslist[6])
-            res['nsat'] = int(anslist[7])
-            res['altitude'] = float(anslist[9])
-            res['hdop'] = float(anslist[8])
-            if self.date_time is None:
-                res['datetime'] = self.date_time
-                self.date_time = None
-        elif msg == 'GPZDA':
-            pass
+            try:
+                hour = int(anslist[1][0:2])
+                minute = int(anslist[1][2:4])
+                second = int(anslist[1][4:6])
+                if len(anslist[1]) > 6:
+                    ms = int(float(anslist[1][6:]) * 1000)
+                else:
+                    ms = 0
+                d = date.today()
+                res['datetime'] = datetime(d.year, d.month, d.day, hour, minute, second, ms)
+                mul = 1 if anslist[3] == 'N' else -1
+                res['latitude'] = Angle(mul * float(anslist[2]), 'NMEA')
+                mul = 1 if anslist[5] == 'E' else -1
+                res['longitude'] = Angle(mul * float(anslist[4]), 'NMEA')
+                res['quality'] = int(anslist[6])
+                res['nsat'] = int(anslist[7])
+                res['altitude'] = float(anslist[9])
+                res['hdop'] = float(anslist[8])
+            except:
+                logging.error(" invalid nmea sentence: " + ans)
+                return None
         return res
 
     @staticmethod
-    def MeasureMsg(self):
+    def MeasureMsg():
         """ NMEA sentence type for lat,lon
 
-            :returns: GPGGA
+            :returns: GGA
         """
-        return "GPGGA"
+        return "GGA"
 
 if __name__ == '__main__':
     ans = "$GPGGA,183730,3907.356,N,12102.482,W,1,05,1.6,646.4,M,-24.1,M,,*75"
+    #ans = "$GPZDA,050306,29,10,2003,,*43"
     nmeaunit = NmeaGnssUnit()
-    print (nmeaunit.Result("GPGGA", ans))
+    print (nmeaunit.Result("GGA", ans))

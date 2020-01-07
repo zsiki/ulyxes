@@ -10,8 +10,16 @@
     Daniel Moka <mokadaniel@citromail.hu>
 """
 import logging
+import time
 from instrument import Instrument
 from angle import Angle
+from leicatps1200 import LeicaTPS1200
+from leicatcra1100 import LeicaTCRA1100
+from leicatca1800 import LeicaTCA1800
+from trimble5500 import Trimble5500
+from serialiface import SerialIface
+from bluetoothiface import BluetoothIface
+from echowriter import EchoWriter
 
 class TotalStation(Instrument):
     """ Generic total station instrument
@@ -31,6 +39,9 @@ class TotalStation(Instrument):
         # call super class init
         super(TotalStation, self).__init__(name, measureUnit, measureIface,
                                            writerUnit)
+        if isinstance(measureUnit, Trimble5500):
+            # change default eol marker for read
+            measureIface.eomRead = '>'
 
 #        self.__class__.add_totalStation(self)
 
@@ -246,7 +257,13 @@ class TotalStation(Instrument):
             :returns: observations in a dictionary
         """
         msg = self.measureUnit.GetMeasureMsg(wait, incl)
-        return self._process(msg)
+        i = 0
+        meas = self._process(msg)
+        while 'distance' not in meas and i < 20:   # wait for trimble 5500
+            i += 1
+            time.sleep(2)
+            meas = self._process(msg)
+        return meas
 
     def MeasureDistAng(self, prg='DEFAULT'):
         """ Measure distance and return observations
@@ -435,35 +452,28 @@ class TotalStation(Instrument):
 
 if __name__ == "__main__":
     import time
-    from leicatps1200 import LeicaTPS1200
-    from leicatcra1100 import LeicaTCRA1100
-    from leicatca1800 import LeicaTCA1800
-    from trimble5500 import Trimble5500
-    from serialiface import SerialIface
-    from echowriter import EchoWriter
     logging.getLogger().setLevel(logging.DEBUG)
     mu = LeicaTPS1200()
     #mu = LeicaTCA1800()
     #mu = Trimble5500()
-    iface = SerialIface("rs-232", "/dev/ttyUSB0")
-    if isinstance(mu, Trimble5500):
-        # change default eol marker for read
-        iface.eomRead = '>'
+    #iface = SerialIface("rs-232", "/dev/ttyUSB0")
+    iface = BluetoothIface('test', '00:12:F3:04:ED:06', 1)
     wrt = EchoWriter()
     ts = TotalStation("Leica", mu, iface, wrt)
-    ts.SetStation(10.0, 20., 30., 1.0)
+    #ts.SetStation(10.0, 20., 30., 1.0)
     print(ts.GetStation())
-    print(ts.GetInstrumentNo())
+    #print(ts.GetInstrumentNo())
     #ts.GetInstrumentName()
     #ts.SetEDMMode(ts.measureUnit.edmModes['RLSTANDARD'])
     #ts.SetPc(0.0068)
     #print(ts.GetPc())
+    print(ts.GetAngles())
     ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
     #ts.SetEDMMode(ts.measureUnit.edmModes['STANDARD'])
-    #ts.Measure()
-    #meas = ts.GetMeasure()
+    ts.Measure()
+    meas = ts.GetMeasure()
     #while 'distance' not in meas:
-    #    time.sleep(2)
-    #    meas = ts.GetMeasure()
+    #time.sleep(5)
+    #meas = ts.GetMeasure()
     #print(meas)
     #ts.SwitchOff()
