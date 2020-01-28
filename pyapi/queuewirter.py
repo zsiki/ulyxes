@@ -14,21 +14,31 @@
 from writer import Writer
 import logging
 import queue
+from angle import Angle
 
 class QueueWriter(Writer):
+    '''Class to write queue
 
-    def __init__(self, name=None, angle='GON', dist='.3f', \
+            :param name: name of writer (str), default None
+            :param angle: angle unit to use (str), default GON
+            :param dist: distance and coordinate format (str), default .3f
+            :param dt: date/time format (str), dafault ansi
+            :param filt: list of keys to output (list), deafult None
+    '''
+    def __init__(self, queue, name=None, angle='GON', dist='.3f', \
                  dt='%Y-%m-%d %H:%M:%S', filt=None):
-        '''Class to write queue
+        '''Constuctor
 
-                :param name: name of writer (str), default None
-                :param angle: angle unit to use (str), default GON
-                :param dist: distance and coordinate format (str), default .3f
-                :param dt: date/time format (str), dafault ansi
-                :param filt: list of keys to output (list), deafult None
         '''
-        super(Writer, self).__init__(name, angle, dist)
-        self.q = queue.Queue()
+        super(QueueWriter, self).__init__(name, angle, dist, dt, filt)
+        self.q = queue
+
+    def GetQueue(self):
+        '''method to get queue
+            :returns: queue dt='%Y-%m-%d %H:%M:%S', filt=None, queue):
+
+        '''
+        return self.q
 
     def WriteData(self, data):
         '''Write observation data to queue
@@ -50,3 +60,11 @@ class QueueWriter(Writer):
             return -1
 
         return 0
+
+if __name__ == "__main__":
+    qu = queue.Queue()
+
+    myQueue = QueueWriter(queue = qu)
+    data = {'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'dist': 123.6581}
+
+    myQueue.WriteData(data)
