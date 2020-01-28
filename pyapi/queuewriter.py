@@ -73,3 +73,4 @@ if __name__ == "__main__":
     data = {'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'dist': 123.6581}
 
     myQueue.WriteData(data)
+    myQueue.GetQueue()
