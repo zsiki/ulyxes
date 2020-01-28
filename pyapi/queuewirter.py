@@ -25,17 +25,22 @@ class QueueWriter(Writer):
             :param dt: date/time format (str), dafault ansi
             :param filt: list of keys to output (list), deafult None
     '''
-    def __init__(self, queue, name=None, angle='GON', dist='.3f', \
+    def __init__(self, qu=None, name=None, angle='GON', dist='.3f', \
                  dt='%Y-%m-%d %H:%M:%S', filt=None):
         '''Constuctor
 
         '''
         super(QueueWriter, self).__init__(name, angle, dist, dt, filt)
-        self.q = queue
+        if isinstance(qu, queue.Queue):
+            self.q = qu
+        elif queue is None:
+            self.q = queue.Queue()
+        else:
+            raise TypeError('qu must be Queue type!')
 
     def GetQueue(self):
         '''method to get queue
-            :returns: queue dt='%Y-%m-%d %H:%M:%S', filt=None, queue):
+            :returns: queue
 
         '''
         return self.q
@@ -64,7 +69,7 @@ class QueueWriter(Writer):
 if __name__ == "__main__":
     qu = queue.Queue()
 
-    myQueue = QueueWriter(queue = qu)
+    myQueue = QueueWriter(qu = qu)
     data = {'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'dist': 123.6581}
 
     myQueue.WriteData(data)
