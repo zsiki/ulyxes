@@ -14,7 +14,7 @@
 from writer import Writer
 import logging
 import queue
-from angle import Angle
+
 
 class QueueWriter(Writer):
     '''Class to write queue
@@ -68,6 +68,7 @@ class QueueWriter(Writer):
         return 0
 
 if __name__ == "__main__":
+    from angle import Angle
     qu = queue.Queue()
 
     myQueue = QueueWriter(qu = qu)

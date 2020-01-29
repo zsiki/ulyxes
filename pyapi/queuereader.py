@@ -11,10 +11,8 @@
 .. moduleauthor:: Bence Turák <turak.bence@epito.bme.hu>
 """
 from reader import Reader
-from angle import Angle
 import queue
 import logging
-from queuewriter import QueueWriter
 
 class QueueReader(Reader):
     '''Class te read queue
@@ -63,6 +61,8 @@ class QueueReader(Reader):
         return self.GetLine()
 
 if __name__ == "__main__":
+    from queuewriter import QueueWriter
+    from angle import Angle
     qu = queue.Queue()
 
     quWr = QueueWriter(qu = qu)
