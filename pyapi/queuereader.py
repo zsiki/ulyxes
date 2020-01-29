@@ -18,11 +18,16 @@ from queuewriter import QueueWriter
 
 class QueueReader(Reader):
     '''Class te read queue
-            :param
 
+            :param qu: queue (Queue), default None
+            :param name: name of writer (str), default None
+            :param filt: list of keys to output (list), deafult None
     '''
 
-    def __init__(self, qu, name=None, filt=None):
+    def __init__(self, qu=None, name=None, filt=None):
+        '''Constuctor
+
+        '''
         super(QueueReader, self).__init__(name, filt)
 
         if isinstance(qu, queue.Queue):

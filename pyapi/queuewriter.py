@@ -19,6 +19,7 @@ from angle import Angle
 class QueueWriter(Writer):
     '''Class to write queue
 
+            :param qu: queue (Queue), default None
             :param name: name of writer (str), default None
             :param angle: angle unit to use (str), default GON
             :param dist: distance and coordinate format (str), default .3f
