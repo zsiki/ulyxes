@@ -6,7 +6,7 @@
    :synopsis: Ulyxes - an open source project to drive total stations and
            publish observation results.
            GPL v2.0 license
-           Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
+           Copyright (C) 2010-2020 Zoltan Siki <siki.zoltan@epito.bme.hu>
 
 .. moduleauthor:: Bence Turák <turak.bence@epito.bme.hu>
 """
@@ -15,9 +15,8 @@ from writer import Writer
 import logging
 import queue
 
-
 class QueueWriter(Writer):
-    '''Class to write queue
+    """Class to write queue
 
             :param qu: queue (Queue), default None
             :param name: name of writer (str), default None
@@ -25,12 +24,10 @@ class QueueWriter(Writer):
             :param dist: distance and coordinate format (str), default .3f
             :param dt: date/time format (str), dafault ansi
             :param filt: list of keys to output (list), deafult None
-    '''
+    """
     def __init__(self, qu=None, name=None, angle='GON', dist='.3f', \
                  dt='%Y-%m-%d %H:%M:%S', filt=None):
-        '''Constuctor
-
-        '''
+        """ Constuctor """
         super(QueueWriter, self).__init__(name, angle, dist, dt, filt)
         if isinstance(qu, queue.Queue):
             self.q = qu
@@ -40,16 +37,16 @@ class QueueWriter(Writer):
             raise TypeError('qu must be Queue type!')
 
     def GetQueue(self):
-        '''method to get queue
+        """ method to get queue
             :returns: queue
-
-        '''
+        """
         return self.q
 
     def WriteData(self, data):
-        '''Write observation data to queue
-                :param data: dictonary with observation data
-        '''
+        """ Write observation data to queue
+            :param data: dictonary with observation data
+            :returns: 0/-1/-2 OK/write error/empty not written
+        """
         line = {}
         if data is None or self.DropData(data):
             logging.warning(" empty or inappropiate data not written")
@@ -59,6 +56,8 @@ class QueueWriter(Writer):
         for key, val in data.items():
             if self.filt is None or key in self.filt:
                 line[key] = val
+        if not line:
+            return -2   # skip empty data
         try:
             self.q.put(line)
         except:
