@@ -55,7 +55,7 @@ class Reader(object):
         self.state = self.RD_OK
 
     def Filt(self, rec):
-        """ Filter a record
+        """ check all filter fields are in record
 
             :param rec: record to check to self.filt
             :returns: Tue/False keep/drop record

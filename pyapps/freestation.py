@@ -118,7 +118,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         gama_path = sys.argv[2]
     else:
-        gama_path = '/home/siki/GeoEasy/gama-local'
+        gama_path = '/home/siki/GeoEasy/src/gama-local'
 
     # load observations and coordinates
     fn = fname[:-4] # remove extension

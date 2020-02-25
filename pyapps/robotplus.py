@@ -506,7 +506,7 @@ if __name__ == "__main__":
                              cr.json['stdev_dist'], cr.json['stdev_dist1'],
                              cr.json['blunders'])
             w = fs.Adjustment()
-            if w is None or 'east' not in w or 'north' not in w:
+            if w is None or 'east' not in w[0] or 'north' not in w[0]:
                 logging.fatal("No adjusted coordinates for station %s",
                               cr.json['station_id'])
                 sys.exit(-1)

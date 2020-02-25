@@ -243,7 +243,6 @@ class GamaIface(object):
         w = ET.tostring(gama_local).decode('utf-8')
         f.write(w)
         f.close()
-        print(tmp_name)
 
         # run gama-local
         status = os.system(self.gama_path + ' ' + tmp_name + '.xml --text ' +
