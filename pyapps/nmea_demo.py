@@ -18,32 +18,61 @@ Usage:
 """
 import sys
 import os
+import re
+import argparse
 
 sys.path.append('../pyapi')
 
-if __name__ == "__main__":
-    # get file from command line params
-    if len(sys.argv) > 1:
-        fn = sys.argv[1]
-    else:
-        fn = 'test.log'
-    if len(sys.argv) > 2:
-        web = sys.argv[2]
-    else:
-        web = 'http://enfo.hu/gnss_demo/get.php'
-    # file or on-line?
-    if os.path.exists(fn) and os.path.isfile(fn):
-        # input from file
-        from localiface import LocalIface
-        li = LocalIface('test', fn)
-    else:
-        # input from gnss receiver
-        from serialiface import SerialIface
-        li = SerialIface('test', fn)
+from localiface import LocalIface
+from serialiface import SerialIface
+from bluetoothiface import BluetoothIface
+from nmeagnssunit import NmeaGnssUnit
+from httpwriter import HttpWriter
+from echowriter import EchoWriter
+from csvwriter import CsvWriter
+from gnss import Gnss
 
-    from nmeagnssunit import NmeaGnssUnit
-    from httpwriter import HttpWriter
-    from gnss import Gnss
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--interface', type=str,
+        help='interface e.g. COM1: /dev/ttyUSB0', default = '/dev/ttyUSB0')
+    parser.add_argument('-s', '--speed', type=int,
+        help='communication speed e.g. 9600', default = 9600)
+    parser.add_argument('-o', '--output', type=str,
+        help='output, default stdout')
+    # get file from command line params
+    args = parser.parse_args()
+
+    # NMEA input interface
+    if re.search('^COM[0-9][0-9]?$', args.interface) or \
+        re.search('^/dev/ttyUSB[0-9]$', args.interface) or \
+        re.search('^/dev/ttyS[0-9]*', args.interface):
+        # serial
+        li = SerialIface('test', args.interface, args.speed)
+    elif re.search('^([0-9A-F]{2}:){5}[0-9A-F]{2}$', args.interface):
+        # bluetooth
+        li = BluetoothIface('test', args.interface, 1)
+    elif os.path.exists(args.interface) and os.path.isfile(args.interface):
+        # input from file
+        li = LocalIface('test', args.interface)
+    else:
+        print('invalid interface given')
+        sys.exit(1)
+
+    # output
+    if args.output is None:
+        wrt = EchoWriter('', 'DEG', '.3f', '%Y-%m-%d %H:%M:%S',
+            ['id', 'latitude', 'longitude', 'altitude', 'datetime'])
+    elif re.search('^https?://', args.output):
+        wrt = HttpWriter(angle='DEG', url=args.output,
+            filt=['longitude', 'latitude', 'altitude', 'datetime'])
+    elif re.search('\.csv$', args.output):
+        wrt = CsvWriter('', 'DEG', '.3f', '%Y-%m-%d %H:%M:%S',
+            ['id', 'latitude', 'longitude', 'altitude', 'datetime'], args.output)
+    else:
+        print('invalid output given')
+        sys.exit(2)
 
     # nmea data OK?
     if li.state != li.IF_OK:
@@ -52,11 +81,6 @@ if __name__ == "__main__":
 
     # nmea processing unit
     mu = NmeaGnssUnit()
-    # processed data to web
-    #wrt = HttpWriter(angle='DEG', url='http://localhost/gnss/get.php',
-    #    filt=['longitude', 'latitude', 'altitude', 'datetime'])
-    wrt = HttpWriter(angle='DEG', url='http://enfo.hu/gnss_demo/get.php',
-        filt=['longitude', 'latitude', 'altitude', 'datetime'])
     # instrument
     g = Gnss('test', mu, li, wrt)
     while g.measureIface.state == g.measureIface.IF_OK:
