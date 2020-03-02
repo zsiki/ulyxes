@@ -20,6 +20,7 @@ import sys
 import os
 import re
 import argparse
+import logging
 
 sys.path.append('../pyapi')
 
@@ -32,7 +33,7 @@ from echowriter import EchoWriter
 from csvwriter import CsvWriter
 from gnss import Gnss
 
-
+# topcon hiper II bluetooth: 00:07:80:57:3b:6e
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--interface', type=str,
@@ -41,16 +42,20 @@ if __name__ == "__main__":
         help='communication speed e.g. 9600', default = 9600)
     parser.add_argument('-o', '--output', type=str,
         help='output, default stdout')
+    parser.add_argument('-d', '--debug', action="store_true",
+        help='detailed log output to stdout')
     # get file from command line params
     args = parser.parse_args()
 
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
     # NMEA input interface
     if re.search('^COM[0-9][0-9]?$', args.interface) or \
         re.search('^/dev/ttyUSB[0-9]$', args.interface) or \
         re.search('^/dev/ttyS[0-9]*', args.interface):
         # serial
         li = SerialIface('test', args.interface, args.speed)
-    elif re.search('^([0-9A-F]{2}:){5}[0-9A-F]{2}$', args.interface):
+    elif re.search('^([0-9a-fA-F]{2}:){5}[0-9A-f-F]{2}$', args.interface):
         # bluetooth
         li = BluetoothIface('test', args.interface, 1)
     elif os.path.exists(args.interface) and os.path.isfile(args.interface):
