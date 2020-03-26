@@ -18,4 +18,4 @@ and a [paper](https://peerj.com/preprints/27226v1) on PeerJ Preprints.
 Deprecated modules/APIs
 
 * TclAPI - API written in tcl to handle robotic total stations, digital levels and GNSS receivers. The development of this subproject is finished, only bug fixes will be made.
-* Robot - Sample MS Windows/MFC/C++ application to drive Leica robotic total stations (you must have GComS2K120.lib from Leica). This program mainly serves for demonstration purposes. The development of this subproject is finished, only bug fixes will be made.
+* Robot - Sample MS Windows/MFC/C++ application to drive Leica robotic total stations (you must have GComS2K120.lib from Leica). This program mainly serves for demonstration purposes. The development of this subproject is finished, no bug fixes will be made.
