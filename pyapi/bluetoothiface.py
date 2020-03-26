@@ -138,7 +138,8 @@ class BluetoothIface(Iface):
         return res
 
 if __name__ == "__main__":
-    a = BluetoothIface('test', '00:12:F3:04:ED:06', 1)
+    #a = BluetoothIface('test', '00:12:F3:04:ED:06', 1) # leica 1200
+    a = BluetoothIface('test', '00:07:80:57:3B:6E', 1)  # topcon hiper II rover
     if a.GetState() == a.IF_OK:
         print(a.Send('%R1Q,2008:1,0'))
         print(a.GetState())

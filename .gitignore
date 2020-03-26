@@ -7,3 +7,6 @@ TODO
 *.npy
 pics
 .ftpconfig
+camera/*.png
+camera/*.jpg
+camera/*.h264
