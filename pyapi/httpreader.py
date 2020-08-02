@@ -12,8 +12,13 @@
 """
 
 #import logging
-import urllib
 import json
+try:
+    from urllib.request import urlopen # for python 3
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
+    from urllib2 import urlopen        # for python 2
 
 from reader import Reader
 
@@ -76,7 +81,7 @@ class HttpReader(Reader):
                 par['pids'] = ','.join(self.pids)
             if self.ptys is not None:
                 par['ptys'] = ','.join(self.ptys)
-            self.res = json.loads(urllib.urlopen(self.url + urllib.urlencode(par)).read())
+            self.res = json.loads(urlopen(self.url + urlencode(par)).read())
             if len(self.res):
                 self.start += 1
                 return self._process(self.res[0])

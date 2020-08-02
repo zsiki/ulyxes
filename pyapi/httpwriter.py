@@ -17,8 +17,6 @@ try:
 except ImportError:
     from urllib import urlencode
     from urllib2 import urlopen, Request        # for python 2
-#import urllib
-#import urllib2
 from angle import Angle
 from writer import Writer
 
@@ -59,29 +57,22 @@ class HttpWriter(Writer):
             if self.filt is None or key in self.filt:
                 par[key] = self.StrVal(val)
         if self.mode == 'GET':
-            #res = urlopen(self.url + '?' + urlencode(par)).read()
-            print(self.url + '?' + urlencode(par))
             try:
-                res = urlopen(self.url + '?' + urlencode(par))
-                print(res)
-                res = res.read()
-                print(res)
+                res = urlopen(self.url + '?' + urlencode(par)).read()
             except:
                 res = None
         else:
             try:
-                d = urlencode(par)
+                d = urlencode(par).encode('ascii')
                 req = Request(self.url, d)
-                print(req)
                 res = urlopen(req).read()
-                print(res)
             except:
                 res = None
         return res
 
 if __name__ == "__main__":
-    #myfile = HttpWriter(mode='POST')
-    myfile = HttpWriter(mode='GET')
+    #myfile = HttpWriter(mode='GET', url="http://www.agt.bme.hu/php/get_tester.php")
+    myfile = HttpWriter(mode='POST', url="http://www.agt.bme.hu/php/get_tester.php")
     v = Angle(100.2345, 'GON')
     data = {'id': '1', 'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'distance': 123.6581}
     print(myfile.WriteData(data))

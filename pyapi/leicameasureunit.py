@@ -305,7 +305,7 @@ class LeicaMeasureUnit(MeasureUnit):
     def SetEDMModeMsg(self, mode):
         """ Set EDM mode
 
-            :param mode: string name
+            :param mode: string name/code
             :returns: set edm mode message
         """
         if type(mode) is str:
