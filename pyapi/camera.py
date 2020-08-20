@@ -10,7 +10,6 @@
 """
 
 import sys
-#sys.path.append('../ulyxes/pyapi/')
 import os
 import cv2
 from instrument import Instrument

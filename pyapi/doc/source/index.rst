@@ -15,6 +15,9 @@ Angles
 .. automodule:: angle
    :members:
 
+DATA READERS
+============
+
 Reader
 ::::::
 
@@ -61,6 +64,12 @@ SqLite Reader
 :::::::::::::
 
 .. automodule:: sqlitereader
+   :members:
+
+Queue Reader
+::::::::::::
+
+.. automodule:: queuereader
    :members:
 
 INTERFACES
@@ -114,6 +123,18 @@ Gama Iface
 ::::::::::
 
 .. automodule:: gamaiface
+   :members:
+
+Raspberry PI Camera Interface
+:::::::::::::::::::::::::::::
+
+.. automodule:: picamiface
+   :members:
+
+TCP Interface
+:::::::::::::
+
+.. automodule:: tcpiface
    :members:
 
 MEASURE UNITS
@@ -181,6 +202,12 @@ BMP180 Unit
 .. automodule:: bmp180measureunit
    :members:
 
+LSM9DS0 Unit
+::::::::::::
+
+.. automodule:: lsm9ds0unit
+   :members:
+
 Wifi Unit
 :::::::::
 
@@ -193,13 +220,19 @@ Web Met Unit
 .. automodule:: webmetmeasureunit
    :members:
 
+Raspberry PI Camera Unit
+::::::::::::::::::::::::
+
+.. automodule:: picameraunit
+   :members:
+
 SENSORS/INSTRUMENTS
 ===================
 
-Sensors or instruments integrate the interface, the measure unit and an
+Sensors or instruments integrate the interface, the measure unit and the
 optional writer. Interface is responsible for the communication with the
 physical device, measure unit gives the specific features of intruments,
-the writer adds the storing logic to observed data.
+the writer adds the storing logic for observed data.
 
 Generic Instrument
 ::::::::::::::::::
@@ -237,6 +270,12 @@ BMP180 Air Pressure Sensor
 .. automodule:: bmp180
    :members:
 
+LSM9DS0 9DOF sensor
+:::::::::::::::::::
+
+.. automodule:: lsm9ds0
+   :members:
+
 WiFi Collector
 ::::::::::::::
 
@@ -249,13 +288,31 @@ Web Met Sensor
 .. automodule:: webmet
    :members:
 
+Camera
+::::::
+
+.. automodule:: camera
+   :members:
+
+Camera station
+::::::::::::::
+
+.. automodule:: camerastation
+   :members:
+
+Raspberry PI SenseHat
+:::::::::::::::::::::
+
+.. automodule:: sensehat
+   :members:
+
 WRITERS
 =======
 
 Writers are responsible to store observed data on different media.
 
 Writer
-::::::::::::::
+::::::
 
 .. automodule:: writer
    :members:
@@ -300,6 +357,19 @@ SqLite Writer
 :::::::::::::
 
 .. automodule:: sqlitewriter
+   :members:
+
+Video Writer
+::::::::::::
+
+.. automodule:: videowriter
+   :members:
+
+Queue Writer
+:::::::::::::
+
+.. automodule:: queuewriter
+   :members:
 
 SAMPLE APPLICATIONS
 ===================
@@ -346,6 +416,18 @@ Filegen
 .. automodule:: filegen
    :members:
 
+Coomaker
+::::::::
+
+.. automodule:: coomaker
+   :members:
+
+Coord plot
+::::::::::
+
+.. automodule:: coord_plot
+   :members:
+
 Blind orientation
 :::::::::::::::::
 
@@ -376,3 +458,8 @@ Coords
 .. automodule:: coords
    :members:
 
+Geo to SQLite
+:::::::::::::
+
+.. automodule:: geo2sqlite
+   :members:
