@@ -10,3 +10,7 @@ pics
 camera/*.png
 camera/*.jpg
 camera/*.h264
+Ulyxes_PyAPI*
+build
+dist
+doc/*.pdf
