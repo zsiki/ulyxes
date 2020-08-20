@@ -7,7 +7,7 @@
 Sample application of Ulyxes PyAPI to measure a horizontal section(s)
     target on the first point of the first section and start this app
     coordinates and observations are written to csv file
-    :param argv[1] (angle step): angle step between points in DEG, default 45
+    :param argv[1] (angle step): angle step between points in DEG, default 45 or the name of a json file which contains all the parameters (this case do not specify other parameters in the command line)
     :param argv[2] (sensor): 1100/1200/5500, default 1200
     :param argv[3] (port): serial port, default /dev/ttyUSB0
     :param argv[4] (max angle): stop at this direction, default 360 degree
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     #sys.argv.append('horiz.json')
     if len(sys.argv) == 2 and pat.search(sys.argv[1]):
         # load json config
-        cr = ConfReader('HorizontalSection', sys.argv[1], None, config_pars)
+        cr = ConfReader('HorizontalSection', sys.argv[1], config_pars)
         cr.Load()
         if not cr.Check():
             print("Config check failed")

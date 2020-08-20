@@ -32,7 +32,6 @@ class HttpReader(Reader):
         :param ptys: point types to query FIX/STA/MON list
     """
 
-    # TODO extend float for all possible fields
     FLOATS = ['east', 'north', 'elev', 'pc']
 
     def __init__(self, name=None, url=None, pids=None, ptys=None, \

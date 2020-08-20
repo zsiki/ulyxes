@@ -19,14 +19,13 @@ class ConfReader(JSONReader):
 
             :param name: name of reader (str), default None
             :param fname: name of input file
-            :param filt: obligatory fields for load TODO not ued yet
             :param pars: a dictionary for parameter validation e.g. {key : {}}, valid keys for individual config parameters are: required (True/False), type (int/float/str/list)
     """
 
-    def __init__(self, name=None, fname=None, filt=None, pars=None):
+    def __init__(self, name=None, fname=None, pars=None):
         """ Constructor
         """
-        super(ConfReader, self).__init__(name, fname, filt)
+        super(ConfReader, self).__init__(name, fname)
         self.pars = pars
 
     def Check(self):
@@ -71,7 +70,6 @@ class ConfReader(JSONReader):
                     self.json[par] not in pardef['set']:
                     print("invalid value: {0}".format(par))
                     return False
-                    # TODO reglist
         # TODO complex rules e.g. no fix but gama_path given
         return True
 
@@ -90,6 +88,7 @@ if __name__ == '__main__':
         'face_coo_limit': {'required': False, 'default': 0.01, 'type': 'float'},
         'face_dir_limit': {'required': False, 'default': 0.0029, 'type': 'float'},
         'face_dist_limit': {'required': False, 'default': 0.01, 'type': 'float'},
+        'directfaces': {'required': False, 'default': 1, 'type': 'int'},
         'fix_list': {'required': False, 'type': 'list'},
         'mon_list': {'required': False, 'type': 'list'},
         'max_try': {'required': False, 'type': 'int', 'default': 3},
@@ -100,6 +99,7 @@ if __name__ == '__main__':
         'coo_wr': {'required' : True},
         'obs_wr': {'required': False},
         'met_wr': {'required': False},
+        'inf_wr': {'required': False},
         'avg_wr': {'required': False, 'type': 'int', 'default': 1},
         'decimals': {'required': False, 'type': 'int', 'default': 4},
         'gama_path': {'required': False, 'type': 'file'},
@@ -109,12 +109,13 @@ if __name__ == '__main__':
         'dimension': {'required': False, 'type': 'int', 'default': 3},
         'probability': {'required': False, 'type': 'float', 'default': 0.95},
         'blunders': {'required': False, 'type': 'int', 'default': 1},
+        'ts_off': {'required': False, 'type': 'int', 'default': 0},
         'met': {'required': False, 'set': ['WEBMET', 'BMP180', 'SENSEHAT']},
         'met_addr': {'required': False},
         'met_par': {'required': False},
         '__comment__': {'required': False, 'type': 'str'}
     }
-    jr = ConfReader('test', '../pyapps/robotplus.json', None, config_pars)
+    jr = ConfReader('test', '../pyapps/robotplus.json', config_pars)
     if jr.state == jr.RD_OK:
         print(jr.Load())
         print(jr.Check())

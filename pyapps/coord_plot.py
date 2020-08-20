@@ -57,7 +57,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         if os.path.isfile(sys.argv[1]):
             try:
-                cr = ConfReader('coords', sys.argv[1], None, config_pars)
+                cr = ConfReader('coords', sys.argv[1], config_pars)
                 cr.Load()
             except:
                 logging.fatal("Error in config file: " + sys.argv[1])

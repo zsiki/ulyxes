@@ -121,7 +121,7 @@ def avg_coo(coords, face_coo_limit=0.01):
 def avg_obs(obs, face_dir_limit=0.0029, face_dist_limit=0.01):
     """ Calculate average observations in faces
 
-        :param obs: list of observations
+        :param obs: list of observations dictionaries
         :params face_dir_limit: difference limit from average angles (rad)
         :params face_dist_limit: difference limit from average distance (m)
         :returns: average observations
@@ -133,7 +133,7 @@ def avg_obs(obs, face_dir_limit=0.0029, face_dist_limit=0.01):
     # get unique point ids
     ids = list(set([o['id'] for o in obs if 'id' in o]))
     for k in ids:
-        # separate face left/right
+        # separate face left/right by zenith angle
         hz1 = [o['hz'].GetAngle() for o in obs \
             if 'id' in o and o['id'] == k and o['v'].GetAngle() < math.pi]
         hz2 = [o['hz'].GetAngle() for o in obs \
@@ -260,7 +260,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         if os.path.isfile(sys.argv[1]):
             try:
-                cr = ConfReader('robotplus', sys.argv[1], None, config_pars)
+                cr = ConfReader('robotplus', sys.argv[1], config_pars)
                 cr.Load()
             except:
                 print("Error in config file: {0}".format(sys.argv[1]))

@@ -88,7 +88,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         if os.path.isfile(sys.argv[1]):
             try:
-                cr = ConfReader('coords', sys.argv[1], None, config_pars)
+                cr = ConfReader('coords', sys.argv[1], config_pars)
                 cr.Load()
             except:
                 logging.fatal("Error in config file: " + sys.argv[1])
@@ -102,12 +102,8 @@ if __name__ == "__main__":
             sys.exit(-1)
     else:
         print("Usage: coords.py config_file")
-        cr = ConfReader('coords', '/home/siki/tanszek/szelkapu/szk1/szk1_all.json', None, config_pars)
-        cr.Load()
-        if not cr.Check():
-            logging.fatal("Config check failed")
         logging.fatal("Invalid parameters")
-        #sys.exit(-1)
+        sys.exit(-1)
     # logging
     logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
          filemode='a', level=cr.json['log_level'])

@@ -18,13 +18,12 @@ class JSONReader(FileReader):
 
             :param name: name of reader (str), default None
             :param fname: name of input file
-            :param filt: obligatory fields for Load
     """
-    # TODO filt ????
-    def __init__(self, name=None, fname=None, filt=None):
+    
+    def __init__(self, name=None, fname=None):
         """ Constructor
         """
-        super(JSONReader, self).__init__(name, fname, filt)
+        super(JSONReader, self).__init__(name, fname)
         self.json = None
 
     def GetLine(self):
