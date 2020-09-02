@@ -15,8 +15,7 @@ import re
 import argparse
 import matplotlib.pyplot as plt
 import numpy as np
-
-aruco = cv2.aruco
+import yaml
 
 if __name__ == "__main__":
     # set up command line parameters
@@ -28,19 +27,26 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--dict', type=int, default=1,
         help='marker dictionary id, default=1 (DICT_4X4_100)')
     parser.add_argument('-c', '--code', type=int, 
-        help='marker id to search, if not given all markers are listed')
+        help='marker id to search, if not given first found marker is used')
     parser.add_argument('--fast', action="store_true",
-        help='reduce input image size to double the template')
+        help='reduce input image size doubling the marker size at latest found position')
     parser.add_argument('--debug', type=int, default=0,
-        help='display every nth frame with marked template position, default 0 (off)')
+        help='display every nth frame with marked marker position, default 0 (off)')
+    parser.add_argument('-m', '--calibration', type=str, default=None,
+        help='use camera calibration from file')
     args = parser.parse_args()      # process parameters
 
     # prepare aruco
-    params = aruco.DetectorParameters_create()  # TODO set parameters
+    params = cv2.aruco.DetectorParameters_create()  # TODO set parameters
+    params.perspectiveRemoveIgnoredMarginPerCell = 0.33
     if args.dict == 99:     # use special 3x3 dictionary
-        aruco_dict = aruco.Dictionary_create(32, 3)
+        aruco_dict = cv2.aruco.Dictionary_create(32, 3)
     else:
-        aruco_dict = aruco.Dictionary_get(args.dict)
+        aruco_dict = cv2.aruco.Dictionary_get(args.dict)
+    if args.calibration:    # load callibration data
+        c = yaml.load(f, Loader=yaml.FullLoader)
+        tx = np.array(c['camera_matrix'])
+        dist = np.array(c['dist_coeff'])
 
     spec = False
     if args.name in ("0", "1", "2", "3"):
@@ -80,22 +86,28 @@ if __name__ == "__main__":
         ret, frame = cap.read() # get next frame
         if ret:
             img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            if args.calibration:    # undistort image using calibration
+                img_gray = cv2.undistort(img_gray, mtx, dist, None)
             if args.fast and last_x:
-                off_x = max(0, last_x - templ_w // 2)
-                off_y = max(0, last_y - templ_h // 2)
-                off_x1 = min(last_x + 3 * templ_w // 2, img_gray.shape[1])
-                off_y1 = min(last_y + 3 * templ_h // 2, img_gray.shape[0])
+                off_x = max(0, last_x - marker_w)
+                off_y = max(0, last_y - marker_h)
+                off_x1 = min(last_x + marker_w, img_gray.shape[1])
+                off_y1 = min(last_y + marker_h, img_gray.shape[0])
                 img_gray = img_gray[off_y:off_y1,off_x:off_x1]
-            corners, ids, rejectedImgPoints = aruco.detectMarkers(img_gray,
+            corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(img_gray,
                 aruco_dict, parameters=params)
             found = False
             x = y = 0
             if ids is not None:
                 for j in range(ids.size):
+                    if args.code is None:
+                        args.code = ids[j][0]   # use first found code
                     if ids[j][0] == args.code:
                         # calculate center of aruco code
                         x = int(round(np.average(corners[j][0][:, 0])))
                         y = int(round(np.average(corners[j][0][:, 1])))
+                        marker_w = int(np.max(corners[j][0][:, 0]) - np.min(corners[j][0][:, 0]))
+                        marker_h = int(np.max(corners[j][0][:, 1]) - np.min(corners[j][0][:, 1]))
                         found = True
 
             if args.debug and i % args.debug == 0:
@@ -106,10 +118,13 @@ if __name__ == "__main__":
             if found:
                 print("{:d},{:s},{:d},{:d},{:d}".format(i,
                     t.strftime(tformat), x+off_x, y+off_y, args.code))
+                last_x = x + off_x  # save last position
+                last_y = y + off_y
+            else:   # no marker found
+                last_x = last_y = None
+                off_y = off_x = 0
             i += 1
             t = t + dt
-            last_x = x + off_x
-            last_y = y + off_y
         else:
             break
     cap.release()
