@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
     # prepare aruco
     params = cv2.aruco.DetectorParameters_create()  # TODO set parameters
-    params.perspectiveRemoveIgnoredMarginPerCell = 0.33
+#    params.perspectiveRemoveIgnoredMarginPerCell = 0.33
     if args.dict == 99:     # use special 3x3 dictionary
         aruco_dict = cv2.aruco.Dictionary_create(32, 3)
     else:
