@@ -16,6 +16,25 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
+from math import (sqrt, atan2)
+
+# TODO pose http://cs-courses.mines.edu/csci507/schedule/24/SquareMarkersOpenCV.pdf
+def  rotationMatrixToEulerAngles(R):
+    """ Calculates rotation matrix to euler angles
+
+        :param R: rotation matrix
+        :returns: vector of euler angles
+    """
+    sy = sqrt(R[0][0] * R[0][0] +  R[1][0] * R[1][0])
+    y = atan2(-R[2][0], sy)
+    if sy < 1e-6:
+        # singular case
+        x = atan2(-R[1][2], R[1][1])
+        z = 0
+    else:
+        x = atan2(R[2][1] , R[2][2])
+        z = atan2(R[1][0], R[0][0])
+    return np.array([x, y, z])
 
 if __name__ == "__main__":
     # set up command line parameters
@@ -34,19 +53,28 @@ if __name__ == "__main__":
         help='display every nth frame with marked marker position, default 0 (off)')
     parser.add_argument('-m', '--calibration', type=str, default=None,
         help='use camera calibration from file')
+    parser.add_argument('-s', '--size', type=float, default=0.28,
+        help='marker size for pose extimation, default: 0.28 m')
+    parser.add_argument('--hist', action="store_true",
+        help='Increase image constrast using histogram')
+    parser.add_argument('--clip', type=float, default=40.0,
+        help='Clip limit for adaptive histogram, use with --hist, default: 40')
+    parser.add_argument('--tile', type=int, default=8,
+        help='Tile size for adaptive histogram,  use with --hist, default: 40')
     args = parser.parse_args()      # process parameters
 
     # prepare aruco
     params = cv2.aruco.DetectorParameters_create()  # TODO set parameters
-    params.perspectiveRemoveIgnoredMarginPerCell = 0.33
+    params.perspectiveRemoveIgnoredMarginPerCell = 0.25
     if args.dict == 99:     # use special 3x3 dictionary
         aruco_dict = cv2.aruco.Dictionary_create(32, 3)
     else:
         aruco_dict = cv2.aruco.Dictionary_get(args.dict)
     if args.calibration:    # load callibration data
-        c = yaml.load(f, Loader=yaml.FullLoader)
-        tx = np.array(c['camera_matrix'])
-        dist = np.array(c['dist_coeff'])
+        with open(args.calibration) as f:
+            c = yaml.load(f, Loader=yaml.FullLoader)
+            mtx = np.array(c['camera_matrix'])
+            dist = np.array(c['dist_coeff'])
 
     spec = False
     if args.name in ("0", "1", "2", "3"):
@@ -94,6 +122,11 @@ if __name__ == "__main__":
                 off_x1 = min(last_x + marker_w, img_gray.shape[1])
                 off_y1 = min(last_y + marker_h, img_gray.shape[0])
                 img_gray = img_gray[off_y:off_y1,off_x:off_x1]
+            if args.hist:
+                clahe = cv2.createCLAHE(clipLimit=args.clip,
+                                        tileGridSize=(args.tile,args.tile))
+                img_gray = clahe.apply(img_gray)
+                #img_gray = cv2.equalizeHist(img_gray)
             corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(img_gray,
                 aruco_dict, parameters=params)
             found = False
@@ -109,18 +142,29 @@ if __name__ == "__main__":
                         marker_w = int(np.max(corners[j][0][:, 0]) - np.min(corners[j][0][:, 0]))
                         marker_h = int(np.max(corners[j][0][:, 1]) - np.min(corners[j][0][:, 1]))
                         found = True
+                        if args.calibration:    # estimate pose
+                        # TODO move outside loop to detect all poses?
+                            rvec, tvec ,_ = cv2.aruco.estimatePoseSingleMarkers(corners[j:j+1], args.size, mtx, dist)
+                            # https://answers.opencv.org/question/16796/computing-attituderoll-pitch-yaw-from-solvepnp/?answer=52913#post-id-52913
+                            r, _ = cv2.Rodrigues(rvec) # convert to rotation matrix
+                            # https://www.learnopencv.com/rotation-matrix-to-euler-angles/
+                            euler_angles = rotationMatrixToEulerAngles(r)
+                        break
 
             if args.debug and i % args.debug == 0:
                 plt.clf()
-                plt.imshow(frame)
-                plt.plot(x+off_x, y+off_y, "o")
+                plt.imshow(img_gray)
+                plt.plot(x+off_x, y+off_y, "o", color="red")
                 plt.pause(0.0001)
             if found:
-                print("{:d},{:s},{:d},{:d},{:d}".format(i,
-                    t.strftime(tformat), x+off_x, y+off_y, args.code))
+                if args.calibration:
+                    print("{:d},{:s},{:d},{:d},{:d},{:.6f},{:.6f},{:.6f}".format(i, t.strftime(tformat), x+off_x, y+off_y, args.code, euler_angles[0], euler_angles[1], euler_angles[2]))
+                else:
+                    print("{:d},{:s},{:d},{:d},{:d}".format(i,
+                        t.strftime(tformat), x+off_x, y+off_y, args.code))
                 last_x = x + off_x  # save last position
                 last_y = y + off_y
-            else:   # no marker found
+            else:   # no marker found search whole image next
                 last_x = last_y = None
                 off_y = off_x = 0
             i += 1
