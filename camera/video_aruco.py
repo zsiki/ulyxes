@@ -116,6 +116,7 @@ if __name__ == "__main__":
             img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             if args.calibration:    # undistort image using calibration
                 img_gray = cv2.undistort(img_gray, mtx, dist, None)
+            img_ori = img_gray.copy()
             if args.fast and last_x:
                 off_x = max(0, last_x - marker_w)
                 off_y = max(0, last_y - marker_h)
@@ -153,7 +154,7 @@ if __name__ == "__main__":
 
             if args.debug and i % args.debug == 0:
                 plt.clf()
-                plt.imshow(img_gray)
+                plt.imshow(img_ori)
                 plt.plot(x+off_x, y+off_y, "o", color="red")
                 plt.pause(0.0001)
             if found:
