@@ -18,6 +18,8 @@ if __name__ == "__main__":
         help='start frame to save from, default 0')
     parser.add_argument('-f', '--frames', type=int, default=1,
         help='number of frames to save, default 1')
+    parser.add_argument('-t', '--total', action="store_true",
+        help='report total frame number, it ignores --start and --frames')
     # process commentline parameters
     args = parser.parse_args()
     if args.name[0] in ("0", "1", "2", "3"):
@@ -33,12 +35,14 @@ if __name__ == "__main__":
     else:
         # process video
         i = 0
-        while i < (n + m):
+        while i < (n + m) or args.total:
             ret, frame = cap.read() # get first frame
             if ret:
-                if i >= n and i < n + m:
+                if n <= i < n + m and not args.total:
                     cv2.imwrite('{}_{:08d}.png'.format(fname, i), frame)
             else:
                 break
             i += 1
     cap.release()
+    if args.total:
+        print(i)
