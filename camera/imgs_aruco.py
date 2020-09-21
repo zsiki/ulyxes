@@ -9,14 +9,46 @@
     use video_arucoco.py --help for comamnd line options
 """
 import os
-import cv2
 import sys
 import datetime
-import re
 import argparse
 import matplotlib.pyplot as plt
-import numpy as np
-import yaml
+import cv2
+from aruco_base import ArucoBase
+
+class ImgsAruco(ArucoBase):
+    """ class to scan images for ArUco code
+
+        :param args: command line arguments from argparse
+    """
+
+    def __init__(self, args):
+        """ initialize """
+        # prepare aruco
+        super(ImgsAruco, self).__init__(args)
+
+    def process(self):
+        """ process images """
+        if args.debug:
+            # prepare animated figure
+            plt.ion()
+        i = 0   # frame id
+        for name in args.names:
+            name1 = os.path.split(name)[1]
+            # TODO get file creation date?
+            frame = cv2.imread(name)
+            if frame is not None:
+                res = self.ProcessImg(frame, i)
+                if res:
+                    if self.calibration:    # output pose, too
+                        # TODO use ulyxes writer
+                        print("{:d},{:s},{:d},{:d},{:d},{:.6f},{:.6f},{:.6f}".format(i, name1, res["east"], res["north"], self.code, res["euler_angles"][0], res["euler_angles"][1], res["euler_angles"][2]))
+                    else:
+                        print("{:s},{:d},{:d},{:d}".format(name1, res["east"], res["north"], self.code))
+                else:   # no marker found
+                    last_x = last_y = None
+                    off_x = off_y = 0
+                i += 1
 
 if __name__ == "__main__":
     # set up command line parameters
@@ -33,67 +65,17 @@ if __name__ == "__main__":
         help='display every nth frame with marked template position, default 0 (off)')
     parser.add_argument('-m', '--calibration', type=str, default=None,
         help='use camera calibration from file')
+    parser.add_argument('-s', '--size', type=float, default=0.28,
+        help='marker size for pose extimation, default: 0.28 m')
+    parser.add_argument('--hist', action="store_true",
+        help='Increase image constrast using histogram')
+    parser.add_argument('--lchanel', action="store_true",
+        help='Increase image constrast using histogram on lchanel only')
+    parser.add_argument('--clip', type=float, default=3.0,
+        help='Clip limit for adaptive histogram, use with --hist, default: 3')
+    parser.add_argument('--tile', type=int, default=8,
+        help='Tile size for adaptive histogram,  use with --hist, default: 8')
+
     args = parser.parse_args()      # process parameters
-
-    # prepare aruco
-    params = cv2.aruco.DetectorParameters_create()  # TODO set parameters
-#    params.perspectiveRemoveIgnoredMarginPerCell = 0.33
-    if args.dict == 99:     # use special 3x3 dictionary
-        aruco_dict = cv2.aruco.Dictionary_create(32, 3)
-    else:
-        aruco_dict = cv2.aruco.Dictionary_get(args.dict)
-    if args.calibration:    # load callibration data
-        c = yaml.load(f, Loader=yaml.FullLoader)
-        tx = np.array(c['camera_matrix'])
-        dist = np.array(c['dist_coeff'])
-
-    spec = False
-    # process images
-    if args.debug:
-        # prepare animated figure
-        plt.ion()
-    last_x = None
-    last_y = None
-    off_x = 0
-    off_y = 0
-    for name in args.names:
-        name1 = os.path.split(name)[1]
-        frame = cv2.imread(name)
-        if frame is not None:
-            img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            if args.calibration:    # undistort image using calibration
-                img_gray = cv2.undistort(img_gray, mtx, dist, None)
-            if args.fast and last_x:
-                off_x = max(0, last_x - marker_w // 2)
-                off_y = max(0, last_y - marker_h // 2)
-                off_x1 = min(last_x + 3 * marker_w // 2, img_gray.shape[1])
-                off_y1 = min(last_y + 3 * marker_h // 2, img_gray.shape[0])
-                img_gray = img_gray[off_y:off_y1,off_x:off_x1]
-            corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(img_gray,
-                aruco_dict, parameters=params)
-            found = False
-            x = y = 0
-            if ids is not None:
-                for j in range(ids.size):
-                    if args.code is None:
-                        args.code = ids[j][0] # use first found code
-                    if ids[j][0] == args.code:
-                        # calculate center of aruco code
-                        x = int(round(np.average(corners[j][0][:, 0])))
-                        y = int(round(np.average(corners[j][0][:, 1])))
-                        marker_w = np.max(corners[j][0][:, 0]) - np.min(corners[j][0][:, 0])
-                        marker_h = np.max(corners[j][0][:, 1]) - np.min(corners[j][0][:, 1])
-                        found = True
-
-            if args.debug and i % args.debug == 0:
-                plt.clf()
-                plt.imshow(frame)
-                plt.plot(x+off_x, y+off_y, "o")
-                plt.pause(0.0001)
-            if found:
-                print("{:s},{:d},{:d},{:d}".format(name1, x+off_x, y+off_y, ids[j, 0]))
-                last_x = x + off_x  # save last position
-                last_y = y + off_y
-            else:   # no marker found
-                last_x = last_y = None
-                off_x = off_y = 0
+    i_a = ImgsAruco(args)
+    i_a.process()
