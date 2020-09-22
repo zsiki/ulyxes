@@ -5,6 +5,7 @@
     Virtual base class for template matching
 """
 
+import yaml
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
@@ -46,6 +47,13 @@ class TemplateBase():
             self.names = args.names
         except:
             pass
+        if args.calibration:    # load callibration data
+            with open(args.calibration) as f:
+                c = yaml.load(f, Loader=yaml.FullLoader)
+                self.mtx = np.array(c['camera_matrix'])
+                self.dist = np.array(c['dist_coeff'])
+        else:
+            self.mtx = self.dist = None
 
     def img_correlation(self, img):
         """ find most similar part to templ on img
@@ -77,6 +85,8 @@ class TemplateBase():
             :param i: frame id
             :returns: dictionary of match position
         """
+        if self.calibration:    # undistort image using calibration
+            frame = cv2.undistort(frame, self.mtx, self.dist, None)
         img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         if self.fast and self.last_x:
             self.off_x = max(0, self.last_x - self.templ_w // 2)

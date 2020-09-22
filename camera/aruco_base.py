@@ -26,6 +26,8 @@ class ArucoBase():
                 c = yaml.load(f, Loader=yaml.FullLoader)
                 self.mtx = np.array(c['camera_matrix'])
                 self.dist = np.array(c['dist_coeff'])
+        else:
+            self.mtx = self.dist = None
         self.debug = args.debug
         self.clip = args.clip
         self.tile = args.tile

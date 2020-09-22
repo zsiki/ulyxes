@@ -15,6 +15,7 @@ import cv2
 from template_base import TemplateBase
 
 class ImgsCorrelation(TemplateBase):
+    """ process a serie of images for template matching """
 
     def __init__(self, args):
         """ initialize """
@@ -50,6 +51,9 @@ if __name__ == "__main__":
         help='reduce input image size to double the template')
     parser.add_argument('-d', '--debug', type=int, default=0,
         help='display every nth frame with marked template position, default 0 (off)')
+    parser.add_argument('--calibration', type=str, default=None,
+        help='use camera calibration from file for undistort image and pose estimation')
+
     args = parser.parse_args()      # process parameters
     i_c = ImgsCorrelation(args)
     i_c.process()                   # process files
