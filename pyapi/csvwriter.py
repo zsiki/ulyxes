@@ -32,6 +32,8 @@ class CsvWriter(FileWriter):
                  fname=None, mode='a', sep=';', header=None):
         """ Constructor
         """
+        if filt is None or len(filt) == 0:
+            raise NameError('Filter is empty -- CSV writer')
         super(CsvWriter, self).__init__(name, angle, dist, dt, filt, fname, mode)
         self.sep = sep
         if header and self.mode == 'w':
