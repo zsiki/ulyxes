@@ -29,9 +29,10 @@ class VideoIface(Iface):
         self.video = None
         if type(source) is int:
             # video device source
-            self.video = cv2.cv.CaptureFromCAM(source)
+            self.video = cv2.VideoCapture(source)
             # try to read stream
-            if cv2.cv.QueryFrame(self.video) is None:
+            ret, _ = self.video.read()
+            if ret is None:
                 self.state = self.IF_SOURCE
                 logging.error(" error opening video camera")
             else:
@@ -39,7 +40,7 @@ class VideoIface(Iface):
         elif type(source) is str:
             # video file source
             if os.path.exists(source) and os.path.isfile(source):
-                self.video = cv2.cv.CaptureFromFile(source)
+                self.video = cv2.videoCapture(source)
                 self.opened = True
             else:
                 self.state = self.IF_FILE
@@ -63,8 +64,8 @@ class VideoIface(Iface):
             :returns: an image or None
         """
         if self.state == self.IF_OK:
-            img = cv2.cv.QueryFrame(self.video)
-            if img is None:
+            ret, img = self.video.read()
+            if ret is None:
                 self.state = self.IF_EOF
                 logging.warning(" eof on video source")
             return img
@@ -77,4 +78,4 @@ if __name__ == "__main__":
     else:
         im = stream.GetImage()
         print (type(im))
-        print (cv2.cv.GetSize(im))
+        print (im.shape)

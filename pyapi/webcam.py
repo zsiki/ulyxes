@@ -39,10 +39,12 @@ if __name__ == "__main__":
     #from picamiface import PiCamIface
     from videomeasureunit import VideoMeasureUnit
     from imagewriter import ImageWriter
+    from videowriter import VideoWriter
     mu = VideoMeasureUnit()
     iface = VideoIface(source=0)
     #iface = PiCamIface()
-    wrt = ImageWriter("test", "tmp")
+    #wrt = ImageWriter("test", "tmp")
+    wrt = VideoWriter("test", "tmp/video1.avi")
     wc = WebCam('test', mu, iface, wrt)
-    for i in range(2):
+    for i in range(20):
         wc.GetImage()
