@@ -19,6 +19,7 @@ from aruco_base import ArucoBase
 sys.path.append('../pyapi/')
 
 from csvwriter import CsvWriter
+from imagereader import ImageReader
 
 class ImgsAruco(ArucoBase):
     """ class to scan images for ArUco code
@@ -33,34 +34,36 @@ class ImgsAruco(ArucoBase):
         self.tformat = '%Y-%m-%d %H:%M:%S.%f'
         self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
                              filt=['id', 'name', 'datetime', 'east', 'north'])
+        self.rdr = ImageReader(args.names)
 
     def process(self):
         """ process images """
         if args.debug:
             # prepare animated figure
             plt.ion()
-        i = 0   # frame id
-        for name in args.names:
-            t = datetime.datetime.fromtimestamp(os.path.getmtime(name))
-            name1 = os.path.split(name)[1]
-            frame = cv2.imread(name)
+        while True:
+            frame, t = self.rdr.GetNext()
             if frame is not None:
-                res = self.ProcessImg(frame, i)
+                name1 = os.path.split(self.rdr.srcname)[1]
+                res = self.ProcessImg(frame, self.rdr.ind)
                 if res:
                     if self.calibration:    # output pose, too
-                        data = {'id': i, 'name': name1, 'datetime': t,
+                        data = {'id': self.rdr.ind, 'name': name1,
+                                'datetime': t,
                                 'east': res["east"], 'north': res["north"],
                                 'roll': res["euler_angles"][0],
                                 'pitch': res["euler_angles"][1],
                                 'yaw': res["euler_angles"][2]}
                     else:
-                        data = {'id': i, 'name': name1, 'datetime': t,
+                        data = {'id': self.rdr.ind, 'name': name1,
+                                'datetime': t,
                                 'east': res["east"], 'north': res["north"]}
                     self.wrt.WriteData(data)
                 else:   # no marker found
                     last_x = last_y = None
                     off_x = off_y = 0
-                i += 1
+            else:
+                break
 
 if __name__ == "__main__":
     # set up command line parameters

@@ -19,6 +19,7 @@ from aruco_base import ArucoBase
 sys.path.append('../pyapi/')
 
 from csvwriter import CsvWriter
+from imagereader import ImageReader
 
 class VideoAruco(ArucoBase):
     """ class to scan ArUco code in video image
@@ -29,73 +30,46 @@ class VideoAruco(ArucoBase):
     def __init__(self, args):
         """ initialize """
         super(VideoAruco, self).__init__(args)
-
-        if args.name in ("0", "1", "2", "3"):
-            self.cap = cv2.videoCapture(int(args.name)) # open camera stream
-            if args.fps:
-                self.fps = 25
-            self.t = datetime.now()
-            self.tformat = '%Y-%m-%d %H:%M:%S.%f'
-        else:
-            fn = args.name[0]
-            if re.search('[0-9]_[0-9]{8}_[0-9]{6}', fn):
-                l = fn.split('_')
-                self.t = datetime.datetime(int(l[-2][0:4]), int(l[-2][4:6]),
-                                           int(l[-2][6:8]), int(l[-1][0:2]),
-                                           int(l[-1][2:4]), int(l[-1][4:6]))
-                self.tformat = '%Y-%m-%d %H:%M:%S.%f'
-            else:
-                self.t = datetime.datetime(1970, 1, 1, 0, 0, 0)
-                self.tformat = '%H:%M:%S.%f'
-            self.cap = cv2.VideoCapture(fn)     # open video file
-            self.fps = self.cap.get(cv2.CAP_PROP_FPS)
-            if args.fps:
-                self.fps = args.fps              # override fps from commandline
+        fn = args.name[0]
+        self.rdr = ImageReader(fn, fps=args.fps)
+        self.tformat = '%Y-%m-%d %H:%M:%S.%f'
+        if re.search('[0-9]_[0-9]{8}_[0-9]{6}', fn):
+            l = fn.split('_')
+            self.rdr.act = datetime.datetime(int(l[-2][0:4]), int(l[-2][4:6]),
+                                             int(l[-2][6:8]), int(l[-1][0:2]),
+                                             int(l[-1][2:4]), int(l[-1][4:6]))
         self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
                              filt=['id', 'datetime', 'east', 'north', 'code'])
-
-    def __del__(self):
-        try:
-            self.cap.release()
-        except:
-            pass
 
     def process(self):
         """ process video frame by frame
 
             :returns: exit status 0 -OK
         """
-        if not self.cap.isOpened():
-            print("Error opening video file")
-            return 2
         # process video
-        i = 0   # frame id
-        dt = datetime.timedelta(0, 1.0 / self.fps)
         if self.debug:
             # prepare animated figure
             plt.ion()
         while True:
-            # TODO use ulyxes image reader?
-            ret, frame = self.cap.read() # get next frame
-            if ret:
-                res = self.ProcessImg(frame, i)
+            frame, t = self.rdr.GetNext() # get next frame
+            if frame is not None:
+                res = self.ProcessImg(frame, self.rdr.ind)
                 if res:
                     if self.calibration:    # output pose, too
-                        data = {'id': i, 'datetime': self.t,
+                        data = {'id': self.rdr.ind, 'datetime': t,
                                 'east': res["east"],
                                 'north': res["north"], 'code': self.code,
                                 'roll': res["euler_angles"][0],
                                 'pitch': res["euler_angles"][1],
                                 'yaw': res["euler_angles"][2]}
                     else:
-                        data = {'id': i, 'datatime': dt, 'east': res["east"],
+                        data = {'id': self.rdr.ind, 'datetime': t,
+                                'east': res["east"],
                                 'north': res["north"], 'code': self.code}
                     self.wrt.WriteData(data)
                 else:   # no marker found search whole image next
                     self.last_x = self.last_y = None
                     self.off_y = self.off_x = 0
-                i += 1
-                self.t += dt
             else:
                 break
         return 0
