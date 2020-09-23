@@ -4,9 +4,9 @@
    :platform: Unix, Windows
    :synopsis: Ulyxes - an open source project to drive total stations and
        publish observation results. GPL v2.0 license Copyright (C)
-       2010-2013 Zoltan Siki <siki@agt.bme.hu>
+       2010- Zoltan Siki <siki.zoltan@epito.bme.hu>
 
-.. moduleauthor:: Zoltan Siki <siki@agt.bme.hu>
+.. moduleauthor:: Zoltan Siki <siki.zoltan@epito.bme.hu>
 
 """
 

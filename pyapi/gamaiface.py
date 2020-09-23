@@ -4,8 +4,10 @@
 .. module:: gamaiface.py
     :platform: Linux, Windows
     :synopsis: interface modul to GNU Gama
+           GPL v2.0 license
+           Copyright (C) 2010- Zoltan Siki <siki.zoltan@epito.bme.hu>
 
-.. moduleauthor::Zoltan Siki <siki@agt.bme.hu>
+.. moduleauthor::Zoltan Siki <siki.zoltan@epito.bme.hu>
 """
 
 import os

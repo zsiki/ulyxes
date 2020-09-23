@@ -6,7 +6,7 @@
    :synopsis: Ulyxes - an open source project to drive total stations and
        publish observation results.
        GPL v2.0 license
-       Copyright (C) 2010-2013 Zoltan Siki <siki@agt.bme.hu>
+       Copyright (C) 2010- Zoltan Siki <siki.zoltan@epito.bme.hu>
 
 .. moduleauthor:: Bence Turak <bence.turak@gmail.com>
 """
@@ -14,8 +14,6 @@ from instrument import Instrument
 from angle import Angle
 import sense_hat
 import time
-
-
 
 class SenseHat(Instrument, sense_hat.SenseHat):
     def __init__(self, name, writerUnit=None):

@@ -4,14 +4,13 @@
    :platform: Unix, Windows
    :synopsis: Ulyxes - an open source project to drive total stations and
        publish observation results.  GPL v2.0 license Copyright (C)
-       2010-2013 Zoltan Siki <siki@agt.bme.hu>
+       2010- Zoltan Siki <siki.zoltan@epito.bme.hu>
 
 .. moduleauthor::  Bence Turak <bence.turak@gmail.com>
 """
 
 import sys
 import json
-#sys.path.append('../ulyxes/pyapi/')
 import re
 from measureunit import MeasureUnit
 from angle import Angle
