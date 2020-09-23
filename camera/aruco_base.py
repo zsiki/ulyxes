@@ -1,12 +1,15 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+    Base class for ArUco processing
+"""
+
 from math import (sqrt, atan2)
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 import cv2
 
-"""
-    Base class for ArUco processing
-"""
 class ArucoBase():
     """ virtual base class from aruco processing in images or video
     """
@@ -21,6 +24,7 @@ class ArucoBase():
         else:
             self.aruco_dict = cv2.aruco.Dictionary_get(args.dict)
         self.mtx = self.dist = None
+        self.calibration = args.calibration
         if args.calibration:    # load callibration data
             with open(args.calibration) as f:
                 c = yaml.load(f, Loader=yaml.FullLoader)
@@ -31,7 +35,6 @@ class ArucoBase():
         self.debug = args.debug
         self.clip = args.clip
         self.tile = args.tile
-        self.calibration = args.calibration
         self.fast = args.fast
         self.hist = args.hist
         self.lchanel = args.lchanel
@@ -129,7 +132,7 @@ class ArucoBase():
             self.last_y = y + self.off_y
             if self.calibration:    # output pose, too
                 return {'east': self.last_x, 'north': self.last_y,
-                         'euler_angles': euler_angles}
+                        'euler_angles': euler_angles}
             return {'east': self.last_x, 'north': self.last_y}
         else:   # no marker found search whole image next
             self.last_x = self.last_y = None

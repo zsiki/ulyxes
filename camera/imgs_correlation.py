@@ -9,10 +9,16 @@
     use imgs_correlation.py --help for comamnd line options
 """
 import os
+import sys
+import datetime
 import argparse
 import matplotlib.pyplot as plt
 import cv2
 from template_base import TemplateBase
+
+sys.path.append('../pyapi/')
+
+from csvwriter import CsvWriter
 
 class ImgsCorrelation(TemplateBase):
     """ process a serie of images for template matching """
@@ -20,6 +26,9 @@ class ImgsCorrelation(TemplateBase):
     def __init__(self, args):
         """ initialize """
         super(ImgsCorrelation, self).__init__(args)
+        self.tformat = '%Y-%m-%d %H:%M:%S.%f'
+        self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
+                             filt=['id', 'name', 'datetime', 'east', 'north'])
 
     def process(self):
         """ process image serie
@@ -30,11 +39,23 @@ class ImgsCorrelation(TemplateBase):
             # prepare animated figure
             plt.ion()
         for name in self.names:
+            t = datetime.datetime.fromtimestamp(os.path.getmtime(name))
             name1 = os.path.split(name)[1]
             frame = cv2.imread(name)
             if frame is not None:
                 res = self.ProcessImg(frame, i)
-                print("{},{},{},{},{:.2f}".format(name1, i, res["east"], res["north"], res["quality"]))
+                if res:
+                    if self.calibration:
+                        data = {'id': i, 'name': name1, 'datetime': t,
+                                'east': res["east"], 'north': res["north"],
+                                'roll': res["euler_angles"][0],
+                                'pitch': res["euler_angles"][1],
+                                'yaw': res["euler_angles"][2]}
+                    else:
+                        data = {'id': i, 'name': name1, 'datetime': t,
+                                'east': res["east"], 'north': res["north"]}
+                    self.wrt.WriteData(data)
+
 
 if __name__ == "__main__":
     # set up command line parameters
@@ -53,6 +74,8 @@ if __name__ == "__main__":
         help='display every nth frame with marked template position, default 0 (off)')
     parser.add_argument('--calibration', type=str, default=None,
         help='use camera calibration from file for undistort image and pose estimation')
+    parser.add_argument('-o', '--output', type=str,
+        help='name of output file')
 
     args = parser.parse_args()      # process parameters
     i_c = ImgsCorrelation(args)

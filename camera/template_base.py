@@ -47,6 +47,7 @@ class TemplateBase():
             self.names = args.names
         except:
             pass
+        self.calibration = args.calibration
         if args.calibration:    # load callibration data
             with open(args.calibration) as f:
                 c = yaml.load(f, Loader=yaml.FullLoader)
@@ -97,7 +98,7 @@ class TemplateBase():
                               img_gray.shape[0])
             img_gray = img_gray[self.off_y:self.off_y1, self.off_x:self.off_x1]
         if self.spec:
-            x, y, s = img_correlation(img_gray, templ_gray)
+            x, y, s = self.img_correlation(img_gray, self.templ)
         else:
             result = cv2.matchTemplate(img_gray, self.templ, self.method[0])
             min_max = cv2.minMaxLoc(result)

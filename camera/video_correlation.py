@@ -16,6 +16,10 @@ import matplotlib.pyplot as plt
 import cv2
 from template_base import TemplateBase
 
+sys.path.append('../pyapi/')
+
+from csvwriter import CsvWriter
+
 class VideoCorrelation(TemplateBase):
     """ process video for template matching """
 
@@ -30,7 +34,7 @@ class VideoCorrelation(TemplateBase):
             self.t = datetime.now()
         else:
             fn = args.name[0]
-            if re.match('([a-zA-Z])*[0-9]_[0-9]{8}_[0-9]{6}', fn):
+            if re.search('[0-9]_[0-9]{8}_[0-9]{6}', fn):
                 l = fn.split('_')
                 self.t = datetime.datetime(int(l[-2][0:4]), int(l[-2][4:6]),
                                            int(l[-2][6:8]), int(l[-1][0:2]),
@@ -43,6 +47,8 @@ class VideoCorrelation(TemplateBase):
             self.fps = self.cap.get(cv2.CAP_PROP_FPS)
             if args.fps:
                 self.fps = args.fps              # override fps from commandline
+        self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
+                             filt=['id', 'datetime', 'east', 'north'])
 
     def __del__(self):
         try:
@@ -68,8 +74,18 @@ class VideoCorrelation(TemplateBase):
             ret, frame = self.cap.read() # get next frame
             if ret:
                 res = self.ProcessImg(frame, i)
-                print("{},{},{},{},{:.2f}".format(i, self.t.strftime(self.tformat), res["east"], res["north"], res["quality"]))
-                
+                if res:
+                    if self.calibration: # output pose too
+                        data = {'id': i, 'datetime': self.t,
+                                'east': res["east"],
+                                'north': res["north"],
+                                'roll': res["euler_angles"][0],
+                                'pitch': res["euler_angles"][1],
+                                'yaw': res["euler_angles"][2]}
+                    else:
+                        data = {'id': i, 'datetime': self.t, 'east': res["east"],
+                                'north': res["north"]}
+                    self.wrt.WriteData(data)
                 i += 1
                 self.t += dt
             else:
@@ -94,6 +110,8 @@ if __name__ == "__main__":
         help='display every nth frame with marked template position, default 0 (off)')
     parser.add_argument('--calibration', type=str, default=None,
         help='use camera calibration from file for undistort image and pose estimation')
+    parser.add_argument('-o', '--output', type=str,
+        help='name of output file')
 
     args = parser.parse_args()      # process parameters
     v_c = VideoCorrelation(args)

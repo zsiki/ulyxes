@@ -13,9 +13,12 @@ import datetime
 import re
 import argparse
 import matplotlib.pyplot as plt
-import numpy as np
 import cv2
 from aruco_base import ArucoBase
+
+sys.path.append('../pyapi/')
+
+from csvwriter import CsvWriter
 
 class VideoAruco(ArucoBase):
     """ class to scan ArUco code in video image
@@ -32,9 +35,10 @@ class VideoAruco(ArucoBase):
             if args.fps:
                 self.fps = 25
             self.t = datetime.now()
+            self.tformat = '%Y-%m-%d %H:%M:%S.%f'
         else:
             fn = args.name[0]
-            if re.match('([a-zA-Z])*[0-9]_[0-9]{8}_[0-9]{6}', fn):
+            if re.search('[0-9]_[0-9]{8}_[0-9]{6}', fn):
                 l = fn.split('_')
                 self.t = datetime.datetime(int(l[-2][0:4]), int(l[-2][4:6]),
                                            int(l[-2][6:8]), int(l[-1][0:2]),
@@ -47,6 +51,8 @@ class VideoAruco(ArucoBase):
             self.fps = self.cap.get(cv2.CAP_PROP_FPS)
             if args.fps:
                 self.fps = args.fps              # override fps from commandline
+        self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
+                             filt=['id', 'datetime', 'east', 'north', 'code'])
 
     def __del__(self):
         try:
@@ -75,10 +81,16 @@ class VideoAruco(ArucoBase):
                 res = self.ProcessImg(frame, i)
                 if res:
                     if self.calibration:    # output pose, too
-                        # TODO use ulyxes writer
-                        print("{:d},{:s},{:d},{:d},{:d},{:.6f},{:.6f},{:.6f}".format(i, self.t.strftime(self.tformat), res["east"], res["north"], self.code, res["euler_angles"][0], res["euler_angles"][1], res["euler_angles"][2]))
+                        data = {'id': i, 'datetime': self.t,
+                                'east': res["east"],
+                                'north': res["north"], 'code': self.code,
+                                'roll': res["euler_angles"][0],
+                                'pitch': res["euler_angles"][1],
+                                'yaw': res["euler_angles"][2]}
                     else:
-                        print("{:d},{:s},{:d},{:d},{:d}".format(i, self.t.strftime(self.tformat), res["east"], res["north"], self.code))
+                        data = {'id': i, 'datatime': dt, 'east': res["east"],
+                                'north': res["north"], 'code': self.code}
+                    self.wrt.WriteData(data)
                 else:   # no marker found search whole image next
                     self.last_x = self.last_y = None
                     self.off_y = self.off_x = 0
@@ -115,6 +127,8 @@ if __name__ == "__main__":
         help='Clip limit for adaptive histogram, use with --hist, default: 3')
     parser.add_argument('--tile', type=int, default=8,
         help='Tile size for adaptive histogram,  use with --hist, default: 8')
+    parser.add_argument('-o', '--output', type=str,
+        help='name of output file')
     args = parser.parse_args()      # process parameters
     v_a = VideoAruco(args)
     v_a.process()

@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
     go through video frames to find an aruco code
@@ -16,6 +16,10 @@ import matplotlib.pyplot as plt
 import cv2
 from aruco_base import ArucoBase
 
+sys.path.append('../pyapi/')
+
+from csvwriter import CsvWriter
+
 class ImgsAruco(ArucoBase):
     """ class to scan images for ArUco code
 
@@ -26,6 +30,9 @@ class ImgsAruco(ArucoBase):
         """ initialize """
         # prepare aruco
         super(ImgsAruco, self).__init__(args)
+        self.tformat = '%Y-%m-%d %H:%M:%S.%f'
+        self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
+                             filt=['id', 'name', 'datetime', 'east', 'north'])
 
     def process(self):
         """ process images """
@@ -34,17 +41,22 @@ class ImgsAruco(ArucoBase):
             plt.ion()
         i = 0   # frame id
         for name in args.names:
+            t = datetime.datetime.fromtimestamp(os.path.getmtime(name))
             name1 = os.path.split(name)[1]
-            # TODO get file creation date?
             frame = cv2.imread(name)
             if frame is not None:
                 res = self.ProcessImg(frame, i)
                 if res:
                     if self.calibration:    # output pose, too
-                        # TODO use ulyxes writer
-                        print("{:d},{:s},{:d},{:d},{:d},{:.6f},{:.6f},{:.6f}".format(i, name1, res["east"], res["north"], self.code, res["euler_angles"][0], res["euler_angles"][1], res["euler_angles"][2]))
+                        data = {'id': i, 'name': name1, 'datetime': t,
+                                'east': res["east"], 'north': res["north"],
+                                'roll': res["euler_angles"][0],
+                                'pitch': res["euler_angles"][1],
+                                'yaw': res["euler_angles"][2]}
                     else:
-                        print("{:s},{:d},{:d},{:d}".format(name1, res["east"], res["north"], self.code))
+                        data = {'id': i, 'name': name1, 'datetime': t,
+                                'east': res["east"], 'north': res["north"]}
+                    self.wrt.WriteData(data)
                 else:   # no marker found
                     last_x = last_y = None
                     off_x = off_y = 0
@@ -75,6 +87,8 @@ if __name__ == "__main__":
         help='Clip limit for adaptive histogram, use with --hist, default: 3')
     parser.add_argument('--tile', type=int, default=8,
         help='Tile size for adaptive histogram,  use with --hist, default: 8')
+    parser.add_argument('-o', '--output', type=str,
+        help='name of output file')
 
     args = parser.parse_args()      # process parameters
     i_a = ImgsAruco(args)
