@@ -584,8 +584,8 @@ if __name__ == "__main__":
         obs_out, coo_out = r.run()
         # calculate average for observations
         if cr.json['faces'] > 1 or cr.json['directfaces'] > 1:
-            obs_out = avg_obs(obs_out, cd.json['face_dir_limit'],
-                              cd.json['face_dist_limit'])
+            obs_out = avg_obs(obs_out, cr.json['face_dir_limit'],
+                              cr.json['face_dist_limit'])
         for o in obs_out:
             o['datetime'] = act_date
             if 'distance' in o:
