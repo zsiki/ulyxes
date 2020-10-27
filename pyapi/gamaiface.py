@@ -128,8 +128,8 @@ class GamaIface(object):
             description.text = 'GNU Gama 3D network'
         parameters = ET.SubElement(network, 'parameters',
             {'sigma-apr': '1', 'conf-pr': str(self.probability),
-            'tol-abs': '1000', 'sigma-act': 'aposteriori',
-            'update-constrained-coordinates': 'yes'})
+            'tol-abs': '1000', 'sigma-act': 'aposteriori'})
+            #'update-constrained-coordinates': 'yes'}) gama 2.10!
         points_observations = ET.SubElement(network, 'points-observations',
             {'distance-stdev': str(self.stdev_dist)+' '+str(self.stdev_dist1),
             'direction-stdev': str(self.stdev_angle / 3600.0 * 10000.0),
