@@ -42,7 +42,7 @@ dialout group use the following command
 
 	sudo usermod -a -G dialout YOUR_USER_NAME
 
-PyBluez (Bleutooth communication to sensor)
+PyBluez (Bluetooth communication to sensor)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: bash
@@ -70,13 +70,16 @@ GNU GaMa is built from sources
 OpenCV
 ~~~~~~
 
-Optional used by WebCam class.
+Optional used by WebCam class. opencv-contrib-python contains code to 
+identify ArUco codes in images which is used by the applications in camera
+folder.
 
 .. code:: bash
 
 	sudo apt-get install libopencv-dev 
 	sudo pip3 install opencv-python
-	
+	sudp pip3 install opencv-contrib-python
+
 Wifi
 ~~~~
 
