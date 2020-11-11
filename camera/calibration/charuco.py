@@ -107,9 +107,10 @@ if args.camera:
     cap.release()
     cv2.destroyAllWindows()
 # transform matrix and distortion to writeable lists
+print('Overall RMS: {}'.format(ret))
 cal = {'camera_matrix': np.asarray(mtx).tolist(),
        'dist_coeff': np.asarray(dist).tolist()}
 # and save to file
 with open(args.output, "w") as f:
     yaml.dump(cal, f)
-print(cal)
+#print(cal)

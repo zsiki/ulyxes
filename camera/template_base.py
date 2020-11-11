@@ -87,7 +87,12 @@ class TemplateBase():
             :returns: dictionary of match position
         """
         if self.calibration:    # undistort image using calibration
-            frame = cv2.undistort(frame, self.mtx, self.dist, None)
+            h, w = frame.shape[:2]
+            newmtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist,
+                                                        (w, h), 1, (w, h))
+            frame = cv2.undistort(frame, self.mtx, self.dist, None, newmtx)
+            # crop image
+            frame = frame[roi[1]:roi[1]+roi[3], roi[0]:roi[0]+roi[2]]
         img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         if self.fast and self.last_x:
             self.off_x = max(0, self.last_x - self.templ_w // 2)

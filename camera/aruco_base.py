@@ -44,8 +44,7 @@ class ArucoBase():
         self.last_x = self.last_y = None
         self.off_x = self.off_y = 0
         self.off_x1 = self.off_y1 = 0
-        self.maker_h = self.maker_w = 0
-        self.calibration = False
+        self.marker_h = self.marker_w = 0
         self.fast = False
         self.clahe = None
         self.clahe = cv2.createCLAHE(clipLimit=self.clip,
@@ -78,9 +77,15 @@ class ArucoBase():
             :returns: dictionary of position and pose
         """
         if self.calibration:    # undistort image using calibration
-            frame = cv2.undistort(frame, self.mtx, self.dist, None)
-        img = frame.copy()  # copy original image
-        if self.fast and last_x:    # crop image for fast mode
+            # TODO check it https://docs.opencv.org/master/dc/dbb/tutorial_py_calibration.html
+            h, w = frame.shape[:2]
+            newmtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist,
+                                                        (w, h), 1, (w, h))
+            frame = cv2.undistort(frame, self.mtx, self.dist, None, newmtx)
+            # crop image
+            frame = frame[roi[1]:roi[1]+roi[3], roi[0]:roi[0]+roi[2]]
+        img = frame.copy()  # copy original (undistorted) image
+        if self.fast and self.last_x:    # crop image for fast mode
             self.off_x = max(0, self.last_x - self.marker_w)
             self.off_y = max(0, self.last_y - self.marker_h)
             self.off_x1 = min(self.last_x + self.marker_w, img.shape[1])
@@ -89,7 +94,7 @@ class ArucoBase():
         if self.hist:
             if self.lchanel:
                 lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
-                img_gray, a, b = cv2.split(lab)
+                img_gray, _, _ = cv2.split(lab)
             else:
                 img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             img_gray = self.clahe.apply(img_gray)
@@ -119,6 +124,8 @@ class ArucoBase():
                         r, _ = cv2.Rodrigues(rvec) # convert to rotation matrix
                         # https://www.learnopencv.com/rotation-matrix-to-euler-angles/
                         euler_angles = self.rotationMatrixToEulerAngles(r)
+                        cv2.aruco.drawAxis(frame, self.mtx, self.dist, rvec,
+                                           tvec, 0.01)
                     break
 
         if self.debug and i % self.debug == 0:
@@ -134,7 +141,7 @@ class ArucoBase():
                 return {'east': self.last_x, 'north': self.last_y,
                         'euler_angles': euler_angles}
             return {'east': self.last_x, 'north': self.last_y}
-        else:   # no marker found search whole image next
-            self.last_x = self.last_y = None
-            self.off_y = self.off_x = 0
+        # no marker found search whole image next
+        self.last_x = self.last_y = None
+        self.off_y = self.off_x = 0
         return None

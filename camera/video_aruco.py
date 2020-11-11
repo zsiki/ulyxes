@@ -13,7 +13,6 @@ import datetime
 import re
 import argparse
 import matplotlib.pyplot as plt
-import cv2
 from aruco_base import ArucoBase
 
 sys.path.append('../pyapi/')
@@ -78,31 +77,31 @@ if __name__ == "__main__":
     # set up command line parameters
     parser = argparse.ArgumentParser()
     parser.add_argument('name', metavar='file_name', type=str, nargs=1,
-        help='video file to process')
+                        help='video file to processi or camera ID (e.g. 0)')
     parser.add_argument('-f', '--fps', type=int, default=None,
-        help='frame per sec')
+                        help='frame per sec')
     parser.add_argument('-d', '--dict', type=int, default=1,
-        help='marker dictionary id, default=1 (DICT_4X4_100)')
-    parser.add_argument('-c', '--code', type=int, 
-        help='marker id to search, if not given first found marker is used')
+                        help='marker dictionary id, default=1 (DICT_4X4_100)')
+    parser.add_argument('-c', '--code', type=int,
+                        help='marker id to search, if not given first found marker is used')
     parser.add_argument('--fast', action="store_true",
-        help='reduce input image size doubling the marker size at latest found position')
+                        help='reduce input image size doubling the marker size at latest found position')
     parser.add_argument('--debug', type=int, default=0,
-        help='display every nth frame with marked marker position, default 0 (off)')
+                        help='display every nth frame with marked marker position, default 0 (off)')
     parser.add_argument('-m', '--calibration', type=str, default=None,
-        help='use camera calibration from file for undistort image and pose estimation')
+                        help='use camera calibration from file for undistort image and pose estimation')
     parser.add_argument('-s', '--size', type=float, default=0.28,
-        help='marker size for pose extimation, default: 0.28 m')
+                        help='marker size for pose extimation, default: 0.28 m')
     parser.add_argument('--hist', action="store_true",
-        help='Increase image constrast using histogram')
+                        help='Increase image constrast using histogram')
     parser.add_argument('--lchanel', action="store_true",
-        help='Increase image constrast using histogram on lchanel only')
+                        help='Increase image constrast using histogram on lchanel only')
     parser.add_argument('--clip', type=float, default=3.0,
-        help='Clip limit for adaptive histogram, use with --hist, default: 3')
+                        help='Clip limit for adaptive histogram, use with --hist, default: 3')
     parser.add_argument('--tile', type=int, default=8,
-        help='Tile size for adaptive histogram,  use with --hist, default: 8')
+                        help='Tile size for adaptive histogram,  use with --hist, default: 8')
     parser.add_argument('-o', '--output', type=str,
-        help='name of output file')
+                        help='name of output file')
     args = parser.parse_args()      # process parameters
-    v_a = VideoAruco(args)
-    v_a.process()
+    V_A = VideoAruco(args)
+    V_A.process()
