@@ -37,39 +37,54 @@ class NmeaGnssUnit(MeasureUnit):
         """
         return ['POSITION']
 
-    def Result(self, msg, ans):
+    @staticmethod
+    def NmeaChecksum(msg):
+        """ NMEA message checksum
+
+            :param msg: NMEA message
+            :returns: True/False
+        """
+        data, cksum = msg.split('*')
+        cksum1 = 0
+        for s in data[1:]:
+            cksum1 ^= ord(s)
+        if cksum.lower() != hex(cksum1).lower()[-2:]:
+            return False
+        return True
+
+    def Result(self, msgs, ans):
         """ process the answer from GNSS
 
-            :param msg: MNEA message to get
+            :param msg: MNEA messages to get (list)
             :param ans: NMEA message from GNSS unit
             :returns: processed message or None if msg and ans do not match
         """
         res = {}
-        if ans[3:len(msg)+3] != msg:
-            return None
+        msg = ans[3:len(msgs[0])+3]
+        if msg not in msgs:
+            return None     # no process
         # check checksum
-        data, cksum = re.split('\*', ans)
-        cksum1 = 0
-        for s in data[1:]:
-            cksum1 ^= ord(s)
-        if ('0x' + cksum).lower() != hex(cksum1).lower():
+        if not self.NmeaChecksum(ans):
             logging.error(' Checksum error')
             return None
         anslist = ans.split(',')
         if msg == 'GGA':
-            # no fix
             if int(anslist[6]) == 0:
-                return None
+                return None     # no position
             try:
                 hour = int(anslist[1][0:2])
                 minute = int(anslist[1][2:4])
                 second = int(anslist[1][4:6])
+                ms = 0
                 if len(anslist[1]) > 6:
                     ms = int(float(anslist[1][6:]) * 1000)
+                if self.date_time is None:
+                    d = datetime.utcnow()   # UTC time
                 else:
-                    ms = 0
-                d = date.today()
-                res['datetime'] = datetime(d.year, d.month, d.day, hour, minute, second, ms)
+                    # date from DZA
+                    d = datetime(self.date_time.year, self.date_time.month,
+                                 self.date_time.day, hour, minute, second, ms)
+                res['datetime'] = d
                 mul = 1 if anslist[3] == 'N' else -1
                 res['latitude'] = Angle(mul * float(anslist[2]), 'NMEA')
                 mul = 1 if anslist[5] == 'E' else -1
@@ -81,6 +96,16 @@ class NmeaGnssUnit(MeasureUnit):
             except:
                 logging.error(" invalid nmea sentence: " + ans)
                 return None
+        elif msg == 'ZDA':
+            anslist = re.split(r'[,\*]', ans)
+            try:
+                day = int(anslist[2])
+                month = int(anslist[3])
+                year = int(anslist[4])
+                self.date_time = date(year, month, day)
+            except Exception as e:
+                logging.error(" invalid nmea sentence: %", ans)
+            return None # no output
         return res
 
     @staticmethod
@@ -92,7 +117,8 @@ class NmeaGnssUnit(MeasureUnit):
         return "GGA"
 
 if __name__ == '__main__':
-    ans = "$GPGGA,183730,3907.356,N,12102.482,W,1,05,1.6,646.4,M,-24.1,M,,*75"
-    #ans = "$GPZDA,050306,29,10,2003,,*43"
     nmeaunit = NmeaGnssUnit()
-    print (nmeaunit.Result("GGA", ans))
+    ans = "$GPZDA,050306,29,10,2003,,*43"
+    print(nmeaunit.Result(("GGA", "ZDA"), ans))
+    ans = "$GPGGA,183730,3907.356,N,12102.482,W,1,05,1.6,646.4,M,-24.1,M,,*75"
+    print(nmeaunit.Result(("GGA", "ZDA"), ans))
