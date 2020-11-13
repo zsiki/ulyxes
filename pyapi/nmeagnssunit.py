@@ -12,7 +12,7 @@
 
 import re
 import logging
-from datetime import datetime, date
+from datetime import datetime
 from angle import Angle
 from measureunit import MeasureUnit
 
@@ -52,6 +52,80 @@ class NmeaGnssUnit(MeasureUnit):
             return False
         return True
 
+    @staticmethod
+    def NmeaDateTime(msg):
+        """ get date/time from ZDA message
+
+            :param msg: NMEA ZDA sentence
+            :returns: dete/time or None
+        """
+        d = None
+        lst = re.split(r'[,\*]', msg)
+        if len(lst) < 5:
+            logging.error("Invalid ZDA message, few fields: %s", msg)
+            return None
+        try:
+            day = int(lst[2])
+            month = int(lst[3])
+            year = int(lst[4])
+            hour = int(lst[1][0:2])
+            minute = int(lst[1][2:4])
+            second = int(lst[1][4:6])
+            ms = 0
+            if len(lst[1]) > 6:
+                ms = int(float(lst[1][6:]) * 1000)
+            d = datetime(year, month, day, hour, minute, second, ms)
+        except Exception as e:
+            logging.error("Invalid date/time: %s", msg)
+        return d
+
+    def Nmea2Coo(self, msg):
+        """ process GGA nmea message
+
+            :param msg: NMEA GGA sentence
+            :returns: dictionary of data
+        """
+        lst = re.split(r'[,\*]', msg)
+        if len(lst) < 10:
+            logging.error("Invalid GGA message, few fields: %s", msg)
+            return None
+        res = {}
+        try:
+            if int(lst[6]) == 0: # no position
+                return None
+            if self.date_time is None:
+                d1 = datetime.utcnow() # UTC at server
+            else:
+                d1 = self.date_time       # timestamp from ZDA
+            # UTC time from GGA
+            hour = int(lst[1][0:2])
+            minute = int(lst[1][2:4])
+            second = int(lst[1][4:6])
+            ms = 0
+            if len(lst[1]) > 6:
+                ms = int(float(lst[1][6:]) * 1000)
+            d = datetime(d1.year, d1.month, d1.day, hour, minute, second, ms)
+            # check day change
+            if abs((d1 - d).total_seconds()) > 10:
+                logging.debug("day change %s - %s", d, d1)
+                d = d1
+            res['datetime'] = d
+            mul = 1 if lst[3] == 'N' else -1
+            res['latitude'] = Angle(mul * float(lst[2]), 'NMEA')
+            mul = 1 if lst[5] == 'E' else -1
+            res['longitude'] = Angle(mul * float(lst[4]), 'NMEA')
+            res['quality'] = int(lst[6])
+            res['nsat'] = int(lst[7])
+            res['altitude'] = float(lst[9])
+            res['hdop'] = float(lst[8])
+        except Exception as e:
+            logging.error('Invalid GGA message, invalid value: %s', msg)
+            logging.error(e)
+            self.date_time = None    # drop previous DZA time
+            res = None
+        self.date_time = None    # drop previous DZA time
+        return res
+
     def Result(self, msgs, ans):
         """ process the answer from GNSS
 
@@ -59,53 +133,18 @@ class NmeaGnssUnit(MeasureUnit):
             :param ans: NMEA message from GNSS unit
             :returns: processed message or None if msg and ans do not match
         """
-        res = {}
         msg = ans[3:len(msgs[0])+3]
         if msg not in msgs:
-            return None     # no process
+            return None     # no process for this message
         # check checksum
         if not self.NmeaChecksum(ans):
             logging.error(' Checksum error')
             return None
-        anslist = ans.split(',')
         if msg == 'GGA':
-            if int(anslist[6]) == 0:
-                return None     # no position
-            try:
-                hour = int(anslist[1][0:2])
-                minute = int(anslist[1][2:4])
-                second = int(anslist[1][4:6])
-                ms = 0
-                if len(anslist[1]) > 6:
-                    ms = int(float(anslist[1][6:]) * 1000)
-                if self.date_time is None:
-                    d = datetime.utcnow()   # UTC time
-                else:
-                    # date from DZA
-                    d = datetime(self.date_time.year, self.date_time.month,
-                                 self.date_time.day, hour, minute, second, ms)
-                res['datetime'] = d
-                mul = 1 if anslist[3] == 'N' else -1
-                res['latitude'] = Angle(mul * float(anslist[2]), 'NMEA')
-                mul = 1 if anslist[5] == 'E' else -1
-                res['longitude'] = Angle(mul * float(anslist[4]), 'NMEA')
-                res['quality'] = int(anslist[6])
-                res['nsat'] = int(anslist[7])
-                res['altitude'] = float(anslist[9])
-                res['hdop'] = float(anslist[8])
-            except:
-                logging.error(" invalid nmea sentence: " + ans)
-                return None
+            res = self.Nmea2Coo(ans)     # position
         elif msg == 'ZDA':
-            anslist = re.split(r'[,\*]', ans)
-            try:
-                day = int(anslist[2])
-                month = int(anslist[3])
-                year = int(anslist[4])
-                self.date_time = date(year, month, day)
-            except Exception as e:
-                logging.error(" invalid nmea sentence: %", ans)
-            return None # no output
+            self.date_time = self.NmeaDateTime(ans)  # datetime
+            res = None
         return res
 
     @staticmethod
