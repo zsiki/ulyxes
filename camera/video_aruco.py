@@ -38,7 +38,7 @@ class VideoAruco(ArucoBase):
                                              int(l[-2][6:8]), int(l[-1][0:2]),
                                              int(l[-1][2:4]), int(l[-1][4:6]))
         self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
-                             filt=['id', 'datetime', 'east', 'north', 'code'])
+                             filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
 
     def process(self):
         """ process video frame by frame
@@ -56,15 +56,17 @@ class VideoAruco(ArucoBase):
                 if res:
                     if self.calibration:    # output pose, too
                         data = {'id': self.rdr.ind, 'datetime': t,
-                                'east': res["east"],
-                                'north': res["north"], 'code': self.code,
+                                'east': res["east"], 'north': res["north"],
+                                'width': res['width'], 'height': res['height'],
+                                'code': self.code,
                                 'roll': res["euler_angles"][0],
                                 'pitch': res["euler_angles"][1],
                                 'yaw': res["euler_angles"][2]}
                     else:
                         data = {'id': self.rdr.ind, 'datetime': t,
-                                'east': res["east"],
-                                'north': res["north"], 'code': self.code}
+                                'east': res["east"], 'north': res["north"],
+                                'width': res['width'], 'height': res['height'],
+                                'code': self.code}
                     self.wrt.WriteData(data)
                 else:   # no marker found search whole image next
                     self.last_x = self.last_y = None

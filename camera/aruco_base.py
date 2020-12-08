@@ -139,8 +139,10 @@ class ArucoBase():
             self.last_y = y + self.off_y
             if self.calibration:    # output pose, too
                 return {'east': self.last_x, 'north': self.last_y,
+                    'width': self.marker_w, 'height': self.marker_h,
                         'euler_angles': euler_angles}
-            return {'east': self.last_x, 'north': self.last_y}
+            return {'east': self.last_x, 'north': self.last_y, 
+                    'width': self.marker_w, 'height': self.marker_h}
         # no marker found search whole image next
         self.last_x = self.last_y = None
         self.off_y = self.off_x = 0
