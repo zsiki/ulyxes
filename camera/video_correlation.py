@@ -35,7 +35,7 @@ class VideoCorrelation(TemplateBase):
                                              int(l[-2][6:8]), int(l[-1][0:2]),
                                              int(l[-1][2:4]), int(l[-1][4:6]))
         self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
-                             filt=['id', 'datetime', 'east', 'north'])
+                             filt=['id', 'datetime', 'east', 'north', 'quality'])
 
     def process(self):
         """ process image serie
@@ -54,12 +54,14 @@ class VideoCorrelation(TemplateBase):
                     if self.calibration: # output pose too
                         data = {'id': self.rdr.ind, 'datetime': t,
                                 'east': res["east"], 'north': res["north"],
+                                'quality': res['quality'],
                                 'roll': res["euler_angles"][0],
                                 'pitch': res["euler_angles"][1],
                                 'yaw': res["euler_angles"][2]}
                     else:
                         data = {'id': self.rdr.ind, 'datetime': t,
-                                'east': res["east"], 'north': res["north"]}
+                                'east': res["east"], 'north': res["north"],
+                                'quality': res['quality']}
                     self.wrt.WriteData(data)
             else:
                 break
