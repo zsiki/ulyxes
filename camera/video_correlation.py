@@ -18,6 +18,7 @@ import argparse
 import matplotlib.pyplot as plt
 from template_base import TemplateBase
 from csvwriter import CsvWriter
+from imagereader import ImageReader
 
 class VideoCorrelation(TemplateBase):
     """ process video for template matching """
@@ -26,6 +27,7 @@ class VideoCorrelation(TemplateBase):
         """ initialize """
         super(VideoCorrelation, self).__init__(args)
         fn = args.name[0]
+        self.rdr = ImageReader(fn, fps=args.fps)
         self.tformat = '%Y-%m-%d %H:%M:%S.%f'
         if re.search('[0-9]_[0-9]{8}_[0-9]{6}', fn):
             l = fn.split('_')

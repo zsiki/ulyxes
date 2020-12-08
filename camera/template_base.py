@@ -29,6 +29,9 @@ class TemplateBase():
     def __init__(self, args):
         """ initialize """
         self.templ = cv2.imread(args.template, cv2.IMREAD_GRAYSCALE)
+        if self.templ is None:
+            print("Error reading template: []".format(args.template))
+            exit(1)
         self.templ_h, self.templ_w = self.templ.shape
         self.last_x = self.last_y = None
         self.off_x = self.off_y = 0
