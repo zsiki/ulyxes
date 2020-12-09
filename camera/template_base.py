@@ -112,7 +112,7 @@ class TemplateBase():
             min_max = cv2.minMaxLoc(result)
             x = min_max[self.method[1]][0]
             y = min_max[self.method[1]][1]
-            s = result[min_max[self.method[1]][0]][min_max[self.method[1]][1]]
+            s = min_max[self.method[1]-2]   #result[x, y]
         if self.debug and i % self.debug == 0:
             plt.clf()
             plt.imshow(frame)
