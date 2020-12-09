@@ -47,12 +47,13 @@ class ImageWriter(Writer):
         if data is None:
             logging.warning(" empty image not written")
             return
-        name = os.path.join(self.dirName, str(self.counter) + '.png')
+        name = os.path.join(self.dirName, self.name + str(self.counter) + '.png')
         try:
             cv2.imwrite(name, data)
             self.counter += 1
         except:
             logging.warning(" cannot write image to file")
+        return name
 
 if __name__ == "__main__":
     pass
