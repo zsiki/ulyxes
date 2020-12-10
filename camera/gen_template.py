@@ -46,18 +46,20 @@ class VideoTemplateGen(ArucoBase):
             :returns: exit status 0 -OK
         """
         # process video
+        name = "NotFound"
         while True:
             frame, _ = self.rdr.GetNext() # get next frame
-            if frame is not None:
-                res = self.ProcessImg(frame, self.rdr.ind)
-                if res:
-                    east = res["east"]
-                    north = res["north"]
-                    width2 = int(res['width'] * 1.1 / 2)
-                    height2 = int(res['height'] * 1.1 / 2)
-                    data = frame[east-width2:east+width2, north-height2:north+height2]
-                    name = self.wrt.WriteData(data)
-                    break
+            if frame is None:
+                break
+            res = self.ProcessImg(frame, self.rdr.ind)
+            if res:     # aruco found
+                east = res["east"]
+                north = res["north"]
+                width2 = int(res['width'] * 1.1 / 2)
+                height2 = int(res['height'] * 1.1 / 2)
+                data = frame[east-width2:east+width2, north-height2:north+height2]
+                name = self.wrt.WriteData(data)
+                break
         return name
 
 if __name__ == "__main__":
