@@ -117,6 +117,7 @@ class ArucoBase():
                                         np.min(corners[j][0][:, 0]))
                     self.marker_h = int(np.max(corners[j][0][:, 1]) -
                                         np.min(corners[j][0][:, 1]))
+                    actCorner = corners[j][0]
                     found = True
                     if self.calibration:    # estimate pose
                         rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners[j:j+1], self.size, self.mtx, self.dist)
@@ -133,6 +134,10 @@ class ArucoBase():
             plt.imshow(frame)
             if found:
                 plt.plot(x+self.off_x, y+self.off_y, "o", color="red")
+                plt.plot([actCorner[0][0], actCorner[1][0], actCorner[2][0],
+                          actCorner[3][0], actCorner[0][0]],
+                         [actCorner[0][1], actCorner[1][1], actCorner[2][1],
+                          actCorner[3][1], actCorner[0][1]])
             plt.pause(0.0001)
         if found:
             self.last_x = x + self.off_x  # save last position
