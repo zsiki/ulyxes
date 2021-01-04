@@ -10,7 +10,7 @@ import cv2
 
 parser = argparse.ArgumentParser()
 parser.add_argument('names', metavar='file_names', type=str, nargs='*',
-                    help='board images from diffirent directions to process')
+                    help='board images from different directions to process')
 parser.add_argument('-b', '--board', action="store_true",
                     help='save only board image to charuco.png file')
 parser.add_argument('-c', '--camera', action="store_true",
@@ -27,7 +27,7 @@ board = cv2.aruco.CharucoBoard_create(5, 7, .025, .0125, dictionary)
 img = board.draw((200 * 5, 200 * 7))
 
 if args.board:
-    #Dump the calibration board to a file
+    # Dump the calibration board to a file
     cv2.imwrite('charuco.png', img)
     sys.exit()
 
@@ -87,10 +87,9 @@ else:
                 allIds.append(ids1)
                 decimator += 1
 
-imsize = gray.shape
-
 #Calibration fails for lots of reasons. Release the video if we do
 try:
+    imsize = gray.shape
     ret, mtx, dist, rvecs, tvecs = cv2.aruco.calibrateCameraCharuco(allCorners,
                                                                     allIds,
                                                                     board,
