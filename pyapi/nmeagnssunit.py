@@ -17,16 +17,23 @@ from angle import Angle
 from measureunit import MeasureUnit
 
 class NmeaGnssUnit(MeasureUnit):
+
+    SUPPORTED_MSGS = ("GGA", "GNS", "ZDA")
+
     """ NMEA measure unit
 
+            :param filt: NMEA sentence filter list e.g. ["GGA", "GNS"]
             :param name: name of nmea unit (str), default 'Nmea Gnss'
             :param typ: type of nmea unit (str), default None
     """
-    def __init__(self, name='Nmea Gnss', typ=None):
+    def __init__(self, filt = None, name='Nmea Gnss', typ=None):
         """ constructor for nmea measure unit
         """
         # call super class init
         super(NmeaGnssUnit, self).__init__(name, typ)
+        self.filt = self.SUPPORTED_MSGS  # default filter accept all
+        if filt is not None:
+            self.filt = [msg for msg in filt if msg in self.SUPPORTED_MSGS]
         self.date_time = None
 
     @staticmethod
@@ -82,16 +89,16 @@ class NmeaGnssUnit(MeasureUnit):
     def Nmea2Coo(self, msg):
         """ process GGA nmea message
 
-            :param msg: NMEA GGA sentence
+            :param msg: NMEA GGA/GNS sentence
             :returns: dictionary of data
         """
         lst = re.split(r'[,\*]', msg)
         if len(lst) < 10:
-            logging.error("Invalid GGA message, few fields: %s", msg)
+            logging.error("Invalid GGA/GNS message, few fields: %s", msg)
             return None
         res = {}
         try:
-            if int(lst[6]) == 0: # no position
+            if lst[6] == '0' or lst[6] == '': # no position 
                 return None
             if self.date_time is None:
                 d1 = datetime.utcnow() # UTC at server
@@ -108,16 +115,28 @@ class NmeaGnssUnit(MeasureUnit):
             # check day change
             if abs((d1 - d).total_seconds()) > 10:
                 logging.debug("day change %s - %s", d, d1)
-                d = d1
+                d = d1          # TODO time from GGA/GNS overwritten!
             res['datetime'] = d
             mul = 1 if lst[3] == 'N' else -1
             res['latitude'] = Angle(mul * float(lst[2]), 'NMEA')
             mul = 1 if lst[5] == 'E' else -1
             res['longitude'] = Angle(mul * float(lst[4]), 'NMEA')
-            res['quality'] = int(lst[6])
             res['nsat'] = int(lst[7])
-            res['altitude'] = float(lst[9])
             res['hdop'] = float(lst[8])
+            res['altitude'] = float(lst[9])
+            if msg[3:6] == "GGA":
+                res['quality'] = int(lst[6])
+            else:
+                if "R" in lst[6]:
+                    res['quality'] = 4  # RTK fix
+                elif "F" in lst[6]:
+                    res['quality'] = 5  # RTK float
+                elif "D" in lst[6]:
+                    res['quality'] = 2  # Differential GPS
+                elif "A" in lst[6]:
+                    res['quality'] = 1  # Differential GPS
+                else:
+                    res['quality'] = 0  # all others
         except Exception as e:
             logging.error('Invalid GGA message, invalid value: %s', msg)
             logging.error(e)
@@ -140,24 +159,25 @@ class NmeaGnssUnit(MeasureUnit):
         if not self.NmeaChecksum(ans):
             logging.error(' Checksum error')
             return None
-        if msg == 'GGA':
+        res = None
+        if msg in ('GGA', 'GNS'):
             res = self.Nmea2Coo(ans)     # position
         elif msg == 'ZDA':
             self.date_time = self.NmeaDateTime(ans)  # datetime
-            res = None
         return res
 
-    @staticmethod
-    def MeasureMsg():
+    def MeasureMsg(self):
         """ NMEA sentence type for lat,lon
 
-            :returns: GGA
+            :returns: accepted messages
         """
-        return "GGA"
+        return self.filt
 
 if __name__ == '__main__':
     nmeaunit = NmeaGnssUnit()
     ans = "$GPZDA,050306,29,10,2003,,*43"
-    print(nmeaunit.Result(("GGA", "ZDA"), ans))
+    print(nmeaunit.Result(("GGA", "ZDA", "GNS"), ans))
     ans = "$GPGGA,183730,3907.356,N,12102.482,W,1,05,1.6,646.4,M,-24.1,M,,*75"
     print(nmeaunit.Result(("GGA", "ZDA"), ans))
+    ans = "$GNGNS,082456.00,4733.9695486,N,01900.4864959,E,RRNN,17,0.63,198.744,39.430,1.0,0207,V*35"
+    print(nmeaunit.Result(("GGA", "ZDA", "GNS"), ans))

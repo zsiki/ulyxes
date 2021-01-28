@@ -1,10 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """
 .. module:: nmea_demo.py
   :platform: Unix, Windows
 
-.. moduleauthor:: dr. Zoltan Siki <siki@agt.bme.hu>
+.. moduleauthor:: dr. Zoltan Siki <siki.zoltan@epito.bme.hu>
 
 GNSS demo collects data from the NMEA GNSS receiver or reads data from file,
 sends data to a remote url to store/process them.
@@ -13,6 +13,7 @@ Usage:
 
 * python nmea_demo.py COM1
 * python nmea_demo.py /dev/sttyUSB0 
+* python nmea_demo.py demo.nmea
 * python nmea_demo.py COM1 http://enfo.hu/gnss_demo/get.php
 * python nmea_demo.py /dev/sttyUSB0 http://enfo.hu/gnss_demo/get.php
 """
@@ -37,7 +38,7 @@ from gnss import Gnss
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--interface', type=str,
-        help='interface e.g. COM1: /dev/ttyUSB0', default = '/dev/ttyUSB0')
+        help='interface e.g. COM1: /dev/ttyUSB0 of file name', default = '/dev/ttyUSB0')
     parser.add_argument('-s', '--speed', type=int,
         help='communication speed e.g. 9600', default = 9600)
     parser.add_argument('-o', '--output', type=str,
