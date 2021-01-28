@@ -10,11 +10,15 @@ import cv2
 
 parser = argparse.ArgumentParser()
 parser.add_argument('names', metavar='file_names', type=str, nargs='*',
-                    help='board images from different directions to process')
+                    help='board images from different directions to process or a video file')
 parser.add_argument('-b', '--board', action="store_true",
                     help='save only board image to charuco.png file')
+parser.add_argument('-w', '--width', type=int, default=5,
+                    help='Width of board, default 5, max 10')
+parser.add_argument('-e', '--height', type=int, default=7,
+                    help='Width of board, default 7, max 10')
 parser.add_argument('-c', '--camera', action="store_true",
-                    help='use first camera to take photos')
+                    help='use first camera or video file to take photos until enter pressed')
 parser.add_argument('-s', '--save', action="store_true",
                     help='save camera images to file cal0.png, cal1.png if camera is used')
 parser.add_argument('-o', '--output', type=str,
@@ -23,12 +27,14 @@ parser.add_argument('-o', '--output', type=str,
 
 args = parser.parse_args()
 dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
-board = cv2.aruco.CharucoBoard_create(5, 7, .025, .0125, dictionary)
-img = board.draw((200 * 5, 200 * 7))
+board = cv2.aruco.CharucoBoard_create(args.width, args.height, .025, .0125, dictionary)
+img = board.draw((200 * args.width, 200 * args.height))
+#img = board.draw((1000, 1400))
 
 if args.board:
     # Dump the calibration board to a file
-    cv2.imwrite('charuco.png', img)
+    name = 'charuco_{}x{}.png'.format(args.width, args.height)
+    cv2.imwrite(name, img)
     sys.exit()
 
 if not args.names and not args.camera:
@@ -42,7 +48,10 @@ decimator = 0
 
 if args.camera:
     #Start capturing images for calibration
-    cap = cv2.VideoCapture(0)
+    if len(args.names) == 1 and names[0][-4:] in ("h264", ".mp4", ".avi"):
+        cap = cv2.VideoCapture(args.names[0])
+    else:
+        cap = cv2.VideoCapture(0)
     while True:
         ret, frame = cap.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)

@@ -26,7 +26,7 @@ with open(sys.argv[1]) as f:
 
 for fn in sys.argv[2:]:
     img = cv2.imread(fn)
-    if img:
+    if img is not None:
         # undistort
         dst = cv2.undistort(img, mtx, dist, None)
         on = os.path.split(fn)
