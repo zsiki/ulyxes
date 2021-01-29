@@ -18,15 +18,31 @@ from measureunit import MeasureUnit
 
 class NmeaGnssUnit(MeasureUnit):
 
-    SUPPORTED_MSGS = ("GGA", "GNS", "ZDA")
-
     """ NMEA measure unit
 
             :param filt: NMEA sentence filter list e.g. ["GGA", "GNS"]
             :param name: name of nmea unit (str), default 'Nmea Gnss'
             :param typ: type of nmea unit (str), default None
     """
-    def __init__(self, filt = None, name='Nmea Gnss', typ=None):
+    # set item positions in NMEA messages
+    MSGS_KEYS = {
+        "GGA": {'datetime': 1, 'latitude': 2, 'ns': 3, 'longitude': 4, 'ew': 5,
+                'quality': 6, 'nsat': 7, 'hdop': 8, 'altitude': 9,
+                'alt_unit': 10, 'geoid': 11, 'geoid_unit': 12, 'age': 13,
+                'ref': 14},
+        "GNS": {'datetime': 1, 'latitude': 2, 'ns': 3, 'longitude': 4, 'ew': 5,
+                'quality': 6, 'nsat': 7, 'hdop': 8, 'altitude': 9, 'geoid': 10,
+                'age': 11, 'ref': 12},
+        "ZDA": {'datetime': 1, 'day': 2, 'month': 3, 'year': 4, 'offset_h': 5,
+                'offset_m': 6},
+        "RMC": {'datetime': 1, 'quality': 2, 'latitude': 3, 'longitude': 4,
+                'speed': 5, 'angle': 6, 'date': 7, 'magnetic': 8},
+        "GLL": {'latitude': 1, 'ns': 2, 'longitude': 3, 'ew': 4,
+                'datetime': 5, 'quality': 6}
+    }
+    SUPPORTED_MSGS = list(MSGS_KEYS.keys())
+
+    def __init__(self, filt=None, name='Nmea Gnss', typ=None):
         """ constructor for nmea measure unit
         """
         # call super class init
@@ -82,63 +98,59 @@ class NmeaGnssUnit(MeasureUnit):
             if len(lst[1]) > 6:
                 ms = int(float(lst[1][6:]) * 1000)
             d = datetime(year, month, day, hour, minute, second, ms)
-        except Exception as e:
+        except:
             logging.error("Invalid date/time: %s", msg)
         return d
 
     def Nmea2Coo(self, msg):
         """ process GGA nmea message
 
-            :param msg: NMEA GGA/GNS sentence
+            :param msg: NMEA GGA/GNS/RMC/GLL sentence
             :returns: dictionary of data
         """
+        msg_type = msg[3:6]
+        msg_keys = self.MSGS_KEYS[msg_type]
         lst = re.split(r'[,\*]', msg)
-        if len(lst) < 10:
-            logging.error("Invalid GGA/GNS message, few fields: %s", msg)
+        if len(lst) < len(msg_keys):
+            logging.error("Invalid message, few fields: %s", msg)
             return None
         res = {}
         try:
-            if lst[6] == '0' or lst[6] == '': # no position 
-                return None
-            if self.date_time is None:
-                d1 = datetime.utcnow() # UTC at server
-            else:
-                d1 = self.date_time       # timestamp from ZDA
-            # UTC time from GGA
-            hour = int(lst[1][0:2])
-            minute = int(lst[1][2:4])
-            second = int(lst[1][4:6])
-            ms = 0
-            if len(lst[1]) > 6:
-                ms = int(float(lst[1][6:]) * 1000)
-            d = datetime(d1.year, d1.month, d1.day, hour, minute, second, ms)
-            # check day change
-            if abs((d1 - d).total_seconds()) > 10:
-                logging.debug("day change %s - %s", d, d1)
-                d = d1          # TODO time from GGA/GNS overwritten!
-            res['datetime'] = d
-            mul = 1 if lst[3] == 'N' else -1
-            res['latitude'] = Angle(mul * float(lst[2]), 'NMEA')
-            mul = 1 if lst[5] == 'E' else -1
-            res['longitude'] = Angle(mul * float(lst[4]), 'NMEA')
-            res['nsat'] = int(lst[7])
-            res['hdop'] = float(lst[8])
-            res['altitude'] = float(lst[9])
-            if msg[3:6] == "GGA":
-                res['quality'] = int(lst[6])
-            else:
-                if "R" in lst[6]:
-                    res['quality'] = 4  # RTK fix
-                elif "F" in lst[6]:
-                    res['quality'] = 5  # RTK float
-                elif "D" in lst[6]:
-                    res['quality'] = 2  # Differential GPS
-                elif "A" in lst[6]:
-                    res['quality'] = 1  # Differential GPS
+            if 'datetime' in msg_keys:
+                if self.date_time is None:
+                    d1 = datetime.utcnow() # UTC at server
                 else:
-                    res['quality'] = 0  # all others
+                    d1 = self.date_time       # timestamp from ZDA
+                # UTC time from sentence
+                index = msg_keys['datetime']
+                hour = int(lst[index][0:2])
+                minute = int(lst[index][2:4])
+                second = int(lst[index][4:6])
+                ms = 0
+                if len(lst[index]) > 6:
+                    ms = int(float(lst[index][6:]) * 1000)
+                d = datetime(d1.year, d1.month, d1.day, hour, minute, second, ms)
+                # check day change
+                if abs((d1 - d).total_seconds()) > 10:
+                    logging.debug("day change %s - %s", d, d1)
+                d = d1          # TODO time from GGA/GNS overwritten!
+                res['datetime'] = d
+            if 'latitude' in msg_keys:
+                mul = 1 if lst[msg_keys['ns']] == 'N' else -1
+                res['latitude'] = Angle(mul * float(lst[msg_keys['latitude']]), 'NMEA')
+            if 'longitude' in msg_keys:
+                mul = 1 if lst[msg_keys['ew']] == 'E' else -1
+                res['longitude'] = Angle(mul * float(lst[msg_keys['longitude']]), 'NMEA')
+            if 'quality' in msg_keys:
+                res['quality'] = lst[msg_keys['quality']]
+            if 'nsat' in msg_keys:
+                res['nsat'] = int(lst[msg_keys['nsat']])
+            if 'hdop' in msg_keys:
+                res['hdop'] = float(lst[msg_keys['hdop']])
+            if 'altitude' in msg_keys:
+                res['altitude'] = float(lst[msg_keys['altitude']])
         except Exception as e:
-            logging.error('Invalid GGA message, invalid value: %s', msg)
+            logging.error('Invalid message, invalid value: %s', msg)
             logging.error(e)
             self.date_time = None    # drop previous DZA time
             res = None
@@ -160,10 +172,10 @@ class NmeaGnssUnit(MeasureUnit):
             logging.error(' Checksum error')
             return None
         res = None
-        if msg in ('GGA', 'GNS'):
-            res = self.Nmea2Coo(ans)     # position
-        elif msg == 'ZDA':
+        if msg == 'ZDA':
             self.date_time = self.NmeaDateTime(ans)  # datetime
+        elif msg in self.SUPPORTED_MSGS:
+            res = self.Nmea2Coo(ans)     # position
         return res
 
     def MeasureMsg(self):
