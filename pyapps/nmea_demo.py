@@ -86,7 +86,7 @@ if __name__ == "__main__":
         exit(1)
 
     # nmea processing unit
-    mu = NmeaGnssUnit()
+    mu = NmeaGnssUnit(['GNS'])
     # instrument
     g = Gnss('test', mu, li, wrt)
     while g.measureIface.state == g.measureIface.IF_OK:

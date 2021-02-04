@@ -160,10 +160,12 @@ class NmeaGnssUnit(MeasureUnit):
     def Result(self, msgs, ans):
         """ process the answer from GNSS
 
-            :param msg: MNEA messages to get (list)
+            :param msgs: MNEA messages to get (list), None means to use filter
             :param ans: NMEA message from GNSS unit
             :returns: processed message or None if msg and ans do not match
         """
+        if msgs is None:
+            msgs = self.filt
         msg = ans[3:len(msgs[0])+3]
         if msg not in msgs:
             return None     # no process for this message
@@ -186,10 +188,10 @@ class NmeaGnssUnit(MeasureUnit):
         return self.filt
 
 if __name__ == '__main__':
-    nmeaunit = NmeaGnssUnit()
+    nmeaunit = NmeaGnssUnit(("GGA", "ZDA", "GNS"))
     ans = "$GPZDA,050306,29,10,2003,,*43"
-    print(nmeaunit.Result(("GGA", "ZDA", "GNS"), ans))
+    print(nmeaunit.Result(None, ans))
     ans = "$GPGGA,183730,3907.356,N,12102.482,W,1,05,1.6,646.4,M,-24.1,M,,*75"
-    print(nmeaunit.Result(("GGA", "ZDA"), ans))
+    print(nmeaunit.Result(None, ans))
     ans = "$GNGNS,082456.00,4733.9695486,N,01900.4864959,E,RRNN,17,0.63,198.744,39.430,1.0,0207,V*35"
-    print(nmeaunit.Result(("GGA", "ZDA", "GNS"), ans))
+    print(nmeaunit.Result(None, ans))
