@@ -78,7 +78,7 @@ folder.
 
 	sudo apt-get install libopencv-dev 
 	sudo pip3 install opencv-python
-	sudp pip3 install opencv-contrib-python
+	sudo pip3 install opencv-contrib-python
 
 Wifi
 ~~~~
