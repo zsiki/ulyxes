@@ -12,8 +12,10 @@ sudo apt-get -y install bluetooth bluez bluez-tools rfkill
 to turn on/off bluetooth interface from the command line:
     rfkill unblock bluetooth  or  sudo /etc/init.d/bluetooth stop
     rfkill block bluetooth  or  sudo /etc/init.d/bluetooth start
+
 make connection from command line
     hciconfig
+
 https://computingforgeeks.com/connect-to-bluetooth-device-from-linux-terminal/
 
 .. moduleauthor:: Zoltan Siki <siki.zoltan@epito.bme.hu>,
