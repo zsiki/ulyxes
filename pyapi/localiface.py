@@ -20,6 +20,8 @@ class LocalIface(Iface):
     """ This local interface stands for using PyAPI without any instrument.
         A file is used to read data instread of instrument.
         It is mainly for developing or testing
+        rand mode can be used with GeoCom commands only, if more line with
+        identical codes are in the input file, they are used sequentially
 
         :param name: name of the interface (str), default 'Local'
         :param fname: name of the file the data read from
@@ -32,6 +34,7 @@ class LocalIface(Iface):
         self.mode = mode
         self.fp = None
         self.data = {}
+        self.index = {}
         try:
             self.fp = open(fname, 'r')
         except:
@@ -42,7 +45,10 @@ class LocalIface(Iface):
             # load whole file
             for line in self.fp:
                 code, ans = line.split('|')
-                self.data[code] = ans
+                if code not in self.data:
+                    self.data[code] = []
+                    self.index[code] = 0
+                self.data[code].append(ans)
 
     def __del__(self):
         """ Destructor
@@ -61,13 +67,17 @@ class LocalIface(Iface):
         if self.mode == 'rand':
             code = re.split(':|,', msg)[1]
             if code in self.data:
-                return self.data[code]
+                i = self.index[code]
+                if i < len(self.data[code]):
+                    self.index[code] += 1
+                else:
+                    i = 0
+                return self.data[code][i]
             else:
                 return None
         elif self.mode == 'seq':
             return self.GetLine()
-        else:
-            return None
+        return None
 
     def GetLine(self):
         """ Return next line from sequental file
@@ -81,7 +91,8 @@ class LocalIface(Iface):
         return w
 
 if __name__ == "__main__":
-    a = LocalIface('test', '/home/siki/meresfeldolgozas/nmea1.txt')
-    print (a.GetName())
-    print (a.GetState())
-    print (a.GetLine())
+    a = LocalIface(fname="/home/siki/tmp/tca1800.geocom", mode='rand')
+    #a = LocalIface('test', '/home/siki/meresfeldolgozas/nmea1.txt')
+    #print(a.GetName())
+    #print(a.GetState())
+    #print(a.GetLine())
