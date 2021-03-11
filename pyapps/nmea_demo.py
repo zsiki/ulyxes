@@ -67,15 +67,14 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # output
+    filt = ['id', 'latitude', 'longitude', 'altitude', 'datetime', 'quality',
+            'nsat']
     if args.output is None:
-        wrt = EchoWriter('', 'DEG', '.3f', '%Y-%m-%d %H:%M:%S',
-            ['id', 'latitude', 'longitude', 'altitude', 'datetime'])
+        wrt = EchoWriter('', 'DEG', '.3f', '%Y-%m-%d %H:%M:%S', filt)
     elif re.search('^https?://', args.output):
-        wrt = HttpWriter(angle='DEG', url=args.output,
-            filt=['longitude', 'latitude', 'altitude', 'datetime'])
+        wrt = HttpWriter(angle='DEG', url=args.output, filt=filt)
     elif re.search('\.csv$', args.output):
-        wrt = CsvWriter('', 'DEG', '.3f', '%Y-%m-%d %H:%M:%S',
-            ['id', 'latitude', 'longitude', 'altitude', 'datetime'], args.output)
+        wrt = CsvWriter('', 'DEG', '.3f', '%Y-%m-%d %H:%M:%S', filt, args.output)
     else:
         print('invalid output given')
         sys.exit(2)
@@ -86,7 +85,7 @@ if __name__ == "__main__":
         exit(1)
 
     # nmea processing unit
-    mu = NmeaGnssUnit(['GNS'])
+    mu = NmeaGnssUnit(['GNS', 'GGA', 'ZDA'])
     # instrument
     g = Gnss('test', mu, li, wrt)
     while g.measureIface.state == g.measureIface.IF_OK:
