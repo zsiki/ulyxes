@@ -12,7 +12,7 @@
 """
 try:
     from urllib2 import urlopen
-except:
+except Exception:
     from urllib.request import urlopen
 
 import json
@@ -41,7 +41,7 @@ class WebIface(Iface):
         """
         try:
             response = urlopen(self.url + '?' + msg, timeout=self.timeout)
-        except:
+        except Exception:
             response = None
             data = None
         if response is not None:

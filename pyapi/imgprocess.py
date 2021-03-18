@@ -30,7 +30,7 @@ def intersection(line1, line2):
             return [x, y]
         else:
             return False
-    except:
+    except Exception:
         return False
 
 def dist(p1, p2):

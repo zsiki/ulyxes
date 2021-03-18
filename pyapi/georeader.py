@@ -37,7 +37,7 @@ class GeoReader(FileReader):
         """
         try:
             self.fp.close()
-        except:
+        except Exception:
             pass
 
     def GetNext(self):
@@ -69,7 +69,7 @@ class GeoReader(FileReader):
                     elif key == 51:
                         try:
                             res[self.codes[key]] = datetime.strptime(' '.join(www[1:]), '%Y-%m-%d %H:%M:%S')
-                        except:
+                        except Exception:
                             pass    # skip if datetime format is not valid
                     else:
                         res[self.codes[key]] = ' '.join(www[1:])

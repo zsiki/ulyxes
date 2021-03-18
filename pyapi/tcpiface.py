@@ -50,7 +50,7 @@ class TCPIface(Iface):
             self.bufSize = bufSize
             self.opened = True
             self.state = self.IF_OK
-        except:
+        except Exception:
             self.opened = False
             self.state = self.IF_ERROR
             logging.error(" cannot open TCP socket")
@@ -62,7 +62,7 @@ class TCPIface(Iface):
             self.sock.close()
             self.opened = False
             self.state = self.IF_OK
-        except:
+        except Exception:
             self.state = self.IF_ERROR
             logging.error(" cannot close TCP socet")
 
@@ -126,7 +126,7 @@ class TCPIface(Iface):
         logging.debug(" message sent: %s", msg)
         try:
             self.sock.send(msg)
-        except:
+        except Exception:
             self.state = self.IF_WRITE
             logging.error(" cannot write tcp")
             return -1

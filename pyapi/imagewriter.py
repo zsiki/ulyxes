@@ -51,7 +51,7 @@ class ImageWriter(Writer):
         try:
             cv2.imwrite(name, data)
             self.counter += 1
-        except:
+        except Exception:
             logging.warning(" cannot write image to file")
         return name
 

@@ -60,7 +60,7 @@ class QueueWriter(Writer):
             return -2   # skip empty data
         try:
             self.q.put(line)
-        except:
+        except Exception:
             logging.error(" queue write failed")
             return -1
 

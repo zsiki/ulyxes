@@ -79,7 +79,7 @@ class CameraStation(TotalStation, Camera):
                 picCoord = rec.recogChessPattern(img)
                 print(picCoord)
                 ok = True
-            except:
+            except Exception:
                 pass
 
         img[int(picCoord[1]),:] = [0,255,255]

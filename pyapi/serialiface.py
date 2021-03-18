@@ -53,7 +53,7 @@ class SerialIface(Iface):
         try:
             self.ser = serial.Serial(port, baud, byteSize, parity, stop, timeout)
             self.state = self.IF_OK
-        except:
+        except Exception:
             self.state = self.IF_ERROR
             logging.error(" cannot open serial line")
 
@@ -63,7 +63,7 @@ class SerialIface(Iface):
         try:
             self.ser.close()
             self.state = self.IF_OK
-        except:
+        except Exception:
             self.state = self.IF_ERROR
             logging.error(" cannot close serial line")
 
@@ -82,7 +82,7 @@ class SerialIface(Iface):
             ch = ''
             try:
                 ch = (self.ser.read(1)).decode('ascii')
-            except:
+            except Exception:
                 self.state = self.IF_READ
                 logging.error(" cannot read serial line")
             if ch == '':
@@ -116,7 +116,7 @@ class SerialIface(Iface):
         logging.debug(" message sent: %s", msg)
         try:
             self.ser.write(msg)
-        except:
+        except Exception:
             self.state = self.IF_WRITE
             logging.error(" cannot write serial line")
             return -1

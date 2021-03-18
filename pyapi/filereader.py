@@ -37,7 +37,7 @@ class FileReader(Reader):
         """
         try:
             self.fp.close()
-        except:
+        except Exception:
             pass
 
     def GetLine(self):

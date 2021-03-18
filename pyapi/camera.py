@@ -17,7 +17,7 @@ from tcpiface import TCPIface
 
 try:
     import picamera
-except:
+except Exception:
     pass
 
 class Camera(Instrument):

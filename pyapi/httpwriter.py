@@ -59,14 +59,14 @@ class HttpWriter(Writer):
         if self.mode == 'GET':
             try:
                 res = urlopen(self.url + '?' + urlencode(par)).read()
-            except:
+            except Exception:
                 res = None
         else:
             try:
                 d = urlencode(par).encode('ascii')
                 req = Request(self.url, d)
                 res = urlopen(req).read()
-            except:
+            except Exception:
                 res = None
         return res
 

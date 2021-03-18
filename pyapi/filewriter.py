@@ -42,7 +42,7 @@ class FileWriter(Writer):
         else:
             try:
                 self.fp = open(fname, mode)
-            except:
+            except Exception:
                 self.state = self.WR_OPEN
                 logging.error(" cannot open file %s", self.fname)
 
@@ -51,7 +51,7 @@ class FileWriter(Writer):
         """
         try:
             self.fp.close()
-        except:
+        except Exception:
             pass
 
     def WriteData(self, data):
@@ -71,7 +71,7 @@ class FileWriter(Writer):
         try:
             self.fp.write(line + "\n")
             self.fp.flush()
-        except:
+        except Exception:
             logging.error(" file write failed")
             return -1
         return 0

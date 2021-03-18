@@ -63,7 +63,7 @@ class ImageReader(Reader):
         if self.typ in (self.CAMERA, self.VIDEO):
             try:
                 self.source.release()
-            except:
+            except Exception:
                 pass
 
     def GetNext(self):

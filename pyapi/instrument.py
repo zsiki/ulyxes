@@ -108,7 +108,7 @@ class Instrument(object):
                 if pic != None:
                     pic.write(res)
                     res['pic'] = pic
-        except:
+        except Exception:
             pass
         return res
 

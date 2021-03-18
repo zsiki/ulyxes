@@ -37,7 +37,7 @@ class LocalIface(Iface):
         self.index = {}
         try:
             self.fp = open(fname, 'r')
-        except:
+        except Exception:
             self.state = self.IF_FILE
             logging.error(" error opening file")
             return
@@ -55,7 +55,7 @@ class LocalIface(Iface):
         """
         try:
             self.fp.close()
-        except:
+        except Exception:
             pass
 
     def Send(self, msg):

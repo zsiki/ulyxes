@@ -55,7 +55,7 @@ class VideoIface(Iface):
         if self.video is not None:
             try:
                 self.video.release()
-            except:
+            except Exception:
                 pass
 
     def GetImage(self):

@@ -98,7 +98,7 @@ class NmeaGnssUnit(MeasureUnit):
             if len(lst[1]) > 6:
                 ms = int(float(lst[1][6:]) * 1000)
             d = datetime(year, month, day, hour, minute, second, ms)
-        except:
+        except Exception:
             logging.error("Invalid date/time: %s", msg)
         return d
 
@@ -191,7 +191,8 @@ if __name__ == '__main__':
     nmeaunit = NmeaGnssUnit(("GGA", "ZDA", "GNS"))
     ans = "$GPZDA,050306,29,10,2003,,*43"
     print(nmeaunit.Result(None, ans))
-    ans = "$GPGGA,183730,3907.356,N,12102.482,W,1,05,1.6,646.4,M,-24.1,M,,*75"
+    #ans = "$GPGGA,183730,3907.356,N,12102.482,W,1,05,1.6,646.4,M,-24.1,M,,*75"
+    ans = "$GNGGA,000501.00,4728.1158076,N,01904.0281549,E,4,12,0.57,124.585,M,39.322,M,1.0,0207*64"
     print(nmeaunit.Result(None, ans))
     ans = "$GNGNS,082456.00,4733.9695486,N,01900.4864959,E,RRNN,17,0.63,198.744,39.430,1.0,0207,V*35"
     print(nmeaunit.Result(None, ans))

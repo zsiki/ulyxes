@@ -44,7 +44,7 @@ class VideoWriter(Writer):
         """
         try:
             self.wp.release()
-        except:
+        except Exception:
             pass
 
     def WriteData(self, data):
@@ -57,7 +57,7 @@ class VideoWriter(Writer):
             return
         try:
             self.wp.write(data)
-        except:
+        except Exception:
             logging.warning(" cannot write image to video file")
 
 if __name__ == "__main__":

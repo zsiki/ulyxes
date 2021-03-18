@@ -16,7 +16,7 @@ import os
 from measureunit import MeasureUnit
 try:
     import picamera
-except:
+except Exception:
     pass
 class PiCameraUnit(MeasureUnit):
     """ Picamera Unit for handle Picamera device

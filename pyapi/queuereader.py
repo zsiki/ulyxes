@@ -45,7 +45,7 @@ class QueueReader(Reader):
         """
         try:
             buf = self.q.get(False)
-        except:
+        except Exception:
             return None     # empty queu
         res = {}
         for key, val in buf.items():

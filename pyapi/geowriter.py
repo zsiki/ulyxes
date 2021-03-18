@@ -41,7 +41,7 @@ class GeoWriter(FileWriter):
         """
         try:
             self.fp.close()
-        except:
+        except Exception:
             pass
 
     def WriteData(self, data):
@@ -69,7 +69,7 @@ class GeoWriter(FileWriter):
         try:
             self.fp.write(line + "\n")
             self.fp.flush()
-        except:
+        except Exception:
             logging.error(" file write failed")
             return -1
         return 0

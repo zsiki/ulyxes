@@ -39,7 +39,7 @@ class CsvReader(FileReader):
         """
         try:
             self.fp.close()
-        except:
+        except Exception:
             pass
 
     def GetNext(self):

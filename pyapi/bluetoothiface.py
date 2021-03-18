@@ -63,7 +63,7 @@ class BluetoothIface(Iface):
         self.socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
         try:
             self.socket.connect((self.mac, self.port))
-        except:
+        except Exception:
             logging.error(" error opening bluetooth connection")
             self.state = self.IF_SOURCE
             self.socket = None
@@ -73,7 +73,7 @@ class BluetoothIface(Iface):
         """
         try:
             self.socket.close()
-        except:
+        except Exception:
             pass
 
     def GetLine(self):
@@ -89,7 +89,7 @@ class BluetoothIface(Iface):
             ch = ''
             try:
                 ch = (self.socket.recv(1)).decode('ascii')
-            except:
+            except Exception:
                 self.state = self.IF_READ
                 logging.error(" cannot read bluetooth connection")
                 break
@@ -125,7 +125,7 @@ class BluetoothIface(Iface):
         try:
             self.socket.settimeout(self.timeout)
             self.socket.send(msg)
-        except:
+        except Exception:
             self.state = self.IF_WRITE
             logging.error(" cannot write to bluetooth connection")
             return -1

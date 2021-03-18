@@ -101,7 +101,7 @@ class LeicaMeasureUnit(MeasureUnit):
             msgBufflist = re.split(':|,', msg)
             try:
                 commandID = int(msgBufflist[1])
-            except:
+            except Exception:
                 commandID = -1
             # get error code from answer
             ansBufflist = re.split(':|,', ans)

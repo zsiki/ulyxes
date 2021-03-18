@@ -39,7 +39,7 @@ class CsvWriter(FileWriter):
         if header and self.mode == 'w':
             try:
                 self.fp.write(self.sep.join(self.filt) + "\n")
-            except:
+            except Exception:
                 logging.error(" file write failed")
 
 
@@ -48,7 +48,7 @@ class CsvWriter(FileWriter):
         """
         try:
             self.fp.close()
-        except:
+        except Exception:
             pass
 
     def WriteData(self, data):
@@ -70,7 +70,7 @@ class CsvWriter(FileWriter):
         try:
             self.fp.write(self.sep.join(linelist) + "\n")
             self.fp.flush()
-        except:
+        except Exception:
             logging.error(" file write failed")
             return -1
         return 0
