@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 .. module:: robotplus.py
 
@@ -262,7 +262,7 @@ if __name__ == "__main__":
             try:
                 cr = ConfReader('robotplus', sys.argv[1], config_pars)
                 cr.Load()
-            except:
+            except Exception:
                 print("Error in config file: {0}".format(sys.argv[1]))
                 sys.exit(-1)
             if not cr.Check():
@@ -374,6 +374,9 @@ if __name__ == "__main__":
     if re.search('^http[s]?://', cr.json['coo_rd']):
         rd_st = HttpReader(url=cr.json['coo_rd'], ptys=['STA'], \
                            filt=['id', 'east', 'north', 'elev'])
+    elif re.search('\.txt$', cr.json['coo_rd']) or re.search('\.csv$', cr.json['coo_rd']):
+        rd_st = CsvReader(fname=cr.json['coo_rd'], \
+                          filt=['id', 'east', 'north', 'elev'])
     else:
         rd_st = GeoReader(fname=cr.json['coo_rd'], \
                           filt=['id', 'east', 'north', 'elev'])

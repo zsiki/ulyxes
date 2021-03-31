@@ -29,6 +29,9 @@ from angle import Angle, PI2
 from serialiface import SerialIface
 from csvwriter import CsvWriter
 from totalstation import TotalStation
+from leicatps1200 import LeicaTPS1200
+from leicatcra1100 import LeicaTCRA1100
+from trimble5500 import Trimble5500
 
 if __name__ == "__main__":
     if sys.version_info[0] > 2:  # Python 3 compatibility
@@ -46,13 +49,10 @@ if __name__ == "__main__":
     else:
         stationtype = '1200'
     if re.search('120[0-9]$', stationtype):
-        from leicatps1200 import LeicaTPS1200
         mu = LeicaTPS1200()
     elif re.search('110[0-9]$', stationtype):
-        from leicatcra1100 import LeicaTCRA1100
         mu = LeicaTCRA1100()
     elif re.search('550[0-9]$', stationtype):
-        from trimble5500 import Trimble5500
         mu = Trimble5500()
     else:
         print("unsupported instrument type")

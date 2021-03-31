@@ -16,7 +16,6 @@ Sample application of Ulyxes PyAPI to measure a horizontal section(s)
     :param argv[7].. (elevations): elevations for horizontal sections
 """
 import sys
-import time
 import re
 import math
 import logging
@@ -76,7 +75,7 @@ class HorizontalSection(object):
         w = True
         try:
             self.ts.SetRedLaser(1)       # turn on red laser if possible
-        except:
+        except Exception:
             pass
         act = Angle(0)  # actual angle from startpoint
         while act.GetAngle() < self.maxa: # go around the whole circle
@@ -106,7 +105,7 @@ class HorizontalSection(object):
                 self.ts.MoveRel(Angle(0), Angle(zenith1-zenith))
                 ans = self.ts.Measure()
                 if 'errCode' in ans:
-                    print ('Cannot measure point')
+                    print('Cannot measure point')
                     break
                 index += 1
                 if index > self.maxiter or \
@@ -123,12 +122,16 @@ class HorizontalSection(object):
                 startp0 = nextp # store first valid point on section
             if 'distance' in nextp and w:
                 coord = self.ts.Coords()
-                res = dict(nextp.items() + coord.items())
+                res = dict(list(nextp.items()) + list(coord.items()))
                 self.wrt.WriteData(res)
             self.ts.MoveRel(self.stepinterval, Angle(0))
             act += self.stepinterval
         # rotate back to start
         self.ts.Move(startp0['hz'], startp0['v'])
+        try:
+            self.ts.SetRedLaser(0)       # turn off red laser if possible
+        except Exception:
+            pass
         return 0
 
 if __name__ == "__main__":
@@ -138,7 +141,8 @@ if __name__ == "__main__":
     config_pars = {
         'log_file': {'required' : True, 'type': 'file'},
         'log_level': {'required' : True, 'type': 'int',
-            'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.FATAL]},
+                      'set': [logging.DEBUG, logging.INFO, logging.WARNING,
+                              logging.ERROR, logging.FATAL]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
         'angle_step' : {'required': False, 'type': "float", 'default': 45.0},
 
@@ -164,8 +168,8 @@ if __name__ == "__main__":
             print("Config check failed")
             sys.exit(-1)
         logging.basicConfig(format=cr.json['log_format'],
-            filename=cr.json['log_file'], filemode='a',
-            level=cr.json['log_level'])
+                            filename=cr.json['log_file'], filemode='a',
+                            level=cr.json['log_level'])
         hz_start = None
         if cr.json['hz_start'] is not None:
             hz_start = Angle(float(cr.json['hz_start']), 'DEG')
@@ -176,8 +180,8 @@ if __name__ == "__main__":
         tol = cr.json['tolerance']
         maxiter = cr.json['iteration']
         wrt = CsvWriter(angle='DMS', dist='.3f',
-            filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
-            fname=cr.json['wrt'], mode='a', sep=';')
+                        filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
+                        fname=cr.json['wrt'], mode='a', sep=';')
         levels = cr.json['height_list']
     else:
         if len(sys.argv) > 1:
@@ -204,8 +208,8 @@ if __name__ == "__main__":
         if len(sys.argv) > 6:
             maxiter = int(sys.argv[6])
         wrt = CsvWriter(angle='DMS', dist='.3f',
-            filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
-            fname='stdout', mode='a', sep=';')
+                        filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
+                        fname='stdout', mode='a', sep=';')
         if len(sys.argv) > 7:
             levels = [float(a) for a in sys.argv[7:]]
         else:
@@ -213,7 +217,7 @@ if __name__ == "__main__":
     iface = SerialIface("rs-232", port)
     if iface.state != iface.IF_OK:
         print("serial error")
-        exit(1)
+        sys.exit(1)
     if re.search('120[0-9]$', stationtype):
         mu = LeicaTPS1200()
     elif re.search('110[0-9]$', stationtype):
@@ -223,7 +227,7 @@ if __name__ == "__main__":
         iface.eomRead = b'>'
     else:
         print("unsupported instrument type")
-        exit(1)
+        sys.exit(1)
 
     ts = TotalStation(stationtype, mu, iface)
     if isinstance(mu, Trimble5500):
@@ -238,6 +242,7 @@ if __name__ == "__main__":
                                       maxiter, tol)
             h_sec.run()
     else:
-        h_sec = HorizontalSection(ts, wrt, hz_start=hz_start,stepinterval=stepinterval, 
+        h_sec = HorizontalSection(ts, wrt, hz_start=hz_start,
+                                  stepinterval=stepinterval,
                                   maxa=maxa, maxiter=maxiter, tol=tol)
         h_sec.run()
