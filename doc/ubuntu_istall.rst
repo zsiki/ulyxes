@@ -10,11 +10,19 @@ too.
 Serial test
 ~~~~~~~~~~~
 
-Optional for testing serial connection to the instrument.
+Optional for testing serial connection to the instrument. With graphical user interface use cutecom.
 
 .. code:: bash
 
 	sudo apt-get install cutecom
+	
+or with command line use setserial and minicom.
+
+.. code:: bash
+
+	sudo apt-get install setserial
+	sudo apt-get install minicom
+
 
 Python 3.x & pip
 ~~~~~~~~~~~~~~~~~~
