@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 .. module:: horizsection.py
 
@@ -40,6 +40,7 @@ class HorizontalSection(object):
         :param hz_max: end horizontal direction (radians)
         :param maxiter: max iteration to find elevation
         :param tol: tolerance for horizontal angle
+        :param levels: more parameters at horizontal cross sections to measure
     """
 
     def __init__(self, ts, wrt, elev=None, hz_start=None,
