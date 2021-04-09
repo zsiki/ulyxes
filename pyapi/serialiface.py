@@ -44,7 +44,10 @@ class SerialIface(Iface):
     def __del__(self):
         """ Destructor for serial interface
         """
-        self.Close()
+        try:
+            self.Close()
+        except Exception:
+            pass
 
     def Open(self, port, baud=9600, byteSize=8,
              parity=serial.PARITY_NONE, stop=1, timeout=12):
