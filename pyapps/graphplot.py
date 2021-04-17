@@ -11,49 +11,18 @@
     It is poissible to define different number of y columns for the input csv files.
     The input csv files may have different number of rows and columns. column indeces are
     zero based.
-    The data series are given by a list with maximum 8 elements
-    1st the name of the csv file separated by ';' and
-        list of column ordinal numbers first is for x, the followings are for y values
-        (0 base index), the same column can be repeated
-        x column can be numerical or date/time, y columns are numerical
-        or complex list [ x1, [y11, y12], x2, [y21 y22]]
-        x and y vlaues can be numpy vectors
-    2nd list of x, y1, y2, ... column indices
-    3rd index of filter column or None if no filter
-    4th regexp for filtering or None if no filter
-    5th list of multipliers for the columns, default 1 for each column
-    6th list of offsets for the columns, default 0 for each column
-    7th list of simple format specifiers for y values, default is matplotlib defaults
-    8th list of legend labels for y values, default filename:column
+    The data series are given by a list with maximum 6 elements
+    1st list of x values
+    2nd list of y1, y2, ... values
+    3th list of multipliers for the columns, default 1 for each column
+    4th list of offsets for the columns, default 0 for each column
+    5th list of simple format specifiers for y values, default is matplotlib defaults
+    6th list of legend labels for y values, default ordinal index
 
-    Here is a simple example with three input files and two subplots
-
-    first.csv:
-    1;0.34;2.56
-    2;0.58;1.43
-    3;1.02;1.1
-
-    second.csv:
-    A;1.2;0.86;0.55;6.54
-    B;1.9;1.7;0.72;5.78
-    C;2.4;1.45;0.4;1.34
-    D;2.8;0.86;.88;5.12
-
-    third.csv
-    1;0.75;1.8
-    2;2.1;2.5
-    3;1.8;3.1
-
-    titles = ["line1", "line2", "points"]
-    units = ["m", "mm", "degree"]
-    data_series = [['first.csv', [0, 1, 2], None, None, [1, 1, 0.56], [0, 0, 0], ['g--', 'r'], ['l1', 'l2']],
-                   [['second.csv', [1, 3, 2]], None, None, [1, 1, 1], [0, 0, 0], ['', ''], ['b1', 'b2']],
-                   [['third.csv', [0, 2]], None, None, [1, 0.75], [0, -0.3], ['b+']]]
-    g = GraphPlot(titles, units, data_series)
-    g.draw()
-
+    There are some simple examples at the end of the code
 """
-import csv
+
+import sys
 import os.path
 import re
 from datetime import datetime
@@ -61,14 +30,46 @@ import matplotlib.pyplot as plt
 #from matplotlib.dates import DateFormatter
 import numpy as np
 
+sys.path.append('../pyapi/')
+from csvreader import CsvReader
+from sqlitereader import SqLiteReader
+
+def dict2lists(dict_src, x_key, y_keys):
+    """ convert list of dictionaries to vectors x can be string of date time or numerical string
+
+        :param dict_src: loaded list of dictionaries from CsvReader
+        :param x_key: key for x values
+        :param y_keys: keys for multiple y values
+        :returns: tuple of lists of x and y values
+    """
+    date_format = None
+    if re.match("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}",
+                dict_src[0][x_key]):
+        date_format = '%Y-%m-%d %H:%M:%S'
+    elif re.match("[0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}",
+                  dict_src[0][x_key]):
+        date_format = '%Y/%m/%d %H:%M:%S'
+    elif re.match("[0-9]{4}-[0-9]{2}-[0-9]{2}", dict_src[0][x_key]):
+        date_format = '%Y-%m-%d'
+    elif re.match("[0-9]{4}/[0-9]{2}/[0-9]{2}", dict_src[0][x_key]):
+        date_format = '%Y/%m/%d'
+    if date_format:
+        x = [datetime.strptime(d[x_key], date_format) for d in dict_src]
+    else:
+        x = [float(d[x_key]) for d in dict_src]
+    ys = []
+    for y_key in y_keys:
+        y = [float(d[y_key]) for d in dict_src]
+        ys.append(y)
+    return (x, ys)
+
 class GraphPlot:
     """ class to plot a graph
 
         :param titles: list of titles for subplots
         :param units: units for aces
-        :param data_series: list for each data file, filename, filter_column, filter_regexp, column numbers, scales, offsets, formats, labels; scales, offset, formats and labels are optional
+        :param data_series: list for each data serie, x, ys, formats, labels; formats and labels are optional
     """
-    SEPARATOR = ";" # TODO configurable separator for csv file
 
     def __init__(self, titles, units, data_series):
         """ initialize instance """
@@ -79,50 +80,52 @@ class GraphPlot:
         self.fmts = []
         self.labels = []
         for serie in data_series:
-            filter_col = None
-            if len(serie) > 2:
-                filter_col = serie[2]
-            filter_val = None
-            if len(serie) > 3:
-                filter_val = serie[3]
-            scales = [1] * len(serie[1])    # default scales
-            if len(serie) > 4 and serie[4] is not None:
-                scales = serie[4]
-            offsets = [0] * len(serie[1])  # default offsets
-            if len(serie) > 5 and serie[5] is not None:
-                offsets = serie[5]
-            if isinstance(serie[0], str):
-                act_x, act_y = self.load(serie[0], serie[1], filter_col,
-                                         filter_val, scales, offsets)
-            else:
-                act_x = serie[0]
-                act_y = serie[1]
-            self.x.append(act_x)
-            self.y.append(act_y)
-            fmt = [''] * (len(serie[1]) - 1)      # default formats
-            if len(serie) > 6 and serie[6] is not None:
-                fmt = serie[6]
+            self.x.append(serie[0])
+            self.y.append(serie[1])
+            fmt = [''] * len(serie[1])      # default formats
+            if len(serie) > 2 and serie[2] is not None:
+                fmt = serie[2]
             self.fmts.append(fmt)
-            if isinstance(serie[0], str):
-                label = ["{}:{}".format(serie[0], str(col))
-                         for col in serie[1]]
-            else:
-                label = [str(col+1) for col in range(len(serie[1]))]
-            if len(serie) > 7 and serie[7] is not None:
-                label = serie[7]
+            label = [str(col+1) for col in range(len(serie[1]))]
+            if len(serie) > 3 and serie[3] is not None:
+                label = serie[3]
             self.labels.append(label)
-        try:
-            self.main_title, _ = os.path.splitext(os.path.basename(data_series[0]))
-        except:
-            self.main_title, _ = os.path.splitext(os.path.basename(__file__))
+        self.main_title, _ = os.path.splitext(os.path.basename(__file__))
 
     def valid(self):
-        """ check validity of data set """
-        # TODO
-        rows = max([len(yi) for yi in self.y])
-        if len(self.titles) != rows or len(self.units) != rows+1:
-            return 1
-        return 0
+        """ check validity of data sets """
+        n_err = 0
+        n_xserie = len(self.x)
+        n_yserie = len(self.y)
+        if n_xserie != n_yserie:
+            n_err += 1
+            print("x-y series number different")
+        max_y = max([len(y) for y in self.y])
+        if len(self.titles) != max_y:
+            n_err += 1
+            print("titles-x series")
+        if len(self.units) != max_y + 1:    # there is unit for x too
+            n_err += 1
+            print("units-x series")
+        if len(self.fmts) != n_xserie:
+            n_err += 1
+            print("fmts-x series")
+        for i in range(len(self.x)):
+            n_x = len(self.x[i])
+            n_ys = len(self.y[i])
+            if len(self.fmts[i]) != n_ys:
+                n_err += 1
+                print("fmts-y length {}".format(i))
+            if len(self.labels[i]) != n_ys:
+                n_err += 1
+                print("fmts-y length {}".format(i))
+                
+            for j in range(len(self.y[i])):
+                n_y = len(self.y[i][j])
+                if n_y != n_x:
+                    n_err += 1
+                    print("different x-y length {}".format(i))
+        return n_err
 
     def draw(self, target=None):
         """ draw multi graph
@@ -156,39 +159,6 @@ class GraphPlot:
             plt.show()
         else:
             fig.savefig(target)
-
-    @staticmethod
-    def load(fname, cols, filter_col=None, filter_val=None,
-             scales=None, offsets=None):
-        """ load input data
-
-            :param fname: name of csv input file
-            :param filter_col: column number for fileter, optional
-            :param filter_val: regular expression for filter, optional
-            :param cols: ordinal column numbers to use
-            :param scales: multipliers for columns, optional
-            :param offsets: offsets for columns optional
-            :returns tuple x and y values (multiple y series as list)
-        """
-        data = []
-        if scales is None:
-            scales = [1] * len(cols)    # default scales to 1
-        if offsets is None:
-            offsets = [0] * len(cols)   # oefault offsets to 0
-        with open(fname, newline='') as f:
-            reader = csv.reader(f, delimiter=GraphPlot.SEPARATOR)
-            for row in reader:
-                if filter_col is None or re.search(filter_val, row[filter_col]):
-                    data.append(row)
-        if re.match("[0-9]{4}-[0-9]{2}-[0-9]{2}", data[0][cols[0]]):
-            x = [datetime.strptime(row[cols[0]], '%Y-%m-%d %H:%M:%S')
-                 for row in data]
-        else:
-            x = [float(row[cols[0]]) * scales[0] + offsets[0] for row in data]
-        y = []
-        for i in range(1, len(cols)):
-            y.append([float(row[cols[i]]) * scales[i] + offsets[i] for row in data])
-        return (x, y)
 
     def corr(self, xi, yi, xj, yj):
         """ calculate cross correlation between ith and jth data seriess
@@ -270,17 +240,7 @@ if __name__ == "__main__":
     DEMO_ID = 1
     if len(argv) > 1:
         DEMO_ID = int(argv[1])
-    if DEMO_ID == 0:
-        TITLES = ["line1", "line2", "points"]
-        UNITS = ["m", "mm", "degree", "m"]
-        DATA_SERIES = [['test/first.csv', [0, 1, 2, 2], None, None, [1, 1, 0.56, 1], [0, 0, 0, 1],
-                        ['g--', 'r', 'ro'], ['l1', 'l2', 'l2']],
-                       ['test/second.csv', [1, 3, 2, 3], None, None, [1, 1, 1, 0.75], [0, 0, 0, -0.5],
-                        ['', '', 'yx'], ['b1', 'b2', 'b1']],
-                       ['test/third.csv', [0, 2], None, None, [1, 0.75], [0, -0.3], ['b+']]]
-        G = GraphPlot(TITLES, UNITS, DATA_SERIES)
-        G.draw()
-    elif DEMO_ID == 1:
+    if DEMO_ID == 1:
         TITLES = ["line1", "line2", "points"]
         UNITS = ["m", "mm", "degree", "m"]
         X1 = [1, 2, 3, 4, 5, 6]
@@ -289,50 +249,37 @@ if __name__ == "__main__":
         X2 = [1.2, 1.9, 2.4, 2.8, 3.5, 5.8]
         Y21 = [0.86, 1.7, 1.45, 0.86, 1.2, 3.0]
         Y22 = [0.55, 0.72, 0.4, 0.88, 0.99, 2.0]
+        Y23 = [6.54, 5.78, 1.34, 5.12, 4.01, 3.6]
         # x3 == x1
         Y31 = [1.8, 2.5, 3.1, 2.6, 2.3, 2.8]
-        DATA_SERIES = [[X1, [Y11, Y12, Y12], None, None,
+        DATA_SERIES = [[X1, [Y11, Y12, Y12],
                         [1, 1, 0.56, 1], [0, 0, 0, 1],
                         ['g--', 'r', 'ro'], ['l1', 'l2', 'l2']],
-                       [X2, [Y22, Y21, Y22], None, None,
+                       [X2, [Y22, Y21, Y23],
                         [1, 1, 1, 0.75], [0, 0, 0, -0.5],
-                        ['', '', 'yx'], ['b1', 'b2', 'b1']],
-                       [X1, [Y31], None, None, [1, 0.75], [0, -0.3], ['b+']]]
+                        None, ['b1', 'b2', 'b3']],
+                       [X1, [Y31], [1, 0.75], [0, -0.3], ['b+']]]
         G = GraphPlot(TITLES, UNITS, DATA_SERIES)
         G.draw()
     elif DEMO_ID == 2:
         TITLES = ["trigonometry"]
-        UNITS = ["fok", "-", "-"]
-        DATA_SERIES = [['test/sin_cos.csv', [0, 2], None, None,
-                        [1, 1], [0, 0], [''], ['sin']],
-                       ['test/sin_cos.csv', [0, 3], None, None,
-                        [1, 1], [0, 0], [''], ['cos']]]
-        G = GraphPlot(TITLES, UNITS, DATA_SERIES)
-        G.draw()
-        #print(G.corr(0, 0, 1, 0))
-    elif DEMO_ID == 3:
-        TITLES = ["trigonometry"]
-        UNITS = ["fok", "-", "-"]
+        UNITS = ["fok", "-"]
         X = list(range(0, 370, 10))
         Y1 = [sin(xi / 180 * pi) for xi in range(0, 370, 10)]
         Y2 = [cos(xi / 180 * pi) for xi in range(0, 370, 10)]
-        DATA_SERIES = [[X, [Y1], [0, 2], None, None,
-                        [1, 1], [0, 0], [''], ['sin']],
-                       [X, [Y2], [0, 3], None, None,
-                        [1, 1], [0, 0], [''], ['cos']]]
+        DATA_SERIES = [[X, [Y1], None, None, None, ['sin']],
+                       [X, [Y2], None, None, None, ['cos']]]
         G = GraphPlot(TITLES, UNITS, DATA_SERIES)
         G.draw()
         #print(G.corr(0, 0, 1, 0))
 
-    elif DEMO_ID == 4:
+    elif DEMO_ID == 3:
         TITLES = ["numpy arrays"]
         UNITS = ["fok", "-", "-"]
         X = np.arange(0, 361, 10)
         Y1 = np.sin(X / 180 * pi)
         Y2 = np.cos(X / 180 * pi)
-        DATA_SERIES = [[X, [Y1], [0, 2], None, None,
-                        [1, 1], [0, 0], [''], ['sin']],
-                       [X, [Y2], [0, 3], None, None,
-                        [1, 1], [0, 0], [''], ['cos']]]
+        DATA_SERIES = [[X, [Y1], None, None, None, ['sin']],
+                       [X, [Y2], None, None, None, ['cos']]]
         G = GraphPlot(TITLES, UNITS, DATA_SERIES)
         G.draw()
