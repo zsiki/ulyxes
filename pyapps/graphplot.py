@@ -253,25 +253,24 @@ if __name__ == "__main__":
         # x3 == x1
         Y31 = [1.8, 2.5, 3.1, 2.6, 2.3, 2.8]
         DATA_SERIES = [[X1, [Y11, Y12, Y12],
-                        [1, 1, 0.56, 1], [0, 0, 0, 1],
                         ['g--', 'r', 'ro'], ['l1', 'l2', 'l2']],
                        [X2, [Y22, Y21, Y23],
-                        [1, 1, 1, 0.75], [0, 0, 0, -0.5],
                         None, ['b1', 'b2', 'b3']],
-                       [X1, [Y31], [1, 0.75], [0, -0.3], ['b+']]]
+                       [X1, [Y31], ['b+']]]
         G = GraphPlot(TITLES, UNITS, DATA_SERIES)
-        G.draw()
+        if G.valid() == 0:
+            G.draw()
     elif DEMO_ID == 2:
         TITLES = ["trigonometry"]
         UNITS = ["fok", "-"]
         X = list(range(0, 370, 10))
         Y1 = [sin(xi / 180 * pi) for xi in range(0, 370, 10)]
         Y2 = [cos(xi / 180 * pi) for xi in range(0, 370, 10)]
-        DATA_SERIES = [[X, [Y1], None, None, None, ['sin']],
-                       [X, [Y2], None, None, None, ['cos']]]
+        DATA_SERIES = [[X, [Y1], None, ['sin']],
+                       [X, [Y2], None, ['cos']]]
         G = GraphPlot(TITLES, UNITS, DATA_SERIES)
-        G.draw()
-        #print(G.corr(0, 0, 1, 0))
+        if G.valid() == 0:
+            G.draw()
 
     elif DEMO_ID == 3:
         TITLES = ["numpy arrays"]
@@ -279,7 +278,8 @@ if __name__ == "__main__":
         X = np.arange(0, 361, 10)
         Y1 = np.sin(X / 180 * pi)
         Y2 = np.cos(X / 180 * pi)
-        DATA_SERIES = [[X, [Y1], None, None, None, ['sin']],
-                       [X, [Y2], None, None, None, ['cos']]]
+        DATA_SERIES = [[X, [Y1], None, ['sin']],
+                       [X, [Y2], None, ['cos']]]
         G = GraphPlot(TITLES, UNITS, DATA_SERIES)
-        G.draw()
+        if G.valid() == 0:
+            G.draw()
