@@ -34,12 +34,13 @@ sys.path.append('../pyapi/')
 from csvreader import CsvReader
 from sqlitereader import SqLiteReader
 
-def dict2lists(dict_src, x_key, y_keys):
+def dict2lists(dict_src, x_key, y_keys, rel=False):
     """ convert list of dictionaries to vectors x can be string of date time or numerical string
 
         :param dict_src: loaded list of dictionaries from CsvReader
         :param x_key: key for x values
         :param y_keys: keys for multiple y values
+        :param rel: relative values to first in ys
         :returns: tuple of lists of x and y values
     """
     date_format = None
@@ -59,7 +60,10 @@ def dict2lists(dict_src, x_key, y_keys):
         x = [float(d[x_key]) for d in dict_src]
     ys = []
     for y_key in y_keys:
-        y = [float(d[y_key]) for d in dict_src]
+        rel_val = 0
+        if rel:
+            rel_val = float(dict_src[0][y_key])
+        y = [float(d[y_key]) - rel_val for d in dict_src]
         ys.append(y)
     return (x, ys)
 
