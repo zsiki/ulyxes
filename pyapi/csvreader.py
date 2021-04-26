@@ -56,9 +56,9 @@ class CsvReader(FileReader):
         if len(w) == 0:
             return None         # empty line
         res = {}
-        for i in range(len(w)):
+        for i, item in enumerate(w):
             if self.filt is None or self.fields[i] in self.filt:
-                res[self.fields[i]] = w[i]
+                res[self.fields[i]] = item
         return res
 
 if __name__ == '__main__':
