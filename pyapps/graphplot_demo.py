@@ -57,10 +57,12 @@ for act_id in args.ids:
     sql = sql_templ.format(args.coord, act_id, args.coord, args.start, args.end)
     r1 = SqLiteReader(args.database, sql)
     d1 = r1.Load()
+    if len(d1) == 0:
+        print('No data for point {} in the database'.format(act_id))
+        continue
     # convert dict to list
     x1, y1s = dict2lists(d1, 'dt', [args.coord], args.relative)
     data.append([x1, y1s, None, [act_id]])
-
 t = args.coord + " relative" if args.relative else args.coord
 titles = [t]
 units = ["date", "m"]

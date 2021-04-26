@@ -101,6 +101,9 @@ class GraphPlot:
         n_err = 0
         n_xserie = len(self.x)
         n_yserie = len(self.y)
+        if n_xserie == 0 or n_yserie == 0:
+            print("missing x or y data series")
+            return n_err + 1
         if n_xserie != n_yserie:
             n_err += 1
             print("x-y series number different")
