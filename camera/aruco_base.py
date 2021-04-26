@@ -5,6 +5,7 @@
 """
 
 from math import (sqrt, atan2)
+from os import path
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
@@ -26,10 +27,14 @@ class ArucoBase():
         self.mtx = self.dist = None
         self.calibration = args.calibration
         if args.calibration:    # load callibration data
-            with open(args.calibration) as f:
-                c = yaml.load(f, Loader=yaml.FullLoader)
-                self.mtx = np.array(c['camera_matrix'])
-                self.dist = np.array(c['dist_coeff'])
+            if path.exists(args.calibration):
+                with open(args.calibration) as f:
+                    c = yaml.load(f, Loader=yaml.FullLoader)
+                    self.mtx = np.array(c['camera_matrix'])
+                    self.dist = np.array(c['dist_coeff'])
+            else:
+                print('Calibration file not found')
+                exit(1)
         else:
             self.mtx = self.dist = None
         self.debug = args.debug
@@ -84,7 +89,7 @@ class ArucoBase():
             frame = cv2.undistort(frame, self.mtx, self.dist, None, newmtx)
             # crop image
             frame = frame[roi[1]:roi[1]+roi[3], roi[0]:roi[0]+roi[2]]
-        img = frame.copy()  # copy original (undistorted) image
+        img = frame.copy()  # copy original (undistorted) image for display
         if self.fast and self.last_x:    # crop image for fast mode
             self.off_x = max(0, self.last_x - self.marker_w)
             self.off_y = max(0, self.last_y - self.marker_h)
@@ -131,7 +136,7 @@ class ArucoBase():
 
         if self.debug and i % self.debug == 0:
             plt.clf()
-            plt.imshow(frame)
+            plt.imshow(img)
             if found:
                 plt.plot(x+self.off_x, y+self.off_y, "o", color="red")
                 plt.plot([actCorner[0][0], actCorner[1][0], actCorner[2][0],
