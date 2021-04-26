@@ -4,7 +4,7 @@
 """
     Virtual base class for template matching
 """
-
+import sys
 import yaml
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,12 +26,13 @@ class TemplateBase():
                (cv2.TM_CCOEFF, 3),
                (cv2.TM_CCOEFF_NORMED, 3))
 
-    def __init__(self, args):
+    def __init__(self, args, demo=False):
         """ initialize """
+        self.demo = demo  # to show correlation image in progress
         self.templ = cv2.imread(args.template, cv2.IMREAD_GRAYSCALE)
         if self.templ is None:
-            print("Error reading template: []".format(args.template))
-            exit(1)
+            print("Error reading template: {}".format(args.template))
+            sys.exit(1)
         self.templ_h, self.templ_w = self.templ.shape
         self.last_x = self.last_y = None
         self.off_x = self.off_y = 0
@@ -48,7 +49,7 @@ class TemplateBase():
         self.refresh_template = args.refresh_template
         try:
             self.names = args.names
-        except:
+        except Exception:
             pass
         self.calibration = args.calibration
         if args.calibration:    # load callibration data
@@ -69,17 +70,39 @@ class TemplateBase():
         rows, cols = img.shape
         trows, tcols = self.templ.shape
         row = col = None
-        mins = trows * tcols * 255         # max statistic
+        mins = trows * tcols * 255**2       # max statistic
         t = self.templ.astype(int)
+        if self.demo:
+            mx = mins                         # extra for demonstration
+            res = np.zeros(shape=(rows, cols), dtype=np.uint8)  # extra for demonstration
+            res.fill(255)
         for i in range(rows - trows):
             i1 = i + trows
             for j in range(cols - tcols):
                 j1 = j + tcols
-                s = np.sum(np.absolute(t - img[i:i1, j:j1]))
+                s = np.sum(np.square(t - img[i:i1, j:j1]))
                 if s < mins:
                     mins = s
                     row = i
                     col = j
+                if self.demo:
+                    # extra for demonstating
+                    tmp = img.copy()
+                    tmp[i:i1, j:j1] = self.templ
+                    res[i, j] = int(s / mx * 1000)
+                    fig = plt.figure()
+                    fig.add_subplot(1, 2, 1)
+                    plt.imshow(tmp, cmap='gray', vmin=0, vmax=255)
+                    fig.add_subplot(1, 2, 2)
+                    plt.imshow(res, cmap='gray', vmin=0, vmax=255)
+                    #plt.show()
+                    if i % 20 == 0 and j % 20 == 0:
+                        name = "tmp/{:04d}{:04d}.png".format(i, j)
+                        plt.savefig(name)
+                    plt.close(fig)
+                    # end extra for demonstating
+        if self.demo:
+            print(np.min(res), np.max(res))
         return (col, row, s)
 
     def ProcessImg(self, frame, i):
@@ -106,7 +129,7 @@ class TemplateBase():
                               img_gray.shape[0])
             img_gray = img_gray[self.off_y:self.off_y1, self.off_x:self.off_x1]
         if self.spec:
-            x, y, s = self.img_correlation(img_gray, self.templ)
+            x, y, s = self.img_correlation(img_gray)
         else:
             result = cv2.matchTemplate(img_gray, self.templ, self.method[0])
             min_max = cv2.minMaxLoc(result)
@@ -124,3 +147,18 @@ class TemplateBase():
         self.last_x = x + self.off_x
         self.last_y = y + self.off_y
         return {'east': self.last_x, 'north': self.last_y, 'quality': s}
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    args = parser.parse_args()
+    args.template = "/home/siki/tutorials/english/img_processing/code/mona_temp4.png"
+    args.method = 99
+    args.fast = False
+    args.debug = False
+    args.refresh_template = False
+    args.calibration = None
+    args.names = ["/home/siki/tutorials/english/img_processing/code/monalisa.jpg"]
+    img = cv2.imread(args.names[0])
+    tb = TemplateBase(args, True)   # debug images for partial result
+    tb.ProcessImg(img, 1)
