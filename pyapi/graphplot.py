@@ -14,10 +14,8 @@
     The data series are given by a list with maximum 6 elements
     1st list of x values
     2nd list of y1, y2, ... values
-    3th list of multipliers for the columns, default 1 for each column
-    4th list of offsets for the columns, default 0 for each column
-    5th list of simple format specifiers for y values, default is matplotlib defaults
-    6th list of legend labels for y values, default ordinal index
+    3th list of simple format specifiers for y values, default is matplotlib defaults
+    4th list of legend labels for y values, default ordinal index
 
     There are some simple examples at the end of the code
 """
@@ -29,10 +27,6 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 #from matplotlib.dates import DateFormatter
 import numpy as np
-
-sys.path.append('../pyapi/')
-from csvreader import CsvReader
-from sqlitereader import SqLiteReader
 
 def dict2lists(dict_src, x_key, y_keys, rel=False):
     """ convert list of dictionaries to vectors x can be string of date time or numerical string
@@ -46,10 +40,10 @@ def dict2lists(dict_src, x_key, y_keys, rel=False):
     date_format = None
     if re.match("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}",
                 dict_src[0][x_key]):
-        date_format = '%Y-%m-%d %H:%M:%S'
+        date_format = '%Y-%m-%d %H:%M:%S.%f'
     elif re.match("[0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}",
                   dict_src[0][x_key]):
-        date_format = '%Y/%m/%d %H:%M:%S'
+        date_format = '%Y/%m/%d %H:%M:%S.%f'
     elif re.match("[0-9]{4}-[0-9]{2}-[0-9]{2}", dict_src[0][x_key]):
         date_format = '%Y-%m-%d'
     elif re.match("[0-9]{4}/[0-9]{2}/[0-9]{2}", dict_src[0][x_key]):
@@ -126,7 +120,6 @@ class GraphPlot:
             if len(self.labels[i]) != n_ys:
                 n_err += 1
                 print("fmts-y length {}".format(i))
-                
             for j in range(len(self.y[i])):
                 n_y = len(self.y[i][j])
                 if n_y != n_x:
@@ -146,7 +139,7 @@ class GraphPlot:
         for ind in range(rows):
             ax = plt.subplot(rows, 1, ind+1)
             for i in range(len(self.x)):
-                if len(self.y[i]) > ind:
+                if len(self.y[i]) > ind and self.y[i][ind] is not None and len(self.y[i][ind]) > 0:
                     if isinstance(self.x[i][0], datetime):
                         plt.plot_date(self.x[i], self.y[i][ind], self.fmts[i][ind],
                                       label=self.labels[i][ind])
@@ -178,18 +171,6 @@ class GraphPlot:
         # find common range of the two x series
         x1 = max(self.x[xi][0], self.x[xj][0])
         x2 = min(self.x[xi][-1], self.x[xj][-1])
-        xi1 = 0
-        while self.x[xi][xi1] < x1:
-            xi1 += 1
-        xj1 = 0
-        while self.x[xj][xj1] < x1:
-            xj1 += 1
-        xi2 = len(self.x[xi]) - 1
-        while self.x[xi][xi2] > x2:
-            xi2 -= 1
-        xj2 = len(self.x[xj]) - 1
-        while self.x[xj][xj2] > x2:
-            xj2 -= 1
         # interpolate to equal interval data
         if isinstance(self.x[xi][0], datetime):
             x1_orig = x1
@@ -199,46 +180,21 @@ class GraphPlot:
             x2 = delta
         else:
             delta = x2 - x1
-        n = max(xj2 - xj1, xi2 - xi1)   # use denser serie for interpolation
-        dx = delta / n
-        xx = [x1 + i * dx for i in range(n)]
+        n = max(len(self.x[xi]), len(self.x[xj]))   # use denser serie for interpolation
+        #dx = delta / n
+        xx = np.linspace(x1, x2, n)
         if isinstance(self.x[xi][0], datetime):
             # change x to seconds from start
-            wxi = [(x - x1_orig).total_seconds() for x in self.x[xi][xi1:xi2]]
-            wxj = [(x - x1_orig).total_seconds() for x in self.x[xj][xj1:xj2]]
-            yyi = np.interp(xx, wxi, self.y[xi][yi][xi1:xi2])
-            yyj = np.interp(xx, wxj, self.y[xj][yj][xj1:xj2])
+            wxi = [(x - x1_orig).total_seconds() for x in self.x[xi]]
+            wxj = [(x - x1_orig).total_seconds() for x in self.x[xj]]
+            yyi = np.interp(xx, wxi, self.y[xi][yi])
+            yyj = np.interp(xx, wxj, self.y[xj][yj])
         else:
-            yyi = np.interp(xx, self.x[xi][xi1:xi2], self.y[xi][yi][xi1:xi2])
-            yyj = np.interp(xx, self.x[xj][xj1:xj2], self.y[xj][yj][xj1:xj2])
+            yyi = np.interp(xx, self.x[xi], self.y[xi][yi])
+            yyj = np.interp(xx, self.x[xj], self.y[xj][yj])
         res = np.correlate(yyi, yyj, 'full')
-        pos = np.argmax(res)        # position of first max value
-        pos -= len(xx) + 1          # change to relative position
-        c = -1e20
-        j = 0
-        for i in range(1, len(yyi) // 2):
-            w = np.correlate(yyi[:-i], yyj[i:])[0]
-            if w > c:
-                c = w
-                j = i
-                plt.figure()
-                plt.plot(xx[:-i], yyi[:-i], xx[:-i], yyj[i:])
-                plt.grid()
-                plt.show()
-            w = np.correlate(yyj[:-i], yyi[i:])[0]
-            if w > c:
-                c = w
-                j = -i
-                plt.figure()
-                plt.plot(xx[i:], yyj[:-i], xx[i:], yyi[i:])
-                plt.grid()
-                plt.show()
-        print(j, c)
-        plt.figure()
-        plt.xcorr(yyi, yyj, usevlines=False, maxlags=n // 2)
-        plt.grid()
-        plt.show()
-        return pos * dx
+        lags = np.arange(-n + 1, n)
+        return lags, res
 
 if __name__ == "__main__":
     from sys import argv
