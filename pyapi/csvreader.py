@@ -20,7 +20,7 @@ class CsvReader(FileReader):
             :param fname: name of input file
             :param separator: field separator, default ;
             :param filt: list of fields to use, default None (use all)
-            :param fields: filed names for columns in CSV if not in the first line
+            :param fields: list of field names for columns in CSV if not in the first line
     """
 
     def __init__(self, name=None, fname=None, separator=';', filt=None, fields=None):
