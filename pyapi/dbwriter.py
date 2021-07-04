@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """
-    OBSOLATE USE dbwriter.py
-
-.. module:: sqlitewriter.py
+.. module:: dbwriter.py
    :platform: Unix, Windows
    :synopsis: Ulyxes - an open source project to drive total stations and
        publish observation results.
@@ -15,13 +13,14 @@
 import os.path
 import logging
 import sqlite3
+import psycopg2
 from angle import Angle
 from writer import Writer
 
-class SqLiteWriter(Writer):
-    """ Class to write observations/coordinates to a local sqlite database
+class DbWriter(Writer):
+    """ Class to write observations/coordinates to a database
 
-            :param db: name of database file (str)
+            :param db: name of database file or connect string (str)
             :param table: name of table to write (str)
             :param name: name of writer (str)
             :param angle: angle unit to use (str), DMS not supported
@@ -37,14 +36,21 @@ class SqLiteWriter(Writer):
         if angle == 'DMS':
             angle = 'GON'
             logging.warning('Angle type changed from DMS to GON')
-        super(SqLiteWriter, self).__init__(name, angle, dist, dt, filt)
+        super(DbWriter, self).__init__(name, angle, dist, dt, filt)
+        self.db = db
+        self.conn = None
         if os.path.isfile(db):
-            self.db = db
-            # connect to local db
-            self.conn = sqlite3.connect(db)
+            # connect to sqlite db
+            try:
+                self.conn = sqlite3.connect(db)
+            except Exception:
+                logging.fatal('Cannot open database')
         else:
-            self.conn = None
-            logging.fatal('SqLite database does not exists: ' + db)
+            # connect to postgres
+            try:
+                self.conn = psycopg2.connect(db)
+            except Exception:
+                logging.fatal('Cannot open database')
         self.table = table
 
     def __del__(self):
@@ -89,14 +95,20 @@ class SqLiteWriter(Writer):
         return res
 
 if __name__ == "__main__":
-    myfile = SqLiteWriter(db="test.sqlite", table='monitoring_obs')
+    from sys import argv
+
+    if len(argv) > 1:
+        db = argv[1]
+    else:
+        db = ""
+    myfile = DbWriter(db=db, table='monitoring_obs')
     data = {'id': '1', 'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), \
             'distance': 123.6581, 'lengthincline': Angle(0.0015, 'GON'), \
             'crossincline': Angle(0.0020, 'GON')}
     print(myfile.WriteData(data))
-    myfile = SqLiteWriter(db="test.sqlite", table='monitoring_coo')
+    myfile = DbWriter(db=db, table='monitoring_coo')
     data = {'id': '1', 'east': 0.12345, 'north': 100.2365, 'elev': 123.6581}
     print(myfile.WriteData(data))
-    myfile = SqLiteWriter(db="test.sqlite", table='monitoring_met')
+    myfile = DbWriter(db=db, table='monitoring_met')
     data = {'id': '1', 'temp': 12.45, 'pressure': 1017}
     print(myfile.WriteData(data))

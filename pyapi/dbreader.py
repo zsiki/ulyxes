@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 """
-    OBSOLATE USE dbreader.py
-
-.. module:: sqlitereader.py
+.. module:: dbreader.py
    :platform: Unix, Windows
    :synopsis: Ulyxes - an open source project to drive total stations and
        publish observation results.
@@ -15,10 +13,11 @@
 import os.path
 import logging
 import sqlite3
+import psycopg2
 from reader import Reader
 
-class SqLiteReader(Reader):
-    """ Class to read observations/coordinates from a local sqlite database
+class DbReader(Reader):
+    """ Class to read observations/coordinates from a database
 
             :param name: name of reader (str)
             :param angle: angle unit to use (str), DMS not supported
@@ -33,16 +32,22 @@ class SqLiteReader(Reader):
     def __init__(self, db, sql, name=None, filt=None):
         """ Constructor
         """
-        super(SqLiteReader, self).__init__(name, filt)
+        super(DbReader, self).__init__(name, filt)
         self.angle = 'GON'
+        self.db = db
         if os.path.isfile(db):
-            self.db = db
             # connect to local db
-            self.conn = sqlite3.connect(db)
+            try:
+                self.conn = sqlite3.connect(db)
+            except Exception:
+                logging.fatal("Cannot ope database")
+                return
         else:
-            self.db = self.conn = self.cur = None
-            logging.fatal('SqLite database does not exists: ' + db)
-            return
+            try:
+                self.conn = psycopg2.connect(db)
+            except Exception:
+                logging.fatal("Cannot ope database")
+                return
         self.cur = self.conn.cursor()
         self.cur.execute(sql)
         self.keys = [description[0] for description in self.cur.description]
@@ -60,7 +65,11 @@ class SqLiteReader(Reader):
 
             :returns: dictionary with values
         """
-        r = self.cur.fetchone()
+        r = None
+        try:
+            r = self.cur.fetchone()
+        except Exception:
+            logging.error('Cannot read data from DB')
         if r:
             res = dict(zip(self.keys, r))
         else:
@@ -68,6 +77,14 @@ class SqLiteReader(Reader):
         return res
 
 if __name__ == "__main__":
-    myfile = SqLiteReader(db="/home/siki/tanszek/szelkapu/szk1/szk1.db",
-                          sql="SELECT * FROM monitoring_obs WHERE datetime between '2017-11-17 12:00:00' and '2017-11-22 12:00:00' ORDER BY datetime")
-    print(myfile.GetNext())
+    from sys import argv
+    if len(argv) > 1:
+        db = argv[1]
+    else:
+        db = ""
+    myfile = DbReader(db=db,
+                      sql="SELECT * FROM monitoring_obs ORDER BY datetime")
+    res = myfile.GetNext()
+    while res:
+        print(res)
+        res = myfile.GetNext()
