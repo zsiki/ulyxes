@@ -47,6 +47,9 @@ class ConfReader(JSONReader):
                 continue
             # type checking
             pardef = self.pars[par]
+            if self.json[par] is None and pardef['default'] is None:
+                # do not check type for None if it is the default
+                continue
             if 'type' in pardef:
                 if pardef['type'] == 'int' and type(self.json[par]) is not int:
                     print("type mismatch parameter: {0}".format(par))
@@ -61,9 +64,9 @@ class ConfReader(JSONReader):
                     print("type mismatch parameter: {0}".format(par))
                     return False
                 elif pardef['type'] == 'file' and \
-                    type(self.json[par]) is not str and \
+                    type(self.json[par]) is str and \
                     not os.path.isfile(self.json[par]):
-                    print("type mismatch parameter or file does not exist: {0}".format(par))
+                    print("type mismatch parameter or file does not exist: {0}".format(self.json[par]))
                     return False
                 # check set for valid values
                 if 'set' in pardef and \
