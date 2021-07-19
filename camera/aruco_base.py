@@ -3,13 +3,22 @@
 """
     Base class for ArUco processing
 """
+# TODO remove fast mode not faster
+# TODO if code not given find all markers
+# TODO test pose estimation
 
-from math import (sqrt, atan2)
+from math import (sqrt, atan2, hypot)
 from os import path
+import sys
+import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 import cv2
+
+sys.path.append('../pyapi/')
+
+from confreader import ConfReader
 
 class ArucoBase():
     """ virtual base class from aruco processing in images or video
@@ -20,40 +29,111 @@ class ArucoBase():
         # prepare aruco
         self.params = cv2.aruco.DetectorParameters_create()  # TODO set parameters
         self.params.perspectiveRemoveIgnoredMarginPerCell = 0.25
+        self.clip = 3.0
+        self.tile = 8
+        self.code = None
+
+        if isinstance(args, str):
+            # get params from json
+            self.json_params(args)
+        else:
+            # get params from command line
+            self.args_params(args)
+        #
+        self.last_x = self.last_y = None
+        self.off_x = self.off_y = 0
+        self.off_x1 = self.off_y1 = 0
+        self.marker_h = self.marker_w = 0
+        self.fast = False
+        self.clahe = cv2.createCLAHE(clipLimit=self.clip,
+                                     tileGridSize=(self.tile, self.tile))
+
+
+    def json_params(self, fn):
+        """ get params from json config """
+        config_pars = {
+            'log_file': {'required' : True, 'type': 'file'},
+            'log_level': {'required' : True, 'type': 'int',
+                          'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.FATAL]},
+            'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
+            'station_id': {'required' : True, 'type': 'str'},
+            'camera_id': {'required' : False, 'type': 'str', 'default': '1'},
+            'fps': {'required': False, 'type': 'float', 'default': 1},
+            'dict': {'required': False, 'type': 'int', 'default': 1},
+            'code': {'required': False, 'type': 'int', 'default': None},
+            'size': {'required': False, 'type': 'float', 'default': 100.0},
+            'calibration': {'required': False, 'type': 'file', 'default': None},
+            'hist': {'required': False, 'type': 'int', 'default': 0},
+            'lchanel': {'required': False, 'type': 'int', 'default': 0},
+            'clip': {'required': False, 'type': 'float', 'default': 3.0},
+            'tile': {'required': False, 'type': 'int', 'default': 8},
+            'coo_wr': {'required': True, 'type': 'str'},
+            'debug': {'required': False, 'type': 'int', 'default': 0},
+            '__comment__': {'required': False, 'type': 'str'}
+        }
+        try:
+            cr = ConfReader('camera', fn, config_pars)
+            cr.Load()
+        except Exception:
+            print("Error in config file: {0}".format(sys.argv[1]))
+            sys.exit(-1)
+        if not cr.Check():
+            print("Config check failed")
+            sys.exit(-1)
+        if cr.json['dict'] == 99:     # use special 3x3 dictionary
+            self.aruco_dict = cv2.aruco.Dictionary_create(32, 3)
+        else:
+            self.aruco_dict = cv2.aruco.Dictionary_get(cr.json['dict'])
+        self.mtx = self.dist = None
+        self.calibration = cr.json['calibration']
+        if self.calibration:    # load callibration data
+            if path.exists(self.calibration):
+                with open(self.calibration) as f:
+                    c = yaml.load(f, Loader=yaml.FullLoader)
+                    self.mtx = np.array(c['camera_matrix'])
+                    self.dist = np.array(c['dist_coeff'])
+            else:
+                print('Calibration file not found')
+                sys.exit(1)
+        self.camera_id = cr.json['camera_id']
+        self.fps = cr.json['fps']
+        self.debug = cr.json['debug']
+        self.clip = cr.json['clip']
+        self.tile = cr.json['tile']
+        #self.fast = args.fast
+        self.hist = cr.json['hist']
+        self.lchanel = cr.json['lchanel']
+        self.code = cr.json['code']
+        self.size = cr.json['size']
+        self.coo_wr = cr.json['coo_wr']
+        self.log_file = cr.json["log_file"]
+        self.log_format = cr.json["log_format"]
+
+    def args_params(self, args):
+        """ get params from command line """
         if args.dict == 99:     # use special 3x3 dictionary
             self.aruco_dict = cv2.aruco.Dictionary_create(32, 3)
         else:
             self.aruco_dict = cv2.aruco.Dictionary_get(args.dict)
         self.mtx = self.dist = None
         self.calibration = args.calibration
-        if args.calibration:    # load callibration data
-            if path.exists(args.calibration):
-                with open(args.calibration) as f:
+        if self.calibration:    # load callibration data
+            if path.exists(self.calibration):
+                with open(self.calibration) as f:
                     c = yaml.load(f, Loader=yaml.FullLoader)
                     self.mtx = np.array(c['camera_matrix'])
                     self.dist = np.array(c['dist_coeff'])
             else:
                 print('Calibration file not found')
-                exit(1)
-        else:
-            self.mtx = self.dist = None
+                sys.exit(1)
         self.debug = args.debug
         self.clip = args.clip
         self.tile = args.tile
-        self.fast = args.fast
+        #self.fast = args.fast
         self.hist = args.hist
         self.lchanel = args.lchanel
         self.code = args.code
         self.size = args.size
-
-        self.last_x = self.last_y = None
-        self.off_x = self.off_y = 0
-        self.off_x1 = self.off_y1 = 0
-        self.marker_h = self.marker_w = 0
-        self.fast = False
-        self.clahe = None
-        self.clahe = cv2.createCLAHE(clipLimit=self.clip,
-                                     tileGridSize=(self.tile, self.tile))
 
     # TODO pose http://cs-courses.mines.edu/csci507/schedule/24/SquareMarkersOpenCV.pdf
     @staticmethod
@@ -118,10 +198,26 @@ class ArucoBase():
                     # calculate center of aruco code
                     x = int(round(np.average(corners[j][0][:, 0])))
                     y = int(round(np.average(corners[j][0][:, 1])))
-                    self.marker_w = int(np.max(corners[j][0][:, 0]) -
-                                        np.min(corners[j][0][:, 0]))
-                    self.marker_h = int(np.max(corners[j][0][:, 1]) -
-                                        np.min(corners[j][0][:, 1]))
+                    self.marker_w = max(hypot(corners[j][0][0, 0] -
+                                              corners[j][0][0, 1],
+                                              corners[j][0][1, 0] -
+                                              corners[j][0][1, 1]),
+                                        hypot(corners[j][0][2, 0] -
+                                              corners[j][0][2, 1],
+                                              corners[j][0][3, 0] -
+                                              corners[j][0][3, 1]))
+                    self.marker_h = max(hypot(corners[j][0][1, 0] -
+                                              corners[j][0][1, 1],
+                                              corners[j][0][2, 0] -
+                                              corners[j][0][2, 1]),
+                                        hypot(corners[j][0][3, 0] -
+                                              corners[j][0][3, 1],
+                                              corners[j][0][0, 0] -
+                                              corners[j][0][0, 1]))
+                    #self.marker_w = int(np.max(corners[j][0][:, 0]) -
+                    #                    np.min(corners[j][0][:, 0]))
+                    #self.marker_h = int(np.max(corners[j][0][:, 1]) -
+                    #                    np.min(corners[j][0][:, 1]))
                     actCorner = corners[j][0]
                     found = True
                     if self.calibration:    # estimate pose
@@ -149,9 +245,9 @@ class ArucoBase():
             self.last_y = y + self.off_y
             if self.calibration:    # output pose, too
                 return {'east': self.last_x, 'north': self.last_y,
-                    'width': self.marker_w, 'height': self.marker_h,
+                        'width': self.marker_w, 'height': self.marker_h,
                         'euler_angles': euler_angles}
-            return {'east': self.last_x, 'north': self.last_y, 
+            return {'east': self.last_x, 'north': self.last_y,
                     'width': self.marker_w, 'height': self.marker_h}
         # no marker found search whole image next
         self.last_x = self.last_y = None
