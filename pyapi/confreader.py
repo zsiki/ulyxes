@@ -66,7 +66,7 @@ class ConfReader(JSONReader):
                 elif pardef['type'] == 'file' and \
                     type(self.json[par]) is str and \
                     not os.path.isfile(self.json[par]):
-                    print("type mismatch parameter or file does not exist: {0}".format(self.json[par]))
+                    print("parameter type mismatch or file does not exist: {0}".format(self.json[par]))
                     return False
                 # check set for valid values
                 if 'set' in pardef and \
