@@ -500,16 +500,21 @@ if __name__ == "__main__":
                     if wrt1.WriteData(o) == -1:
                         logging.error('Observation data write failed %s',
                                       o['id'])
-                    logging.info('inclination [GON]: %.4f %.4f %s',
-                                 o['crossincline'].GetAngle('GON'),
-                                 o['lengthincline'].GetAngle('GON'), o['id'])
+                    if 'crossincline' in o and 'lengthincline' in o:
+                        logging.info('inclination [GON]: %.4f %.4f %s',
+                                     o['crossincline'].GetAngle('GON'),
+                                     o['lengthincline'].GetAngle('GON'),
+                                     o['id'])
+                    else:
+                        logging.info('No inclination data available')
             fs = Freestation(obs_out, st_coord + fix_coords,
                              cr.json['gama_path'], cr.json['dimension'],
                              cr.json['probability'], cr.json['stdev_angle'],
                              cr.json['stdev_dist'], cr.json['stdev_dist1'],
                              cr.json['blunders'])
             w = fs.Adjustment()
-            if w is None or 'east' not in w[0] or 'north' not in w[0]:
+            if w is None or w[0] is None or \
+                    'east' not in w[0] or 'north' not in w[0]:
                 logging.fatal("No adjusted coordinates for station %s",
                               cr.json['station_id'])
                 sys.exit(-1)

@@ -224,7 +224,7 @@ class Robot(object):
                                 self.ts.Move(Angle(hz), Angle(v), 0)
                                 if 'errorCode' not in res:
                                     # wait for user to target on point
-                                    ww = raw_input(target_msg % (pn, self.directions[i]['code'], (n + k) % 2 + 1))
+                                    ww = raw_input(target_msg.format(pn, self.directions[i]['code'], (n + k) % 2 + 1))
                                     if ww == 's':
                                         break
                                     res = self.ts.Measure()
@@ -239,7 +239,7 @@ class Robot(object):
                                 res = self.ts.Move(Angle(hz), Angle(v), 0)
                                 if 'errorCode' not in res:
                                     # wait for user to target on point
-                                    ww = raw_input(target_msg % (pn, self.directions[i]['code'], (n + k) % 2 + 1))
+                                    ww = raw_input(target_msg.format(pn, self.directions[i]['code'], (n + k) % 2 + 1))
                                     if ww == 's':
                                         break
                             else:
