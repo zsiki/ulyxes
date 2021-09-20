@@ -3,7 +3,6 @@
 """
     Base class for ArUco processing
 """
-# TODO remove fast mode not faster
 # TODO if code not given find all markers
 # TODO test pose estimation
 
@@ -40,11 +39,6 @@ class ArucoBase():
             # get params from command line
             self.args_params(args)
         #
-        self.last_x = self.last_y = None
-        self.off_x = self.off_y = 0
-        self.off_x1 = self.off_y1 = 0
-        self.marker_h = self.marker_w = 0
-        self.fast = False
         self.clahe = cv2.createCLAHE(clipLimit=self.clip,
                                      tileGridSize=(self.tile, self.tile))
 
@@ -56,7 +50,7 @@ class ArucoBase():
             'log_level': {'required' : True, 'type': 'int',
                           'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.FATAL]},
             'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
-            'station_id': {'required' : True, 'type': 'str'},
+            'station_id': {'required' : False, 'type': 'str'},
             'camera_id': {'required' : False, 'type': 'str', 'default': '1'},
             'fps': {'required': False, 'type': 'float', 'default': 1},
             'dict': {'required': False, 'type': 'int', 'default': 1},
@@ -100,7 +94,6 @@ class ArucoBase():
         self.debug = cr.json['debug']
         self.clip = cr.json['clip']
         self.tile = cr.json['tile']
-        #self.fast = args.fast
         self.hist = cr.json['hist']
         self.lchanel = cr.json['lchanel']
         self.code = cr.json['code']
@@ -129,7 +122,6 @@ class ArucoBase():
         self.debug = args.debug
         self.clip = args.clip
         self.tile = args.tile
-        #self.fast = args.fast
         self.hist = args.hist
         self.lchanel = args.lchanel
         self.code = args.code
@@ -170,12 +162,6 @@ class ArucoBase():
             # crop image
             frame = frame[roi[1]:roi[1]+roi[3], roi[0]:roi[0]+roi[2]]
         img = frame.copy()  # copy original (undistorted) image for display
-        if self.fast and self.last_x:    # crop image for fast mode
-            self.off_x = max(0, self.last_x - self.marker_w)
-            self.off_y = max(0, self.last_y - self.marker_h)
-            self.off_x1 = min(self.last_x + self.marker_w, img.shape[1])
-            self.off_y1 = min(self.last_y + self.marker_h, img.shape[0])
-            img = frame[self.off_y:self.off_y1, self.off_x:self.off_x1]
         if self.hist:
             if self.lchanel:
                 lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
@@ -185,20 +171,17 @@ class ArucoBase():
             img_gray = self.clahe.apply(img_gray)
         else:
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        corners, ids, rejectedImgPoints = \
-                cv2.aruco.detectMarkers(img_gray, self.aruco_dict,
-                                        parameters=self.params)
-        found = False
+        corners, ids, _ = cv2.aruco.detectMarkers(img_gray, self.aruco_dict,
+                                                  parameters=self.params)
         x = y = 0
+        res = []    # results
         if ids is not None:
             for j in range(ids.size):
-                if self.code is None:
-                    self.code = ids[j][0]   # use first found code
-                if ids[j][0] == self.code:
+                if self.code is None or ids[j][0] == self.code:
                     # calculate center of aruco code
                     x = int(round(np.average(corners[j][0][:, 0])))
                     y = int(round(np.average(corners[j][0][:, 1])))
-                    self.marker_w = max(hypot(corners[j][0][0, 0] -
+                    marker_w = max(hypot(corners[j][0][0, 0] -
                                               corners[j][0][0, 1],
                                               corners[j][0][1, 0] -
                                               corners[j][0][1, 1]),
@@ -206,7 +189,7 @@ class ArucoBase():
                                               corners[j][0][2, 1],
                                               corners[j][0][3, 0] -
                                               corners[j][0][3, 1]))
-                    self.marker_h = max(hypot(corners[j][0][1, 0] -
+                    marker_h = max(hypot(corners[j][0][1, 0] -
                                               corners[j][0][1, 1],
                                               corners[j][0][2, 0] -
                                               corners[j][0][2, 1]),
@@ -214,42 +197,31 @@ class ArucoBase():
                                               corners[j][0][3, 1],
                                               corners[j][0][0, 0] -
                                               corners[j][0][0, 1]))
-                    #self.marker_w = int(np.max(corners[j][0][:, 0]) -
-                    #                    np.min(corners[j][0][:, 0]))
-                    #self.marker_h = int(np.max(corners[j][0][:, 1]) -
-                    #                    np.min(corners[j][0][:, 1]))
                     actCorner = corners[j][0]
-                    found = True
                     if self.calibration:    # estimate pose
                         rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners[j:j+1], self.size, self.mtx, self.dist)
                         # https://answers.opencv.org/question/16796/computing-attituderoll-pitch-yaw-from-solvepnp/?answer=52913#post-id-52913
                         r, _ = cv2.Rodrigues(rvec) # convert to rotation matrix
                         # https://www.learnopencv.com/rotation-matrix-to-euler-angles/
                         euler_angles = self.rotationMatrixToEulerAngles(r)
-                        cv2.aruco.drawAxis(frame, self.mtx, self.dist, rvec,
-                                           tvec, 0.01)
-                    break
-
+                    if self.calibration:    # output pose, too
+                        res.append({'code': ids[j][0], 'east': x, 'north': y,
+                                    'width': marker_w, 'height': marker_h,
+                                    'euler_angles': euler_angles})
+                    else:
+                        res.append({'code': ids[j][0], 'east': x, 'north': y,
+                                    'width': marker_w, 'height': marker_h})
+                    if self.code is not None:
+                        break   # search for single marker
+        print(res)
         if self.debug and i % self.debug == 0:
             plt.clf()
             plt.imshow(img)
-            if found:
-                plt.plot(x+self.off_x, y+self.off_y, "o", color="red")
-                plt.plot([actCorner[0][0], actCorner[1][0], actCorner[2][0],
-                          actCorner[3][0], actCorner[0][0]],
-                         [actCorner[0][1], actCorner[1][1], actCorner[2][1],
-                          actCorner[3][1], actCorner[0][1]])
+            for r in res:
+                plt.plot(r['east'], r['north'], "o", color="red")
+                #plt.plot([actCorner[0][0], actCorner[1][0], actCorner[2][0],
+                #          actCorner[3][0], actCorner[0][0]],
+                #         [actCorner[0][1], actCorner[1][1], actCorner[2][1],
+                #          actCorner[3][1], actCorner[0][1]])
             plt.pause(0.0001)
-        if found:
-            self.last_x = x + self.off_x  # save last position
-            self.last_y = y + self.off_y
-            if self.calibration:    # output pose, too
-                return {'east': self.last_x, 'north': self.last_y,
-                        'width': self.marker_w, 'height': self.marker_h,
-                        'euler_angles': euler_angles}
-            return {'east': self.last_x, 'north': self.last_y,
-                    'width': self.marker_w, 'height': self.marker_h}
-        # no marker found search whole image next
-        self.last_x = self.last_y = None
-        self.off_y = self.off_x = 0
-        return None
+        return res
