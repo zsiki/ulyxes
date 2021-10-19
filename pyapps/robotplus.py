@@ -523,8 +523,10 @@ if __name__ == "__main__":
                abs(st_coord[0]['elev'] - w[0]['elev']) > cr.json['station_coo_limit']:
                 logging.fatal("Station moved!!! %s", w[0]['id'])
                 sys.exit(-1)
-            # update station coordinates
+            # update station coordinates & upload to instrument
             st_coord = w
+            ts.SetStation(st_coord[0]['east'], st_coord[0]['north'],
+                          st_coord[0]['elev'])
             # upload station coords to server
             print("Uploading station coords...")
             st_coord[0]['datetime'] = act_date
