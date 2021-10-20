@@ -63,6 +63,7 @@ from httpreader import HttpReader
 from httpwriter import HttpWriter
 from georeader import GeoReader
 from geowriter import GeoWriter
+from csrreader import CsvReader
 from csvwriter import CsvWriter
 from sqlitewriter import SqLiteWriter
 from confreader import ConfReader
@@ -526,7 +527,7 @@ if __name__ == "__main__":
             # update station coordinates & upload to instrument
             st_coord = w
             ts.SetStation(st_coord[0]['east'], st_coord[0]['north'],
-                          st_coord[0]['elev'])
+                          st_coord[0]['elev'], cr.json['station_height'])
             # upload station coords to server
             print("Uploading station coords...")
             st_coord[0]['datetime'] = act_date
