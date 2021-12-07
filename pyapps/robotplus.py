@@ -63,7 +63,7 @@ from httpreader import HttpReader
 from httpwriter import HttpWriter
 from georeader import GeoReader
 from geowriter import GeoWriter
-from csrreader import CsvReader
+from csvreader import CsvReader
 from csvwriter import CsvWriter
 from sqlitewriter import SqLiteWriter
 from confreader import ConfReader
@@ -362,6 +362,8 @@ if __name__ == "__main__":
                                     table='monitoring_met',
                                     filt=['id', 'pressure', 'temp', 'humidity',
                                           'wettemp', 'datetime'])
+                if wrtm.conn is None:
+                    exit(-1)
             else:
                 wrtm = CsvWriter(name='met', fname=cr.json['met_wr'],
                                  filt=['id', 'temp', 'pressure', 'humidity',
@@ -394,6 +396,8 @@ if __name__ == "__main__":
         wrt = SqLiteWriter(db=cr.json['coo_wr'][7:], dist=fmt,
                            table='monitoring_coo',
                            filt=['id', 'east', 'north', 'elev', 'datetime'])
+        if wrt.conn is None:
+            exit(-1)
     else:
         wrt = GeoWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt)
     # observation writer
@@ -404,6 +408,8 @@ if __name__ == "__main__":
                             table='monitoring_obs',
                             filt=['id', 'hz', 'v', 'distance',
                                   'crossincline', 'lengthincline', 'datetime'])
+        if wrt1.conn is None:
+            exit(-1)
     else:
         wrt1 = GeoWriter(fname=cr.json['obs_wr'], mode='a', dist=fmt)
     # information writer
@@ -416,6 +422,8 @@ if __name__ == "__main__":
                                 filt=['datetime', 'nref', 'nrefobs', 'nmon',
                                       'nmonobs', 'maxincl', 'std_east',
                                       'std_north', 'std_elev', 'std_ori'])
+            if wrt2.conn is None:
+                exit(-1)
         else:
             wrt2 = GeoWriter(fname=cr.json['inf_wr'], mode='a', dist=fmt)
     if 'fix_list' in cr.json and cr.json['fix_list'] is not None:
