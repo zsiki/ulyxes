@@ -103,6 +103,7 @@ if __name__ == "__main__":
         port = '/dev/ttyUSB0'
 
     #logging.getLogger().setLevel(logging.DEBUG)
+    print("We suppose the orientation is set on the station")
     iface = SerialIface("rs-232", port)
     geo_wrt = GeoWriter(dist='.4f', angle='RAD', fname=ofname+'.geo', mode='w')
     coo_wrt = GeoWriter(dist='.4f', angle='RAD', fname=ofname + '.coo', mode='w')
@@ -155,13 +156,13 @@ if __name__ == "__main__":
                 ts.SetPrismType(p)
             else:
                 pc = -99
-            atr = 0 if p == 2 else 1
+            atr = 0 if p == 2 else 1    # prism 2 is the foil marker
         else:
-            pc = GetFloat("Prism constant [mm] (-99 for none) ", pc * 1000) / 1000.0
+            pc = GetFloat("Prism constant [mm] (-99 for none) ", pc)
             if pc > -99:
-                ts.SetPc(pc)
+                ts.SetPc(pc / 1000.0)
                 #pc = -99
-            atr = 0 if pc == 0.00344 else 1
+            atr = 0 if pc == 34.4 else 1    # 34.4 is the PC for direct reflext on Leica
         print(ts.GetPc())
         ts.SetATR(atr)
         raw_input("Target on prism and press enter")
