@@ -54,16 +54,16 @@ class ConfReader(JSONReader):
                 if pardef['type'] == 'int' and type(self.json[par]) is not int:
                     print("type mismatch parameter: {0}".format(par))
                     return False
-                elif pardef['type'] == 'float' and \
+                if pardef['type'] == 'float' and \
                     type(self.json[par]) is not int and \
                     type(self.json[par]) is not float:
-                    print("type mismatch parameter: ".format(par))
+                    print("type mismatch parameter: {0}".format(par))
                     return False
-                elif pardef['type'] == 'list' and \
+                if pardef['type'] == 'list' and \
                     type(self.json[par]) is not list:
                     print("type mismatch parameter: {0}".format(par))
                     return False
-                elif pardef['type'] == 'file' and \
+                if pardef['type'] == 'file' and \
                     type(self.json[par]) is str and \
                     not os.path.isfile(self.json[par]):
                     print("parameter type mismatch or file does not exist: {0}".format(self.json[par]))
@@ -77,10 +77,12 @@ class ConfReader(JSONReader):
         return True
 
 if __name__ == '__main__':
-    config_pars = {
+    from sys import argv
+
+    CONFIG_PARS = {
         'log_file': {'required' : True, 'type': 'file'},
         'log_level': {'required' : True, 'type': 'int',
-        'set':[logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR ]},
+                      'set':[logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
         'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1800', '1100']},
         'station_id': {'required' : True, 'type': 'str'},
@@ -92,6 +94,7 @@ if __name__ == '__main__':
         'face_dir_limit': {'required': False, 'default': 0.0029, 'type': 'float'},
         'face_dist_limit': {'required': False, 'default': 0.01, 'type': 'float'},
         'directfaces': {'required': False, 'default': 1, 'type': 'int'},
+        'avg_faces': {'required': False, 'default': 1, 'type': 'int'},
         'fix_list': {'required': False, 'type': 'list'},
         'mon_list': {'required': False, 'type': 'list'},
         'max_try': {'required': False, 'type': 'int', 'default': 3},
@@ -118,9 +121,10 @@ if __name__ == '__main__':
         'met_par': {'required': False},
         '__comment__': {'required': False, 'type': 'str'}
     }
-    jr = ConfReader('test', '../pyapps/robotplus.json', config_pars)
-    if jr.state == jr.RD_OK:
-        print(jr.Load())
-        print(jr.Check())
+    FN = '../pyapps/robotplus.json' if len(argv) < 2 else argv[1]
+    JR = ConfReader('test', FN, CONFIG_PARS)
+    if JR.state == JR.RD_OK:
+        print(JR.Load())
+        print(JR.Check())
     else:
         print("config file?")

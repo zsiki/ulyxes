@@ -734,6 +734,7 @@ Parameters:
 - face_dir_limit: maximum difference for face left and face right angle (rad) (default 0.0029 60")
 - face_dist_limit: maximum difference for face left and face right dist (m) (default 0.01 m)
 - directfaces: number of faces to measure (face left and right are measured directly) (default 1)
+- avg_faces: 1/0 calculate average for faces of monitoring points and store only average/do not calculate average store individual faces, default: 1
 - fix_list: list of fix points to calculate station coordinates, optional (default: empty)
 - mon_list: list of monitoring points to measure, optional (default: empty)
 - max_try: maximum trying to measure a point, optional (default: 3)

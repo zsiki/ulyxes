@@ -22,6 +22,7 @@ Parameters are stored in config file using JSON format::
     face_dir_limit: maximum difference for face left and face right angle (rad) (default 0.0029 60")
     face_dist_limit: maximum difference for face left and face right dist (m) (default 0.01)
     directfaces: number of faces to measure (face left and right are measured directly) (default 1)
+    avg_faces: 1/0 calculate average for faces of monitoring points and store only average/do not calculate average store individual faces, default: 1
     fix_list: list of fix points to calculate station coordinates, optional (default: empty)
     mon_list: list of monitoring points to measure, optional (default: empty)
     max_try: maximum trying to measure a point, optional (default: 3)
@@ -86,11 +87,11 @@ def get_mu(t):
     """
     if re.search('120[0-9]$', t):
         return LeicaTPS1200()
-    elif re.search('110[0-9]$', t):
+    if re.search('110[0-9]$', t):
         return LeicaTCRA1100()
-    elif re.search('180[0-9]$', t):
+    if re.search('180[0-9]$', t):
         return LeicaTCA1800()
-    elif re.search('^local', t):
+    if re.search('^local', t):
         return LeicaTPS1200()
     return False
 
@@ -231,6 +232,7 @@ if __name__ == "__main__":
         'face_dir_limit': {'required': False, 'default': 0.0029, 'type': 'float'},
         'face_dist_limit': {'required': False, 'default': 0.01, 'type': 'float'},
         'directfaces': {'required': False, 'default': 1, 'type': 'int'},
+        'avg_faces': {'required': False, 'default': 1, 'type': 'int'},
         'fix_list': {'required': False, 'type': 'list'},
         'mon_list': {'required': False, 'type': 'list'},
         'max_try': {'required': False, 'type': 'int', 'default': 3},
@@ -363,7 +365,7 @@ if __name__ == "__main__":
                                     filt=['id', 'pressure', 'temp', 'humidity',
                                           'wettemp', 'datetime'])
                 if wrtm.conn is None:
-                    exit(-1)
+                    sys.exit(-1)
             else:
                 wrtm = CsvWriter(name='met', fname=cr.json['met_wr'],
                                  filt=['id', 'temp', 'pressure', 'humidity',
@@ -397,7 +399,7 @@ if __name__ == "__main__":
                            table='monitoring_coo',
                            filt=['id', 'east', 'north', 'elev', 'datetime'])
         if wrt.conn is None:
-            exit(-1)
+            sys.exit(-1)
     else:
         wrt = GeoWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt)
     # observation writer
@@ -602,7 +604,8 @@ if __name__ == "__main__":
                   cr.json['dist_limit'])
         obs_out, coo_out = r.run()
         # calculate average for observations
-        if cr.json['faces'] > 1 or cr.json['directfaces'] > 1:
+        if cr.json['avg_faces'] == 1 and \
+           (cr.json['faces'] > 1 or cr.json['directfaces'] > 1):
             obs_out = avg_obs(obs_out, cr.json['face_dir_limit'],
                               cr.json['face_dist_limit'])
         for o in obs_out:
@@ -611,7 +614,9 @@ if __name__ == "__main__":
                 if wrt1.WriteData(o) == -1:
                     logging.error('Observation data write failed')
         # calculate coordinate average
-        coo_out = avg_coo(coo_out, cr.json['face_coo_limit'])
+        if cr.json['avg_faces'] == 1 and \
+           (cr.json['faces'] > 1 or cr.json['directfaces'] > 1):
+            coo_out = avg_coo(coo_out, cr.json['face_coo_limit'])
         for c in coo_out:
             # add datetime to coords (same as obs)
             c['datetime'] = act_date
