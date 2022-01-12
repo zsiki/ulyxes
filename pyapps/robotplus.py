@@ -400,6 +400,9 @@ if __name__ == "__main__":
                            filt=['id', 'east', 'north', 'elev', 'datetime'])
         if wrt.conn is None:
             sys.exit(-1)
+    elif re.search('\.csv$', cr.json['coo_wr']):
+        wrt = CsvWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt,
+                filt=['id', 'east', 'north', 'elev'])
     else:
         wrt = GeoWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt)
     # observation writer
@@ -412,6 +415,9 @@ if __name__ == "__main__":
                                   'crossincline', 'lengthincline', 'datetime'])
         if wrt1.conn is None:
             exit(-1)
+    elif re.search('\.csv$', cr.json['obs_wr']):
+        wrt1 = CsvWriter(fname=cr.json['obs_wr'], mode='a', dist=fmt,
+                filt=['station', 'id', 'hz', 'v', 'distance'])
     else:
         wrt1 = GeoWriter(fname=cr.json['obs_wr'], mode='a', dist=fmt)
     # information writer
@@ -426,6 +432,9 @@ if __name__ == "__main__":
                                       'std_north', 'std_elev', 'std_ori'])
             if wrt2.conn is None:
                 exit(-1)
+        elif re.search('\.csv$', cr.json['inf_wr']):
+            wrt2= CsvWriter(fname=cr.json['inf_wr'], mode='a', dist=fmt,
+                    filt=['datetime', 'nref', 'nrefobs', 'std_east', 'std_north', 'std_elev', 'std_ori'])
         else:
             wrt2 = GeoWriter(fname=cr.json['inf_wr'], mode='a', dist=fmt)
     if 'fix_list' in cr.json and cr.json['fix_list'] is not None:
