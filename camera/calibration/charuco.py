@@ -16,7 +16,7 @@ parser.add_argument('-b', '--board', action="store_true",
 parser.add_argument('-w', '--width', type=int, default=5,
                     help='Width of board, default 5, max 10')
 parser.add_argument('-e', '--height', type=int, default=7,
-                    help='Width of board, default 7, max 10')
+                    help='Height of board, default 7, max 10')
 parser.add_argument('-c', '--camera', action="store_true",
                     help='use first camera or video file to take photos until enter pressed')
 parser.add_argument('-s', '--save', action="store_true",
