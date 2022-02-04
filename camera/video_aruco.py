@@ -52,25 +52,29 @@ class VideoAruco(ArucoBase):
         while True:
             frame, t = self.rdr.GetNext() # get next frame
             if frame is not None:
-                res = self.ProcessImg(frame, self.rdr.ind)
-                if res:
-                    if self.calibration:    # output pose, too
-                        data = {'id': self.rdr.ind, 'datetime': t,
-                                'east': res["east"], 'north': res["north"],
-                                'width': res['width'], 'height': res['height'],
-                                'code': self.code,
-                                'roll': res["euler_angles"][0],
-                                'pitch': res["euler_angles"][1],
-                                'yaw': res["euler_angles"][2]}
-                    else:
-                        data = {'id': self.rdr.ind, 'datetime': t,
-                                'east': res["east"], 'north': res["north"],
-                                'width': res['width'], 'height': res['height'],
-                                'code': self.code}
-                    self.wrt.WriteData(data)
-                else:   # no marker found search whole image next
-                    self.last_x = self.last_y = None
-                    self.off_y = self.off_x = 0
+                results = self.ProcessImg(frame, self.rdr.ind)
+                if results:
+                    for res in results:
+                        print(res)
+                        if self.code is None or self.code == res['code']:
+                            if self.calibration:    # output pose, too
+                                data = {'id': self.rdr.ind, 'datetime': t,
+                                        'east': res["east"],
+                                        'north': res["north"],
+                                        'width': res['width'],
+                                        'height': res['height'],
+                                        'code': res['code'],
+                                        'roll': res["euler_angles"][0],
+                                        'pitch': res["euler_angles"][1],
+                                        'yaw': res["euler_angles"][2]}
+                            else:
+                                data = {'id': self.rdr.ind, 'datetime': t,
+                                        'east': res["east"],
+                                        'north': res["north"],
+                                        'width': res['width'],
+                                        'height': res['height'],
+                                        'code': res['code']}
+                            self.wrt.WriteData(data)
             else:
                 break
         return 0
@@ -79,15 +83,13 @@ if __name__ == "__main__":
     # set up command line parameters
     parser = argparse.ArgumentParser()
     parser.add_argument('name', metavar='file_name', type=str, nargs=1,
-                        help='video file to processi or camera ID (e.g. 0)')
+                        help='video file to process or camera ID (e.g. 0)')
     parser.add_argument('-f', '--fps', type=int, default=None,
                         help='frame per sec')
     parser.add_argument('-d', '--dict', type=int, default=1,
                         help='marker dictionary id, default=1 (DICT_4X4_100)')
     parser.add_argument('-c', '--code', type=int,
-                        help='marker id to search, if not given first found marker is used')
-    parser.add_argument('--fast', action="store_true",
-                        help='reduce input image size doubling the marker size at latest found position')
+                        help='marker id to search, if not given all found markers are detected')
     parser.add_argument('--debug', type=int, default=0,
                         help='display every nth frame with marked marker position, default 0 (off)')
     parser.add_argument('-m', '--calibration', type=str, default=None,
