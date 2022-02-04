@@ -13,7 +13,7 @@ import numpy as np
 import cv2
 
 if len(sys.argv) < 3:
-    print("Usage: calibration_yaml image [image] [...]")
+    print(f"Usage: {sys.argv[0]} calibration_yaml image [image] [...]")
     sys.exit(1)
 with open(sys.argv[1]) as f:
     try:
