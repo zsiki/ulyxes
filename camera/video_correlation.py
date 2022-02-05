@@ -10,14 +10,16 @@
 """
 
 import sys
-sys.path.append('../pyapi/')
-
 import datetime
 import re
 import argparse
 import matplotlib.pyplot as plt
+
+sys.path.append('../pyapi/')
+
 from template_base import TemplateBase
 from csvwriter import CsvWriter
+from sqlitewriter import SqLiteWriter
 from imagereader import ImageReader
 
 class VideoCorrelation(TemplateBase):
@@ -34,8 +36,13 @@ class VideoCorrelation(TemplateBase):
             self.rdr.act = datetime.datetime(int(l[-2][0:4]), int(l[-2][4:6]),
                                              int(l[-2][6:8]), int(l[-1][0:2]),
                                              int(l[-1][2:4]), int(l[-1][4:6]))
-        self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
-                             filt=['id', 'datetime', 'east', 'north', 'quality'])
+        if re.match('sqlite:', args.output):
+            self.wrt = SqLiteWriter(db=args.output[7:],
+                                    table='template_coo',
+                                    filt=['id', 'datetime', 'east', 'north', 'quality'])
+        else:
+            self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
+                                 filt=['id', 'datetime', 'east', 'north', 'quality'])
 
     def process(self):
         """ process image serie

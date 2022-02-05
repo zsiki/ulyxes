@@ -18,6 +18,7 @@ from aruco_base import ArucoBase
 sys.path.append('../pyapi/')
 
 from csvwriter import CsvWriter
+from sqlitewriter import SqLiteWriter
 from imagereader import ImageReader
 
 class VideoAruco(ArucoBase):
@@ -37,8 +38,13 @@ class VideoAruco(ArucoBase):
             self.rdr.act = datetime.datetime(int(l[-2][0:4]), int(l[-2][4:6]),
                                              int(l[-2][6:8]), int(l[-1][0:2]),
                                              int(l[-1][2:4]), int(l[-1][4:6]))
-        self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
-                             filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
+        if re.match('sqlite:', args.output):
+            self.wrt = SqLiteWriter(db=args.output[7:],
+                                    table='aruco_coo',
+                                    filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
+        else:
+            self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
+                                 filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
 
     def process(self):
         """ process video frame by frame
