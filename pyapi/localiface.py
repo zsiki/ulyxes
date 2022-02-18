@@ -19,8 +19,8 @@ from iface import Iface
 class LocalIface(Iface):
     """ This local interface stands for using PyAPI without any instrument.
         A file is used to read data instread of instrument.
-        It is mainly for developing or testing
-        rand mode can be used with GeoCom commands only, if more line with
+        It is mainly for developing or testing.
+        rand mode can be used with GeoCom commands only, if more lines with
         identical codes are in the input file, they are used sequentially
 
         :param name: name of the interface (str), default 'Local'
@@ -93,6 +93,3 @@ class LocalIface(Iface):
 if __name__ == "__main__":
     a = LocalIface(fname="/home/siki/tmp/tca1800.geocom", mode='rand')
     #a = LocalIface('test', '/home/siki/meresfeldolgozas/nmea1.txt')
-    #print(a.GetName())
-    #print(a.GetState())
-    #print(a.GetLine())
