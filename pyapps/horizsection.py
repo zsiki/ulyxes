@@ -16,9 +16,11 @@ Sample application of Ulyxes PyAPI to measure a horizontal section(s)
     :param argv[7].. (elevations): elevations for horizontal sections
 """
 import sys
+import os.path
 import re
 import math
 import logging
+import argparse
 
 sys.path.append('../pyapi/')
 
@@ -31,7 +33,7 @@ from leicatcra1100 import LeicaTCRA1100
 from trimble5500 import Trimble5500
 from totalstation import TotalStation
 
-class HorizontalSection(object):
+class HorizontalSection():
     """ Measure a horizontal section at a given elevation
         :param ts: total station instance
         :param elev: elevation for section
@@ -135,115 +137,205 @@ class HorizontalSection(object):
             pass
         return 0
 
-if __name__ == "__main__":
-    if sys.version_info[0] > 2:  # Python 3 compatibility
-        raw_input = input
+def cmd_params():
+    """ process command line parameters
+        parameters can be given by switches or in a json file
+    """
+    # defaults
+    def_logfile = 'stdout'
+    def_logging = logging.ERROR
+    def_format = "%(asctime)s %(levelname)s:%(message)s"
+    def_angle = 45.0
+    def_east = 0.0
+    def_north = 0.0
+    def_elev = 0.0
+    def_port = '/dev/ttyUSB0'
+    def_start = None
+    def_top = None
+    def_max = 360.0
+    def_tmax = None
+    def_tol = 0.01
+    def_iter = 10
+    def_hlist = None
+    def_wrt = 'stdout'
+    hz_start = def_start
+    levels = None
+    if len(sys.argv) == 2 and os.path.exists(sys.argv[1]):
+        # process JSON config and drop other switches
+        config_pars = {
+            'log_file': {'required' : False, 'type': 'file', 'default': def_logfile},
+            'log_level': {'required' : False, 'type': 'int',
+                          'set': [logging.DEBUG, logging.INFO, logging.WARNING,
+                                  logging.ERROR, logging.FATAL],
+                          'default': def_logging},
+            'log_format': {'required': False, 'default': def_format},
+            'angle_step' : {'required': False, 'type': "float", 'default': def_angle},
 
-    config_pars = {
-        'log_file': {'required' : True, 'type': 'file'},
-        'log_level': {'required' : True, 'type': 'int',
-                      'set': [logging.DEBUG, logging.INFO, logging.WARNING,
-                              logging.ERROR, logging.FATAL]},
-        'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
-        'angle_step' : {'required': False, 'type': "float", 'default': 45.0},
-
-        'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1100', '5500']},
-        'port': {'required' : True, 'type': 'str', 'default': '/dev/ttyUSB0'},
-        'hz_start': {"required": False, 'type': "str", 'default': None},
-        'max_angle': {'required': False, 'type': "float", 'default': 360.0},
-        'tolerance': {'required': False, 'type': "float", 'default': 0.01},
-        'iteration': {'required': False, 'type': 'int', 'default': 10},
-        'height_list': {'required': False, 'type': 'list'},
-        'wrt': {'required' : False, 'default': 'stdout'},
-        '__comment__': {'required': False, 'type': 'str'}
-    }
-    logging.getLogger().setLevel(logging.DEBUG)
-    # process commandline parameters
-    pat = re.compile(r'\.json$')
-    #sys.argv.append('horiz.json')
-    if len(sys.argv) == 2 and pat.search(sys.argv[1]):
-        # load json config
+            'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1100', '5500']},
+            'station_east': {'required' : False, 'type': 'float', 'default': def_east},
+            'station_north': {'required' : False, 'type': 'float', 'default': def_north},
+            'station_elev': {'required' : False, 'type': 'float', 'default': def_elev},
+            'port': {'required' : False, 'type': 'str', 'default': def_port},
+            'hz_start': {"required": False, 'type': "str", 'default': def_start},
+            'hz_top': {"required": False, 'type': "str", 'default': def_top},
+            'max_angle': {'required': False, 'type': "float", 'default': def_max},
+            'max_top': {'required': False, 'type': "float", 'default': def_tmax},
+            'tolerance': {'required': False, 'type': "float", 'default': def_tol},
+            'iteration': {'required': False, 'type': 'int', 'default': def_iter},
+            'height_list': {'required': False, 'type': 'list', 'default': def_hlist},
+            'wrt': {'required' : False, 'default': 'stdout'},
+            '__comment__': {'required': False, 'type': 'str'}
+        }
         cr = ConfReader('HorizontalSection', sys.argv[1], config_pars)
         cr.Load()
         if not cr.Check():
             print("Config check failed")
             sys.exit(-1)
+
         logging.basicConfig(format=cr.json['log_format'],
                             filename=cr.json['log_file'], filemode='a',
                             level=cr.json['log_level'])
-        hz_start = None
         if cr.json['hz_start'] is not None:
             hz_start = Angle(float(cr.json['hz_start']), 'DEG')
+        if cr.json['hz_top'] is not None:
+            hz_top = Angle(float(cr.json['hz_top']), 'DEG')
+        else:
+            hz_top = hz_start
         stepinterval = Angle(cr.json['angle_step'], 'DEG')
         stationtype = cr.json['station_type']
+        east = cr.json['station_east']
+        north = cr.json['station_north']
+        elev = cr.json['station_elev']
         port = cr.json['port']
         maxa = cr.json['max_angle'] / 180.0 * math.pi
+        if cr.json['max_top'] is not None:
+            maxt = cr.json['max_top'] / 180.0 * math.pi
+        else:
+            maxt = maxa
         tol = cr.json['tolerance']
         maxiter = cr.json['iteration']
-        wrt = CsvWriter(angle='DMS', dist='.3f',
-                        filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
-                        fname=cr.json['wrt'], mode='a', sep=';')
+        wrt_file = cr.json['wrt']
         levels = cr.json['height_list']
     else:
-        if len(sys.argv) > 1:
-            stepinterval = Angle(float(sys.argv[1]), 'DEG')
-        else:
-            stepinterval = Angle(45, 'DEG')
-        if len(sys.argv) > 2:
-            stationtype = sys.argv[2]
-        else:
-            stationtype = '1200'
-        if len(sys.argv) > 3:
-            port = sys.argv[3]
-        else:
-            port = '/dev/ttyUSB0'
-        hz_start = None
-        if len(sys.argv) > 4:
-            maxa = float(sys.argv[4]) / 180.0 * math.pi
-        else:
-            maxa = PI2
-        tol = 0.01
-        if len(sys.argv) > 5:
-            tol = float(sys.argv[5])
-        maxiter = 10    # number of iterations to find point on horizontal plan
-        if len(sys.argv) > 6:
-            maxiter = int(sys.argv[6])
-        wrt = CsvWriter(angle='DMS', dist='.3f',
-                        filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
-                        fname='stdout', mode='a', sep=';')
-        if len(sys.argv) > 7:
-            levels = [float(a) for a in sys.argv[7:]]
-        else:
-            levels = None
-    iface = SerialIface("rs-232", port)
-    if iface.state != iface.IF_OK:
-        print("serial error")
+        # process command line switches
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-l', '--log', type=str, default=def_logfile,
+                            help='Logfile name "stdout" for screen output')
+        parser.add_argument('--level', type=int, default=def_logging,
+                            help='Log level')
+        parser.add_argument('--format', type=str, default=def_format,
+                            help='Log format')
+        parser.add_argument('--step', type=float, default=def_angle,
+                            help='Angle step in section')
+        parser.add_argument('--type', type=str,
+                            help='Total station type')
+        parser.add_argument('--east', type=float, default=def_east,
+                            help='Station east')
+        parser.add_argument('--north', type=float, default=def_north,
+                            help='Station north')
+        parser.add_argument('--elev', type=float, default=def_elev,
+                            help='Station elevation')
+        parser.add_argument('-p', '--port', type=str, default=def_port,
+                            help='Communication port')
+        parser.add_argument('--start', type=float, default=def_start,
+                            help='Horizontal start direction')
+        parser.add_argument('--top', type=float, default=def_top,
+                            help='Horizontal start direction at top')
+        parser.add_argument('--max', type=float, default=def_max,
+                            help='Max angle')
+        parser.add_argument('--tmax', type=float, default=def_tmax,
+                            help='Max angle at top')
+        parser.add_argument('--tol', type=float, default=def_tol,
+                            help='Height tolerance')
+        parser.add_argument('--iter', type=int, default=def_iter,
+                            help='Max iteration to find section')
+        parser.add_argument('--heights', type=str, default=def_hlist,
+                            help='list of elevations for more sections')
+        parser.add_argument('--wrt', type=str, default=def_wrt,
+                            help='Output file')
+        args = parser.parse_args()
+
+        logging.basicConfig(format=args.format, filename=args.log, filemode='a',
+                            level=args.level)
+        if args.start is not None:
+            hz_start = Angle(args.start, 'DEG')
+        stepinterval = Angle(args.step, 'DEG')
+        stationtype = args.type
+        east = args.east
+        north = args.north
+        elev = args.elev
+        port = args.port
+        maxa = args.max / 180.0 * math.pi
+        maxt = maxa
+        hz_top = hz_start
+        tol = args.tol
+        maxiter = args.iter
+        wrt_file = args.wrt
+        try:
+            if args.heights is not None:
+                levels = [float(l) for l in args.heights.split()]
+        except Exception:
+            print("parameter error --heights")
+            sys.exit(1)
+
+    if stationtype is None:
+        parser.print_help()
         sys.exit(1)
-    if re.search('120[0-9]$', stationtype):
+
+    return {'hz_Start': hz_start, 'hz_top': hz_top,
+            'stepinterval': stepinterval,
+            'stationtype': stationtype,
+            'east': east, 'north': north, 'elev': elev, 'port': port,
+            'max': maxa, 'maxt': maxt,
+            'tol': tol, 'iter': maxiter, 'wrt': wrt_file, 'levels': levels}
+
+if __name__ == "__main__":
+    # process parameters
+    params = cmd_params()
+    # writer for instrument
+    wrt = CsvWriter(angle='DMS', dist='.3f',
+                    filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
+                    fname=params['wrt'], mode='a', sep=';')
+    # measure interface for instrument
+    if re.search('120[0-9]$', params['stationtype']):
         mu = LeicaTPS1200()
-    elif re.search('110[0-9]$', stationtype):
+    elif re.search('110[0-9]$', params['stationtype']):
         mu = LeicaTCRA1100()
-    elif re.search('550[0-9]$', stationtype):
+    elif re.search('550[0-9]$', params['stationtype']):
         mu = Trimble5500()
         iface.eomRead = b'>'
     else:
         print("unsupported instrument type")
         sys.exit(1)
-
-    ts = TotalStation(stationtype, mu, iface)
+    # iface for instrument
+    iface = SerialIface("rs-232", params['port'])
+    if iface.state != iface.IF_OK:
+        print("serial error")
+        sys.exit(1)
+    # create instrument
+    ts = TotalStation(params['stationtype'], mu, iface)
     if isinstance(mu, Trimble5500):
         print("Please change to reflectorless EDM mode (MNU 722 from keyboard)")
         print("and turn on red laser (MNU 741 from keyboard) and press enter!")
-        raw_input()
+        input()
     else:
         ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
+    # set station coordinates
+    ts.SetStation(params['east'], params['north'], params['elev'])
+    levels = params['levels']
     if levels is not None and len(levels) > 0:
-        for i in levels:
-            h_sec = HorizontalSection(ts, wrt, i, hz_start, stepinterval, maxa,
-                                      maxiter, tol)
+        dhz = params['hz_start'] - params['hz_top']
+        z0 = levels[0]
+        dmax = params['maxt'] - params['max']
+        for z in levels:
+            hz = params['hz_start'] + (z - z0) * dhz
+            ma = params['max'] + (z - z0) * dmax
+            h_sec = HorizontalSection(ts, wrt, z, hz,
+                                      params['stepinterval'], ma,
+                                      params['iter'], params['tol'])
             h_sec.run()
     else:
-        h_sec = HorizontalSection(ts, wrt, hz_start=hz_start,
-                                  stepinterval=stepinterval,
-                                  maxa=maxa, maxiter=maxiter, tol=tol)
+        h_sec = HorizontalSection(ts, wrt, None, params['hz_start'],
+                                  params['stepinterval'], params['max'],
+                                  params['iter'], params['tol'])
         h_sec.run()
