@@ -41,6 +41,9 @@ from leicatps1200 import LeicaTPS1200
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.ERROR)
     # Process command line parameters
+    if len(sys.argv) == 1:
+        print('Usage: {} instrument [mode [EDM_mode [serial [output_csv]]]]'.format(sys.argv[0]))
+        exit()
     # Instrument type
     if len(sys.argv) > 1:
         if re.search('110[0-9]$', sys.argv[1]):
