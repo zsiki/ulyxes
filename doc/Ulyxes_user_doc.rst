@@ -540,8 +540,44 @@ infinite loop.
 Horizsection
 ************
 
-Scan horizontally around the total station with a given angle step in several
+Scan horizontally around the total station with a given angle step in one or more
 horizontal sections.
+
+.. code:: text
+
+    usage: horizsection.py [-h] [-l LOG] [--level LEVEL] [--format FORMAT]
+                           [--step STEP] [--type TYPE] [--east EAST]
+                           [--north NORTH] [--elev ELEV] [-p PORT]
+                           [--start START] [--top TOP] [--max MAX] [--tmax TMAX]
+                           [--tol TOL] [--iter ITER] [--heights HEIGHTS]
+                           [--wrt WRT]
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -l LOG, --log LOG     Logfile name "stdout" for screen output
+      --level LEVEL         Log level
+      --format FORMAT       Log format
+      --step STEP           Angle step in section
+      --type TYPE           Total station type
+      --east EAST           Station east
+      --north NORTH         Station north
+      --elev ELEV           Station elevation
+      -p PORT, --port PORT  Communication port
+      --start START         Horizontal start direction
+      --top TOP             Horizontal start direction at top
+      --max MAX             Max angle
+      --tmax TMAX           Max angle at top
+      --tol TOL             Height tolerance
+      --iter ITER           Max iteration to find section
+      --heights HEIGHTS     list of elevations for more sections
+      --wrt WRT             Output file
+
+Parameters can be passed in a JSON file.
+
+After heights parameter more value can be given. The range of the sections is given
+by angles. START defines the horizontal direction of first section, MAX is the angle
+range of section to the rigth from the START. TOP and TMAX are the same for the last
+section. Horozsection will interpolate between these values for other sections.
 
 Section
 *******
@@ -553,17 +589,18 @@ Monitoring
 
 This block consist of several apps to solve simple tasks for monitoring.
 
-- *filemaker* creates an input file for monitoring using manual targeting
+- *filemaker* creates an input file for monitoring using manual targeting (obsolate use coomaker instead)
 - *filegen* creates an input file for monitoring from coordinates automaticly
 - *coomaker* creates a GeoEasy format input file for monitoring using manual targeting
 - *blindorientation* searches for a prism from a known station and calculates orientation angle
 - *freestation* calculates station coordinates and orientation using GNU gama
-- *robot* makes automatic observation using a file from FileMaker or FileGen
+- *robot* makes automatic observation using a file from FileMaker or FileGen (obsolate use robotplus instead)
 - *robotplus* complex monitoring application using FileGen, Blindorientation, FreeStation and Robot
 
 FileMaker
 =========
 
+*This application is obsolate, use coomaker.*
 It is a simple interactive app to create input file for monitoring observations.
 First set up the total station on a known point and set the orientation.
 
@@ -590,7 +627,7 @@ Target modes:
 FileGen
 =======
 
-A simple application to create input observations file for robot.py. 
+A simple application to create input observations file for robot.py or robotplus.py. 
 The input is a coordinate list in GeoEasy coo or CSV format. The output is a 
 GeoEasy geo or DMP file with bearings, zenith angles and distances from
 the station to the points in the coordinate list.
@@ -605,7 +642,7 @@ CooMaker
 ========
 
 A simple application to create coordinate and observation data for robot.py
-and robotplus.py. User have to set up and orient the total station on the 
+or robotplus.py. User have to set up and orient the total station on the 
 station and observe targets.
 
 Usage: coomaker.py output_file sensor port
@@ -620,7 +657,7 @@ FreeStation
 ===========
 
 An application to calculate free station from observations and coordinates.
-A least squaers estimation is used based on GNU gama.
+A least squares estimation is used based on GNU gama. The horizontal circle have to be oriented.
 
 Blindorientation
 ================
@@ -640,6 +677,7 @@ station or starts a long searching algorithm.
 Robot
 =====
 
+*This application is obsolate, please use robotplus.*
 Sample application of Ulyxes PyAPI to measure a serie of points.
 
 Usage: robot.py input_file output_file sensor port retry delay met met_addr met_par
