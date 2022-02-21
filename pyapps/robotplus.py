@@ -629,7 +629,7 @@ if __name__ == "__main__":
         for c in coo_out:
             # add datetime to coords (same as obs)
             c['datetime'] = act_date
-            if wrt.WriteData(c) == -1:
+            if wrt.WriteData(c) < 1:
                 logging.error('Coord data write failed')
         if 'inf_wr' in cr.json:
             maxi = [max(abs(o['crossincline'].GetAngle('GON')),

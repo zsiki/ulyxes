@@ -68,7 +68,7 @@ class HttpWriter(Writer):
                 res = urlopen(req).read()
             except Exception:
                 res = None
-        return res
+        return int(res)
 
 if __name__ == "__main__":
     #myfile = HttpWriter(mode='GET', url="http://www.agt.bme.hu/php/get_tester.php")
