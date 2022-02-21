@@ -105,8 +105,8 @@ if __name__ == "__main__":
     #logging.getLogger().setLevel(logging.DEBUG)
     print("We suppose the orientation is set on the station")
     iface = SerialIface("rs-232", port)
-    geo_wrt = GeoWriter(dist='.4f', angle='RAD', fname=ofname+'.geo', mode='w')
-    coo_wrt = GeoWriter(dist='.4f', angle='RAD', fname=ofname + '.coo', mode='w')
+    geo_wrt = GeoWriter(dist='.4f', angle='RAD', fname=ofname+'.geo', mode='a')
+    coo_wrt = GeoWriter(dist='.4f', angle='RAD', fname=ofname + '.coo', mode='a')
     ts = TotalStation(stationtype, mu, iface)
 
     # get station data
