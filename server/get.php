@@ -32,6 +32,12 @@
  *	  wettemp: wet temperature
  *    datetime: time stamp
  *	  
+ *  config.php parameters
+ *    conn_str: connection string
+ *    coo_table: table name for local coordinates
+ *    obs_table: table name for observations (total station)
+ *    met_table: table name for meteorology data
+ *    poi_table: table name for map coordinates
  */
 
 	//error_log(http_build_query($_REQUEST));
@@ -44,8 +50,8 @@
 		error_log("Parameter error: id missing" . http_build_query($_REQUEST));
 		exit();
 	}
-	if (isset($_REQUEST['east']) && isset($_REQUEST['north']) &&
-		isset($_REQUEST['elev']) && isset($_REQUEST['datetime'])) {
+	if ((isset($_REQUEST['east']) || isset($_REQUEST['north']) ||
+		isset($_REQUEST['elev'])) && isset($_REQUEST['datetime'])) {
 		// coordinate record sent
 		$table =$coo_table;
 	} elseif (isset($_REQUEST['hz']) && isset($_REQUEST['v']) &&
