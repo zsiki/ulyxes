@@ -7,13 +7,7 @@
 Sample application of Ulyxes PyAPI to measure a horizontal section(s)
     target on the first point of the first section and start this app
     coordinates and observations are written to csv file
-    :param argv[1] (angle step): angle step between points in DEG, default 45 or the name of a json file which contains all the parameters (this case do not specify other parameters in the command line)
-    :param argv[2] (sensor): 1100/1200/5500, default 1200
-    :param argv[3] (port): serial port, default /dev/ttyUSB0
-    :param argv[4] (max angle): stop at this direction, default 360 degree
-    :param argv[5] (tolerance): acceptable tolerance (meter) from the horizontal plane, default 0.01
-    :param argv[6] (iteration): max iteration number for a point, default 10
-    :param argv[7].. (elevations): elevations for horizontal sections
+
 """
 import sys
 import os.path
@@ -46,7 +40,7 @@ class HorizontalSection():
     """
 
     def __init__(self, ts, wrt, elev=None, hz_start=None,
-                 stepinterval=Angle(45, "DEG"), maxa=PI2, maxiter=10, tol=0.02):
+                 stepinterval=Angle(45, "DEG"), maxa=Angle(PI2), maxiter=10, tol=0.02):
         """ initialize """
         self.ts = ts
         self.wrt = wrt
@@ -59,11 +53,11 @@ class HorizontalSection():
 
     def run(self):
         """ do the observations in horizontal section """
-        self.ts.Measure()    # initial measurement for startpoint
         if self.hz_start is not None:
             # rotate to start position, keeping zenith angle
             a = self.ts.GetAngles()
             self.ts.Move(self.hz_start, a['v'])
+        self.ts.Measure()    # initial measurement for startpoint
         startp = self.ts.GetMeasure()
         startp0 = None
         if self.ts.measureIface.state != self.ts.measureIface.IF_OK or 'errorCode' in startp:
@@ -81,7 +75,7 @@ class HorizontalSection():
         except Exception:
             pass
         act = Angle(0)  # actual angle from startpoint
-        while act.GetAngle() < self.maxa: # go around the whole circle
+        while act.GetAngle() < self.maxa.GetAngle(): # go around the whole section
             self.ts.Measure() # measure distance0
             if self.ts.measureIface.state != self.ts.measureIface.IF_OK:
                 self.ts.measureIface.state = self.ts.measureIface.IF_OK
@@ -104,7 +98,7 @@ class HorizontalSection():
                 zenith = nextp['v'].GetAngle()
                 height_rel = nextp['distance'] * math.cos(zenith)
                 hd = math.sin(zenith) * nextp['distance']
-                zenith1 = math.atan(hd / (height_rel + height0 - height))
+                zenith1 = abs(math.atan(hd / (height_rel + height0 - height)))
                 self.ts.MoveRel(Angle(0), Angle(zenith1-zenith))
                 ans = self.ts.Measure()
                 if 'errCode' in ans:
@@ -207,9 +201,9 @@ def cmd_params():
         north = cr.json['station_north']
         elev = cr.json['station_elev']
         port = cr.json['port']
-        maxa = cr.json['max_angle'] / 180.0 * math.pi
+        maxa = Angle(cr.json['max_angle'], "DEG")
         if cr.json['max_top'] is not None:
-            maxt = cr.json['max_top'] / 180.0 * math.pi
+            maxt = Angle(cr.json['max_top'], "DEG")
         else:
             maxt = maxa
         tol = cr.json['tolerance']
@@ -265,7 +259,7 @@ def cmd_params():
         north = args.north
         elev = args.elev
         port = args.port
-        maxa = args.max / 180.0 * math.pi
+        maxa = Angle(args.max, "DEG")
         maxt = maxa
         hz_top = hz_start
         tol = args.tol
@@ -282,7 +276,7 @@ def cmd_params():
         parser.print_help()
         sys.exit(1)
 
-    return {'hz_Start': hz_start, 'hz_top': hz_top,
+    return {'hz_start': hz_start, 'hz_top': hz_top,
             'stepinterval': stepinterval,
             'stationtype': stationtype,
             'east': east, 'north': north, 'elev': elev, 'port': port,
@@ -324,13 +318,14 @@ if __name__ == "__main__":
     ts.SetStation(params['east'], params['north'], params['elev'])
     levels = params['levels']
     if levels is not None and len(levels) > 0:
-        dhz = params['hz_start'] - params['hz_top']
+        dhz = params['hz_top'].GetAngle("DEG") - params['hz_start'].GetAngle("DEG")
         z0 = levels[0]
-        dmax = params['maxt'] - params['max']
-        for z in levels:
-            hz = params['hz_start'] + (z - z0) * dhz
-            ma = params['max'] + (z - z0) * dmax
-            h_sec = HorizontalSection(ts, wrt, z, hz,
+        z1 = levels[-1]
+        dmax = params['maxt'].GetAngle("DEG") - params['max'].GetAngle("DEG")
+        for level in levels:
+            hz = Angle(params['hz_start'].GetAngle("DEG") + (level - z0) / (z1 - z0) * dhz, "DEG")
+            ma = Angle(params['max'].GetAngle("DEG") + (level - z0) / (z1 - z0) * dmax, "DEG")
+            h_sec = HorizontalSection(ts, wrt, level, hz,
                                       params['stepinterval'], ma,
                                       params['iter'], params['tol'])
             h_sec.run()
