@@ -9,9 +9,10 @@ Leica DNA03 continuous observation to a single target
 
 Usage:
 
-* dna_demo.py /dev/sttyUSB0 csv_file
+* dna_demo.py [serial_port] [csv_file] [number_of_readings]
 """
 import sys
+import signal
 
 sys.path.append('../pyapi')
 
@@ -20,21 +21,32 @@ from serialiface import SerialIface
 from csvwriter import CsvWriter
 from digitallevel import DigitalLevel
 
+def handler(signum, frame):
+    """ catch ctrl/C from keyboard """
+    sys.exit()
+
 n = len(sys.argv)
+# default parameters
 ser = '/dev/ttyUSB0'
-out = 'dna_demo.csv'
+out = 'stdout'
+k = -1                  # infinite readings
 if n > 1:
     ser = sys.argv[1]
 if n > 2:
-    out = sys.arv[2]
-
+    out = sys.argv[2]
+if n > 3:
+    k = int(sys.argv[3])
 mu = LeicaDnaUnit()
-iface = SerialIface('x', '/dev/ttyUSB0')
+iface = SerialIface('x', ser)
 wrt = CsvWriter(angle='DMS', dist='.5f',
                 filt=['id', 'distance', 'staff', 'datetime'],
-                fname='stdout', mode='a', sep=';')
+                fname=out, mode='a', sep=';')
 dna = DigitalLevel('DNA03', mu, iface, wrt)
 dna.SetAutoOff(0)
 #print (dna.Temperature())
-while iface.state == iface.IF_OK:
+
+signal.signal(signal.SIGINT, handler)   # catch ctrl/C
+i = 0
+while iface.state == iface.IF_OK and i != k:
     dna.Measure()
+    i += 1
