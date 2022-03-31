@@ -16,7 +16,14 @@ import math
 import logging
 import argparse
 
-sys.path.append('../pyapi/')
+# check PYTHONPATH
+if len([p for p in sys.path if 'pyapi' in p]) == 0:
+    if os.path.isdir('../pyapi/'):
+        sys.path.append('../pyapi/')
+    else:
+        print("pyapi not found")
+        print("Add pyapi directory to the Python path or start your application from ulyxes/pyapps folder")
+        sys.exit(1)
 
 from angle import Angle, PI2
 from serialiface import SerialIface
@@ -124,7 +131,8 @@ class HorizontalSection():
             self.ts.MoveRel(self.stepinterval, Angle(0))
             act += self.stepinterval
         # rotate back to start
-        self.ts.Move(startp0['hz'], startp0['v'])
+        if startp0 is not None:
+            self.ts.Move(startp0['hz'], startp0['v'])
         try:
             self.ts.SetRedLaser(0)       # turn off red laser if possible
         except Exception:
@@ -290,6 +298,11 @@ if __name__ == "__main__":
     wrt = CsvWriter(angle='DMS', dist='.3f',
                     filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
                     fname=params['wrt'], mode='a', sep=';')
+    # iface for instrument
+    iface = SerialIface("rs-232", params['port'])
+    if iface.state != iface.IF_OK:
+        print("serial error")
+        sys.exit(1)
     # measure interface for instrument
     if re.search('120[0-9]$', params['stationtype']):
         mu = LeicaTPS1200()
@@ -300,11 +313,6 @@ if __name__ == "__main__":
         iface.eomRead = b'>'
     else:
         print("unsupported instrument type")
-        sys.exit(1)
-    # iface for instrument
-    iface = SerialIface("rs-232", params['port'])
-    if iface.state != iface.IF_OK:
-        print("serial error")
         sys.exit(1)
     # create instrument
     ts = TotalStation(params['stationtype'], mu, iface)

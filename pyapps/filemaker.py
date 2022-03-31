@@ -23,8 +23,16 @@ Modes::
 """
 import sys
 import re
+import os.path
 
-sys.path.append('../pyapi/')
+# check PYTHONPATH
+if len([p for p in sys.path if 'pyapi' in p]) == 0:
+    if os.path.isdir('../pyapi/'):
+        sys.path.append('../pyapi/')
+    else:
+        print("pyapi not found")
+        print("Add pyapi directory to the Python path or start your application from ulyxes/pyapps folder")
+        sys.exit(1)
 
 from serialiface import SerialIface
 from geowriter import GeoWriter
@@ -81,6 +89,8 @@ if __name__ == "__main__":
         port = 'COM1'
 
     iface = SerialIface("rs-232", port)
+    if iface.state != iface.IF_OK:
+        sys.exit(2)
     if otype == 'geo':
         geo_wrt = GeoWriter(dist='.4f', angle='RAD', fname=ofname+'.geo', mode='w')
         coo_wrt = GeoWriter(dist='.4f', angle='RAD', fname=ofname + '.coo', mode='w')

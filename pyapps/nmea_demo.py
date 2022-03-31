@@ -23,7 +23,14 @@ import re
 import argparse
 import logging
 
-sys.path.append('../pyapi')
+# check PYTHONPATH
+if len([p for p in sys.path if 'pyapi' in p]) == 0:
+    if os.path.isdir('../pyapi/'):
+        sys.path.append('../pyapi/')
+    else:
+        print("pyapi not found")
+        print("Add pyapi directory to the Python path or start your application from ulyxes/pyapps folder")
+        sys.exit(1)
 
 from localiface import LocalIface
 from serialiface import SerialIface
@@ -64,6 +71,9 @@ if __name__ == "__main__":
         li = LocalIface('test', args.interface)
     else:
         print('invalid interface given')
+        sys.exit(1)
+
+    if li.state != li.IF_OK:
         sys.exit(1)
 
     # output

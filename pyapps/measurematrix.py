@@ -16,8 +16,16 @@ usage: python measurematrix.py 9 3 1100 COM5
 """
 import re
 import sys
+import os.path
 
-sys.path.append('../pyapi/')
+# check PYTHONPATH
+if len([p for p in sys.path if 'pyapi' in p]) == 0:
+    if os.path.isdir('../pyapi/'):
+        sys.path.append('../pyapi/')
+    else:
+        print("pyapi not found")
+        print("Add pyapi directory to the Python path or start your application from ulyxes/pyapps folder")
+        sys.exit(1)
 
 from angle import Angle
 from serialiface import SerialIface
@@ -33,7 +41,7 @@ if __name__ == "__main__":
         raw_input = input
 
     if len(sys.argv) == 1:
-        print("Usage: {0:s} horizontal_step vertical_step instrument port output_file".format(sys.argv[0]))
+        print("Usage: {0:s} [horizontal_step [vertical_step [instrument [port [output_file]]]]]".format(sys.argv[0]))
         exit(1)
     # set horizontal stepping interval dh_nr
     dh_nr = 1

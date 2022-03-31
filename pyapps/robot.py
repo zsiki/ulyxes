@@ -61,7 +61,14 @@ import math
 import logging
 import os.path
 
-sys.path.append('../pyapi/')
+# check PYTHONPATH
+if len([p for p in sys.path if 'pyapi' in p]) == 0:
+    if os.path.isdir('../pyapi/'):
+        sys.path.append('../pyapi/')
+    else:
+        print("pyapi not found")
+        print("Add pyapi directory to the Python path or start your application from ulyxes/pyapps folder")
+        sys.exit(1)
 
 if sys.version_info[0] > 2: # Python 3 compatibility
     raw_input = input

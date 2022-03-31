@@ -9,7 +9,7 @@ Sample application of Ulyxes PyAPI to measure to a moving prism/object.
     Select different modes for different scenarios<br>
     0 - determine the horizontal movement of a bridge pylon without prism using
     edm mode RLSTANDARD<br>
-    1 - determine the movement of a sloly moving prism to determine 3D defomation<br>
+    1 - determine the movement of a slowly moving prism to determine 3D defomation<br>
     2 - determine vertical movement of a prism, deflection of a bridge, we suppose horizontal distance is not changed (without lock ATR targeting before angles<br>
     3 - determine vertical movement of a moving prism on a car/machine, we suppose horizontal distance is not changedi (lock on prism)<br>
     4 - determine 3D movement of a moving prism on a car/machine (lock on prism)<br>
@@ -25,7 +25,16 @@ import re
 import sys
 import logging
 import math
-sys.path.append('../pyapi/')
+import os.path
+
+# check PYTHONPATH
+if len([p for p in sys.path if 'pyapi' in p]) == 0:
+    if os.path.isdir('../pyapi/'):
+        sys.path.append('../pyapi/')
+    else:
+        print("pyapi not found")
+        print("Add pyapi directory to the Python path or start your application from ulyxes/pyapps folder")
+        sys.exit(1)
 
 from angle import Angle
 from serialiface import SerialIface
@@ -36,6 +45,7 @@ from echowriter import EchoWriter
 from leicatcra1100 import LeicaTCRA1100
 from leicatca1800 import LeicaTCA1800
 from leicatps1200 import LeicaTPS1200
+from trimble5500 import Trimble5500
 
 
 if __name__ == "__main__":
@@ -52,6 +62,8 @@ if __name__ == "__main__":
             mu = LeicaTCA1800()
         elif re.search('120[0-9]$', sys.argv[1]):
             mu = LeicaTPS1200()
+        elif re.search('550[0-9]$', sys.argv[1]):
+            mu = Trimble5500()
         else:
             mu = LeicaTPS1200()
     else:
@@ -77,6 +89,8 @@ if __name__ == "__main__":
     else:
         iface = LocalIface("testIface", com) # Local iface for testing the module
 
+    if iface.state != iface.IF_OK:
+        sys.exit(1)
     # Writer
     if len(sys.argv) > 5:
         wrt = CsvWriter(angle='GON', dist='.3f', dt='%Y-%m-%d %H:%M:%S.%f',
@@ -113,7 +127,10 @@ if __name__ == "__main__":
                 limit = Angle('0-03-00', 'DMS') # minimal angle change to measure
                 n = 0
     else:
-        ts.SetATR(0)
+        try:
+            ts.SetATR(0)
+        except:
+            pass
 
     # infinite loop of measuring
     while ts.measureIface.state == ts.measureIface.IF_OK:

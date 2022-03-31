@@ -57,7 +57,14 @@ import os
 import time
 import datetime
 
-sys.path.append('../pyapi/')
+# check PYTHONPATH
+if len([p for p in sys.path if 'pyapi' in p]) == 0:
+    if os.path.isdir('../pyapi/'):
+        sys.path.append('../pyapi/')
+    else:
+        print("pyapi not found")
+        print("Add pyapi directory to the Python path or start your application from ulyxes/pyapps folder")
+        sys.exit(1)
 
 from angle import Angle
 from httpreader import HttpReader
@@ -294,6 +301,9 @@ if __name__ == "__main__":
     if iface.GetState():
         logging.fatal("Serial interface error")
         sys.exit(-1)
+    if iface.state != iface.IF_OK:
+        sys.exit(1)
+
     ts = TotalStation(cr.json['station_type'], mu, iface)
     for i in range(10):
         w = ts.GetATR() # wake up instrument
@@ -402,7 +412,7 @@ if __name__ == "__main__":
             sys.exit(-1)
     elif re.search('\.csv$', cr.json['coo_wr']):
         wrt = CsvWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt,
-                filt=['id', 'east', 'north', 'elev'])
+                        filt=['id', 'east', 'north', 'elev'])
     else:
         wrt = GeoWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt)
     # observation writer
@@ -417,7 +427,7 @@ if __name__ == "__main__":
             exit(-1)
     elif re.search('\.csv$', cr.json['obs_wr']):
         wrt1 = CsvWriter(fname=cr.json['obs_wr'], mode='a', dist=fmt,
-                filt=['station', 'id', 'hz', 'v', 'distance'])
+                         filt=['station', 'id', 'hz', 'v', 'distance'])
     else:
         wrt1 = GeoWriter(fname=cr.json['obs_wr'], mode='a', dist=fmt)
     # information writer
@@ -433,8 +443,9 @@ if __name__ == "__main__":
             if wrt2.conn is None:
                 exit(-1)
         elif re.search('\.csv$', cr.json['inf_wr']):
-            wrt2= CsvWriter(fname=cr.json['inf_wr'], mode='a', dist=fmt,
-                    filt=['datetime', 'nref', 'nrefobs', 'std_east', 'std_north', 'std_elev', 'std_ori'])
+            wrt2 = CsvWriter(fname=cr.json['inf_wr'], mode='a', dist=fmt,
+                             filt=['datetime', 'nref', 'nrefobs', 'std_east',
+                                   'std_north', 'std_elev', 'std_ori'])
         else:
             wrt2 = GeoWriter(fname=cr.json['inf_wr'], mode='a', dist=fmt)
     if 'fix_list' in cr.json and cr.json['fix_list'] is not None:

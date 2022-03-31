@@ -22,8 +22,16 @@ import re
 import math
 import numpy as np
 import logging
+import os.path
 
-sys.path.append('../pyapi/')
+# check PYTHONPATH
+if len([p for p in sys.path if 'pyapi' in p]) == 0:
+    if os.path.isdir('../pyapi/'):
+        sys.path.append('../pyapi/')
+    else:
+        print("pyapi not found")
+        print("Add pyapi directory to the Python path or start your application from ulyxes/pyapps folder")
+        sys.exit(1)
 
 from angle import Angle, PI2
 from serialiface import SerialIface
@@ -61,7 +69,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 3:
         port = (sys.argv[3])
     else:
-        port = 'COM7'
+        port = '/dev/ttyUSB0'
 
     if len(sys.argv) > 4:
         numberOfPoints = int(sys.argv[4])
@@ -78,6 +86,9 @@ if __name__ == "__main__":
     if len(sys.argv) > 7:
         arange = float(sys.argv[7]) / 360.0 * PI2
     iface = SerialIface("rs-232", port)   ## eomRead='\n'
+    if iface.state != iface.IF_OK:
+        sys.exit(1)
+
     wrt = CsvWriter(angle='DMS', dist='.3f',
                     filt=['id', 'east', 'north', 'elev'],
                     fname='section.txt', mode='w', sep=';')

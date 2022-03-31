@@ -13,9 +13,16 @@ import sys
 import re
 import math
 import logging
+import os.path
 
-
-sys.path.append('../pyapi/')
+# check PYTHONPATH
+if len([p for p in sys.path if 'pyapi' in p]) == 0:
+    if os.path.isdir('../pyapi/'):
+        sys.path.append('../pyapi/')
+    else:
+        print("pyapi not found")
+        print("Add pyapi directory to the Python path or start your application from ulyxes/pyapps folder")
+        sys.exit(1)
 
 from angle import Angle, PI2
 from totalstation import TotalStation
@@ -83,6 +90,9 @@ class Orientation(object):
         self.ts.SetATR(1)
         self.ts.SetEDMMode('STANDARD')
         ans = self.ts.GetAngles()
+        if not 'v' in ans:
+            logging.fatal("Check communication line")
+            sys.exit(1)
         # move from safe position to first direction
         if ans['v'].GetAngle('DEG') > 160 and ans['v'].GetAngle('DEG') < 200:
             ans = self.ts.Move(self.observations[1]['hz'], \
@@ -165,6 +175,8 @@ if __name__ == '__main__':
         g = GeoReader(fname=ifname)
     else:
         g = CsvReader(fname=ifname)
+    if g.state == g.RD_OPEN:
+        sys.exit(2)
     data = g.Load()
     stationtype = '1100'
     if len(sys.argv) > 2:
