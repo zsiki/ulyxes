@@ -99,7 +99,7 @@ if __name__ == "__main__":
                         help='display every nth frame with marked template position, default 0 (off)')
     parser.add_argument('--calibration', type=str, default=None,
                         help='use camera calibration from file for undistort image and pose estimation')
-    parser.add_argument('-o', '--output', type=str,
+    parser.add_argument('-o', '--output', type=str, default='stdout',
                         help='name of output file')
 
     args = parser.parse_args()      # process parameters

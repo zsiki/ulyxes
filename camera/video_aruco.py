@@ -45,8 +45,6 @@ class VideoAruco(ArucoBase):
             self.rdr.act = datetime.datetime(int(l[-2][0:4]), int(l[-2][4:6]),
                                              int(l[-2][6:8]), int(l[-1][0:2]),
                                              int(l[-1][2:4]), int(l[-1][4:6]))
-        if args.output is None:
-            args.output = 'stdout'      # default to stdout
         if re.match('sqlite:', args.output):
             self.wrt = SqLiteWriter(db=args.output[7:],
                                     table='aruco_coo',
@@ -119,7 +117,7 @@ if __name__ == "__main__":
                         help='Clip limit for adaptive histogram, use with --hist, default: 3')
     parser.add_argument('--tile', type=int, default=8,
                         help='Tile size for adaptive histogram,  use with --hist, default: 8')
-    parser.add_argument('-o', '--output', type=str,
+    parser.add_argument('-o', '--output', type=str, default='stdout',
                         help='name of output file')
     args = parser.parse_args()      # process parameters
     V_A = VideoAruco(args)
