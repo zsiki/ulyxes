@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 .. module:: coomaker.py
 
@@ -145,23 +145,23 @@ if __name__ == "__main__":
     ts.SetEDMMode('STANDARD')
     pc = 0.0
     p = 0
-    if isinstance(ts.GetMeasureUnit(), LeicaTPS1200):
-        print("Prism types:")
-        for i in range(20):
-            res = ts.SetPrismType(i)
-            if 'errorCode' in res:
-                continue
-            res = ts.GetPc()
-            if 'errorCode' in res:
-                continue
-            if 'pc' in res:
-                print(i, res['pc'] * 1000, " mm")
+    #if isinstance(ts.GetMeasureUnit(), LeicaTPS1200):
+    #    print("Prism types:")
+    #    for i in range(20):
+    #        res = ts.SetPrismType(i)
+    #        if 'errorCode' in res:
+    #            continue
+    #        res = ts.GetPc()
+    #        if 'errorCode' in res:
+    #            continue
+    #        if 'pc' in res:
+    #            print(i, res['pc'] * 1000, " mm")
     while 1:
         t_id = raw_input("Target id: ")
         if len(t_id) == 0:
             break
         if isinstance(ts.GetMeasureUnit(), LeicaTPS1200):
-            p = GetInt("Prism number (-1 for none) ", p)
+            p = GetInt("Prism number (-99 for none) ", p)
             if p >= 0:
                 ts.SetPrismType(p)
             else:
