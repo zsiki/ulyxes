@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """
-    OBSOLATE USE dbreader.py
-
 .. module:: sqlitereader.py
    :platform: Unix, Windows
    :synopsis: Ulyxes - an open source project to drive total stations and
@@ -10,6 +8,8 @@
        Copyright (C) 2010- Zoltan Siki <siki.zoltan@epito.bme.hu>
 
 .. moduleauthor:: Zoltan Siki <siki.zoltan@epito.bme.hu>
+
+OBSOLATE USE dbreader.py
 """
 
 import os.path
