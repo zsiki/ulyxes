@@ -4,10 +4,49 @@
 
 .. moduleauthor:: Viktoria Zubaly, Zoltan Siki
 
-Sample application of Ulyxes PyAPI to measure a horizontal section(s)
-    target on the first point of the first section and start this app
-    coordinates and observations are written to csv file
+Sample application of Ulyxes PyAPI to measure horizontal section(s).
 
+Several parameters can be set from the command line of from a
+JSON configuration file.
+
+Parameters are stored in a config file using JSON format::
+
+    log_file: name of log file
+    log_level: 10/20/30/40/50
+    log_format: format string for log file
+    angle_step: angle step in section
+    station type: Total station type 1200/1100/5500
+    station_east: Station east coordinate
+    station_north: Station north coordinate
+    station_elev: Station elevation
+    port: Communication port
+    hz_start: Horizontal start direction bottom
+    hz_top: Horizontam start direction top
+    max_angle: Max angle from start direction at bottom
+    max_top: Max angle from top direction
+    tolerance: Height tolerance
+    iteration: number of iterations to find section
+    height_list: Elevation list for section
+
+Command line parameters::
+
+    -l LOG, --log LOG     Logfile name "stdout" for screen output
+    --level LEVEL         Log level
+    --format FORMAT       Log format
+    --step STEP           Angle step in section
+    --type TYPE           Total station type
+    --east EAST           Station east
+    --north NORTH         Station north
+    --elev ELEV           Station elevation
+    -p PORT, --port PORT  Communication port
+    --start START         Horizontal start direction
+    --top TOP             Horizontal start direction at top
+    --max MAX             Max angle
+    --tmax TMAX           Max angle at top
+    --tol TOL             Height tolerance
+    --iter ITER           Max iteration to find section
+    --heights HEIGHTS     list of elevations for more sections
+    --wrt WRT             Output file
 """
 import sys
 import os.path
@@ -36,6 +75,7 @@ from totalstation import TotalStation
 
 class HorizontalSection():
     """ Measure a horizontal section at a given elevation
+
         :param ts: total station instance
         :param elev: elevation for section
         :param hz_start: start horizontal direction (Angle)
