@@ -12,10 +12,17 @@ import os
 import sys
 import argparse
 import matplotlib.pyplot as plt
+
+# check PYTHONPATH
+if len([p for p in sys.path if 'pyapi' in p]) == 0:
+    if os.path.isdir('../pyapi/'):
+        sys.path.append('../pyapi/')
+    else:
+        print("pyapi not found")
+        print("Add pyapi directory to the Python path or start your application from ulyxes/pyapps folder")
+        sys.exit(1)
+
 from template_base import TemplateBase
-
-sys.path.append('../pyapi/')
-
 from csvwriter import CsvWriter
 from imagereader import ImageReader
 
@@ -67,9 +74,11 @@ if __name__ == "__main__":
                         help='display every nth frame with marked template position, default 0 (off)')
     parser.add_argument('--calibration', type=str, default=None,
                         help='use camera calibration from file for undistort image and pose estimation')
-    parser.add_argument('-o', '--output', type=str,
+    parser.add_argument('-o', '--output', type=str, default='stdout',
                         help='name of output file')
 
     args = parser.parse_args()      # process parameters
+    if sys.platform.startswith('win'):
+        args.names = CsvWriter.extend_names(args.names)
     I_C = ImgsCorrelation(args)
     I_C.process()                   # process files
