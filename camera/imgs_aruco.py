@@ -96,7 +96,7 @@ if __name__ == "__main__":
                         help='Clip limit for adaptive histogram, use with --hist, default: 3')
     parser.add_argument('--tile', type=int, default=8,
                         help='Tile size for adaptive histogram,  use with --hist, default: 8')
-    parser.add_argument('-o', '--output', type=str,
+    parser.add_argument('-o', '--output', type=str, default='stdout',
                         help='name of output file')
 
     args = parser.parse_args()      # process parameters
