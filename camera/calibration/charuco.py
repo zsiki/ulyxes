@@ -3,10 +3,21 @@
 """ calibrate camera using charuco board 7x5
 """
 import sys
+import glob
 import argparse
 import yaml
 import numpy as np
 import cv2
+from cv2 import aruco
+
+def extend_names(name_list):
+    """ extend */? characters from the command line on windows
+    """
+    names = []
+    for name in name_list:
+        if '*' in name or '?' in name:
+            names += glob.glob(name)
+    return names
 
 parser = argparse.ArgumentParser()
 parser.add_argument('names', metavar='file_names', type=str, nargs='*',
@@ -26,8 +37,10 @@ parser.add_argument('-o', '--output', type=str,
                     help='output yaml camera calibration data file, default: calibration_matrix.yaml')
 
 args = parser.parse_args()
-dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
-board = cv2.aruco.CharucoBoard_create(args.width, args.height, .025, .0125, dictionary)
+if sys.platform.startswith('win'):
+    args.names = extend_names(args.names)
+dictionary = aruco.getPredefinedDictionary(aruco.DICT_4X4_50)
+board = aruco.CharucoBoard_create(args.width, args.height, .025, .0125, dictionary)
 img = board.draw((200 * args.width, 200 * args.height))
 #img = board.draw((1000, 1400))
 
@@ -55,14 +68,14 @@ if args.camera:
     while True:
         ret, frame = cap.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        corners, ids, _ = cv2.aruco.detectMarkers(gray, dictionary)
+        corners, ids, _ = aruco.detectMarkers(gray, dictionary)
 
         if ids is not None and len(ids) > 0:
-            ret, corners1, ids1 = cv2.aruco.interpolateCornersCharuco(corners,
+            ret, corners1, ids1 = aruco.interpolateCornersCharuco(corners,
                                                                       ids,
                                                                       gray,
                                                                       board)
-            cv2.aruco.drawDetectedMarkers(gray, corners, ids)
+            aruco.drawDetectedMarkers(gray, corners, ids)
 
         cv2.imshow('frame', gray)
         key = cv2.waitKey(1) & 0xFF
@@ -85,9 +98,9 @@ else:
             print('error reading image: {}'.format(fn))
             continue
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        corners, ids, _ = cv2.aruco.detectMarkers(gray, dictionary)
+        corners, ids, _ = aruco.detectMarkers(gray, dictionary)
         if ids is not None and len(ids) > 0:
-            ret, corners1, ids1 = cv2.aruco.interpolateCornersCharuco(corners,
+            ret, corners1, ids1 = aruco.interpolateCornersCharuco(corners,
                                                                       ids,
                                                                       gray,
                                                                       board)
@@ -99,7 +112,7 @@ else:
 #Calibration fails for lots of reasons. Release the video if we do
 try:
     imsize = gray.shape
-    ret, mtx, dist, rvecs, tvecs = cv2.aruco.calibrateCameraCharuco(allCorners,
+    ret, mtx, dist, rvecs, tvecs = aruco.calibrateCameraCharuco(allCorners,
                                                                     allIds,
                                                                     board,
                                                                     imsize,
