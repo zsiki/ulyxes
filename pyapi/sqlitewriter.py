@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """
-    OBSOLATE USE dbwriter.py
-
 .. module:: sqlitewriter.py
    :platform: Unix, Windows
    :synopsis: Ulyxes - an open source project to drive total stations and
@@ -10,6 +8,10 @@
        Copyright (C) 2010- Zoltan Siki <siki.zoltan@epito.bme.hu>
 
 .. moduleauthor:: Zoltan Siki <siki.zoltan@epito.bme.hu>
+
+.. note::
+
+    OBSOLATE USE dbwriter.py
 """
 
 import os.path
