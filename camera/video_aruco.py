@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     go through video frames to find an aruco code
-    video file name can contain date and time like: pi1_YYYYmmdd_HHMMSS.h264
+    video file name can contain date and time like: pi1_YYYYmmdd_HHMMSS.h264 or ordinal number of camera e.g. 0
     output sent to standard output in the form:
     line,date/time,column,row,statistic
 
@@ -13,10 +13,17 @@ import datetime
 import re
 import argparse
 import matplotlib.pyplot as plt
+
+# check PYTHONPATH
+if len([p for p in sys.path if 'pyapi' in p]) == 0:
+    if os.path.isdir('../pyapi/'):
+        sys.path.append('../pyapi/')
+    else:
+        print("pyapi not found")
+        print("Add pyapi directory to the Python path or start your application from ulyxes/pyapps folder")
+        sys.exit(1)
+
 from aruco_base import ArucoBase
-
-sys.path.append('../pyapi/')
-
 from csvwriter import CsvWriter
 from sqlitewriter import SqLiteWriter
 from imagereader import ImageReader
@@ -63,7 +70,6 @@ class VideoAruco(ArucoBase):
                 results = self.ProcessImg(frame, self.rdr.ind)
                 if results:
                     for res in results:
-                        print(res)
                         if self.code is None or self.code == res['code']:
                             if self.calibration:    # output pose, too
                                 data = {'id': self.rdr.ind, 'datetime': t,
@@ -82,7 +88,8 @@ class VideoAruco(ArucoBase):
                                         'width': res['width'],
                                         'height': res['height'],
                                         'code': res['code']}
-                            self.wrt.WriteData(data)
+                            if len(data):
+                                self.wrt.WriteData(data)
             else:
                 break
         return 0

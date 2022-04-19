@@ -213,7 +213,6 @@ class ArucoBase():
                                     'width': marker_w, 'height': marker_h})
                     if self.code is not None:
                         break   # search for single marker
-        print(res)
         if self.debug and i % self.debug == 0:
             plt.clf()
             plt.imshow(img)
