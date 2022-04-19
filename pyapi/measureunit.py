@@ -37,11 +37,12 @@ class MeasureUnit(object):
         """
         return self.typ
 
-    def Result(self, msg, ans):
+    def Result(self, msgs, anss):
         """ Dummy function it must be implemented in inherited classes
 
-            :param msg: message sent
-            :param ans: answer got
+            :param msgs: messages sent to instrument
+            :param anss: answers got from instrument
+            :returns: None
         """
         return None
 
