@@ -11,6 +11,7 @@
 .. moduleauthor:: Zoltan Siki <siki.zoltan@epito.bme.hu>
 """
 import logging
+import glob
 from reader import Reader
 
 class FileReader(Reader):
@@ -40,9 +41,19 @@ class FileReader(Reader):
         except Exception:
             pass
 
+    @staticmethod
+    def extend_names(name_list):
+        """ extend */? characters from the command line on windows
+        """
+        names = []
+        for name in name_list:
+            if '*' in name or '?' in name:
+                names += glob.glob(name)
+        return names
+
     def GetLine(self):
         """ Get next line from file
-            
+
             :returns: next line from file or None in case of EOF
         """
         buf = self.fp.readline()
