@@ -38,6 +38,8 @@ class VideoAruco(ArucoBase):
             self.rdr.act = datetime.datetime(int(l[-2][0:4]), int(l[-2][4:6]),
                                              int(l[-2][6:8]), int(l[-1][0:2]),
                                              int(l[-1][2:4]), int(l[-1][4:6]))
+        if args.output is None:
+            args.output = 'stdout'      # default to stdout
         if re.match('sqlite:', args.output):
             self.wrt = SqLiteWriter(db=args.output[7:],
                                     table='aruco_coo',
