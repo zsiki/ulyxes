@@ -84,6 +84,8 @@ if __name__ == "__main__":
                         help='reduce input image size doubling the marker at latest found position')
     parser.add_argument('--debug', type=int, default=0,
                         help='display every nth frame with marked template position, default 0 (off)')
+    parser.add_argument('--delay', type=float, default=1,
+                        help='delay in seconds between frames use with debug>0, default 1')
     parser.add_argument('-m', '--calibration', type=str, default=None,
                         help='use camera calibration from file')
     parser.add_argument('-s', '--size', type=float, default=0.28,
@@ -100,7 +102,7 @@ if __name__ == "__main__":
                         help='name of output file')
 
     args = parser.parse_args()      # process parameters
-    if sys.platform.startswith('win'):
-        args.names = extend_names(args.names)
     I_A = ImgsAruco(args)
     I_A.process()
+    if args.debug > 0:
+        input('Press Enter to exit')

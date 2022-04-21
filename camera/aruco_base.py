@@ -3,7 +3,6 @@
 """
     Base class for ArUco processing
 """
-# TODO if code not given find all markers
 # TODO test pose estimation
 
 from math import (sqrt, atan2, hypot)
@@ -63,6 +62,7 @@ class ArucoBase():
             'tile': {'required': False, 'type': 'int', 'default': 8},
             'coo_wr': {'required': True, 'type': 'str'},
             'debug': {'required': False, 'type': 'int', 'default': 0},
+            'delay': {'required': False, 'type': 'float', 'default': 1},
             '__comment__': {'required': False, 'type': 'str'}
         }
         try:
@@ -120,6 +120,7 @@ class ArucoBase():
                 print('Calibration file not found')
                 sys.exit(1)
         self.debug = args.debug
+        self.delay = args.delay
         self.clip = args.clip
         self.tile = args.tile
         self.hist = args.hist
@@ -222,5 +223,5 @@ class ArucoBase():
                 #          actCorner[3][0], actCorner[0][0]],
                 #         [actCorner[0][1], actCorner[1][1], actCorner[2][1],
                 #          actCorner[3][1], actCorner[0][1]])
-            plt.pause(0.0001)
+            plt.pause(self.delay)
         return res

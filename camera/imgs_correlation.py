@@ -72,14 +72,15 @@ if __name__ == "__main__":
                         help='reduce input image size to double the template')
     parser.add_argument('-d', '--debug', type=int, default=0,
                         help='display every nth frame with marked template position, default 0 (off)')
+    parser.add_argument('--delay', type=float, default=1,
+                        help='delay in seconds between frames use with debug>0, default 1')
     parser.add_argument('--calibration', type=str, default=None,
                         help='use camera calibration from file for undistort image and pose estimation')
     parser.add_argument('-o', '--output', type=str, default='stdout',
                         help='name of output file')
 
     args = parser.parse_args()      # process parameters
-    #if sys.platform.startswith('win'):
-    if 1:
-        args.names = CsvWriter.extend_names(args.names)
     I_C = ImgsCorrelation(args)
     I_C.process()                   # process files
+    if args.debug > 0:
+        input('Press Enter to exit')              # wait for keypress

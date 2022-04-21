@@ -46,6 +46,7 @@ class TemplateBase():
             self.spec = True
         self.fast = args.fast
         self.debug = args.debug
+        self.delay = args.delay
         self.refresh_template = args.refresh_template
         try:
             self.names = args.names
@@ -139,8 +140,8 @@ class TemplateBase():
         if self.debug and i % self.debug == 0:
             plt.clf()
             plt.imshow(frame)
-            plt.plot(x+self.off_x, y+self.off_y, "o")
-            plt.pause(0.0001)
+            plt.plot(x+self.off_x, y+self.off_y, "or")
+            plt.pause(self.delay)
         if self.refresh_template:
             # get template from last image
             self.templ = img_gray[y:y+self.templ_h, x:x+self.templ_w]
