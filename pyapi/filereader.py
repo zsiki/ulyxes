@@ -41,8 +41,8 @@ class FileReader(Reader):
         except Exception:
             pass
 
-    @staticmethod
-    def extend_names(name_list):
+    @classmethod
+    def extend_names(cls, name_list):
         """ extend */? characters from the command line on windows
         """
         names = []

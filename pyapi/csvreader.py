@@ -62,6 +62,7 @@ class CsvReader(FileReader):
         return res
 
 if __name__ == '__main__':
+    CsvReader.extend_names('*')
     cr = CsvReader('test', '../data/elev_1056.csv', separator=',',
                    fields=['psz', 'dt', 'east', 'north', 'elev', 'code'])
     if cr.state == cr.RD_OK:
