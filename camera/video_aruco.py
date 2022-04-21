@@ -9,6 +9,7 @@
     use video_arucoco.py --help for comamnd line options
 """
 import sys
+import os
 import datetime
 import re
 import argparse

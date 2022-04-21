@@ -78,7 +78,8 @@ if __name__ == "__main__":
                         help='name of output file')
 
     args = parser.parse_args()      # process parameters
-    if sys.platform.startswith('win'):
+    #if sys.platform.startswith('win'):
+    if 1:
         args.names = CsvWriter.extend_names(args.names)
     I_C = ImgsCorrelation(args)
     I_C.process()                   # process files
