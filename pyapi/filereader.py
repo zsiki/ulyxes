@@ -43,12 +43,12 @@ class FileReader(Reader):
 
     @classmethod
     def extend_names(cls, name_list):
-        """ extend */? characters from the command line on windows
+        """ extend wildcard characters from the command line on windows
+            and remove non-existent files from list
         """
         names = []
         for name in name_list:
-            if '*' in name or '?' in name:
-                names += glob.glob(name)
+            names += glob.glob(name)
         return names
 
     def GetLine(self):

@@ -55,7 +55,7 @@ class ImageReader(Reader):
             self.typ = self.IMAGE
             self.source = []
             for s in srcname:
-                self.source += glob.glob(s)
+                self.source += glob.glob(s) # extend wildcards and remove non-existent files
             self.source.sort()
 
     def __del__(self):
