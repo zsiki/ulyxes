@@ -46,7 +46,10 @@ class TemplateBase():
             self.spec = True
         self.fast = args.fast
         self.debug = args.debug
-        self.delay = args.delay
+        if args.delay < 0.001:
+            self.delay = 0.001
+        else:
+            self.delay = args.delay
         self.refresh_template = args.refresh_template
         try:
             self.names = args.names
@@ -139,7 +142,7 @@ class TemplateBase():
             s = min_max[self.method[1]-2]   #result[x, y]
         if self.debug and i % self.debug == 0:
             plt.clf()
-            plt.imshow(frame)
+            plt.imshow(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
             plt.plot(x+self.off_x, y+self.off_y, "or")
             plt.pause(self.delay)
         if self.refresh_template:

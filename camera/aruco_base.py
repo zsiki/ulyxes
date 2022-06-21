@@ -62,7 +62,7 @@ class ArucoBase():
             'tile': {'required': False, 'type': 'int', 'default': 8},
             'coo_wr': {'required': True, 'type': 'str'},
             'debug': {'required': False, 'type': 'int', 'default': 0},
-            'delay': {'required': False, 'type': 'float', 'default': 1},
+            'delay': {'required': False, 'type': 'float', 'default': 0.01},
             '__comment__': {'required': False, 'type': 'str'}
         }
         try:
@@ -120,7 +120,10 @@ class ArucoBase():
                 print('Calibration file not found')
                 sys.exit(1)
         self.debug = args.debug
-        self.delay = args.delay
+        if args.delay < 0.001:
+            self.delay = 0.001
+        else:
+            self.delay = args.delay
         self.clip = args.clip
         self.tile = args.tile
         self.hist = args.hist
@@ -216,7 +219,7 @@ class ArucoBase():
                         break   # search for single marker
         if self.debug and i % self.debug == 0:
             plt.clf()
-            plt.imshow(img)
+            plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
             for r in res:
                 plt.plot(r['east'], r['north'], "o", color="red")
                 #plt.plot([actCorner[0][0], actCorner[1][0], actCorner[2][0],

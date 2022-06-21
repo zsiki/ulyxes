@@ -98,6 +98,8 @@ if __name__ == "__main__":
                         help='reduce input image size to double the template')
     parser.add_argument('-d', '--debug', type=int, default=0,
                         help='display every nth frame with marked template position, default 0 (off)')
+    parser.add_argument('--delay', type=float, default=0.01,
+                        help='delay in seconds between frames in debug')
     parser.add_argument('--calibration', type=str, default=None,
                         help='use camera calibration from file for undistort image and pose estimation')
     parser.add_argument('-o', '--output', type=str, default='stdout',

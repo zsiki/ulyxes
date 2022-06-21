@@ -106,6 +106,8 @@ if __name__ == "__main__":
                         help='marker id to search, if not given all found markers are detected')
     parser.add_argument('--debug', type=int, default=0,
                         help='display every nth frame with marked marker position, default 0 (off)')
+    parser.add_argument('--delay', type=float, default=0.01,
+                        help='delay in seconds between frames in debug')
     parser.add_argument('-m', '--calibration', type=str, default=None,
                         help='use camera calibration from file for undistort image and pose estimation')
     parser.add_argument('-s', '--size', type=float, default=0.28,
