@@ -194,7 +194,7 @@ def cmd_params():
     def_port = '/dev/ttyUSB0'
     def_start = None
     def_top = None
-    def_max = 360.0
+    def_max = 359.9
     def_tmax = None
     def_tol = 0.01
     def_iter = 10
