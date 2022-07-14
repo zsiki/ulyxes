@@ -57,7 +57,13 @@ PyBluez (Bluetooth communication to sensor)
 	
 	sudo apt-get install bluetooth libbluetooth-dev
 	sudo pip3 install pybluez
+	
+PyYaml (to read camera calibration data)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. code:: bash
+
+	sudo pip3 unstall pyyaml
 
 GNU GaMa
 ~~~~~~~~
