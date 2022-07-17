@@ -28,6 +28,7 @@ from aruco_base import ArucoBase
 from csvwriter import CsvWriter
 from sqlitewriter import SqLiteWriter
 from imagereader import ImageReader
+from imagewriter import ImageWriter
 
 class VideoAruco(ArucoBase):
     """ class to scan ArUco code in video image
@@ -53,6 +54,10 @@ class VideoAruco(ArucoBase):
         else:
             self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
                                  filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
+        self.img_wrt = None
+        if args.img_path:
+            self.img_wrt = ImageWriter('', args.img_path)
+
 
     def process(self):
         """ process video frame by frame
@@ -65,6 +70,8 @@ class VideoAruco(ArucoBase):
             plt.ion()
         while True:
             frame, t = self.rdr.GetNext() # get next frame
+            if self.img_wrt:
+                self.img_wrt.WriteData(frame)
             if frame is not None:
                 results = self.ProcessImg(frame, self.rdr.ind)
                 if results:
@@ -92,6 +99,15 @@ class VideoAruco(ArucoBase):
             else:
                 break
         return 0
+
+def dir_path(img_path):
+    """ check existence of image path
+
+        :param img_path: path to target folder for images
+    """
+    if not os.path.isdir(img_path):
+        raise argparse.ArgumentTypeError("image path is not valid: " + img_path)
+    return img_path
 
 if __name__ == "__main__":
     # set up command line parameters
@@ -122,6 +138,8 @@ if __name__ == "__main__":
                         help='Tile size for adaptive histogram,  use with --hist, default: 8')
     parser.add_argument('-o', '--output', type=str, default='stdout',
                         help='name of output file')
+    parser.add_argument('-i', '--img_path', type=dir_path,
+                        help='path to save images to')
     args = parser.parse_args()      # process parameters
     V_A = VideoAruco(args)
     V_A.process()
