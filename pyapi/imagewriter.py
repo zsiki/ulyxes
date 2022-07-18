@@ -20,13 +20,20 @@ class ImageWriter(Writer):
 
             :param name: name for writer (str)
             :param dirname: output directory name (str)
-            :param counter: id number for the first image (int)
+            :param counter: id number for the first image (int), default 0
+            :param itype: target image type, default png
     """
 
-    def __init__(self, name, dirName, counter=0):
+    def __init__(self, name, dirName, counter=0, itype='png'):
         """ Constructor
         """
         super(ImageWriter, self).__init__(name)
+        if itype[0] != '.':
+            itype = '.' + itype
+        if not itype in ('.bmp', '.jpg', '.png', '.tif', '.pbm'):
+            logging.warning("unsupported image format, png is used")
+            itype = '.png'
+        self.itype = itype
         self.state = self.WR_OK
         self.dirName = None
         self.counter = counter
@@ -47,7 +54,7 @@ class ImageWriter(Writer):
         if data is None:
             logging.warning(" empty image not written")
             return
-        name = os.path.join(self.dirName, self.name + str(self.counter) + '.png')
+        name = os.path.join(self.dirName, self.name + str(self.counter) + self.itype)
         try:
             cv2.imwrite(name, data)
             self.counter += 1

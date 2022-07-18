@@ -56,7 +56,7 @@ class VideoAruco(ArucoBase):
                                  filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
         self.img_wrt = None
         if args.img_path:
-            self.img_wrt = ImageWriter('', args.img_path)
+            self.img_wrt = ImageWriter('', args.img_path, itype=args.img_type)
 
 
     def process(self):
@@ -140,6 +140,8 @@ if __name__ == "__main__":
                         help='name of output file')
     parser.add_argument('-i', '--img_path', type=dir_path,
                         help='path to save images to')
+    parser.add_argument('-t', '--img_type', type=str, default='png',
+                        help='image type to save to, use with --img_path, default png')
     args = parser.parse_args()      # process parameters
     V_A = VideoAruco(args)
     V_A.process()
