@@ -24,7 +24,7 @@ class ImageWriter(Writer):
             :param itype: target image type, default png
     """
 
-    def __init__(self, name, dirName, counter=0, itype='png'):
+    def __init__(self, name, dirName, counter=1, itype='png'):
         """ Constructor
         """
         super(ImageWriter, self).__init__(name)
