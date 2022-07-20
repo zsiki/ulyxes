@@ -11,7 +11,7 @@ Sample application of Ulyxes PyAPI to measure to a moving prism/object.
     edm mode RLSTANDARD<br>
     1 - determine the movement of a slowly moving prism to determine 3D defomation<br>
     2 - determine vertical movement of a prism, deflection of a bridge, we suppose horizontal distance is not changed (without lock ATR targeting before angles<br>
-    3 - determine vertical movement of a moving prism on a car/machine, we suppose horizontal distance is not changedi (lock on prism)<br>
+    3 - determine vertical movement of a moving prism, we suppose horizontal distance is not changedi (lock on prism)<br>
     4 - determine 3D movement of a moving prism on a car/machine (lock on prism)<br>
     5 - measure points if the prism stopped for 3-5 seconds (lock on prism)<br>
 
@@ -47,6 +47,10 @@ from leicatca1800 import LeicaTCA1800
 from leicatps1200 import LeicaTPS1200
 from trimble5500 import Trimble5500
 
+def exit_on_ctrl_c(signal, frame):
+    """ catch interrupt (Ctrl/C) and exit gracefully """
+    print("\nCtrl/C was pressed, exiting...")
+    sys.exit(0)
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.ERROR)
@@ -99,7 +103,7 @@ if __name__ == "__main__":
     else:
         wrt = EchoWriter(angle='GON', dist='.3f', dt='%Y-%m-%d %H:%M:%S.%f',
                          filt=['id', 'datetime', 'hz', 'v', 'distance', 'east', 'north', 'elev'])
-
+    signal.signal(signal.SIGINT, exit_on_ctrl_c)    # catch Ctrl/C
     ts = TotalStation("Leica", mu, iface)
     slopeDist = 0
     if edm not in mu.edmModes:

@@ -10,6 +10,7 @@
 """
 import sys
 import os
+import signal
 import datetime
 import re
 import argparse
@@ -70,9 +71,9 @@ class VideoAruco(ArucoBase):
             plt.ion()
         while True:
             frame, t = self.rdr.GetNext() # get next frame
-            if self.img_wrt:
-                self.img_wrt.WriteData(frame)
             if frame is not None:
+                if self.img_wrt:
+                    self.img_wrt.WriteData(frame)
                 results = self.ProcessImg(frame, self.rdr.ind)
                 if results:
                     for res in results:
@@ -94,8 +95,7 @@ class VideoAruco(ArucoBase):
                                         'width': res['width'],
                                         'height': res['height'],
                                         'code': res['code']}
-                            if len(data):
-                                self.wrt.WriteData(data)
+                            self.wrt.WriteData(data)
             else:
                 break
         return 0
@@ -108,6 +108,11 @@ def dir_path(img_path):
     if not os.path.isdir(img_path):
         raise argparse.ArgumentTypeError("image path is not valid: " + img_path)
     return img_path
+
+def exit_on_ctrl_c(signal, frame):
+    """ catch interrupt (Ctrl/C) and exit gracefully """
+    print("\nCtrl/C was pressed, exiting...")
+    sys.exit(0)
 
 if __name__ == "__main__":
     # set up command line parameters
@@ -142,6 +147,7 @@ if __name__ == "__main__":
                         help='path to save images to')
     parser.add_argument('-t', '--img_type', type=str, default='png',
                         help='image type to save to, use with --img_path, default png')
-    args = parser.parse_args()      # process parameters
+    signal.signal(signal.SIGINT, exit_on_ctrl_c)    # catch Ctrl/C
+    args = parser.parse_args()                      # process parameters
     V_A = VideoAruco(args)
-    V_A.process()
+    V_A.process()                                   # process images

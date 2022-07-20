@@ -29,6 +29,7 @@ from template_base import TemplateBase
 from csvwriter import CsvWriter
 from sqlitewriter import SqLiteWriter
 from imagereader import ImageReader
+from imagewriter import ImageWriter
 
 class VideoCorrelation(TemplateBase):
     """ process video for template matching """
@@ -51,6 +52,10 @@ class VideoCorrelation(TemplateBase):
         else:
             self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
                                  filt=['id', 'datetime', 'east', 'north', 'quality'])
+        self.img_wrt = None
+        if args.img_path:
+            self.img_wrt = ImageWriter('', args.img_path, itype=args.img_type)
+
 
     def process(self):
         """ process image serie
@@ -63,23 +68,30 @@ class VideoCorrelation(TemplateBase):
             plt.ion()
         while True:
             frame, t = self.rdr.GetNext() # get next frame
-            if frame is not None:
-                res = self.ProcessImg(frame, self.rdr.ind)
-                if res:
-                    if self.calibration: # output pose too
-                        data = {'id': self.rdr.ind, 'datetime': t,
-                                'east': res["east"], 'north': res["north"],
-                                'quality': res['quality'],
-                                'roll': res["euler_angles"][0],
-                                'pitch': res["euler_angles"][1],
-                                'yaw': res["euler_angles"][2]}
-                    else:
-                        data = {'id': self.rdr.ind, 'datetime': t,
-                                'east': res["east"], 'north': res["north"],
-                                'quality': res['quality']}
-                    self.wrt.WriteData(data)
-            else:
+            if frame is None:
                 break
+            if self.img_wrt:
+                self.img_wrt.WriteData(frame)
+            res = self.ProcessImg(frame, self.rdr.ind)
+            if res:
+                data = {'id': self.rdr.ind, 'datetime': t,
+                        'east': res["east"], 'north': res["north"],
+                        'quality': res['quality']}
+                self.wrt.WriteData(data)
+
+def dir_path(img_path):
+    """ check existence of image path
+
+        :param img_path: path to target folder for images
+    """
+    if not os.path.isdir(img_path):
+        raise argparse.ArgumentTypeError("image path is not valid: " + img_path)
+    return img_path
+
+def exit_on_ctrl_c(signal, frame):
+    """ catch interrupt (Ctrl/C) and exit gracefully """
+    print("\nCtrl/C was pressed, exiting...")
+    sys.exit(0)
 
 if __name__ == "__main__":
     # set up command line parameters
@@ -104,7 +116,11 @@ if __name__ == "__main__":
                         help='use camera calibration from file for undistort image and pose estimation')
     parser.add_argument('-o', '--output', type=str, default='stdout',
                         help='name of output file')
-
+    parser.add_argument('-i', '--img_path', type=dir_path,
+                        help='path to save images to')
+    parser.add_argument('--img_type', type=str, default='png',
+                        help='image type to save to, use with --img_path, default png')
+    signal.signal(signal.SIGINT, exit_on_ctrl_c)    # catch Ctrl/C
     args = parser.parse_args()      # process parameters
     V_C = VideoCorrelation(args)
     V_C.process()
