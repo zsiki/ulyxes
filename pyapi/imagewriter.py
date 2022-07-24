@@ -54,7 +54,7 @@ class ImageWriter(Writer):
         if data is None:
             logging.warning(" empty image not written")
             return
-        name = os.path.join(self.dirName, self.name + str(self.counter) + self.itype)
+        name = os.path.join(self.dirName, self.name + "{:05d}".format(self.counter) + self.itype)
         try:
             cv2.imwrite(name, data)
             self.counter += 1
