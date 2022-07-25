@@ -26,6 +26,7 @@ import sys
 import logging
 import math
 import os.path
+import signal
 
 # check PYTHONPATH
 if len([p for p in sys.path if 'pyapi' in p]) == 0:
