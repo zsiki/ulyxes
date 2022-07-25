@@ -237,7 +237,7 @@ if __name__ == "__main__":
 
     elif DEMO_ID == 3:
         TITLES = ["numpy arrays"]
-        UNITS = ["fok", "-", "-"]
+        UNITS = ["fok", "-"]
         X = np.arange(0, 361, 10)
         Y1 = np.sin(X / 180 * pi)
         Y2 = np.cos(X / 180 * pi)
