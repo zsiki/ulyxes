@@ -46,17 +46,22 @@ class ImageWriter(Writer):
             os.mkdir(dirName)
             self.dirName = dirName
 
-    def WriteData(self, data):
+    def WriteData(self, data, convert=None):
         """ write image to file
 
             :param data: image to write
+            :param convert: conversion before write e.g. convert='gray'
+            :return: name of image file
         """
         if data is None:
             logging.warning(" empty image not written")
             return
         name = os.path.join(self.dirName, self.name + "{:05d}".format(self.counter) + self.itype)
         try:
-            cv2.imwrite(name, data)
+            if convert == 'gray' and len(data.shape) == 3:
+                cv2.imwrite(name, cv2.cvtColor(data, cv2.COLOR_BGR2GRAY))
+            else:
+                cv2.imwrite(name, data)
             self.counter += 1
         except Exception:
             logging.warning(" cannot write image to file")
