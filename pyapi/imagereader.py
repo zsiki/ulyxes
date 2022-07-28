@@ -14,11 +14,20 @@
 import os
 import glob
 import datetime
+import time
+import numpy as np
 import cv2
 from reader import Reader
 
+try:
+    from picamera.array import PiRGBArray
+    from picamera import PiCamera
+except ModuleNotFoundError:
+    pass
+
+
 class ImageReader(Reader):
-    """ Read images from folder(s) or video file or web camera
+    """ Read images from folder(s) or video file or web camera or pi camera
 
         :param srcname: camera id/video file/list of image names with wildcard"
         :param name: name of reader
@@ -28,6 +37,7 @@ class ImageReader(Reader):
     CAMERA = 0
     VIDEO = 1
     IMAGE = 2
+    PICAM = 3
 
     def __init__(self, srcname, name=None, filt=None, fps=None):
         """ Constructor """
@@ -41,6 +51,15 @@ class ImageReader(Reader):
             # camera source
             self.typ = self.CAMERA
             self.source = cv2.VideoCapture(int(srcname)) # open camera stream
+        elif srcname.lower() == 'picam':
+            self.typ = self.PICAM
+            self.source = PiCamera()
+            #self.width = 1632	# TODO should be input parameter
+            #self.height = 1216
+            self.width = 640
+            self.height = 480
+            self.source.resolution = (self.width, self.height)
+            time.sleep(0.1)	# wait for camera initialization
         elif isinstance(srcname, str) and \
                 srcname.lower()[-4:] in ("h264", ".mp4", ".avi"):
             self.typ = self.VIDEO
@@ -65,6 +84,11 @@ class ImageReader(Reader):
                 self.source.release()
             except Exception:
                 pass
+        elif self.typ == self.PICAM:
+            try:
+                self.source.close()
+            except Exception:
+                pass
 
     def GetNext(self):
         """ Get next image """
@@ -76,6 +100,11 @@ class ImageReader(Reader):
                 self.srcname = fn
                 frame = cv2.imread(fn)
                 t = datetime.datetime.fromtimestamp(os.path.getmtime(fn))
+        elif self.typ == self.PICAM:
+            frame = np.empty((self.height, self.width, 3), dtype=np.uint8)
+            self.source.capture(frame, format="rgb")
+            cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)	# change to opencv BGR
+            t = datetime.datetime.now()
         else:
             ret, frame = self.source.read()
             if ret:
@@ -88,6 +117,9 @@ class ImageReader(Reader):
         return frame, t
 
 if __name__ == "__main__":
+    ir0 = ImageReader('picam')
+    img, t = ir0.GetNext()
+    print(img.shape, t)
     ir1 = ImageReader("/home/siki/tmp/3_20191207_105813_00*.png")
     img, t = ir1.GetNext()
     print(ir1.ind, ir1.srcname, t)
@@ -125,4 +157,3 @@ if __name__ == "__main__":
     print(ir3.ind, ir3.srcname, t)
     img, t = ir3.GetNext()
     print(ir3.ind, ir3.srcname, t)
-
