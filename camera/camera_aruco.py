@@ -125,7 +125,7 @@ if __name__ == "__main__":
         print("Usage: {} config.json".format(sys.argv[0]))
         sys.exit(1)
     if not os.path.exists(sys.argv[1]):
-        print("Confog file not found: {}".format(sys.argv[1]))
+        print("Config file not found: {}".format(sys.argv[1]))
         sys.exit(2)
     C_A = CameraAruco(sys.argv[1])
     logging.basicConfig(format=C_A.log_format, filename=C_A.log_file)
