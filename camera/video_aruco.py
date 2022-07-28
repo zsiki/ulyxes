@@ -73,7 +73,7 @@ class VideoAruco(ArucoBase):
             frame, t = self.rdr.GetNext() # get next frame
             if frame is not None:
                 if self.img_wrt:
-                    self.img_wrt.WriteData(frame)
+                    self.img_wrt.WriteData(frame, 'gray')
                 results = self.ProcessImg(frame, self.rdr.ind)
                 if results:
                     for res in results:
