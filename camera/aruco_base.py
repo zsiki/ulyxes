@@ -185,22 +185,14 @@ class ArucoBase():
                     # calculate center of aruco code
                     x = int(round(np.average(corners[j][0][:, 0])))
                     y = int(round(np.average(corners[j][0][:, 1])))
-                    marker_w = max(hypot(corners[j][0][0, 0] -
-                                              corners[j][0][0, 1],
-                                              corners[j][0][1, 0] -
-                                              corners[j][0][1, 1]),
-                                        hypot(corners[j][0][2, 0] -
-                                              corners[j][0][2, 1],
-                                              corners[j][0][3, 0] -
-                                              corners[j][0][3, 1]))
-                    marker_h = max(hypot(corners[j][0][1, 0] -
-                                              corners[j][0][1, 1],
-                                              corners[j][0][2, 0] -
-                                              corners[j][0][2, 1]),
-                                        hypot(corners[j][0][3, 0] -
-                                              corners[j][0][3, 1],
-                                              corners[j][0][0, 0] -
-                                              corners[j][0][0, 1]))
+                    marker_w = max(hypot(corners[j][0][0, 0] - corners[j][0][1, 0],
+                                         corners[j][0][0, 1] - corners[j][0][1, 1]),
+                                   hypot(corners[j][0][2, 0] - corners[j][0][3, 0],
+                                         corners[j][0][2, 1] - corners[j][0][3, 1]))
+                    marker_h = max(hypot(corners[j][0][0, 0] - corners[j][0][3, 0],
+                                         corners[j][0][0, 1] - corners[j][0][3, 1]),
+                                   hypot(corners[j][0][1, 0] - corners[j][0][2, 0],
+                                         corners[j][0][1, 1] - corners[j][0][2, 1]))
                     actCorner = corners[j][0]
                     if self.calibration:    # estimate pose
                         rvec, tvec, _ = cv2.aruco.estimatePoseSingleMarkers(corners[j:j+1], self.size, self.mtx, self.dist)
