@@ -183,8 +183,8 @@ class ArucoBase():
             for j in range(ids.size):
                 if self.code is None or ids[j][0] == self.code:
                     # calculate center of aruco code
-                    x = int(round(np.average(corners[j][0][:, 0])))
-                    y = int(round(np.average(corners[j][0][:, 1])))
+                    x = np.average(corners[j][0][:, 0])
+                    y = np.average(corners[j][0][:, 1])
                     marker_w = max(hypot(corners[j][0][0, 0] - corners[j][0][1, 0],
                                          corners[j][0][0, 1] - corners[j][0][1, 1]),
                                    hypot(corners[j][0][2, 0] - corners[j][0][3, 0],
