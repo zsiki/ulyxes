@@ -64,6 +64,13 @@ PyYaml (to read camera calibration data)
 .. code:: bash
 
 	sudo pip3 unstall pyyaml
+	
+Matplotlib (to display camera/image ddata)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
+	sudo apt install python3-matplotlib
 
 GNU GaMa
 ~~~~~~~~
