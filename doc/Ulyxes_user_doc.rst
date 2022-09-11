@@ -13,8 +13,8 @@ User's Guide
 
 
 
-    :Date: 2020-01-04
-    :Authors: **Daniel Moka** <mokabme@gmail.com>, **Zoltan Siki** <siki@agt.bme.hu>
+    :Date: 2022-01-04
+    :Authors: **Daniel Moka** <mokabme@gmail.com>, **Zoltan Siki** <siki.zoltan@emk.bme.hu>
     :Version: 1.0
 
 
@@ -238,10 +238,10 @@ Required Python modules
     * numpy
     * opencv
 
-
 *External dependencies*:
     * GNU Gama
 	* sqlite3, spatialite-bin
+    * PostgreSQL
 
 How to install PyAPI
 ^^^^^^^^^^^^^^^^^^^^
@@ -253,7 +253,7 @@ The PyAPI is a part of Ulyxes system. In order to install the API, the whole Uly
     1. Open a terminal
     2. Go to or make the desired “MyFolder” you want to install Ulyxes/PyAPI
     3. Clone the Ulyxes Git directory, so type: git clone https://github.com/zsiki/ulyxes.git
-    4. The TclAPI can be found at: “MyFolder/Ulyxes/PyAPI”
+    4. The PyAPI can be found at: “MyFolder/Ulyxes/PyAPI”
 
 *Windows*
 
@@ -828,3 +828,263 @@ Sample config file::
 	  "probability": 0.95,
 	  "blunders": 0
 	}
+
+
+Camera Applications Tutorials
+#############################
+
+Video ArUco
+***********
+
+Find ArUco markers in recorded video or in webcam video stream.
+
+.. code::
+
+    usage: video_aruco.py [-h] [-f FPS] [-d DICT] [-c CODE] [--debug DEBUG]
+                          [--delay DELAY] [-m CALIBRATION] [-s SIZE] [--hist]
+                          [--lchanel] [--clip CLIP] [--tile TILE] [-o OUTPUT]
+                          [-i IMG_PATH] [-t IMG_TYPE]
+                          file_name
+
+    positional arguments:
+      file_name             video file to process or camera ID (e.g. 0)
+
+    options:
+      -h, --help            show this help message and exit
+      -f FPS, --fps FPS     frame per sec
+      -d DICT, --dict DICT  marker dictionary id, default=1 (DICT_4X4_100)
+      -c CODE, --code CODE  marker id to search, if not given all found markers
+                            are detected
+      --debug DEBUG         display every nth frame with marked marker position,
+                            default 0 (off)
+      --delay DELAY         delay in seconds between frames in debug
+      -m CALIBRATION, --calibration CALIBRATION
+                            use camera calibration from file for undistort image
+                            and pose estimation
+      -s SIZE, --size SIZE  marker size for pose extimation, default: 0.28 m
+      --hist                Increase image constrast using histogram
+      --lchanel             Increase image constrast using histogram on lchanel
+                            only
+      --clip CLIP           Clip limit for adaptive histogram, use with --hist,
+                            default: 3
+      --tile TILE           Tile size for adaptive histogram, use with --hist,
+                            default: 8
+      -o OUTPUT, --output OUTPUT
+                            name of output file
+      -i IMG_PATH, --img_path IMG_PATH
+                            path to save images to
+      -t IMG_TYPE, --img_type IMG_TYPE
+                            image type to save to, use with --img_path, default
+                            png
+
+Use the --fps switch to set the frame per seconds parameter of a recorded video.If you select debug mode, the delay between frames can be set in seconds.
+It is highly recommended to calibrate camera (use charuco.py for calibration),
+a yaml file should be given after --calibration switch. If the ArUco marker is 
+near pependicular to the axis of the camera using --size the change of 
+position is converted to metric value in the output file.
+
+--hist, --lchanel, --clip and --tile are used to enhance image quality before
+marker detection.
+
+The output file contains the positions of detected ArUco markers with a
+time stamp and id of markers. If marker code is given only that marker is 
+printed into the output, otherwise all markers are detected and sent to 
+output.
+
+The images of the video stream can be saved to jpg or png files using 
+--img_path and --img_type.
+
+Sample commands:
+
+.. code::
+
+    python3 video_aruco.py 0
+
+Use first camera, find all 4x4 markers and send the output to standard output.
+
+.. code::
+
+    python3 video_aruco.py --code 5 --dict 99 -m camera_calibration.yaml --fps 30 --hist 1_20220803_100445.h264
+
+Pocess 30 fps recorded video, recornding started at 2022-08-03 10:04:45,
+search for 3x3 ArUco marker with id = 5, consider the calibration data from the
+camera_calibration.yaml file. Enhance image quality by increasing contrast.
+
+Image ArUco
+***********
+
+Find ArUco markers in an image serie.
+
+.. code::
+
+    usage: imgs_aruco.py [-h] [-d DICT] [-c CODE] [--fast] [--debug DEBUG]
+                         [--delay DELAY] [-m CALIBRATION] [-s SIZE] [--hist]
+                         [--lchanel] [--clip CLIP] [--tile TILE] [-o OUTPUT]
+                         file_names [file_names ...]
+
+    positional arguments:
+      file_names            image files to process
+
+    options:
+      -h, --help            show this help message and exit
+      -d DICT, --dict DICT  marker dictionary id, default=1 (DICT_4X4_100)
+      -c CODE, --code CODE  marker id to search, if not given first found marker
+                            is used
+      --debug DEBUG         display every nth frame with marked template position,
+                            default 0 (off)
+      --delay DELAY         delay in seconds between frames use with debug>0,
+                            default 1
+      -m CALIBRATION, --calibration CALIBRATION
+                            use camera calibration from file
+      -s SIZE, --size SIZE  marker size for pose extimation, default: 0.28 m
+      --hist                Increase image constrast using histogram
+      --lchanel             Increase image constrast using histogram on lchanel
+                            only
+      --clip CLIP           Clip limit for adaptive histogram, use with --hist,
+                            default: 3
+      --tile TILE           Tile size for adaptive histogram, use with --hist,
+                            default: 8
+      -o OUTPUT, --output OUTPUT
+                            name of output file
+
+It is very similar to video_aruco, but the images are read from the hard disk.
+
+Video nth
+*********
+
+Read video file and write frames to image files.
+
+.. code::
+
+usage: video_nth.py [-h] [-s START] [-f FRAMES] [--steps STEPS] [-t] file_name
+
+positional arguments:
+  file_name             video file or input video chanel to process
+
+options:
+  -h, --help            show this help message and exit
+  -s START, --start START
+                        start frame to save from, default 0
+  -f FRAMES, --frames FRAMES
+                        number of frames to save, default 1
+  --steps STEPS         save only every steps-th frame, default 1
+  -t, --total           report total frame number, it ignores --start and
+
+Video correlation
+*****************
+
+Get positions of a pattern in a video stream.
+
+.. code::
+
+    usage: video_correlation.py [-h] -t TEMPLATE [-f FPS] [-m METHOD] [-r]
+                                [--fast] [-d DEBUG] [--delay DELAY]
+                                [--calibration CALIBRATION] [-o OUTPUT]
+                                [-i IMG_PATH] [--img_type IMG_TYPE]
+                                file_name
+
+    positional arguments:
+      file_name             video file to process
+
+    options:
+      -h, --help            show this help message and exit
+      -t TEMPLATE, --template TEMPLATE
+                            template image to find in video frames
+      -f FPS, --fps FPS     frame per sec
+      -m METHOD, --method METHOD
+                            method to compare video frame and template,
+                            0/1/2/3/4/5 TM_SQDIFF/TM_SQDIFF_NORMED/TM_CCORR/TM_CCO
+                            RR_NORMED/CV_TM_CCOEFF/CV_TM_CCOEFF_NORMED, default 5
+      -r, --refresh_template
+                            refresh template after each frames
+      --fast                reduce input image size to double the template
+      -d DEBUG, --debug DEBUG
+                            display every nth frame with marked template position,
+                            default 0 (off)
+      --delay DELAY         delay in seconds between frames in debug
+      --calibration CALIBRATION
+                            use camera calibration from file for undistort image
+                            and pose estimation
+      -o OUTPUT, --output OUTPUT
+                            name of output file
+      -i IMG_PATH, --img_path IMG_PATH
+                            path to save images to
+      --img_type IMG_TYPE   image type to save to, use with --img_path, default
+                            png
+
+Image correlation
+*****************
+
+Get positions of a pattern in a serie of images.
+
+.. code::
+
+    usage: imgs_correlation.py [-h] -t TEMPLATE [-m METHOD] [-r] [--fast]
+                               [-d DEBUG] [--delay DELAY]
+                               [--calibration CALIBRATION] [-o OUTPUT]
+                               file_names [file_names ...]
+
+    positional arguments:
+      file_names            image files to process
+
+    options:
+      -h, --help            show this help message and exit
+      -t TEMPLATE, --template TEMPLATE
+                            template image to find in video frames
+      -m METHOD, --method METHOD
+                            method to compare video frame and template,
+                            0/1/2/3/4/5 TM_SQDIFF/TM_SQDIFF_NORMED/TM_CCORR/TM_CCO
+                            RR_NORMED/CV_TM_CCOEFF/CV_TM_CCOEFF_NORMED, default 5
+      -r, --refresh_template
+                            refresh template after each frames
+      --fast                reduce input image size to double the template
+      -d DEBUG, --debug DEBUG
+                            display every nth frame with marked template position,
+                            default 0 (off)
+      --delay DELAY         delay in seconds between frames use with debug>0,
+                            default 1
+      --calibration CALIBRATION
+                            use camera calibration from file for undistort image
+                            and pose estimation
+      -o OUTPUT, --output OUTPUT
+                            name of output file
+
+Undistort images
+****************
+
+Using camera calibration data make an undistorted copy of images.
+
+.. code::
+
+    Usage: undist.py calibration_yaml image [image] [...]
+
+Charuco calibration
+*******************
+
+Find camara calibration parameters from 15-20 images from different
+direction of a charuco board.
+
+.. code::
+
+    usage: charuco.py [-h] [-b] [-w WIDTH] [-e HEIGHT] [-c] [-s] [-o OUTPUT]
+                      [file_names ...]
+
+    positional arguments:
+      file_names            board images from different directions to process or a
+                            video file
+
+    options:
+      -h, --help            show this help message and exit
+      -b, --board           save only board image to charuco.png file
+      -w WIDTH, --width WIDTH
+                            Width of board, default 5, max 10
+      -e HEIGHT, --height HEIGHT
+                            Height of board, default 7, max 10
+      -c, --camera          use first camera or video file to take photos until
+                            enter pressed
+      -s, --save            save camera images to file cal0.png, cal1.png if
+                            camera is used
+      -o OUTPUT, --output OUTPUT
+                            output yaml camera calibration data file, default:
+                            calibration_matrix.yaml
+
