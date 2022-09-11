@@ -18,6 +18,8 @@ if __name__ == "__main__":
         help='start frame to save from, default 0')
     parser.add_argument('-f', '--frames', type=int, default=1,
         help='number of frames to save, default 1')
+    parser.add_argument('--steps', type=int, default=1,
+        help='save only every steps-th frame, default 1')
     parser.add_argument('-t', '--total', action="store_true",
         help='report total frame number, it ignores --start and --frames')
     # process commentline parameters
@@ -38,7 +40,8 @@ if __name__ == "__main__":
         while i < (n + m) or args.total:
             ret, frame = cap.read() # get first frame
             if ret:
-                if n <= i < n + m and not args.total:
+                if n <= i < n + m and not args.total and \
+                   (i - n) % args.steps == 0:
                     cv2.imwrite('{}_{:08d}.png'.format(fname, i), frame)
             else:
                 break
