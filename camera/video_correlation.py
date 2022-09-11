@@ -13,6 +13,7 @@ import sys
 import os
 import datetime
 import re
+import signal
 import argparse
 import matplotlib.pyplot as plt
 
