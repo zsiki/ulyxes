@@ -80,8 +80,6 @@ if __name__ == "__main__":
                         help='marker dictionary id, default=1 (DICT_4X4_100)')
     parser.add_argument('-c', '--code', type=int,
                         help='marker id to search, if not given first found marker is used')
-    parser.add_argument('--fast', action="store_true",
-                        help='reduce input image size doubling the marker at latest found position')
     parser.add_argument('--debug', type=int, default=0,
                         help='display every nth frame with marked template position, default 0 (off)')
     parser.add_argument('--delay', type=float, default=1,
