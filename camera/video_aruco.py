@@ -53,7 +53,7 @@ class VideoAruco(ArucoBase):
                                     table='aruco_coo',
                                     filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
         else:
-            self.wrt = CsvWriter(fname=args.output, dt=self.tformat,
+            self.wrt = CsvWriter(fname=args.output, dt=self.tformat, mode='w',
                                  filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
         self.img_wrt = None
         if args.img_path:
