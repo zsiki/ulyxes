@@ -61,7 +61,7 @@ class ImageReader(Reader):
             self.source.resolution = (self.width, self.height)
             time.sleep(0.1)	# wait for camera initialization
         elif isinstance(srcname, str) and \
-                srcname.lower()[-4:] in ("h264", ".mp4", ".avi"):
+                srcname.lower()[-4:] in ("h264", ".mp4", ".avi", "webm"):
             self.typ = self.VIDEO
             self.source = cv2.VideoCapture(srcname)
             if fps is None:

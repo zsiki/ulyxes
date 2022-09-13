@@ -43,11 +43,27 @@ class VideoAruco(ArucoBase):
         fn = args.name[0]
         self.rdr = ImageReader(fn, fps=args.fps)
         self.tformat = '%Y-%m-%d %H:%M:%S.%f'
-        if re.search('[0-9]_[0-9]{8}_[0-9]{6}', fn):
-            l = fn.split('_')
-            self.rdr.act = datetime.datetime(int(l[-2][0:4]), int(l[-2][4:6]),
-                                             int(l[-2][6:8]), int(l[-1][0:2]),
-                                             int(l[-1][2:4]), int(l[-1][4:6]))
+        t = re.search('[0-9]_[0-9]{8}_[0-9]{6}', fn)
+        t1 = re.search('[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6}', fn)
+        t2 = re.search('[0-9]{8}_[0-9]{6}', fn)
+        if t:
+            # raspivid
+            l = t.group()
+            self.rdr.act = datetime.datetime(int(l[2:6]), int(l[6:8]),
+                                             int(l[8:10]), int(l[11:13]),
+                                             int(l[13:15]), int(l[15:]))
+        elif t1:
+            # dino lite
+            l = t1.group()
+            self.rdr.act = datetime.datetime(int(l[0:4]), int(l[5:7]),
+                                             int(l[8:10]), int(l[11:13]),
+                                             int(l[13:15]), int(l[15:]))
+        elif t2:
+            # mobil
+            l = t2.group()
+            self.rdr.act = datetime.datetime(int(l[0:4]), int(l[4:6]),
+                                             int(l[6:8]), int(l[9:11]),
+                                             int(l[11:13]), int(l[13:]))
         if re.match('sqlite:', args.output):
             self.wrt = SqLiteWriter(db=args.output[7:],
                                     table='aruco_coo',
