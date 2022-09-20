@@ -20,7 +20,7 @@ import cv2
 from reader import Reader
 
 try:
-    from picamera.array import PiRGBArray
+    #from picamera.array import PiRGBArray
     from picamera import PiCamera
 except ModuleNotFoundError:
     pass
@@ -47,6 +47,7 @@ class ImageReader(Reader):
         self.ind = 0    # image index
         self.act = datetime.datetime.now()
         self.dt = None
+        self.source = None
         if srcname in ("0", "1", "2", "3"):
             # camera source
             self.typ = self.CAMERA
@@ -54,20 +55,21 @@ class ImageReader(Reader):
         elif srcname.lower() == 'picam':
             self.typ = self.PICAM
             self.source = PiCamera()
-            #self.width = 1632	# TODO should be input parameter
-            #self.height = 1216
-            self.width = 640
-            self.height = 480
+            self.width = 1632	# TODO should be input parameter
+            self.height = 1216
+            #self.width = 640
+            #self.height = 480
             self.source.resolution = (self.width, self.height)
             time.sleep(0.1)	# wait for camera initialization
         elif isinstance(srcname, str) and \
                 srcname.lower()[-4:] in ("h264", ".mp4", ".avi", "webm"):
             self.typ = self.VIDEO
-            self.source = cv2.VideoCapture(srcname)
-            if fps is None:
-                self.fps = self.source.get(cv2.CAP_PROP_FPS)
-            self.dt = datetime.timedelta(0, 1.0 / self.fps)
-            self.act = datetime.datetime.fromtimestamp(os.path.getmtime(srcname))
+            if os.path.exists(srcname):
+                self.source = cv2.VideoCapture(srcname)
+                if fps is None:
+                    self.fps = self.source.get(cv2.CAP_PROP_FPS)
+                self.dt = datetime.timedelta(0, 1.0 / self.fps)
+                self.act = datetime.datetime.fromtimestamp(os.path.getmtime(srcname))
         else:
             if isinstance(srcname, str):
                 srcname = [srcname]   # make list
@@ -75,7 +77,10 @@ class ImageReader(Reader):
             self.source = []
             for s in srcname:
                 self.source += glob.glob(s) # extend wildcards and remove non-existent files
-            self.source.sort()
+            if len(self.source) > 0:
+                self.source.sort()
+            else:
+                self.source = None
 
     def __del__(self):
         """ release video """

@@ -152,7 +152,7 @@ if __name__ == "__main__":
     parser.add_argument('--hist', action="store_true",
                         help='Increase image constrast using histogram')
     parser.add_argument('--lchanel', action="store_true",
-                        help='Increase image constrast using histogram on lchanel only')
+                        help='Increase image constrast using histogram on lchanel only of CIELAB color space, use with --hist')
     parser.add_argument('--clip', type=float, default=3.0,
                         help='Clip limit for adaptive histogram, use with --hist, default: 3')
     parser.add_argument('--tile', type=int, default=8,
@@ -166,4 +166,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, exit_on_ctrl_c)    # catch Ctrl/C
     args = parser.parse_args()                      # process parameters
     V_A = VideoAruco(args)
+    if V_A.rdr.source is None:
+        print("Invalid imput file(s)")
+        sys.exit()
     V_A.process()                                   # process images
