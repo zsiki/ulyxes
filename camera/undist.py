@@ -8,6 +8,7 @@
 """
 import sys
 import os.path
+import glob
 import yaml
 import numpy as np
 import cv2
@@ -15,6 +16,7 @@ import cv2
 if len(sys.argv) < 3:
     print(f"Usage: {sys.argv[0]} calibration_yaml image [image] [...]")
     sys.exit(1)
+# load camera calibration data
 with open(sys.argv[1]) as f:
     try:
         c = yaml.load(f, Loader=yaml.FullLoader)
@@ -25,11 +27,13 @@ with open(sys.argv[1]) as f:
     dist = np.array(c['dist_coeff'])
 
 for fn in sys.argv[2:]:
-    img = cv2.imread(fn)
-    if img is not None:
-        # undistort
-        dst = cv2.undistort(img, mtx, dist, None)
-        on = os.path.split(fn)
-        cv2.imwrite(os.path.join(on[0], 'cal_' + on[1]), dst)
-    else:
-        print('Cannot read image {}'.format(fn))
+    # extend wildcards on windows
+    for name in glob.glob(fn):
+        img = cv2.imread(name)
+        if img is not None:
+            # undistort
+            dst = cv2.undistort(img, mtx, dist, None)
+            on = os.path.split(name)
+            cv2.imwrite(os.path.join(on[0], 'cal_' + on[1]), dst)
+        else:
+            print('Cannot read image {}'.format(fn))
