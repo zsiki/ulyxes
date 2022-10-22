@@ -64,6 +64,13 @@ PyYaml (to read camera calibration data)
 .. code:: bash
 
 	sudo pip3 install pyyaml
+
+numpy (for camera applications)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
+    sudo pip3 install numpy
 	
 Matplotlib (to display camera/image ddata)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
