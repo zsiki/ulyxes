@@ -16,6 +16,9 @@ import cv2
 
 sys.path.append('../pyapi/')
 
+ALFA = 0    # parameter to getOptimalNewCameraMatrix 
+            # 0 - original area is preserved without invalid areas
+            # 1 - total area preserved with invalid areas
 from confreader import ConfReader
 
 class ArucoBase():
@@ -161,10 +164,10 @@ class ArucoBase():
             # TODO check it https://docs.opencv.org/master/dc/dbb/tutorial_py_calibration.html
             h, w = frame.shape[:2]
             newmtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist,
-                                                        (w, h), 1, (w, h))
+                                                        (w, h), ALFA, (w, h))
             frame = cv2.undistort(frame, self.mtx, self.dist, None, newmtx)
             # crop image
-            frame = frame[roi[1]:roi[1]+roi[3], roi[0]:roi[0]+roi[2]]
+            #frame = frame[roi[1]:roi[1]+roi[3], roi[0]:roi[0]+roi[2]]
         img = frame.copy()  # copy original (undistorted) image for display
         if self.hist:
             if self.lchanel:
