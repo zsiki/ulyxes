@@ -14,7 +14,8 @@
 from filereader import FileReader
 
 class CsvReader(FileReader):
-    """ Class to read csv file, first line must contain field names
+    """ Class to read csv file, first line must contain field names or
+        column names are in fields parameter
 
             :param name: name of reader (str), default None
             :param fname: name of input file
