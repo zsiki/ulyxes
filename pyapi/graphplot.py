@@ -20,7 +20,6 @@
     There are some simple examples at the end of the code
 """
 
-import sys
 import os.path
 import re
 from datetime import datetime
@@ -28,7 +27,7 @@ import matplotlib.pyplot as plt
 #from matplotlib.dates import DateFormatter
 import numpy as np
 
-def dict2lists(dict_src, x_key, y_keys, rel=False, mirror=1):
+def dict2lists(dict_src, x_key, y_keys, rel=False, mirror=1, scale=1.0):
     """ convert list of dictionaries to vectors x can be string of date time or numerical string
 
         :param dict_src: loaded list of dictionaries from CsvReader
@@ -36,6 +35,7 @@ def dict2lists(dict_src, x_key, y_keys, rel=False, mirror=1):
         :param y_keys: keys for multiple y values
         :param rel: relative values to first in ys
         :param mirror: 1/-1 multiplier for y to mirror
+        :param scale: multiplier for y values
         :returns: tuple of lists of x and y values
     """
     date_format = None
@@ -58,7 +58,7 @@ def dict2lists(dict_src, x_key, y_keys, rel=False, mirror=1):
         rel_val = 0
         if rel:
             rel_val = float(dict_src[0][y_key])
-        y = [(float(d[y_key]) - rel_val) * mirror for d in dict_src]
+        y = [(float(d[y_key]) - rel_val) * mirror * scale for d in dict_src]
         ys.append(y)
     return (x, ys)
 
