@@ -16,7 +16,7 @@ import cv2
 
 sys.path.append('../pyapi/')
 
-ALFA = 0    # parameter to getOptimalNewCameraMatrix 
+ALFA = 0    # parameter to getOptimalNewCameraMatrix
             # 0 - original area is preserved without invalid areas
             # 1 - total area preserved with invalid areas
 from confreader import ConfReader
@@ -33,6 +33,7 @@ class ArucoBase():
         self.clip = 3.0
         self.tile = 8
         self.code = None
+        self.refine = False
 
         if isinstance(args, str):
             # get params from json
@@ -43,10 +44,14 @@ class ArucoBase():
         #
         self.clahe = cv2.createCLAHE(clipLimit=self.clip,
                                      tileGridSize=(self.tile, self.tile))
-
+        if self.refine:
+            self.params.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_SUBPIX
 
     def json_params(self, fn):
-        """ get params from json config """
+        """ get params from json config
+
+            :param fn: name of json config file
+        """
         config_pars = {
             'log_file': {'required' : True, 'type': 'file'},
             'log_level': {'required' : True, 'type': 'int',
@@ -60,6 +65,7 @@ class ArucoBase():
             'size': {'required': False, 'type': 'float', 'default': 100.0},
             'calibration': {'required': False, 'type': 'file', 'default': None},
             'hist': {'required': False, 'type': 'int', 'default': 0},
+            'refine': {'required': False, 'type': 'int', 'default': 0},
             'lchanel': {'required': False, 'type': 'int', 'default': 0},
             'clip': {'required': False, 'type': 'float', 'default': 3.0},
             'tile': {'required': False, 'type': 'int', 'default': 8},
@@ -72,7 +78,7 @@ class ArucoBase():
             cr = ConfReader('camera', fn, config_pars)
             cr.Load()
         except Exception:
-            print("Error in config file: {0}".format(sys.argv[1]))
+            print(f"Error in config file: {sys.argv[1]}")
             sys.exit(-1)
         if not cr.Check():
             print("Config check failed")
@@ -99,6 +105,7 @@ class ArucoBase():
         self.tile = cr.json['tile']
         self.hist = cr.json['hist']
         self.lchanel = cr.json['lchanel']
+        self.refine = cr.json['refine']
         self.code = cr.json['code']
         self.size = cr.json['size']
         self.coo_wr = cr.json['coo_wr']
@@ -106,7 +113,10 @@ class ArucoBase():
         self.log_format = cr.json["log_format"]
 
     def args_params(self, args):
-        """ get params from command line """
+        """ get params from command line
+
+            :param args: command line arguments from argparse
+        """
         if args.dict == 99:     # use special 3x3 dictionary
             self.aruco_dict = cv2.aruco.Dictionary_create(32, 3)
         else:
@@ -133,6 +143,7 @@ class ArucoBase():
         self.lchanel = args.lchanel
         self.code = args.code
         self.size = args.size
+        self.refine = args.refine
 
     # TODO pose http://cs-courses.mines.edu/csci507/schedule/24/SquareMarkersOpenCV.pdf
     @staticmethod
