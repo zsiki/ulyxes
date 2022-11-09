@@ -301,7 +301,10 @@ class Robot(object):
                     i += step   # switch to next point
             n = n + 1
         # rotate back to first point
-        self.ts.Move(self.directions[1]['hz'], self.directions[1]['v'], 0)
+        try:
+            self.ts.Move(self.directions[1]['hz'], self.directions[1]['v'], 0)
+        except:
+            pass
         return (obs_out, coo_out)
 
 if __name__ == "__main__":
