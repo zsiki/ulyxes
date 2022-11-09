@@ -27,7 +27,7 @@ class CsvReader(FileReader):
     def __init__(self, name=None, fname=None, separator=';', filt=None, fields=None):
         """ Constructor
         """
-        super(CsvReader, self).__init__(name, fname, filt)
+        super().__init__(name, fname, filt)
         self.separator = separator
         self.filt = filt
         if fields is None:

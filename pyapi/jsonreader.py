@@ -19,11 +19,11 @@ class JSONReader(FileReader):
             :param name: name of reader (str), default None
             :param fname: name of input file
     """
-    
+
     def __init__(self, name=None, fname=None):
         """ Constructor
         """
-        super(JSONReader, self).__init__(name, fname)
+        super().__init__(name, fname)
         self.json = None
 
     def GetLine(self):
@@ -34,10 +34,10 @@ class JSONReader(FileReader):
     def Load(self):
         """ Load full JSON file
         """
-        c = ""
-        for line in self.fp:
-            c += line
-        res = json.loads(c)
+        #c = ""
+        #for line in self.fp:
+        #    c += line
+        res = json.loads("".join(self.fp.readlines()))
         self.json = res
         return res
 

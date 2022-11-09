@@ -22,13 +22,13 @@ https://computingforgeeks.com/connect-to-bluetooth-device-from-linux-terminal/
     Kecskeméti Máté <kecskemeti.mate3@gmail.com>
 """
 
+import time
 import logging
 import bluetooth
-import time
 from iface import Iface
 
 class BluetoothIface(Iface):
-    """ Interface to communicate through bluetooth interfacei as a client. 
+    """ Interface to communicate through bluetooth interfacei as a client.
         This class depends on pybluez.
 
             :param name: name of bluetooth interface (str)
@@ -42,7 +42,7 @@ class BluetoothIface(Iface):
                  eomWrite='\r\n'):
         """ Constructor for bluetooth client
         """
-        super(BluetoothIface, self).__init__(name)
+        super().__init__(name)
         self.mac = mac
         self.port = port
         self.timeout = timeout

@@ -36,7 +36,7 @@ class DbWriter(Writer):
         if angle == 'DMS':
             angle = 'GON'
             logging.warning('Angle type changed from DMS to GON')
-        super(DbWriter, self).__init__(name, angle, dist, dt, filt)
+        super().__init__(name, angle, dist, dt, filt)
         self.db = db
         self.conn = None
         if os.path.isfile(db):
@@ -67,7 +67,7 @@ class DbWriter(Writer):
         res = 0
         if data is None or self.DropData(data):
             logging.warning(" empty or inappropiate data not written")
-            return
+            return None
         # add datetime and/or id
         data = self.ExtendData(data)
         # build sql statement

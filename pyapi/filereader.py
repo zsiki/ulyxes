@@ -25,7 +25,7 @@ class FileReader(Reader):
     def __init__(self, name=None, fname=None, filt=None):
         """ Constructor
         """
-        super(FileReader, self).__init__(name, filt)
+        super().__init__(name, filt)
         self.fp = None
         try:
             self.fp = open(fname, 'r')

@@ -117,15 +117,15 @@ class GraphPlot:
             n_ys = len(self.y[i])
             if len(self.fmts[i]) != n_ys:
                 n_err += 1
-                print("fmts-y length {}".format(i))
+                print(f"fmts-y length {i}")
             if len(self.labels[i]) != n_ys:
                 n_err += 1
-                print("fmts-y length {}".format(i))
+                print(f"fmts-y length {i}")
             for j in range(len(self.y[i])):
                 n_y = len(self.y[i][j])
                 if n_y != n_x:
                     n_err += 1
-                    print("different x-y length {}".format(i))
+                    print(f"different x-y length {i}")
         return n_err
 
     def draw(self, target=None):

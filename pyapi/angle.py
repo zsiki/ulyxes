@@ -92,7 +92,7 @@ def _dms(value):
     mi, sec = divmod(secs, 60)
     deg, mi = divmod(mi, 60)
     deg = int(deg)
-    return "%s%d-%02d-%02d" % (signum, deg, mi, sec)
+    return f"{signum}{deg}-{mi:02d}-{sec:02d}"
 
 def _rad2dm(value):
     """ Convert radian to NMEA DDDMM.nnnnn
@@ -115,28 +115,28 @@ def _rad2mil(value):
     """
     return value / math.pi / 2.0 * 6400.0
 
-class Angle(object):
+class Angle():
     """ Angle class, value stored in radian internally. Angle units supported:
 
-* RAD  radians (e.g. 1.54678432)
-* DMS sexagesimal (Degree-Minute-Second, e.g. 123-54-24)
-* DEG decimal degree (e.g. 25.87659)
-* GON gradians, the whole circle is 400g (e.g. 387.7857)
-* NMEA ddmm.mmmm used in NMEA sentences (e.g. 47.338765)
-* PDEG pseudo sexagesimal (e.g. 156.2745 = 156-27-45)
-* SEC sexagesimal seconds
-* MIL mills the whole circle is 6400 mills
+        * RAD  radians (e.g. 1.54678432)
+        * DMS sexagesimal (Degree-Minute-Second, e.g. 123-54-24)
+        * DEG decimal degree (e.g. 25.87659)
+        * GON gradians, the whole circle is 400g (e.g. 387.7857)
+        * NMEA ddmm.mmmm used in NMEA sentences (e.g. 47.338765)
+        * PDEG pseudo sexagesimal (e.g. 156.2745 = 156-27-45)
+        * SEC sexagesimal seconds
+        * MIL mills the whole circle is 6400 mills
 
-Operators supported:
+        Operators supported:
 
-* \+ add two angles (e.g. c = Angle(180, 'DEG') + Angle('12-34-56', 'DMS'))
-* \- substract two angles (e.g. d = Angle(180, 'DEG') - Angle('12-34-56', 'DMS'))
-* += increment angle (e.g. c += Angle(1, 'GON'))
-* -= decrement angle (e.g. d -= Angle(1, 'GON'))
-* str() convert angle to GON string, used in print
+        * \+ add two angles (e.g. c = Angle(180, 'DEG') + Angle('12-34-56', 'DMS'))
+        * \- substract two angles (e.g. d = Angle(180, 'DEG') - Angle('12-34-56', 'DMS'))
+        * += increment angle (e.g. c += Angle(1, 'GON'))
+        * -= decrement angle (e.g. d -= Angle(1, 'GON'))
+        * str() convert angle to GON string, used in print
 
-:param value: angle value
-:param unit: angle unit (available units RAD/DMS/DEG/GON/NMEA/PDEG/SEC/MIL)
+        :param value: angle value
+        :param unit: angle unit (available units RAD/DMS/DEG/GON/NMEA/PDEG/SEC/MIL)
     """
 
     # jump table to import from
@@ -211,14 +211,14 @@ Operators supported:
 
             :returns: GON string
         """
-        return "{0:.4f}".format(self.GetAngle('GON'))
+        return f"{self.GetAngle('GON'):.4f}"
 
     def __repr__(self):
         """
         angle object representation
             :returns: angle object string
         """
-        return type(self).__name__+"({0:f})".format(self.GetAngle())
+        return type(self).__name__ + f"({self.GetAngle():f})"
 
     def __add__(self, a):
         """ add angles

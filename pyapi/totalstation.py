@@ -18,7 +18,10 @@ from leicatcra1100 import LeicaTCRA1100
 from leicatca1800 import LeicaTCA1800
 from trimble5500 import Trimble5500
 from serialiface import SerialIface
-from bluetoothiface import BluetoothIface
+try:
+    from bluetoothiface import BluetoothIface
+except:
+    pass
 from echowriter import EchoWriter
 
 class TotalStation(Instrument):
@@ -37,7 +40,7 @@ class TotalStation(Instrument):
         """ Constructor
         """
         # call super class init
-        super(TotalStation, self).__init__(name, measureUnit, measureIface,
+        super().__init__(name, measureUnit, measureIface,
                                            writerUnit)
         if isinstance(measureUnit, Trimble5500):
             # change default eol marker for read
@@ -451,7 +454,6 @@ class TotalStation(Instrument):
         return None
 
 if __name__ == "__main__":
-    import time
     logging.getLogger().setLevel(logging.DEBUG)
     mu = LeicaTPS1200()
     #mu = LeicaTCA1800()
@@ -469,10 +471,10 @@ if __name__ == "__main__":
     #ts.SetPc(0.0068)
     #print(ts.GetPc())
     print(ts.GetAngles())
-    #ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
-    #ts.SetEDMMode(ts.measureUnit.edmModes['STANDARD'])
-    #ts.Measure()
-    #meas = ts.GetMeasure()
+    ts.Move(Angle(90, 'DEG'), Angle(85, 'DEG'))
+    ts.SetEDMMode(ts.measureUnit.edmModes['RLSTANDARD'])
+    ts.Measure()
+    meas = ts.GetMeasure()
     #while 'distance' not in meas:
     #time.sleep(5)
     #meas = ts.GetMeasure()

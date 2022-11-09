@@ -25,7 +25,7 @@ class LeicaTCRA1100(LeicaMeasureUnit):
         """ Constructor to leica generic ts
         """
         # call super class init
-        super(LeicaTCRA1100, self).__init__(name, typ)
+        super().__init__(name, typ)
 
     # Constants for message codes
     codes = {
@@ -90,4 +90,4 @@ class LeicaTCRA1100(LeicaMeasureUnit):
             :param on: 0/1 turn off/on read laser
             :returns: red laser on/off message
         """
-        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETREDLASER'], on)
+        return f"%R1Q,{self.codes['SETREDLASER']}:{on}"

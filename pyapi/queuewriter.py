@@ -11,9 +11,9 @@
 .. moduleauthor:: Bence Turák <turak.bence@epito.bme.hu>
 """
 
-from writer import Writer
 import logging
 import queue
+from writer import Writer
 
 class QueueWriter(Writer):
     """Class to write queue
@@ -28,7 +28,7 @@ class QueueWriter(Writer):
     def __init__(self, qu=None, name=None, angle='GON', dist='.3f', \
                  dt='%Y-%m-%d %H:%M:%S', filt=None):
         """ Constuctor """
-        super(QueueWriter, self).__init__(name, angle, dist, dt, filt)
+        super().__init__(name, angle, dist, dt, filt)
         if isinstance(qu, queue.Queue):
             self.q = qu
         elif queue is None:
@@ -50,7 +50,7 @@ class QueueWriter(Writer):
         line = {}
         if data is None or self.DropData(data):
             logging.warning(" empty or inappropiate data not written")
-            return
+            return -3
 
         data = self.ExtendData(data)
         for key, val in data.items():

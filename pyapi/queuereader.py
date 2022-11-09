@@ -10,8 +10,8 @@
 
 .. moduleauthor:: Bence Turák <turak.bence@epito.bme.hu>
 """
-from reader import Reader
 import queue
+from reader import Reader
 
 class QueueReader(Reader):
     """ Class to read queue
@@ -24,7 +24,7 @@ class QueueReader(Reader):
     def __init__(self, qu=None, name=None, filt=None):
         """ Constuctor
         """
-        super(QueueReader, self).__init__(name, filt)
+        super().__init__(name, filt)
 
         if isinstance(qu, queue.Queue):
             self.q = qu

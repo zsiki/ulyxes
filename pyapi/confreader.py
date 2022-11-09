@@ -25,7 +25,7 @@ class ConfReader(JSONReader):
     def __init__(self, name=None, fname=None, pars=None):
         """ Constructor
         """
-        super(ConfReader, self).__init__(name, fname)
+        super().__init__(name, fname)
         self.pars = pars
 
     def Check(self):
@@ -37,13 +37,13 @@ class ConfReader(JSONReader):
         # set default values for missing parameters
         for par in self.pars:
             if self.pars[par]['required'] and par not in self.json:
-                print("missing required parameter: {0}".format(par))
+                print(f"missing required parameter: {par}")
                 return False
             if 'default' in self.pars[par] and par not in self.json:
                 self.json[par] = self.pars[par]['default']
         for par in self.json:
             if par not in self.pars:
-                print("unknown parameter: {0}".format(par))
+                print(f"unknown parameter: {par}")
                 continue
             # type checking
             pardef = self.pars[par]
@@ -52,26 +52,26 @@ class ConfReader(JSONReader):
                 continue
             if 'type' in pardef:
                 if pardef['type'] == 'int' and type(self.json[par]) is not int:
-                    print("type mismatch parameter: {0}".format(par))
+                    print(f"type mismatch parameter: {par}")
                     return False
                 if pardef['type'] == 'float' and \
                     type(self.json[par]) is not int and \
                     type(self.json[par]) is not float:
-                    print("type mismatch parameter: {0}".format(par))
+                    print(f"type mismatch parameter: {par}")
                     return False
                 if pardef['type'] == 'list' and \
                     type(self.json[par]) is not list:
-                    print("type mismatch parameter: {0}".format(par))
+                    print(f"type mismatch parameter: {par}")
                     return False
                 if pardef['type'] == 'file' and \
                     type(self.json[par]) is str and \
                     not os.path.isfile(self.json[par]):
-                    print("parameter type mismatch or file does not exist: {0}".format(self.json[par]))
+                    print(f"parameter type mismatch or file does not exist: {self.json[par]}")
                     return False
                 # check set for valid values
                 if 'set' in pardef and \
                     self.json[par] not in pardef['set']:
-                    print("invalid value: {0}".format(par))
+                    print(f"invalid value: {par}")
                     return False
         # TODO complex rules e.g. no fix but gama_path given
         return True
@@ -121,7 +121,7 @@ if __name__ == '__main__':
         'met_par': {'required': False},
         '__comment__': {'required': False, 'type': 'str'}
     }
-    FN = '../pyapps/robotplus.json' if len(argv) < 2 else argv[1]
+    FN = '../test/redey.json' if len(argv) < 2 else argv[1]
     JR = ConfReader('test', FN, CONFIG_PARS)
     if JR.state == JR.RD_OK:
         print(JR.Load())

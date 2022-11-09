@@ -46,7 +46,7 @@ class NmeaGnssUnit(MeasureUnit):
         """ constructor for nmea measure unit
         """
         # call super class init
-        super(NmeaGnssUnit, self).__init__(name, typ)
+        super().__init__(name, typ)
         self.filt = self.SUPPORTED_MSGS  # default filter accept all
         if filt is not None:
             self.filt = [msg for msg in filt if msg in self.SUPPORTED_MSGS]

@@ -25,7 +25,7 @@ class LeicaTCA1800(LeicaMeasureUnit):
         """ Constructor to leica generic ts
         """
         # call super class init
-        super(LeicaTCA1800, self).__init__(name, typ)
+        super().__init__(name, typ)
 
     @staticmethod
     def GetCapabilities():

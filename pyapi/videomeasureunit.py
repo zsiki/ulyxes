@@ -20,7 +20,7 @@ class VideoMeasureUnit(MeasureUnit):
     def __init__(self, name='webcam', typ='video'):
         """ Constructor
         """
-        super(VideoMeasureUnit, self).__init__(name, typ)
+        super().__init__(name, typ)
 
     @staticmethod
     def GetCapabilities():

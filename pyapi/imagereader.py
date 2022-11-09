@@ -41,7 +41,7 @@ class ImageReader(Reader):
 
     def __init__(self, srcname, name=None, filt=None, fps=None):
         """ Constructor """
-        super(ImageReader, self).__init__(name, filt)
+        super().__init__(name, filt)
         self.fps = fps
         self.srcname = srcname
         self.ind = 0    # image index

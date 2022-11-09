@@ -11,7 +11,7 @@
     Daniel Moka <mokadaniel@citromail.hu>
 """
 
-class Iface(object):
+class Iface():
     """ Base class for different interfaces
 
         :param name: name of the interface (str) (default None)

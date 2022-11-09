@@ -27,7 +27,7 @@ class ImageWriter(Writer):
     def __init__(self, name, dirName, counter=1, itype='png'):
         """ Constructor
         """
-        super(ImageWriter, self).__init__(name)
+        super().__init__(name)
         if itype[0] != '.':
             itype = '.' + itype
         if not itype in ('.bmp', '.jpg', '.png', '.tif', '.pbm'):
@@ -55,7 +55,7 @@ class ImageWriter(Writer):
         """
         if data is None:
             logging.warning(" empty image not written")
-            return
+            return None
         name = os.path.join(self.dirName, self.name + "{:05d}".format(self.counter) + self.itype)
         try:
             if convert == 'gray' and len(data.shape) == 3:

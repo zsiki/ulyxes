@@ -14,7 +14,7 @@
 import datetime
 from angle import Angle
 
-class Writer(object):
+class Writer():
     """ Base class for different writers (virtual)
 
             :param name: name of writer (str), default None

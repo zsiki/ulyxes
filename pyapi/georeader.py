@@ -27,10 +27,10 @@ class GeoReader(FileReader):
              37: 'north', 38: 'east', 39: 'elev', 51: 'datetime',
              62: 'id', 112: 'faces'}
 
-    def __init__(self, name=None, fname=None, filt=None):
-        """ Constructor
-        """
-        super(GeoReader, self).__init__(name, fname, filt)
+    #def __init__(self, name=None, fname=None, filt=None):
+    #    """ Constructor
+    #    """
+    #    super().__init__(name, fname, filt)
 
     def __del__(self):
         """ Destructor

@@ -25,7 +25,7 @@ class LeicaTPS1200(LeicaMeasureUnit):
         """ Constructor to leica generic ts
         """
         # call super class init
-        super(LeicaTPS1200, self).__init__(name, typ)
+        super().__init__(name, typ)
 
     # Constants for message codes
     codes = {
@@ -92,9 +92,7 @@ class LeicaTPS1200(LeicaMeasureUnit):
             :param vRange: vertical range to search (Angle)
             :param on: 0/1 off/on
         """
-        return '%R1Q,{0:d}:{1:f},{2:f},{3:f},{4:f},{5:d}'.format(
-            self.codes['SETSEARCHAREA'], hzCenter.GetAngle(),
-            vCenter.GetAngle(), hzRange.GetAngle(), vRange.GetAngle(), on)
+        return f"%R1Q,{self.codes['SETSEARCHAREA']}:{hzCenter.GetAngle()},{vCenter.GetAngle()},{hzRange.GetAngle()},{vRange.GetAngle()},{on}"
 
     def PowerSearchMsg(self, direction):
         """ Power search
@@ -102,7 +100,7 @@ class LeicaTPS1200(LeicaMeasureUnit):
             :param direction: 1/-1 clockwise/counter clockwise
             :returns: Power search message
         """
-        return '%R1Q,{0:d}:{1:d},0'.format(self.codes['POWERSEARCH'], direction)
+        return f"%R1Q,{self.codes['POWERSEARCH']}:{direction},0"
 
     def SetRedLaserMsg(self, on):
         """ Set red laser on/off
@@ -110,5 +108,4 @@ class LeicaTPS1200(LeicaMeasureUnit):
             :param on: 0/1 turn off/on read laser
             :returns: red laser on/off message
         """
-        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETREDLASER'], on)
-
+        return f"%R1Q,{self.codes['SETREDLASER']}:{on}"

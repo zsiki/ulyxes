@@ -11,7 +11,7 @@
 
 """
 
-class MeasureUnit(object):
+class MeasureUnit():
     """ Virtual base clase for measure units
 
             :param name: name of measure unit (str), default None

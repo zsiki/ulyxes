@@ -24,7 +24,7 @@ class PiCamIface(Iface):
     def __init__(self, name='picam', source=0):
         """ Constructor
         """
-        super(PiCamIface, self).__init__(name)
+        super().__init__(name)
         self.source = source
         self.video = None
         self.camera = PiCamera()

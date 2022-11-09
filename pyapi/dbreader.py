@@ -32,7 +32,7 @@ class DbReader(Reader):
     def __init__(self, db, sql, name=None, filt=None):
         """ Constructor
         """
-        super(DbReader, self).__init__(name, filt)
+        super().__init__(name, filt)
         self.angle = 'GON'
         self.db = db
         if os.path.isfile(db):

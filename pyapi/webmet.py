@@ -25,7 +25,7 @@ class WebMet(Instrument):
     def __init__(self, name, measureUnit, measureIface, writerUnit=None):
         """ constructor
         """
-        super(WebMet, self).__init__(name, measureUnit, measureIface, writerUnit)
+        super().__init__(name, measureUnit, measureIface, writerUnit)
         self.p0 = None    # sealevel pressure not set
 
     def GetTemp(self):
@@ -90,12 +90,11 @@ class WebMet(Instrument):
         return wet
 
 if __name__ == "__main__":
-    """ webmet demo logger
-        command line parameters
-        argv[1]: name of log file, default webmet.log
-        argv[2]: number of repeated observations, default 10
-        argv[3]: delay between observations, default 30 sec
-    """
+    # webmet demo logger
+    #    command line parameters
+    #    argv[1]: name of log file, default webmet.log
+    #    argv[2]: number of repeated observations, default 10
+    #    argv[3]: delay between observations, default 30 sec
     import time
     import sys
     from webmetmeasureunit import WebMetMeasureUnit

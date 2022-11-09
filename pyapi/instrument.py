@@ -43,8 +43,7 @@ codes handles by descendent classes:
 - vRange: vertical search range, totalstation
 - wetTemp: wet temperature, met sensor
 """
-import sys
-class Instrument(object):
+class Instrument():
     """ Base class for different instruments
 
             :param name: name of instrument (str)
@@ -105,7 +104,7 @@ class Instrument(object):
         try:
             if res['binsize'] and res['binsize'] > 0:
                 res = self.measureIface.GetLine(res['binsize'])
-                if pic != None:
+                if pic is not None:
                     pic.write(res)
                     res['pic'] = pic
         except Exception:

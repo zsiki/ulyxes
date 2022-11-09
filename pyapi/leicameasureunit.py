@@ -76,7 +76,7 @@ class LeicaMeasureUnit(MeasureUnit):
         """ Constructor to leica generic ts
         """
         # call super class init
-        super(LeicaMeasureUnit, self).__init__(name, typ)
+        super().__init__(name, typ)
 
     @staticmethod
     def GetCapabilities():
@@ -184,28 +184,28 @@ class LeicaMeasureUnit(MeasureUnit):
             :param pc: prism constant [mm]
             :returns: set prism constant message
         """
-        return '%R1Q,{0:d}:{1:f}'.format(self.codes['SETPC'], pc)
+        return f"%R1Q,{self.codes['SETPC']}:{pc}"
 
     def GetPcMsg(self):
         """ Get prism constant
 
             :returns: get prism constant message
         """
-        return '%R1Q,{0:d}:'.format(self.codes['GETPC'])
+        return f"%R1Q,{self.codes['GETPC']}:"
 
     def SetPrismTypeMsg(self, typ):
         """ Set prism type
 
             :param typ: prism type (0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini)
         """
-        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETPT'], typ)
+        return f"%R1Q,{self.codes['SETPT']}:{typ}"
 
     def GetPrismTypeMsg(self):
         """ Get prism type
 
             :returns: prism type (0/1/2/3/4/5/6/7 round/mini/tape/360/user1/user2/user3/360 mini)
         """
-        return '%R1Q,{0:d}:'.format(self.codes['GETPT'])
+        return f"%R1Q,{self.codes['GETPT']}:"
 
     def SetATRMsg(self, atr):
         """ Set ATR status on/off
@@ -213,14 +213,14 @@ class LeicaMeasureUnit(MeasureUnit):
             :param atr: 0/1 = off/on
             :returns: set atr message string
         """
-        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETATR'], atr)
+        return f"%R1Q,{self.codes['SETATR']}:{atr}"
 
     def GetATRMsg(self):
         """ Get ATR status
 
             :returns: get atr message
         """
-        return '%R1Q,{0:d}:'.format(self.codes['GETATR'])
+        return f"%R1Q,{self.codes['GETATR']}:"
 
     def SetLockMsg(self, lock):
         """ Set Lock status
@@ -228,21 +228,21 @@ class LeicaMeasureUnit(MeasureUnit):
             :param lock: 0/1 = off/on
             :returns: set lock status message
         """
-        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETLOCK'], lock)
+        return f"%R1Q,{self.codes['SETLOCK']}:{lock}"
 
     def GetLockMsg(self):
         """ Get Lock status
 
             :returns: get lock status message
         """
-        return '%R1Q,{0:d}:'.format(self.codes['GETLOCK'])
+        return f"%R1Q,{self.codes['GETLOCK']}:"
 
     def LockInMsg(self):
         """ Activate lock
 
             :returns: active lock message
         """
-        return '%R1Q,{0:d}:'.format(self.codes['LOCKIN'])
+        return f"%R1Q,{self.codes['LOCKIN']}:"
 
     def SetAtmCorrMsg(self, valueOfLambda, pres, dry, wet):
         """ Set atmospheric correction settings
@@ -253,15 +253,14 @@ class LeicaMeasureUnit(MeasureUnit):
             :param wet: wet temperature
             :returns: set atmospheric correction message
         """
-        return '%R1Q,{0:d}:{1:.8f},{2:f},{3:f},{4:f}'.format( \
-            self.codes['SETATMCORR'], valueOfLambda, pres, dry, wet)
+        return f"%R1Q,{self.codes['SETATMCORR']}:{valueOfLambda:.8f},{pres},{dry},{wet}"
 
     def GetAtmCorrMsg(self):
         """ Get atmospheric correction settings
 
             :returns: iget atmospheric settings message
         """
-        return '%R1Q,{0:d}:'.format(self.codes['GETATMCORR'])
+        return f"%R1Q,{self.codes['GETATMCORR']}:"
 
     def SetRefCorrMsg(self, status, earthRadius, refracticeScale):
         """ Set refraction correction settings
@@ -271,8 +270,7 @@ class LeicaMeasureUnit(MeasureUnit):
             :param refracticeScale: refractice scale
             :returns: set refraction message
         """
-        return '%R1Q,{0:d}:{1:d},{2:f},{3:f}'.format(self.codes['SETREFCORR'], \
-            status, earthRadius, refracticeScale)
+        return f"%R1Q,{self.codes['SETREFCORR']}:{status},{earthRadius},{refracticeScale}"
 
     def GetRefCorrMsg(self):
         """ Get refraction correction setting
@@ -280,7 +278,7 @@ class LeicaMeasureUnit(MeasureUnit):
             :returns: get refraction correction message
 
         """
-        return '%R1Q,{0:d}:'.format(self.codes['GETREFCORR'])
+        return f"%R1Q,{self.codes['GETREFCORR']}:"
 
     def SetStationMsg(self, e, n, z, ih=0.0):
         """ Set station coordinates
@@ -291,8 +289,7 @@ class LeicaMeasureUnit(MeasureUnit):
             :param ih: instrument height (optional, default 0)
             :returns: set station coordinates message
         """
-        return '%R1Q,{0:d}:{1:f},{2:f},{3:f},{4:f}'.format( \
-            self.codes['SETSTN'], e, n, z, ih)
+        return f"%R1Q,{self.codes['SETSTN']}:{e},{n},{z},{ih}"
 
     def GetStationMsg(self):
         """ Get station coordinates
@@ -300,7 +297,7 @@ class LeicaMeasureUnit(MeasureUnit):
         :returns: get station coordinates message
 
         """
-        return '%R1Q,{0:d}:'.format(self.codes['GETSTN'])
+        return f"%R1Q,{self.codes['GETSTN']}:"
 
     def SetEDMModeMsg(self, mode):
         """ Set EDM mode
@@ -312,14 +309,14 @@ class LeicaMeasureUnit(MeasureUnit):
             imode = self.edmModes[mode]
         else:
             imode = mode
-        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SETEDMMODE'], imode)
+        return f"%R1Q,{self.codes['SETEDMMODE']}:{imode}"
 
     def GetEDMModeMsg(self):
         """ Get EDM mode
 
             :returns: get edm mode message
         """
-        return '%R1Q,{0:d}:'.format(self.codes['GETEDMMODE'])
+        return f"%R1Q,{self.codes['GETEDMMODE']}:"
 
     def SetOriMsg(self, ori):
         """ Set orientation angle
@@ -329,7 +326,7 @@ class LeicaMeasureUnit(MeasureUnit):
 
         """
         ori_rad = ori.GetAngle('RAD')
-        return '%R1Q,{0:d}:{1:f}'.format(self.codes['SETORI'], ori_rad)
+        return f"%R1Q,{self.codes['SETORI']}:{ori_rad}"
 
     def MoveMsg(self, hz, v, atr=0):
         """ Rotate instrument to direction with ATR or without ATR
@@ -343,8 +340,7 @@ class LeicaMeasureUnit(MeasureUnit):
         # change angles to radian
         hz_rad = hz.GetAngle('RAD')
         v_rad = v.GetAngle('RAD')
-        return '%R1Q,{0:d}:{1:f},{2:f},0,{3:d},0'.format(self.codes['MOVE'], \
-            hz_rad, v_rad, atr)
+        return f"%R1Q,{self.codes['MOVE']}:{hz_rad},{v_rad},0,{atr},0"
 
     def MeasureMsg(self, prg=1, incl=0):
         """ Measure distance
@@ -354,7 +350,7 @@ class LeicaMeasureUnit(MeasureUnit):
 
             :returns: measure message
         """
-        return '%R1Q,{0:d}:{1:d},{2:d}'.format(self.codes['MEASURE'], prg, incl)
+        return f"%R1Q,{self.codes['MEASURE']}:{prg},{incl}"
 
     def GetMeasureMsg(self, wait=15000, incl=0):
         """ Get measured distance
@@ -363,8 +359,7 @@ class LeicaMeasureUnit(MeasureUnit):
             :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
             :returns: get simple measurement message
         """
-        return '%R1Q,{0:d}:{1:d},{2:d}'.format(self.codes['GETMEASURE'], \
-            wait, incl)
+        return f"%R1Q,{self.codes['GETMEASURE']}:{wait},{incl}"
 
     def MeasureDistAngMsg(self, prg):
         """ Measure angles and distance
@@ -375,7 +370,7 @@ class LeicaMeasureUnit(MeasureUnit):
         """
         if type(prg) is str:
             prg = self.edmProg[prg]
-        return '%R1Q,{0:d}:{1:d}'.format(self.codes['MEASUREANGDIST'], prg)
+        return f"%R1Q,{self.codes['MEASUREANGDIST']}:{prg}"
 
     def CoordsMsg(self, wait=15000, incl=0):
         """ Get coordinates
@@ -384,21 +379,19 @@ class LeicaMeasureUnit(MeasureUnit):
             :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
             :returns: get coordinates message
         """
-        return '%R1Q,{0:d}:{1:d},{2:d}'.format(self.codes['COORDS'], \
-            wait, incl)
+        return f"%R1Q,{self.codes['COORDS']}:{wait},{incl}"
 
     def GetAnglesMsg(self):
         """ Get angles
 
                 :returns: get angles message
         """
-        return '%R1Q,{0:d}:0'.format(self.codes['GETANGLES'])
+        return f"%R1Q,{self.codes['GETANGLES']}:0"
 
     def ClearDistanceMsg(self):
         """ Clearing distance
 
                 :returns: clear distance message
-
         """
         return self.MeasureMsg(self, 3)
 
@@ -407,14 +400,14 @@ class LeicaMeasureUnit(MeasureUnit):
 
             :returns: change face message
         """
-        return '%R1Q,{0:d}:'.format(self.codes['CHANGEFACE'])
+        return f"%R1Q,{self.codes['CHANGEFACE']}:"
 
     def GetSpiralMsg(self):
         """ Get search spiral parameters
 
             :returns: get spiral message
         """
-        return '%R1Q,{0:d}:'.format(self.codes['GETSPIRAL'])
+        return f"%R1Q,{self.codes['GETSPIRAL']}:"
 
     def SetSpiralMsg(self, dRangeHz, dRangeV):
         """ Set search priral parameters
@@ -423,15 +416,14 @@ class LeicaMeasureUnit(MeasureUnit):
             :param dRangeV: vertical range of search (Angle)
             :returns: set search spiral message
         """
-        return '%R1Q,{0:d}:{1:f},{2:f}'.format(self.codes['SETSPIRAL'], \
-            dRangeHz.GetAngle('RAD'), dRangeV.GetAngle('RAD'))
+        return f"%R1Q,{self.codes['SETSPIRAL']}:{dRangeHz.GetAngle('RAD')},{dRangeV.GetAngle('RAD')}"
 
     def SearchTargetMsg(self):
         """ Search target using user spiral
 
             :returns: Search target message
         """
-        return '%R1Q,{0:d}:'.format(self.codes['SEARCHTARGET'])
+        return f"%R1Q,{self.codes['SEARCHTARGET']}:"
 
     def SwitchOnMsg(self, mode=1):
         """ Switch on instrument or wake up and change to remote mode
@@ -439,7 +431,7 @@ class LeicaMeasureUnit(MeasureUnit):
             :param mode: startup mode 0/1 local/remote
             :returns: switch on message
         """
-        return '%R1Q,{0:d}:{1:d}'.format(self.codes['SWITCHON'], mode)
+        return f"%R1Q,{self.codes['SWITCHON']}:{mode}"
 
     def SwitchOffMsg(self):
         """ Switch off instrument
@@ -452,18 +444,18 @@ class LeicaMeasureUnit(MeasureUnit):
 
             :returns: get instrument factory number message
         """
-        return '%R1Q,{0:d}:'.format(self.codes['INSTRNO'])
+        return f"%R1Q,{self.codes['INSTRNO']}:"
 
     def GetInstrumentNameMsg(self):
         """ Get instrument name
 
             :returns: get instrument name
         """
-        return '%R1Q,{0:d}:'.format(self.codes['INSTRNAME'])
+        return f"%R1Q,{self.codes['INSTRNAME']}:"
 
     def GetInternalTemperatureMsg(self):
         """ Get instrument internal temperature
 
             :returns: instrument internal temperature
         """
-        return '%R1Q,{0:d}:'.format(self.codes['INTTEMP'])
+        return f"%R1Q,{self.codes['INTTEMP']}:"

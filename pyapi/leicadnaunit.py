@@ -30,7 +30,7 @@ class LeicaDnaUnit(MeasureUnit):
         """ Construnctor for leica dna unit
         """
         # call super class init
-        super(LeicaDnaUnit, self).__init__(name, typ)
+        super().__init__(name, typ)
 
     @staticmethod
     def GetCapabilities():
@@ -94,7 +94,7 @@ class LeicaDnaUnit(MeasureUnit):
             :param par: 0/1/2 Off/On/Sleep mode
             :return: auto off message
         """
-        return "{0}{1:d}".format(self.SETAUTOOFF, par)
+        return f"{self.SETAUTOOFF}{par}"
 
     def GetAutoOffMsg(self):
         """ Get auto off message

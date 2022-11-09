@@ -30,11 +30,12 @@ class GeoWriter(FileWriter):
              'hz': 7, 'v': 8, 'distance': 9, 'hd': 11, 'faces': 112, 'pc': 20,
              'datetime': 51, 'east': 38, 'north': 37, 'elev': 39, 'code': 4,
              'lengthincline': 200, 'crossincline': 201}
+
     def __init__(self, name='None', angle='DMS', dist='.3f',
                  dt='%Y-%m-%d %H:%M:%S', filt=None, fname=None, mode='a'):
         """ Constructor
         """
-        super(GeoWriter, self).__init__(name, angle, dist, dt, filt, fname, mode)
+        super().__init__(name, angle, dist, dt, filt, fname, mode)
 
     def __del__(self):
         """ Destructor
@@ -52,7 +53,7 @@ class GeoWriter(FileWriter):
         """
         if data is None or self.DropData(data):
             logging.warning(" empty or inappropiate data not written")
-            return
+            return -2
         # add datetime and/or id
         data = self.ExtendData(data)
         # remove point id or station if both are given

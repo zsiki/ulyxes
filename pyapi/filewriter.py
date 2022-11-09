@@ -32,7 +32,7 @@ class FileWriter(Writer):
                  mode='a'):
         """ Constructor
         """
-        super(FileWriter, self).__init__(name, angle, dist, dt, filt)
+        super().__init__(name, angle, dist, dt, filt)
         self.fname = fname
         self.mode = mode
         self.fp = None
@@ -62,7 +62,7 @@ class FileWriter(Writer):
         line = ""
         if data is None or self.DropData(data):
             logging.warning(" empty or inappropiate data not written")
-            return
+            return -2
         # add datetime and/or id
         data = self.ExtendData(data)
         for key, val in data.items():

@@ -33,7 +33,7 @@ class SqLiteReader(Reader):
     def __init__(self, db, sql, name=None, filt=None):
         """ Constructor
         """
-        super(SqLiteReader, self).__init__(name, filt)
+        super().__init__(name, filt)
         self.angle = 'GON'
         if os.path.isfile(db):
             self.db = db
@@ -41,7 +41,7 @@ class SqLiteReader(Reader):
             self.conn = sqlite3.connect(db)
         else:
             self.db = self.conn = self.cur = None
-            logging.fatal('SqLite database does not exists: ' + db)
+            logging.fatal('SqLite database does not exists: %s', db)
             return
         self.cur = self.conn.cursor()
         self.cur.execute(sql)

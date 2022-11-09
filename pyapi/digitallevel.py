@@ -20,12 +20,11 @@ class DigitalLevel(Instrument):
             :param writerUnit: store data
     """
 
-    def __init__(self, name, measureUnit, measureIface, writerUnit=None):
-        """ Constructor to Leica DNA level
-        """
-        # call super class init
-        super(DigitalLevel, self).__init__(name, measureUnit, measureIface,
-              writerUnit)
+    #def __init__(self, name, measureUnit, measureIface, writerUnit=None):
+    #    """ Constructor to Leica DNA level
+    #    """
+    #    # call super class init
+    #    super().__init__(name, measureUnit, measureIface, writerUnit)
 
     def Measure(self):
         """ Start reading on staff

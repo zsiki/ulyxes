@@ -24,7 +24,7 @@ class WebCam(Instrument):
         """ Constructor
         """
         # call super class init
-        super(WebCam, self).__init__(name, measureUnit, measureIface, writerUnit)
+        #super(WebCam, self).__init__(name, measureUnit, measureIface, writerUnit)
 
     def GetImage(self):
         """ Get next image from stream
@@ -38,7 +38,6 @@ if __name__ == "__main__":
     from videoiface import VideoIface
     #from picamiface import PiCamIface
     from videomeasureunit import VideoMeasureUnit
-    from imagewriter import ImageWriter
     from videowriter import VideoWriter
     mu = VideoMeasureUnit()
     iface = VideoIface(source=0)

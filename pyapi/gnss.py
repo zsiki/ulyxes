@@ -19,15 +19,16 @@ class Gnss(Instrument):
             :param measureUnit: reference to measure unit
             :param measureIface: reference to measure interface
     """
-    def __init__(self, name, measureUnit, measureIface, writerUnit=None):
-        """ constructor for gnss
-        """
-        super(Gnss, self).__init__(name, measureUnit, measureIface, writerUnit)
+    #def __init__(self, name, measureUnit, measureIface, writerUnit=None):
+    #    """ constructor for gnss
+    #    """
+    #    super().__init__(name, measureUnit, measureIface, writerUnit)
 
-    def _process(self, msg):
+    def _process(self, msg, dummy=None):
         """ Get a line from measure unit and process answer
 
             :param msg: empty string, not used
+            :param dummy: dummy parameter for compatibility with instrument
             :returns: parsed answer (dictionary)
         """
         ans = self.measureIface.GetLine()
@@ -59,7 +60,7 @@ if __name__ == '__main__':
     from nmeagnssunit import NmeaGnssUnit
     logging.basicConfig()
     #iface = SerialIface("", "COM5")
-    iface = LocalIface('test', '../data/nmea2.txt')
+    iface = LocalIface('test', '../../tutorials/english/data_processing/lessons/code/nmea2.txt')
     mu = NmeaGnssUnit()
     wrt = EchoWriter()
     #wrt = HttpWriter(url='http://localhost/get.php', angle='DEG')

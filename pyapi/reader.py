@@ -11,7 +11,7 @@
 .. moduleauthor:: Zoltan Siki <siki.zoltan@epito.bme.hu>
 """
 
-class Reader(object):
+class Reader():
     """ Base class for different readers (virtual)
 
             :param name: name of reader (str), default None
@@ -47,7 +47,7 @@ class Reader(object):
     def GetNext(self):
         """ Dummy function implemented in descendant objects
         """
-        pass
+        return None
 
     def Rewind(self):
         """ Dummy function implemented in descendant objects
@@ -79,10 +79,9 @@ class Reader(object):
             try:
                 w = self.GetNext()
             except IOError:
-                self.sate = self.RD_READ
-            if w is not None:
-                if self.Filt(w):
-                    res.append(w)   # keep record passed filter
-            else:
+                self.state = self.RD_READ
+            if w is None:
                 break
+            if self.Filt(w):
+                res.append(w)   # keep record passed filter
         return res

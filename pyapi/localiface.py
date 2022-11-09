@@ -30,7 +30,7 @@ class LocalIface(Iface):
     def __init__(self, name='Local', fname='None', mode='seq'):
         """ Constructor
         """
-        super(LocalIface, self).__init__(name)
+        super().__init__(name)
         self.mode = mode
         self.fp = None
         self.data = {}
@@ -73,9 +73,8 @@ class LocalIface(Iface):
                 else:
                     i = 0
                 return self.data[code][i]
-            else:
-                return None
-        elif self.mode == 'seq':
+            return None
+        if self.mode == 'seq':
             return self.GetLine()
         return None
 

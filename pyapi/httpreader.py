@@ -38,7 +38,7 @@ class HttpReader(Reader):
                  filt=None):
         """ Constructor
         """
-        super(HttpReader, self).__init__(name, filt)
+        super().__init__(name, filt)
         self.state = self.RD_OK
         if url[-1] != '?':
             url += '?'
@@ -74,17 +74,16 @@ class HttpReader(Reader):
                 self.start += 1
                 return self._process(self.res[self.start - 1])
             return None
-        else:
-            par = {}
-            if self.pids is not None:
-                par['pids'] = ','.join(self.pids)
-            if self.ptys is not None:
-                par['ptys'] = ','.join(self.ptys)
-            self.res = json.loads(urlopen(self.url + urlencode(par)).read())
-            if len(self.res):
-                self.start += 1
-                return self._process(self.res[0])
-            return None
+        par = {}
+        if self.pids is not None:
+            par['pids'] = ','.join(self.pids)
+        if self.ptys is not None:
+            par['ptys'] = ','.join(self.ptys)
+        self.res = json.loads(urlopen(self.url + urlencode(par)).read())
+        if len(self.res) > 0:
+            self.start += 1
+            return self._process(self.res[0])
+        return None
 
 if __name__ == "__main__":
     # read most recent coordinates of all 3D monitoring points from server

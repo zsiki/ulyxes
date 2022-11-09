@@ -10,6 +10,7 @@
 .. moduleauthor::Zoltan Siki <siki.zoltan@epito.bme.hu>
 """
 
+import sys
 import os
 import math
 import re
@@ -18,7 +19,7 @@ import logging
 # for XML
 import xml.etree.ElementTree as ET
 
-class GamaIface(object):
+class GamaIface():
     """ Interface class to GNU Gama
     """
     def __init__(self, gama_path, dimension=3, probability=0.95, stdev_angle=1,
@@ -76,10 +77,10 @@ class GamaIface(object):
 
             :param st: False remove single observation, True remove station (Bool)
         """
-        if len(self.observations):
+        if len(self.observations) > 0:
             if st:
                 o = self.observations.pop()
-                while len(self.observations) and o.station is None:
+                while len(self.observations) > 0  and o.station is None:
                     o = self.observations.pop()
             else:
                 self.observations.pop()
@@ -238,13 +239,11 @@ class GamaIface(object):
                     logging.error("GNU gama unknown dimension")
                     return (None, None)
         # generate temp file name
-        f = tempfile.NamedTemporaryFile()
-        tmp_name = f.name
-        f.close()
-        f = open(tmp_name + '.xml', 'w')
+        with tempfile.NamedTemporaryFile() as f:
+            tmp_name = f.name
         w = ET.tostring(gama_local).decode('utf-8')
-        f.write(w)
-        f.close()
+        with open(tmp_name + '.xml', 'w') as f:
+            f.write(w)
 
         # run gama-local
         status = os.system(self.gama_path + ' ' + tmp_name + '.xml --text ' +
@@ -291,8 +290,8 @@ class GamaIface(object):
                         idx = ['std_east', 'std_north', 'std_elev', 'std_ori']
                         for ggchild in gchild:
                             if root_tag + "flt" == ggchild.tag:
-                                    p[idx[i]] = math.sqrt(float(ggchild.text))
-                                    i += 1
+                                p[idx[i]] = math.sqrt(float(ggchild.text))
+                                i += 1
             if root_tag + "observations" == child.tag:
                 for gchild in child:
                     o = {'std-residual': 0}
@@ -314,8 +313,6 @@ class GamaIface(object):
                        o['f'] > 10:     # extra observations ratio
                         blunder = o
 
-                    
-
         # remove input xml and output xml
         os.remove(tmp_name + '.xml')
         os.remove(tmp_name + '.txt')
@@ -324,10 +321,7 @@ class GamaIface(object):
         return (p, blunder)
 
 if __name__ == "__main__":
-    """
-        unit test
-    """
-    import sys
+    # unit test
     from georeader import GeoReader
 
     fname = "/home/siki/GeoEasy_old/data/freestation.geo"
@@ -338,7 +332,7 @@ if __name__ == "__main__":
         fname += '.geo'
     if not os.path.isfile(fname):
         print("File not found: " + fname)
-        exit(-1)
+        sys.exit(-1)
     fn = fname[:-4] # remove extension
     g = GamaIface(gama_path, 3, 0.95, 1, 1, 1.5)
     # load coordinates
@@ -379,9 +373,8 @@ if __name__ == "__main__":
            'north' not in p or 'elev' not in p:
             print("adjustment failed")
             break
-        elif blunder is not None and blunder['std-residual'] < 1.0:
+        if blunder is not None and blunder['std-residual'] < 1.0:
             print("blunders removed")
             break
-        else:
-            print("%s - %s observation removed" % (blunder['from'], blunder['to']))
-            g.remove_observation(blunder['from'], blunder['to'])
+        print(f"{blunder['from']} - {blunder['to']} observation removed")
+        g.remove_observation(blunder['from'], blunder['to'])

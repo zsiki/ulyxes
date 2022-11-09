@@ -37,7 +37,7 @@ class HttpWriter(Writer):
                  url='http://localhost/monitoring/get.php', mode='GET'):
         """ Constructor
         """
-        super(HttpWriter, self).__init__(name, angle, dist, dt, filt)
+        super().__init__(name, angle, dist, dt, filt)
         self.url = url
         self.mode = mode
 
@@ -50,7 +50,7 @@ class HttpWriter(Writer):
         par = {}
         if data is None or self.DropData(data):
             logging.warning(" empty or inappropiate data not written")
-            return
+            return -1
         # add datetime and/or id
         data = self.ExtendData(data)
         for key, val in data.items():
@@ -60,14 +60,14 @@ class HttpWriter(Writer):
             try:
                 res = urlopen(self.url + '?' + urlencode(par)).read()
             except Exception:
-                res = None
+                res = -1
         else:
             try:
                 d = urlencode(par).encode('ascii')
                 req = Request(self.url, d)
                 res = urlopen(req).read()
             except Exception:
-                res = None
+                res = -1
         return int(res)
 
 if __name__ == "__main__":

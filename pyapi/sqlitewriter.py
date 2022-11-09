@@ -39,7 +39,7 @@ class SqLiteWriter(Writer):
         if angle == 'DMS':
             angle = 'GON'
             logging.warning('Angle type changed from DMS to GON')
-        super(SqLiteWriter, self).__init__(name, angle, dist, dt, filt)
+        super().__init__(name, angle, dist, dt, filt)
         if os.path.isfile(db):
             self.db = db
             # connect to local db
@@ -63,7 +63,7 @@ class SqLiteWriter(Writer):
         res = 0
         if data is None or self.DropData(data):
             logging.warning(" empty or inappropiate data not written")
-            return
+            return -1
         # add datetime and/or id
         data = self.ExtendData(data)
         # build sql statement
@@ -84,6 +84,7 @@ class SqLiteWriter(Writer):
         try:
             c = self.conn.cursor()
             c.execute(sqlstr)
+            res = c.rowcount
             self.conn.commit()
         except Exception as e:
             logging.error(str(e))

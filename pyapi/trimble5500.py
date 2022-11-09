@@ -55,7 +55,7 @@ class Trimble5500(MeasureUnit):
         """ Constructor to leica generic ts
         """
         # call super class init
-        super(Trimble5500, self).__init__(name, typ)
+        super().__init__(name, typ)
         self.edmMode = 0    # standard
 
     @staticmethod
@@ -113,7 +113,7 @@ class Trimble5500(MeasureUnit):
 
             :returns: get prism constant message
         """
-        return 'RG,{0:d}'.format(self.codes['PC'])
+        return f"RG,{self.codes['PC']}"
 
     def SetAtmCorrMsg(self, ppm, pres=None, dry=None, wet=None):
         """ Set atmospheric correction settings using ppm or
@@ -126,18 +126,15 @@ class Trimble5500(MeasureUnit):
             :returns: set atmospheric correction message
         """
         if ppm is not None:
-            return 'WG,{0:d}={1:d}'.format(self.codes['PPM'], ppm)
-        else:
-            return 'WG,{0:d}={1:d}|WG,{2:d}={3:d}|WG,{4:d}={5:d}'.format(
-                self.codes['PRESS'], pres, self.codes['TEMP'], dry,
-                self.codes['WETTEMP'], wet)
+            return f"WG,{self.codes['PPM']}={ppm}"
+        return f"WG,{self.codes['PRESS']}={pres}|WG,{self.codes['TEMP']}={dry}|WG,{self.codes['WETTEMP']}={wet}"
 
     def GetAtmCorrMsg(self):
         """ Get atmospheric correction settings
 
             :returns: atmospheric correction message
         """
-        return 'RG,{0:d}'.format(self.codes['PPM'])
+        return f"RG,{self.codes['PPM']}"
 
     def SetRefCorrMsg(self, status, earthRadius, refrac):
         """ Set refraction correction settings
@@ -148,8 +145,7 @@ class Trimble5500(MeasureUnit):
         :returns: set refraction correction message
 
         """
-        return 'WG,{0:d}={1:d}|WG,{2:d}={3:.2f}'.format(
-            self.codes['EARAD'], earthRadius, self.codes['REFRAC'], refrac)
+        return f"WG,{self.codes['EARAD']}={earthRadius}|WG,{self.codes['REFRAC']}={refrac:.2f}"
 
     def GetRefCorrMsg(self):
         """ Get refraction correction setting
@@ -157,7 +153,7 @@ class Trimble5500(MeasureUnit):
             :return: refraction correction message
 
         """
-        return 'RG,{0:d}|RG,{1:d}'.format(self.codes['EARAD'], self.codes['REFRAC'])
+        return f"RG,{self.codes['EARAD']}|RG,{self.codes['REFRAC']}"
 
     def SetStationMsg(self, e, n, z=None, ih=0):
         """ Set station coordinates
@@ -169,12 +165,11 @@ class Trimble5500(MeasureUnit):
             :returns: set station coordinates message
 
         """
-        msg = 'WG,{0:d}={1:.3f}|WG,{2:d}={3:.3f}'.format(
-            self.codes['EASTING'], e, self.codes['NORTHING'], n)
+        msg = f"WG,{self.codes['EASTING']}={e:.3f}|WG,{self.codes['NORTHING']}={n:.3f}"
         if z is not None:
-            msg += '|WG,{0:d}={1:.3f}'.format(self.codes['ELE'], z)
+            msg += f"|WG,{self.codes['ELE']}={z:.3f}"
         # TODO instrumenrt height
-        msg += '|WG,{0:d}={1:.3f}'.format(self.codes['IH'], ih)
+        msg += f"|WG,{self.codes['IH']}={ih:.3f}"
         return msg
 
     def GetStationMsg(self):
@@ -183,9 +178,7 @@ class Trimble5500(MeasureUnit):
             :returns: get station coordinates message
 
         """
-        return 'RG,{0:d}|RG,{1:d}|RG,{2:d}|RG,{3:d}'.format(
-            self.codes['EASTING'], self.codes['NORTHING'], self.codes['ELE'],
-            self.codes['IH'])
+        return f"RG,{self.codes['EASTING']}|RG,{self.codes['NORTHING']}|RG,{self.codes['ELE']}|RG,{self.codes['IH']}"
 
     def SetEDMModeMsg(self, mode):
         """ Set EDM mode
@@ -197,7 +190,7 @@ class Trimble5500(MeasureUnit):
             self.edmMode = self.edmModes[mode]
         else:
             self.edmMode = mode
-        return 'PG,3{0:d}'.format(self.edmMode)
+        return f"PG,3{self.edmMode}"
 
     def GetEDMModeMsg(self):
         """ Get EDM mode
@@ -213,8 +206,7 @@ class Trimble5500(MeasureUnit):
             :returns: set orientation angle message
 
         """
-        return 'WG,{0:d}={1:.4f}'.format(self.codes['HAREF'],
-                                         ori.GetAngle('PDEG'))
+        return f"WG,{self.codes['HAREF']}={ori.GetAngle('PDEG'):.4f}"
 
     def MoveMsg(self, hz, v, dummy=None):
         """ Rotate instrument to direction
@@ -227,7 +219,7 @@ class Trimble5500(MeasureUnit):
         # change angles to pseudo DMS
         hz_pdms = hz.GetAngle('PDEG')
         v_pdms = v.GetAngle('PDEG')
-        return 'WG,26={0:.4f}|WG,27={1:.4f}|WS=PH02V02'.format(v_pdms, hz_pdms)
+        return f"WG,26={v_pdms:.4f}|WG,27={hz_pdms:.4f}|WS=PH02V02"
 
     def MeasureMsg(self, dummy1=None, dummy2=None):
         """ Measure distance
@@ -263,15 +255,14 @@ class Trimble5500(MeasureUnit):
             :param incl: inclination calculation - 0/1/2 = measure always (slow)/calculate (fast)/automatic, optional (default 0)
             :returns: get coordinates message
         """
-        return 'RG,{0:d}|RG,{1:d}|RG,{2:d}'.format(self.codes['NORTHING'],
-            self.codes['EASTING'], self.codes['ELE'])
+        return f"RG,{self.codes['NORTHING']}|RG,{self.codes['EASTING']}|RG,{self.codes['ELE']}"
 
     def GetAnglesMsg(self):
         """ Get angles
 
                 :returns: get angles message
         """
-        return 'RG,{0:d}|RG,{1:d}'.format(self.codes['HA'], self.codes['VA'])
+        return f"RG,{self.codes['HA']}|RG,{self.codes['VA']}"
 
     def ChangeFaceMsg(self):
         """ Change face

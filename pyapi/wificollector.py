@@ -27,7 +27,7 @@ class WifiCollector(Instrument):
         """ Constructor
         """
         # call super class init
-        super(WifiCollector, self).__init__(name, measureUnit, measureIface, writerUnit)
+        super().__init__(name, measureUnit, measureIface, writerUnit)
 
     def GetWifis(self):
         """ Get all available wifis
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     from wifiunit import WifiUnit
     from csvwriter import CsvWriter
 
-    wu = WifiUnit()
+    wu = WifiUnit(wlan='wlo1')
     wr = CsvWriter(fname='wifitest.csv', mode='w',
                    filt=['ssid', 'address', 'quality', 'signal', 'datetime'])
     wc = WifiCollector('wc', wu, None, wr)
