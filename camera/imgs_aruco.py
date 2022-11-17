@@ -38,10 +38,10 @@ class ImgsAruco(ArucoBase):
         super(ImgsAruco, self).__init__(args)
         self.tformat = '%Y-%m-%d %H:%M:%S.%f'
         if self.calibration:
-            filt = ['id', 'name', 'datetime', 'east', 'north',
-                    'roll', 'pitch', 'yaw']
+            filt = ['id', 'datetime', 'east', 'north', 'width', 'height', 'code']
+                    #'roll', 'pitch', 'yaw']
         else:
-            filt = ['id', 'name', 'datetime', 'east', 'north']
+            filt = ['id', 'datetime', 'east', 'north', 'width', 'height', 'code']
         self.wrt = CsvWriter(fname=args.output, dt=self.tformat, filt=filt)
         self.rdr = ImageReader(args.names)
 
@@ -54,20 +54,30 @@ class ImgsAruco(ArucoBase):
             frame, t = self.rdr.GetNext()
             if frame is not None:
                 name1 = os.path.split(self.rdr.srcname)[1]
-                res = self.ProcessImg(frame, self.rdr.ind)
-                if res:
-                    if self.calibration:    # output pose, too
-                        data = {'id': self.rdr.ind, 'name': name1,
-                                'datetime': t,
-                                'east': res["east"], 'north': res["north"],
-                                'roll': res["euler_angles"][0],
-                                'pitch': res["euler_angles"][1],
-                                'yaw': res["euler_angles"][2]}
-                    else:
-                        data = {'id': self.rdr.ind, 'name': name1,
-                                'datetime': t,
-                                'east': res["east"], 'north': res["north"]}
-                    self.wrt.WriteData(data)
+                results = self.ProcessImg(frame, self.rdr.ind)
+                if results:
+                    for res in results:
+                        if self.code is None or self.code == res['code']:
+                            if self.calibration:    # output pose, too
+                                data = {'id': self.rdr.ind, 'name': name1,
+                                        'datetime': t,
+                                        'east': res["east"],
+                                        'north': res["north"],
+                                        'width': res['width'],
+                                        'height': res['height'],
+                                        'code': res['code'],
+                                        'roll': res["euler_angles"][0],
+                                        'pitch': res["euler_angles"][1],
+                                        'yaw': res["euler_angles"][2]}
+                            else:
+                                data = {'id': self.rdr.ind, 'name': name1,
+                                        'datetime': t,
+                                        'east': res["east"],
+                                        'north': res["north"],
+                                        'width': res['width'],
+                                        'height': res['height'],
+                                        'code': res['code']}
+                            self.wrt.WriteData(data)
             else:
                 break
 
@@ -79,7 +89,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--dict', type=int, default=1,
                         help='marker dictionary id, default=1 (DICT_4X4_100)')
     parser.add_argument('-c', '--code', type=int,
-                        help='marker id to search, if not given first found marker is used')
+                        help='marker id to search, if not given all found markers are used')
     parser.add_argument('--debug', type=int, default=0,
                         help='display every nth frame with marked template position, default 0 (off)')
     parser.add_argument('--delay', type=float, default=1,
@@ -96,6 +106,8 @@ if __name__ == "__main__":
                         help='Clip limit for adaptive histogram, use with --hist, default: 3')
     parser.add_argument('--tile', type=int, default=8,
                         help='Tile size for adaptive histogram,  use with --hist, default: 8')
+    parser.add_argument('--refine', action="store_true",
+                        help='Refine corners with subpixels')
     parser.add_argument('-o', '--output', type=str, default='stdout',
                         help='name of output file')
 
