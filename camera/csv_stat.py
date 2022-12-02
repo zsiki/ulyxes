@@ -43,6 +43,10 @@ if args.marker_size is not None:
     tmp_df['elev'] = tmp_df['elev'] * args.marker_size / tmp_df['med_height']
     tmp_df['east'] = tmp_df['east'] * args.marker_size / tmp_df['med_width']
     tmp_data = tmp_df[names]
+    fno = os.path.splitext(args.name[0])[0] + '_metric' + \
+          os.path.splitext(args.name[0])[1]
+    pd.options.display.float_format = '{:,.2f}'.format
+    tmp_data.to_csv(fno, sep=';', header=False)
 df_mean = tmp_data[[args.column, 'code']].groupby('code').mean()
 df_mean.rename(columns={"code": "code", args.column: "mean_" + args.column},
                inplace=True)
@@ -62,9 +66,5 @@ df_max.rename(columns={"code": "code", args.column: "max_" + args.column},
               inplace=True)
 result = pd.concat([df_mean, df_med, df_std, df_cnt, df_min, df_max],
                    axis=1, join="inner")
-if args.marker_size is not None:
-    fno = os.path.splitext(args.name[0])[0] + '_metric' + \
-          os.path.splitext(args.name[0])[1]
-    tmp_data.to_csv(fno, sep=';', header=False)
 pd.options.display.float_format = '{:,.1f}'.format
 print(result)
