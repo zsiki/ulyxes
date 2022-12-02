@@ -173,10 +173,12 @@ class ArucoBase():
         """
         if self.calibration:    # undistort image using calibration
             # TODO check it https://docs.opencv.org/master/dc/dbb/tutorial_py_calibration.html
-            h, w = frame.shape[:2]
-            newmtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist,
-                                                        (w, h), ALFA, (w, h))
-            frame = cv2.undistort(frame, self.mtx, self.dist, None, newmtx)
+            #h, w = frame.shape[:2]
+            #newmtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist,
+            #                                            (w, h), ALFA, (w, h))
+            # TODO next line zoom in image!
+            #frame = cv2.undistort(frame, self.mtx, self.dist, None, newmtx)
+            frame = cv2.undistort(frame, self.mtx, self.dist, None)
             # crop image
             #frame = frame[roi[1]:roi[1]+roi[3], roi[0]:roi[0]+roi[2]]
         img = frame.copy()  # copy original (undistorted) image for display
