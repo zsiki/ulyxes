@@ -154,3 +154,10 @@ Or make a local copy of the git repository:
 You can move the whole ulyxes install directory to any other place in your 
 file system and you can also rename the ulyxes install directory. You had 
 better not to change directory and file names under the install directory.
+
+Set PYTHONPATH variable in your .profile to start ulyxes applications from any folder
+
+.. code::
+
+	export PYTHONPATH=$HOME/ulyxes/pyapps:$HOME/ulyxes/camera
+	
