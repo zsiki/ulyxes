@@ -135,7 +135,8 @@ class HorizontalSection():
                 self.ts.MoveRel(self.stepinterval, Angle(0))
                 continue
 
-            if 'v' not in nextp or 'distance' not in nextp or 'hz' not in nextp:
+            if 'v' not in nextp or 'hz' not in nextp or \
+               'distance' not in nextp or nextp['distance'] < 0.1:
                 self.ts.MoveRel(self.stepinterval, Angle(0))
                 continue
             height = ts.Coords()['elev']

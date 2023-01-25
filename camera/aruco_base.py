@@ -172,6 +172,7 @@ class ArucoBase():
             :returns: dictionary of position and pose
         """
         if self.calibration:    # undistort image using calibration
+            # TODO NEW https://stackoverflow.com/questions/39432322/what-does-the-getoptimalnewcameramatrix-do-in-opencv getoptimalnewcameramatrix is neccessary if the calibration and the image resolution is different!
             # TODO check it https://docs.opencv.org/master/dc/dbb/tutorial_py_calibration.html
             #h, w = frame.shape[:2]
             #newmtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist,

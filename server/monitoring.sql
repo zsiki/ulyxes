@@ -19,6 +19,7 @@ DROP TABLE IF EXISTS monitoring_poi;
 -- pc additive constant for distance measurement
 CREATE TABLE monitoring_poi (
 	id varchar(50) PRIMARY KEY,
+    ord int NOT NULL UNIQUE,
 	ptype char(3) NOT NULL DEFAULT 'MON' CHECK (ptype in ('FIX','STA','MON')),
 	code char(4) NOT NULL DEFAULT 'ATR' CHECK (code in ('ATR', 'PR', 'ORI', 'RL', 'RLA')),
 	pc float NOT NULL DEFAULT 0
@@ -27,9 +28,10 @@ SELECT AddGeometryColumn('monitoring_poi', 'geom', 4326, 'POINT', 3);
 
 -- table for point coordinates in local reference system
 -- reference coordinates given by the user
--- multiple reference canbe giventothe same point at different data
+-- multiple reference can be given to the same point at different date
 CREATE TABLE monitoring_ref (
-	id varchar(50) NOT NULL REFERENCES monitoring_poi(id),
+	-- id varchar(50) NOT NULL REFERENCES monitoring_poi(id),
+	id varchar(50) NOT NULL,
 	east double precision NOT NULL,
 	north double precision NOT NULL,
 	elev double precision NOT NULL,
@@ -40,18 +42,21 @@ CREATE TABLE monitoring_ref (
 -- table for point coordinates in local reference system
 -- coordinates calculated by Ulyxes
 CREATE TABLE monitoring_coo (
-	id varchar(50) NOT NULL REFERENCES monitoring_poi(id),
-	east double precision NOT NULL,
-	north double precision NOT NULL,
-	elev double precision NOT NULL,
+	-- id varchar(50) NOT NULL REFERENCES monitoring_poi(id),
+	id varchar(50) NOT NULL,
+	east double precision,
+	north double precision,
+	elev double precision,
 	datetime timestamp NOT NULL,
-	CONSTRAINT pkey_coo PRIMARY KEY (id, datetime)
+	CONSTRAINT pkey_coo PRIMARY KEY (id, datetime),
+    CHECK (east is not NULL or north is not NULL or elev is not NULL)
 );
 
 -- table for observations
 -- polar observations made by Ulyxes
 CREATE TABLE monitoring_obs (
-	id varchar(50) NOT NULL REFERENCES monitoring_poi(id),
+	-- id varchar(50) NOT NULL REFERENCES monitoring_poi(id),
+	id varchar(50) NOT NULL,
 	hz double precision NOT NULL,
 	v double precision NOT NULL,
 	distance double precision,
@@ -69,7 +74,8 @@ CREATE TABLE monitoring_obs (
 -- wettemp wet temperature
 -- datetime of observation
 CREATE TABLE monitoring_met (
-	id varchar(50) NOT NULL REFERENCES monitoring_poi(id),
+	-- id varchar(50) NOT NULL REFERENCES monitoring_poi(id),
+	id varchar(50) NOT NULL,
 	temp double precision NOT NULL,
 	pressure double precision NOT NULL,
 	humidity double precision,
@@ -94,4 +100,3 @@ CREATE TABLE monitoring_pgr (
 	pid varchar(50) NOT NULL REFERENCES monitoring_poi(id),
 	CONSTRAINT pkey_pgr PRIMARY KEY (gid, pid)
 );
-

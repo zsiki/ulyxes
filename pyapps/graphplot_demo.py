@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-.. module:: robotplus.py
+.. module:: graphplot_demo.py
 
 .. moduleauthor:: Zoltan Siki
 

@@ -41,11 +41,6 @@ from aruco_base import ArucoBase
 
 sys.path.append('../pyapi/')
 
-from imagereader import ImageReader
-from httpwriter import HttpWriter
-from csvwriter import CsvWriter
-from dbwriter import DbWriter
-
 class CameraAruco(ArucoBase):
     """ class to scan ArUco code in video image
 

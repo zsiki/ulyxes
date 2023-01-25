@@ -48,7 +48,26 @@ class ImageReader(Reader):
         self.act = datetime.datetime.now()
         self.dt = None
         self.source = None
-        if srcname in ("0", "1", "2", "3"):
+        self.typ = None
+        if isinstance(srcname, list):
+            self.typ = self.IMAGE
+            self.source = []
+            for s in srcname:
+                self.source += glob.glob(s) # extend wildcards and remove non-existent files
+            if len(self.source) > 0:
+                self.source.sort()
+            else:
+                self.source = None
+        elif isinstance(srcname, str) and \
+                srcname.lower()[-4:] in ("h264", ".mp4", ".avi", "webm"):
+            self.typ = self.VIDEO
+            if os.path.exists(srcname):
+                self.source = cv2.VideoCapture(srcname)
+                if fps is None:
+                    self.fps = self.source.get(cv2.CAP_PROP_FPS)
+                self.dt = datetime.timedelta(0, 1.0 / self.fps)
+                self.act = datetime.datetime.fromtimestamp(os.path.getmtime(srcname))
+        elif srcname in ("0", "1", "2", "3"):
             # camera source
             self.typ = self.CAMERA
             self.source = cv2.VideoCapture(int(srcname)) # open camera stream
@@ -61,26 +80,6 @@ class ImageReader(Reader):
             #self.height = 480
             self.source.resolution = (self.width, self.height)
             time.sleep(0.1)	# wait for camera initialization
-        elif isinstance(srcname, str) and \
-                srcname.lower()[-4:] in ("h264", ".mp4", ".avi", "webm"):
-            self.typ = self.VIDEO
-            if os.path.exists(srcname):
-                self.source = cv2.VideoCapture(srcname)
-                if fps is None:
-                    self.fps = self.source.get(cv2.CAP_PROP_FPS)
-                self.dt = datetime.timedelta(0, 1.0 / self.fps)
-                self.act = datetime.datetime.fromtimestamp(os.path.getmtime(srcname))
-        else:
-            if isinstance(srcname, str):
-                srcname = [srcname]   # make list
-            self.typ = self.IMAGE
-            self.source = []
-            for s in srcname:
-                self.source += glob.glob(s) # extend wildcards and remove non-existent files
-            if len(self.source) > 0:
-                self.source.sort()
-            else:
-                self.source = None
 
     def __del__(self):
         """ release video """
