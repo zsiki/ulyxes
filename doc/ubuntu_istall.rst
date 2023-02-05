@@ -103,8 +103,8 @@ folder.
 .. code:: bash
 
 	sudo apt-get install libopencv-dev 
-	sudo pip3 install opencv-python
-	sudo pip3 install opencv-contrib-python
+	sudo pip3 install opencv-python==3.4.18.65
+	sudo pip3 install opencv-contrib-python==3.4.18.65
 
 Wifi
 ~~~~
