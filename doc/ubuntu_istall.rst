@@ -157,5 +157,5 @@ Set PYTHONPATH variable in your .profile to start ulyxes applications from any f
 
 .. code::
 
-	export PYTHONPATH=$HOME/ulyxes/pyapps:$HOME/ulyxes/camera
+	export PYTHONPATH=$HOME/ulyxes/pyapi:$HOME/ulyxes/camera
 	
