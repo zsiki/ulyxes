@@ -829,6 +829,11 @@ Sample config file::
 	  "blunders": 0
 	}
 
+To start robotplus from cron a simple shell script should be created::
+
+    cd /home/your_name/ulyxes/pyapps
+    python3 robotplus.py path_to_your_json_config
+
 
 Camera Applications Tutorials
 #############################
