@@ -31,19 +31,20 @@ class ConfReader(JSONReader):
     def Check(self):
         """ Validate config values and send warning/error to log
 
-            :returns: True/False
+            :returns: OK/WARNING/FATAL, msg_lst
         """
         # check for required pars and
         # set default values for missing parameters
+        msg_lst = []
         for par in self.pars:
             if self.pars[par]['required'] and par not in self.json:
-                print(f"missing required parameter: {par}")
-                return False
+                msg_lst.append(f"missing required parameter: {par}")
+                return 'FATAL', msg_lst
             if 'default' in self.pars[par] and par not in self.json:
                 self.json[par] = self.pars[par]['default']
         for par in self.json:
             if par not in self.pars:
-                print(f"unknown parameter: {par}")
+                msg_lst.append(f"unknown parameter: {par}")
                 continue
             # type checking
             pardef = self.pars[par]
@@ -52,29 +53,31 @@ class ConfReader(JSONReader):
                 continue
             if 'type' in pardef:
                 if pardef['type'] == 'int' and type(self.json[par]) is not int:
-                    print(f"type mismatch parameter: {par}")
-                    return False
+                    msg_lst.append(f"type mismatch parameter: {par}")
+                    return 'FATAL', msg_lst
                 if pardef['type'] == 'float' and \
                     type(self.json[par]) is not int and \
                     type(self.json[par]) is not float:
-                    print(f"type mismatch parameter: {par}")
-                    return False
+                    msg_lst.append(f"type mismatch parameter: {par}")
+                    return 'FATAL', msg_lst
                 if pardef['type'] == 'list' and \
                     type(self.json[par]) is not list:
-                    print(f"type mismatch parameter: {par}")
-                    return False
+                    msg_lst.append(f"type mismatch parameter: {par}")
+                    return 'FATAL', msg_lst
                 if pardef['type'] == 'file' and \
                     type(self.json[par]) is str and \
                     not os.path.isfile(self.json[par]):
-                    print(f"parameter type mismatch or file does not exist: {self.json[par]}")
-                    return False
+                    msg_lst.append(f"parameter type mismatch or file does not exist: {self.json[par]}")
+                    return 'FATAL', msg_lst
                 # check set for valid values
                 if 'set' in pardef and \
                     self.json[par] not in pardef['set']:
-                    print(f"invalid value: {par}")
-                    return False
+                    msg_lst.append(f"invalid value: {par}")
+                    return 'FATAL', msg_lst
         # TODO complex rules e.g. no fix but gama_path given
-        return True
+        if len(msg_lst) > 0:
+            return 'WARNING', msg_lst
+        return 'OK', msg_lst
 
 if __name__ == '__main__':
     from sys import argv

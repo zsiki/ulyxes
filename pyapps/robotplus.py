@@ -275,8 +275,11 @@ if __name__ == "__main__":
             except Exception:
                 print("Error in config file: {0}".format(sys.argv[1]))
                 sys.exit(-1)
-            if not cr.Check():
+            state, msg_lst = cr.Check()
+            if state == "FATAL":
                 print("Config check failed")
+                for msg in msg_lst:
+                    print(msg)
                 sys.exit(-1)
         else:
             print("Config file not found %s" % sys.argv[1])
@@ -289,6 +292,10 @@ if __name__ == "__main__":
     # logging
     logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
          filemode='a', level=cr.json['log_level'])
+    # log config warnings after log created
+    if state == "WARNING":
+        for msg in msg_lst:
+            logging.error(msg)
     # create totalstation
     mu = get_mu(cr.json['station_type'])
     if not mu:

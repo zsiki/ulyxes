@@ -100,8 +100,11 @@ if __name__ == "__main__":
             except:
                 logging.fatal("Error in config file: " + sys.argv[1])
                 sys.exit(-1)
-            if not cr.Check():
+            state, msg_lst = not cr.Check()
+            if state == "FATAL":
                 logging.fatal("Config check failed")
+                for msg in msg_lst:
+                    logging.error(msg)
                 sys.exit(-1)
         else:
             print("Config file not found " + sys.argv[1])
@@ -114,6 +117,10 @@ if __name__ == "__main__":
     # logging
     logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
          filemode='a', level=cr.json['log_level'])
+    # deffered config warnings
+    if state == "WARNING":
+        for msg in msg_lst:
+            logging.error(msg)
     # get station coordinates
     #print("Loading station coords...")
     if re.search('^http[s]?://', cr.json['coo_rd']):

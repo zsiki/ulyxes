@@ -231,13 +231,20 @@ def cmd_params():
         }
         cr = ConfReader('HorizontalSection', sys.argv[1], config_pars)
         cr.Load()
-        if not cr.Check():
+        state, msg_lst = cr.Check()
+        if state == "FATAL":
             print("Config check failed")
+            for msg in msg_lst:
+                print(msg)
             sys.exit(-1)
 
         logging.basicConfig(format=cr.json['log_format'],
                             filename=cr.json['log_file'], filemode='a',
                             level=cr.json['log_level'])
+        # deffered config warnings
+        if state == "WARNING":
+            for msg in msg_lst:
+                logging.error(msg)
         if cr.json['hz_start'] is not None:
             hz_start = Angle(float(cr.json['hz_start']), 'DEG')
         if cr.json['hz_top'] is not None:

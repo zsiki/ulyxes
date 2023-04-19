@@ -26,9 +26,9 @@ import sys
 import re
 import logging
 import os
+import math
 #https://sourceforge.net/projects/pygnuplot/
 import pyGnuplot
-import math
 
 # check PYTHONPATH
 if len([p for p in sys.path if 'pyapi' in p]) == 0:
@@ -69,7 +69,10 @@ if __name__ == "__main__":
             except:
                 logging.fatal("Error in config file: " + sys.argv[1])
                 sys.exit(-1)
-            if not cr.Check():
+            state, msg_lst = cr.Check()
+            if state == "FATAL":
+                for msg in msg_lst:
+                    logging.error(msg)
                 logging.fatal("Config check failed")
                 sys.exit(-1)
         else:
@@ -84,6 +87,10 @@ if __name__ == "__main__":
     #TODO if the log file does not exist, it causes an error message
     logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
          filemode='w', level=cr.json['log_level'])
+    # config warnings
+    if state == "WARNING":
+        for msg in msg_lst:
+            logging.error(msg)
 
     # load reference coordinates of points
     if re.search('^http[s]?://', cr.json['coo_ref']):
