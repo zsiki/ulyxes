@@ -34,18 +34,18 @@ if __name__ == "__main__":
     m = args.frames
     if not cap.isOpened():
         print("Error opening video file")
-    else:
-        # process video
-        i = 0
-        while i < (n + m) or args.total:
-            ret, frame = cap.read() # get first frame
-            if ret:
-                if n <= i < n + m and not args.total and \
-                   (i - n) % args.steps == 0:
-                    cv2.imwrite('{}_{:08d}.png'.format(fname, i), frame)
-            else:
-                break
-            i += 1
+        exit()
+    # process video
+    i = 0
+    while i < (n + m) or args.total:
+        ret, frame = cap.read() # get first frame
+        if ret:
+            if n <= i < n + m and not args.total and \
+               (i - n) % args.steps == 0:
+                cv2.imwrite('{}_{:08d}.png'.format(fname, i), frame)
+        else:
+            break
+        i += 1
     cap.release()
     if args.total:
         print(i)
