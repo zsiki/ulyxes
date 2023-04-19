@@ -116,7 +116,8 @@ if __name__ == "__main__":
         elevation = float(sys.argv[4]) # elevation of start point
     else:
         elevation = 100                # default elevation for start point
-    mu = WebMetMeasureUnit(msg="q=budapest&appid=13152b0308b85a39cc9a161e241ec2cf")
+    #mu = WebMetMeasureUnit(msg="q=budapest&appid=13152b0308b85a39cc9a161e241ec2cf")
+    mu = WebMetMeasureUnit(msg="lat=47.463142&lon=19.070921&appid=13152b0308b85a39cc9a161e241ec2cf")
     wi = WebIface("demo", "http://api.openweathermap.org/data/2.5/weather", "json")
     fw = FileWriter(fname=log, filt=['pressure', 'temp', 'humidity', 'datetime'])
     web = WebMet('WebMet', mu, wi)
