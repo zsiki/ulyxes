@@ -6,7 +6,7 @@
 
 Sample application of Ulyxes PyAPI to measure horizontal section(s).
 
-Several parameters can be set from the command line of from a
+Several parameters can be set from the command line or from a
 JSON configuration file.
 
 Parameters are stored in a config file using JSON format::
@@ -270,43 +270,44 @@ def cmd_params():
         # process command line switches
         parser = argparse.ArgumentParser()
         parser.add_argument('-l', '--log', type=str, default=def_logfile,
-                            help='Logfile name "stdout" for screen output')
+                help=f'Logfile name, default: {def_logfile}, "stdout" for screen output')
         parser.add_argument('--level', type=int, default=def_logging,
-                            help='Log level')
+                help=f'Log level, default: {def_logging}')
         parser.add_argument('--format', type=str, default=def_format,
-                            help='Log format')
+                help='Log format, default: time, level, message')
         parser.add_argument('--step', type=float, default=def_angle,
-                            help='Angle step in section')
-        parser.add_argument('--type', type=str,
+                help=f'Angle step in section [DEG], default: {def_angle}')
+        parser.add_argument('--type', type=str, required=True,
                             help='Total station type')
         parser.add_argument('--east', type=float, default=def_east,
-                            help='Station east')
+                help=f'Station east, default: {def_east}')
         parser.add_argument('--north', type=float, default=def_north,
-                            help='Station north')
+                help=f'Station north, default: {def_north}')
         parser.add_argument('--elev', type=float, default=def_elev,
-                            help='Station elevation')
+                help=f'Station elevation, default: {def_elev}')
         parser.add_argument('-p', '--port', type=str, default=def_port,
-                            help='Communication port')
+                help=f'Communication port, default: {def_port}')
         parser.add_argument('--start', type=float, default=def_start,
-                            help='Horizontal start direction')
+                help='Horizontal start direction, default: actual telescope direction')
         parser.add_argument('--top', type=float, default=def_top,
-                            help='Horizontal start direction at top')
+                help='Horizontal start direction at top, default: same as start')
         parser.add_argument('--max', type=float, default=def_max,
-                            help='Max angle')
+                help='Max angle, default: whole circle')
         parser.add_argument('--tmax', type=float, default=def_tmax,
-                            help='Max angle at top')
+                help='Max angle at top, default: same as max')
         parser.add_argument('--tol', type=float, default=def_tol,
-                            help='Height tolerance')
+                help=f'Height tolerance, default: {def_tol}')
         parser.add_argument('--iter', type=int, default=def_iter,
-                            help='Max iteration to find section')
+                help='Max iteration to find section, default: {def_iter}')
         parser.add_argument('--heights', type=str, default=def_hlist,
-                            help='list of elevations for more sections')
+                help='list of elevations for more sections between double quotes, default: single section at the telescope direction')
         parser.add_argument('--wrt', type=str, default=def_wrt,
-                            help='Output file')
+                help=f'Name of output file, default: {def_wrt}')
         args = parser.parse_args()
 
         logging.basicConfig(format=args.format, filename=args.log, filemode='a',
                             level=args.level)
+        hz_start = None
         if args.start is not None:
             hz_start = Angle(args.start, 'DEG')
         stepinterval = Angle(args.step, 'DEG')
@@ -316,8 +317,12 @@ def cmd_params():
         elev = args.elev
         port = args.port
         maxa = Angle(args.max, "DEG")
-        maxt = maxa
-        hz_top = hz_start
+        hz_top = None
+        if args.top is not None:
+            hz_top = Angle(args.top, 'DEG')
+        maxt = None
+        if args.tmax is not None:
+            maxt = Angle(args.tmax, 'DEG')
         tol = args.tol
         maxiter = args.iter
         wrt_file = args.wrt
@@ -327,10 +332,6 @@ def cmd_params():
         except Exception:
             print("parameter error --heights")
             sys.exit(1)
-
-    if stationtype is None:
-        parser.print_help()
-        sys.exit(1)
 
     return {'hz_start': hz_start, 'hz_top': hz_top,
             'stepinterval': stepinterval,
@@ -373,7 +374,7 @@ if __name__ == "__main__":
     # set station coordinates
     ts.SetStation(params['east'], params['north'], params['elev'])
     levels = params['levels']
-    if levels is not None and len(levels) > 0:
+    if levels is not None and len(levels) > 1:
         dhz = params['hz_top'].GetAngle("DEG") - params['hz_start'].GetAngle("DEG")
         z0 = levels[0]
         z1 = levels[-1]
@@ -386,7 +387,12 @@ if __name__ == "__main__":
                                       params['iter'], params['tol'])
             h_sec.run()
     else:
-        h_sec = HorizontalSection(ts, wrt, None, params['hz_start'],
-                                  params['stepinterval'], params['max'],
-                                  params['iter'], params['tol'])
+        if levels is None or len(levels) == 0:
+            h_sec = HorizontalSection(ts, wrt, None, params['hz_start'],
+                                      params['stepinterval'], params['max'],
+                                      params['iter'], params['tol'])
+        else:
+            h_sec = HorizontalSection(ts, wrt, levels[0], params['hz_start'],
+                                      params['stepinterval'], params['max'],
+                                      params['iter'], params['tol'])
         h_sec.run()
