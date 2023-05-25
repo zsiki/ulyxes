@@ -9,6 +9,31 @@ import yaml
 import numpy as np
 import cv2
 from cv2 import aruco
+import matplotlib.pyplot as plt
+
+ARUCO_DICT = {
+	"DICT_4X4_50": cv2.aruco.DICT_4X4_50,
+	"DICT_4X4_100": cv2.aruco.DICT_4X4_100,
+	"DICT_4X4_250": cv2.aruco.DICT_4X4_250,
+	"DICT_4X4_1000": cv2.aruco.DICT_4X4_1000,
+	"DICT_5X5_50": cv2.aruco.DICT_5X5_50,
+	"DICT_5X5_100": cv2.aruco.DICT_5X5_100,
+	"DICT_5X5_250": cv2.aruco.DICT_5X5_250,
+	"DICT_5X5_1000": cv2.aruco.DICT_5X5_1000,
+	"DICT_6X6_50": cv2.aruco.DICT_6X6_50,
+	"DICT_6X6_100": cv2.aruco.DICT_6X6_100,
+	"DICT_6X6_250": cv2.aruco.DICT_6X6_250,
+	"DICT_6X6_1000": cv2.aruco.DICT_6X6_1000,
+	"DICT_7X7_50": cv2.aruco.DICT_7X7_50,
+	"DICT_7X7_100": cv2.aruco.DICT_7X7_100,
+	"DICT_7X7_250": cv2.aruco.DICT_7X7_250,
+	"DICT_7X7_1000": cv2.aruco.DICT_7X7_1000,
+	"DICT_ARUCO_ORIGINAL": cv2.aruco.DICT_ARUCO_ORIGINAL,
+	"DICT_APRILTAG_16h5": cv2.aruco.DICT_APRILTAG_16h5,
+	"DICT_APRILTAG_25h9": cv2.aruco.DICT_APRILTAG_25h9,
+	"DICT_APRILTAG_36h10": cv2.aruco.DICT_APRILTAG_36h10,
+	"DICT_APRILTAG_36h11": cv2.aruco.DICT_APRILTAG_36h11
+}
 
 def extend_names(name_list):
     """ extend */? characters from the command line on windows
@@ -19,15 +44,28 @@ def extend_names(name_list):
             names += glob.glob(name)
     return names
 
+def show_markers(img, corners, ids):
+    """ show image with found markers """
+    x = np.zeros(ids.size)
+    y = np.zeros(ids.size)
+    img1 = img.copy()
+    for j in range(ids.size):
+      x[j] = int(round(np.average(corners[j][0][:, 0])))
+      y[j] = int(round(np.average(corners[j][0][:, 1])))
+      cv2.putText(img1, str(ids[j][0]), (int(x[j]+2), int(y[j])), cv2.FONT_HERSHEY_SIMPLEX, 8, (0, 255, 0), 12)
+    plt.imshow(img1)
+    plt.plot(x, y, "ro")
+    plt.show()
+
 parser = argparse.ArgumentParser()
 parser.add_argument('names', metavar='file_names', type=str, nargs='*',
                     help='board images from different directions to process or a video file')
 parser.add_argument('-b', '--board', action="store_true",
                     help='save only board image to charuco.png file')
 parser.add_argument('-w', '--width', type=int, default=5,
-                    help='Width of board, default 5, max 10')
+                    help='Width of board, default 5')
 parser.add_argument('-e', '--height', type=int, default=7,
-                    help='Height of board, default 7, max 10')
+                    help='Height of board, default 7')
 parser.add_argument('-c', '--camera', action="store_true",
                     help='use first camera or video file to take photos until enter pressed')
 parser.add_argument('-s', '--save', action="store_true",
@@ -35,11 +73,19 @@ parser.add_argument('-s', '--save', action="store_true",
 parser.add_argument('-o', '--output', type=str,
                     default="calibration_matrix.yaml",
                     help='output yaml camera calibration data file, default: calibration_matrix.yaml')
+parser.add_argument('-d', '--dictionary', type=str, default="DICT_4X4_50",
+                    help='ArUco dictionary name, default DICT_4X4_50')
+parser.add_argument('--debug', action="store_true",
+                    help='Display found ArUco codes')
 
 args = parser.parse_args()
 if sys.platform.startswith('win'):
     args.names = extend_names(args.names)
-dictionary = aruco.getPredefinedDictionary(aruco.DICT_4X4_50)
+if args.dictionary not in ARUCO_DICT:
+    print(f"Unkonw ArUco dictionary name: {args.dictionary}")
+    print(f"Valid names: {ARUCO_DICT}")
+    sys.exit()
+dictionary = aruco.getPredefinedDictionary(ARUCO_DICT[args.dictionary])
 board = aruco.CharucoBoard_create(args.width, args.height, .025, .0125, dictionary)
 img = board.draw((200 * args.width, 200 * args.height))
 #img = board.draw((1000, 1400))
@@ -69,7 +115,8 @@ if args.camera:
         ret, frame = cap.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         corners, ids, _ = aruco.detectMarkers(gray, dictionary)
-
+        if args.debug:
+            show_markers(frame, corners, ids)
         if ids is not None and len(ids) > 0:
             ret, corners1, ids1 = aruco.interpolateCornersCharuco(corners,
                                                                       ids,
@@ -91,7 +138,7 @@ if args.camera:
             decimator += 1
 else:
     # load images from files
-    for fn in args.names:
+    for fn in sorted(args.names):
         # read images from files
         frame = cv2.imread(fn)
         if frame is None:
@@ -99,6 +146,8 @@ else:
             continue
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         corners, ids, _ = aruco.detectMarkers(gray, dictionary)
+        if args.debug:
+            show_markers(frame, corners, ids)
         if ids is not None and len(ids) > 0:
             ret, corners1, ids1 = aruco.interpolateCornersCharuco(corners,
                                                                       ids,
