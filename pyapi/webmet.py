@@ -92,32 +92,38 @@ class WebMet(Instrument):
 if __name__ == "__main__":
     # webmet demo logger
     #    command line parameters
-    #    argv[1]: name of log file, default webmet.log
-    #    argv[2]: number of repeated observations, default 10
-    #    argv[3]: delay between observations, default 30 sec
+    #    argv[1]: your app id for http://api.openweathermap.org
+    #    argv[2]: name of log file, default webmet.log
+    #    argv[3]: number of repeated observations, default 10
+    #    argv[4]: delay between observations, default 30 sec
+    #    argv[5]: elevation of start point
     import time
     import sys
     from webmetmeasureunit import WebMetMeasureUnit
     from webiface import WebIface
     from filewriter import FileWriter
-    if len(sys.argv) > 1:
-        log = sys.argv[1]       # name of log file
+    n = len(sys.argv)
+    if n < 2:
+        print(f"{sys.argv[0]} app_id [log_file]  [repeat] [delay]")
+        sys.exit()
+    app_id = sys.argv[1]
+    if len(sys.argv) > 2:
+        log = sys.argv[2]       # name of log file
     else:
         log = 'webmet.log'      # default log file
-    if len(sys.argv) > 2:
-        n = int(sys.argv[2])    # number of observations
+    if len(sys.argv) > 3:
+        n = int(sys.argv[3])    # number of observations
     else:
         n = 10                  # default single observation
-    if len(sys.argv) > 3:
-        delay = int(sys.argv[3]) # delay between observations (sec)
+    if len(sys.argv) > 4:
+        delay = int(sys.argv[4]) # delay between observations (sec)
     else:
         delay = 30               # default delay 30 sec
-    if len(sys.argv) > 4:
-        elevation = float(sys.argv[4]) # elevation of start point
+    if len(sys.argv) > 5:
+        elevation = float(sys.argv[5]) # elevation of start point
     else:
         elevation = 100                # default elevation for start point
-    #mu = WebMetMeasureUnit(msg="q=budapest&appid=13152b0308b85a39cc9a161e241ec2cf")
-    mu = WebMetMeasureUnit(msg="lat=47.463142&lon=19.070921&appid=13152b0308b85a39cc9a161e241ec2cf")
+    mu = WebMetMeasureUnit(msg="lat=47.463142&lon=19.070921&appid=" + app_id)
     wi = WebIface("demo", "http://api.openweathermap.org/data/2.5/weather", "json")
     fw = FileWriter(fname=log, filt=['pressure', 'temp', 'humidity', 'datetime'])
     web = WebMet('WebMet', mu, wi)
