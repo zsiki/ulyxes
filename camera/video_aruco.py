@@ -15,6 +15,7 @@ import datetime
 import re
 import argparse
 import matplotlib.pyplot as plt
+from aruco_dict import ARUCO_DICT
 
 # check PYTHONPATH
 if len([p for p in sys.path if 'pyapi' in p]) == 0:
@@ -137,8 +138,8 @@ if __name__ == "__main__":
                         help='video file to process or camera ID (e.g. 0)')
     parser.add_argument('-f', '--fps', type=int, default=None,
                         help='frame per sec')
-    parser.add_argument('-d', '--dict', type=int, default=1,
-                        help='marker dictionary id, default=1 (DICT_4X4_100)')
+    parser.add_argument('-d', '--dict', type=str, default="DICT_4X4_50",
+                        help='marker dictionary id or dictionary name, default=1 (DICT_4X4_100)')
     parser.add_argument('-c', '--code', type=int,
                         help='marker id to search, if not given all found markers are detected')
     parser.add_argument('--debug', type=int, default=0,

@@ -13,13 +13,28 @@ import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 import cv2
+from aruco_dict import ARUCO_DICT
 
-sys.path.append('../pyapi/')
+# check PYTHONPATH
+if len([p for p in sys.path if 'pyapi' in p]) == 0:
+    if os.path.isdir('../pyapi/'):
+        sys.path.append('../pyapi/')
+    else:
+        print("pyapi not found")
+        print("Add pyapi directory to the Python path or start your application from ulyxes/pyapps folder")
+        sys.exit(1)
+
+from confreader import ConfReader
+
+# handle incompatibility introduced in openCV 4.8 
+if cv2.__version__ < '4.8':
+    cv2.aruco.Dictionary = cv2.aruco.Dictionary_create
+    cv2.aruco.getPredefinedDictionary = cv2.aruco.Dictionary_get
+    cv2.aruco.DetectorParameters = cv2.aruco.DetectorParameters_create
 
 ALFA = 0    # parameter to getOptimalNewCameraMatrix
             # 0 - original area is preserved without invalid areas
             # 1 - total area preserved with invalid areas
-from confreader import ConfReader
 
 class ArucoBase():
     """ virtual base class from aruco processing in images or video
@@ -28,7 +43,8 @@ class ArucoBase():
     def __init__(self, args):
         """ initialize """
         # prepare aruco
-        self.params = cv2.aruco.DetectorParameters_create()  # TODO set parameters
+        # TODO set parameters
+        self.params = cv2.aruco.DetectorParameters()
         self.params.perspectiveRemoveIgnoredMarginPerCell = 0.25
         self.clip = 3.0
         self.tile = 8
@@ -84,9 +100,15 @@ class ArucoBase():
             print("Config check failed")
             sys.exit(-1)
         if cr.json['dict'] == 99:     # use special 3x3 dictionary
-            self.aruco_dict = cv2.aruco.Dictionary_create(32, 3)
+            try:    # for 4.8 compatibility
+                self.aruco_dict = cv2.aruco.Dictionary(32, 3)
+            except AttributeError:
+                self.aruco_dict = cv2.aruco.Dictionary_create(32, 3)
         else:
-            self.aruco_dict = cv2.aruco.Dictionary_get(cr.json['dict'])
+            try:    # for 4.8 compatibility
+                self.aruco_dict = cv2.aruco.getPredefinedDictionary(cr.json['dict'])
+            except:
+                self.aruco_dict = cv2.aruco.Dictionary_get(cr.json['dict'])
         self.mtx = self.dist = None
         self.calibration = cr.json['calibration']
         if self.calibration:    # load callibration data
@@ -117,10 +139,17 @@ class ArucoBase():
 
             :param args: command line arguments from argparse
         """
-        if args.dict == 99:     # use special 3x3 dictionary
-            self.aruco_dict = cv2.aruco.Dictionary_create(32, 3)
+        try:
+            wid = int(args.dict)
+        except ValueError:
+            if args.dict in ARUCO_DICT:
+                wid = ARUCO_DICT[args.dict]
+            else:
+                wid = 1
+        if wid == 99:     # use special 3x3 dictionary
+            self.aruco_dict = cv2.aruco.Dictionary(32, 3)
         else:
-            self.aruco_dict = cv2.aruco.Dictionary_get(args.dict)
+            self.aruco_dict = cv2.aruco.getPredefinedDictionary(wid)
         self.mtx = self.dist = None
         self.calibration = args.calibration
         if self.calibration:    # load callibration data
