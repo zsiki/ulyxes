@@ -10,30 +10,7 @@ import numpy as np
 import cv2
 from cv2 import aruco
 import matplotlib.pyplot as plt
-
-ARUCO_DICT = {
-	"DICT_4X4_50": cv2.aruco.DICT_4X4_50,
-	"DICT_4X4_100": cv2.aruco.DICT_4X4_100,
-	"DICT_4X4_250": cv2.aruco.DICT_4X4_250,
-	"DICT_4X4_1000": cv2.aruco.DICT_4X4_1000,
-	"DICT_5X5_50": cv2.aruco.DICT_5X5_50,
-	"DICT_5X5_100": cv2.aruco.DICT_5X5_100,
-	"DICT_5X5_250": cv2.aruco.DICT_5X5_250,
-	"DICT_5X5_1000": cv2.aruco.DICT_5X5_1000,
-	"DICT_6X6_50": cv2.aruco.DICT_6X6_50,
-	"DICT_6X6_100": cv2.aruco.DICT_6X6_100,
-	"DICT_6X6_250": cv2.aruco.DICT_6X6_250,
-	"DICT_6X6_1000": cv2.aruco.DICT_6X6_1000,
-	"DICT_7X7_50": cv2.aruco.DICT_7X7_50,
-	"DICT_7X7_100": cv2.aruco.DICT_7X7_100,
-	"DICT_7X7_250": cv2.aruco.DICT_7X7_250,
-	"DICT_7X7_1000": cv2.aruco.DICT_7X7_1000,
-	"DICT_ARUCO_ORIGINAL": cv2.aruco.DICT_ARUCO_ORIGINAL,
-	"DICT_APRILTAG_16h5": cv2.aruco.DICT_APRILTAG_16h5,
-	"DICT_APRILTAG_25h9": cv2.aruco.DICT_APRILTAG_25h9,
-	"DICT_APRILTAG_36h10": cv2.aruco.DICT_APRILTAG_36h10,
-	"DICT_APRILTAG_36h11": cv2.aruco.DICT_APRILTAG_36h11
-}
+from aruco_dict import ARUCO_DICT
 
 def extend_names(name_list):
     """ extend */? characters from the command line on windows
@@ -44,8 +21,10 @@ def extend_names(name_list):
             names += glob.glob(name)
     return names
 
-def show_markers(img, corners, ids):
+def show_markers(name, img, corners, ids):
     """ show image with found markers """
+    title = f"{name}, {len(ids)} markers found"
+    print(title)
     x = np.zeros(ids.size)
     y = np.zeros(ids.size)
     img1 = img.copy()
@@ -55,6 +34,7 @@ def show_markers(img, corners, ids):
       cv2.putText(img1, str(ids[j][0]), (int(x[j]+2), int(y[j])), cv2.FONT_HERSHEY_SIMPLEX, 8, (0, 255, 0), 12)
     plt.imshow(img1)
     plt.plot(x, y, "ro")
+    plt.title(title)
     plt.show()
 
 parser = argparse.ArgumentParser()
@@ -116,7 +96,7 @@ if args.camera:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         corners, ids, _ = aruco.detectMarkers(gray, dictionary)
         if args.debug:
-            show_markers(frame, corners, ids)
+            show_markers("On-line camera", frame, corners, ids)
         if ids is not None and len(ids) > 0:
             ret, corners1, ids1 = aruco.interpolateCornersCharuco(corners,
                                                                       ids,
@@ -147,7 +127,7 @@ else:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         corners, ids, _ = aruco.detectMarkers(gray, dictionary)
         if args.debug:
-            show_markers(frame, corners, ids)
+            show_markers(fn, frame, corners, ids)
         if ids is not None and len(ids) > 0:
             ret, corners1, ids1 = aruco.interpolateCornersCharuco(corners,
                                                                       ids,
