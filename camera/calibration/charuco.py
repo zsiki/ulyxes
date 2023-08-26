@@ -24,7 +24,6 @@ def extend_names(name_list):
 def show_markers(name, img, corners, ids):
     """ show image with found markers """
     title = f"{name}, {len(ids)} markers found"
-    print(title)
     x = np.zeros(ids.size)
     y = np.zeros(ids.size)
     img1 = img.copy()
