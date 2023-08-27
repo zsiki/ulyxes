@@ -221,8 +221,12 @@ class ArucoBase():
             img_gray = self.clahe.apply(img_gray)
         else:
             img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        corners, ids, _ = cv2.aruco.detectMarkers(img_gray, self.aruco_dict,
-                                                  parameters=self.params)
+        if cv2.__version__ < '4.8':
+            corners, ids, _ = cv2.aruco.detectMarkers(img_gray, self.aruco_dict,
+                                                      parameters=self.params)
+        else:
+            detector = cv2.aruco.ArucoDetector(self.aruco_dict, self.params)
+            corners, ids, _ = detector.detectMarkers(img_gray)
         x = y = 0
         res = []    # results
         if ids is not None:
