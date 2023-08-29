@@ -1,6 +1,9 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+
+    OBSOLATE use video_aruco.py
+
     go through video frames to find an aruco code
     video file name can contain date and time like: pi1_YYYYmmdd_HHMMSS.h264
     parameters are given in a json file
@@ -27,7 +30,7 @@
             http: url to remote application over http
         debug: visual feedback, optional (int 0/1), default 0
 
-    usage: camera_arucoco.py config.json
+    usage: camera_aruco.py config.json
 """
 # TODO logging messages
 

@@ -6,7 +6,7 @@
     output sent to standard output in the form:
     line,date/time,column,row,statistic
 
-    use video_arucoco.py --help for comamnd line options
+    use imgs_arucoco.py --help for comamnd line options
 """
 import os
 import sys
