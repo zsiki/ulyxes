@@ -15,7 +15,6 @@ import datetime
 import re
 import argparse
 import matplotlib.pyplot as plt
-from aruco_dict import ARUCO_DICT
 
 # check PYTHONPATH
 if len([p for p in sys.path if 'pyapi' in p]) == 0:
@@ -28,7 +27,8 @@ if len([p for p in sys.path if 'pyapi' in p]) == 0:
 
 from aruco_base import ArucoBase
 from csvwriter import CsvWriter
-from sqlitewriter import SqLiteWriter
+from dbwriter import DbWriter
+from httpwriter import HttpWriter
 from imagereader import ImageReader
 from imagewriter import ImageWriter
 
@@ -66,9 +66,16 @@ class VideoAruco(ArucoBase):
                                              int(l[6:8]), int(l[9:11]),
                                              int(l[11:13]), int(l[13:]))
         if re.match('sqlite:', args.output):
-            self.wrt = SqLiteWriter(db=args.output[7:],
+            self.wrt = DbWriter(db=args.output[7:],
                                     table='aruco_coo',
                                     filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
+        if re.match('psql:', args.output):
+            self.wrt = DbWriter(db=args.output[5:],
+                                    table='aruco_coo',
+                                    filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
+        elif re.match('https?://', args.output):
+            self.wrt = HttpWriter(url=args.output, mode='POST', dist='.4f',
+                                  filt=['id', 'datetime', 'east', 'elev'])
         else:
             self.wrt = CsvWriter(fname=args.output, dt=self.tformat, mode='w',
                                  filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
