@@ -25,6 +25,10 @@ try:
 except ModuleNotFoundError:
     pass
 
+try:
+    from picamera2 import Picamera2
+except ModuleNotFoundError:
+    pass
 
 class ImageReader(Reader):
     """ Read images from folder(s) or video file or web camera or pi camera
@@ -38,6 +42,7 @@ class ImageReader(Reader):
     VIDEO = 1
     IMAGE = 2
     PICAM = 3
+    PICAM2 = 4
 
     def __init__(self, srcname, name=None, filt=None, fps=None):
         """ Constructor """
@@ -80,6 +85,14 @@ class ImageReader(Reader):
             #self.height = 480
             self.source.resolution = (self.width, self.height)
             time.sleep(0.1)	# wait for camera initialization
+        elif srcname.lower() == "picam2":
+            self.type = self.PICAM2
+            self.source = Picamera2()
+            self.width = 2028	# TODO should be input parameter
+            self.height = 1520
+            config = self.source.create_preview_configuration(main={"size": (self.width, self.height)})
+            self.source.configure(config)
+            time.sleep(0.1)
 
     def __del__(self):
         """ release video """
@@ -88,7 +101,7 @@ class ImageReader(Reader):
                 self.source.release()
             except Exception:
                 pass
-        elif self.typ == self.PICAM:
+        elif self.typ in (self.PICAM, self.PICAM2):
             try:
                 self.source.close()
             except Exception:
@@ -107,8 +120,12 @@ class ImageReader(Reader):
         elif self.typ == self.PICAM:
             frame = np.empty((self.height, self.width, 3), dtype=np.uint8)
             self.source.capture(frame, format="rgb")
-            cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)	# change to opencv BGR
             t = datetime.datetime.now()
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)	# change to opencv BGR
+        elif self.typ == self.PICAM2:
+            frame = self.source.capture_array()
+            t = datetime.datetime.now()
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)	# change to opencv BGR
         else:
             ret, frame = self.source.read()
             if ret:
