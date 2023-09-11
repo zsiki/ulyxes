@@ -86,12 +86,13 @@ class ImageReader(Reader):
             self.source.resolution = (self.width, self.height)
             time.sleep(0.1)	# wait for camera initialization
         elif srcname.lower() == "picam2":
-            self.type = self.PICAM2
+            self.typ = self.PICAM2
             self.source = Picamera2()
             self.width = 2028	# TODO should be input parameter
             self.height = 1520
             config = self.source.create_preview_configuration(main={"size": (self.width, self.height)})
             self.source.configure(config)
+            self.source.start()
             time.sleep(0.1)
 
     def __del__(self):
