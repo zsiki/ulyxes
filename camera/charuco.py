@@ -1,9 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding: UTF-8 -*-
-""" calibrate camera using charuco board 7x5
-
-TODO upgrade to 4.7 see:
-    https://github.com/opencv/opencv/blob/4.x/samples/python/calibrate.py
+""" calibrate camera using charuco board 7x5 or other size
+    dictionary with 50 markers the max size is 8 x 11
+    use DICT_4X4_250 for larger boards
 """
 import sys
 import glob
@@ -15,7 +14,7 @@ from cv2 import aruco
 import matplotlib.pyplot as plt
 from aruco_dict import ARUCO_DICT
 
-# handle incompatibility introduced in openCV 4.8
+# handling incompatibility introduced in openCV 4.8
 if cv2.__version__ < '4.8':
     aruco.Dictionary = aruco.Dictionary_create
     aruco.getPredefinedDictionary = aruco.Dictionary_get
@@ -50,7 +49,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('names', metavar='file_names', type=str, nargs='*',
                     help='board images from different directions to process or a video file')
 parser.add_argument('-b', '--board', action="store_true",
-                    help='save only board image to charuco.png file')
+        help='save only board to image file: charuco_widthxheight.png')
 parser.add_argument('-w', '--width', type=int, default=5,
                     help='Width of board, default 5')
 parser.add_argument('-e', '--height', type=int, default=7,
@@ -72,7 +71,9 @@ if sys.platform.startswith('win'):
     args.names = extend_names(args.names)
 if args.dictionary not in ARUCO_DICT:
     print(f"Unkonw ArUco dictionary name: {args.dictionary}")
-    print(f"Valid names: {ARUCO_DICT}")
+    print("Valid names are:")
+    for key in ARUCO_DICT.keys():
+        print(key)
     sys.exit()
 dictionary = aruco.getPredefinedDictionary(ARUCO_DICT[args.dictionary])
 if cv2.__version__ < '4.8':
