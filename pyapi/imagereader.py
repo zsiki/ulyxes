@@ -44,7 +44,8 @@ class ImageReader(Reader):
     PICAM = 3
     PICAM2 = 4
 
-    def __init__(self, srcname, name=None, filt=None, fps=None):
+    def __init__(self, srcname, name=None, filt=None, fps=None,
+                 width=None, height=None):
         """ Constructor """
         super().__init__(name, filt)
         self.fps = fps
@@ -54,6 +55,8 @@ class ImageReader(Reader):
         self.dt = None
         self.source = None
         self.typ = None
+        self.width = width
+        self.height = height
         if isinstance(srcname, list):
             self.typ = self.IMAGE
             self.source = []
@@ -79,17 +82,17 @@ class ImageReader(Reader):
         elif srcname.lower() == 'picam':
             self.typ = self.PICAM
             self.source = PiCamera()
-            self.width = 1632	# TODO should be input parameter
-            self.height = 1216
-            #self.width = 640
-            #self.height = 480
+            if self.width is None or self.height is None:
+                self.width = 640
+                self.height = 480
             self.source.resolution = (self.width, self.height)
             time.sleep(0.1)	# wait for camera initialization
         elif srcname.lower() == "picam2":
             self.typ = self.PICAM2
             self.source = Picamera2()
-            self.width = 2028	# TODO should be input parameter
-            self.height = 1520
+            if self.width is None or self.height is None:
+                self.width = 640
+                self.height = 480
             config = self.source.create_preview_configuration(main={"size": (self.width, self.height)})
             self.source.configure(config)
             self.source.start()
@@ -113,7 +116,7 @@ class ImageReader(Reader):
         frame = None
         t = None
         if self.typ == self.IMAGE:
-            if len(self.source):
+            if self.source is not None and len(self.source):
                 fn = self.source.pop(0)
                 self.srcname = fn
                 frame = cv2.imread(fn)
