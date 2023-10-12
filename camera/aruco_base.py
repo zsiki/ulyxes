@@ -28,7 +28,7 @@ from confreader import ConfReader
 
 # handle incompatibility introduced in openCV 4.8 
 if cv2.__version__ < '4.8':
-    cv2.aruco.Dictionary = cv2.aruco.Dictionary_create
+    cv2.aruco.extendDictionary = cv2.aruco.Dictionary_create
     cv2.aruco.getPredefinedDictionary = cv2.aruco.Dictionary_get
     cv2.aruco.DetectorParameters = cv2.aruco.DetectorParameters_create
 
@@ -101,7 +101,7 @@ class ArucoBase():
             sys.exit(-1)
         if cr.json['dict'] == 99:     # use special 3x3 dictionary
             try:    # for 4.8 compatibility
-                self.aruco_dict = cv2.aruco.Dictionary(32, 3)
+                self.aruco_dict = cv2.aruco.extendDictionary(32, 3)
             except AttributeError:
                 self.aruco_dict = cv2.aruco.Dictionary_create(32, 3)
         else:
@@ -147,7 +147,7 @@ class ArucoBase():
             else:
                 wid = 1
         if wid == 99:     # use special 3x3 dictionary
-            self.aruco_dict = cv2.aruco.Dictionary(32, 3)
+            self.aruco_dict = cv2.aruco.extendDictionary(32, 3)
         else:
             self.aruco_dict = cv2.aruco.getPredefinedDictionary(wid)
         self.mtx = self.dist = None
