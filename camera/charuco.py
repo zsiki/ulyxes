@@ -35,7 +35,7 @@ def show_markers(name, img, corners, ids):
     title = f"{name}, {len(ids)} markers found"
     x = np.zeros(ids.size)
     y = np.zeros(ids.size)
-    img1 = img.copy()
+    img1 = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     for j in range(ids.size):
       x[j] = int(round(np.average(corners[j][0][:, 0])))
       y[j] = int(round(np.average(corners[j][0][:, 1])))
@@ -123,9 +123,9 @@ if args.camera:
             else:
                 ch_detector = aruco.CharucoDetector(board)
                 ret, corners1, ids1 = ch_detector.detectBoard(gray, corners, ids)
-            aruco.drawDetectedMarkers(gray, corners, ids)
+            #aruco.drawDetectedMarkers(gray, corners, ids)
 
-        cv2.imshow('frame', gray)
+        #cv2.imshow('frame', gray)
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
             break
