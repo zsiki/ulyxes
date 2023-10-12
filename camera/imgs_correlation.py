@@ -81,6 +81,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()      # process parameters
     I_C = ImgsCorrelation(args)
+    if I_C.rdr.source is None:
+        print("No images found")
+        sys.exit()
     I_C.process()                   # process files
     if args.debug > 0:
         input('Press Enter to exit')              # wait for keypress

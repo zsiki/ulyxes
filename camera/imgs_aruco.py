@@ -113,6 +113,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()      # process parameters
     I_A = ImgsAruco(args)
+    if I_A.rdr.source is None:
+        print("No images found")
+        sys.exit(1)
     I_A.process()
     if args.debug > 0:
         input('Press Enter to exit')
