@@ -42,7 +42,7 @@ class VideoAruco(ArucoBase):
         """ initialize """
         super(VideoAruco, self).__init__(args)
         fn = args.name[0]
-        self.rdr = ImageReader(fn, fps=args.fps)
+        self.rdr = ImageReader(fn, fps=args.fps, width=args.width, height=args.height)
         self.tformat = '%Y-%m-%d %H:%M:%S.%f'
         t = re.search('[0-9]_[0-9]{8}_[0-9]{6}', fn)
         t1 = re.search('[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6}', fn)
@@ -173,6 +173,10 @@ if __name__ == "__main__":
                         help='path to save images to')
     parser.add_argument('-t', '--img_type', type=str, default='png',
                         help='image type to save to, use with --img_path, default png')
+    parser.add_argument('-w', '--width', type=int,
+            help='image width for picam/picam2, default:640')
+    parser.add_argument('-e', '--height', type=int,
+            help='image height for picam/picam2, default:480')
     signal.signal(signal.SIGINT, exit_on_ctrl_c)    # catch Ctrl/C
     args = parser.parse_args()                      # process parameters
     V_A = VideoAruco(args)
