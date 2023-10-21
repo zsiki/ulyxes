@@ -55,8 +55,6 @@ class ImageReader(Reader):
         self.dt = None
         self.source = None
         self.typ = None
-        self.width = width
-        self.height = height
         if isinstance(srcname, list):
             self.typ = self.IMAGE
             self.source = []
@@ -75,17 +73,31 @@ class ImageReader(Reader):
                     self.fps = self.source.get(cv2.CAP_PROP_FPS)
                 self.dt = datetime.timedelta(0, 1.0 / self.fps)
                 self.act = datetime.datetime.fromtimestamp(os.path.getmtime(srcname))
+                self.width = self.source.get(cv2.CAP_PROP_FRAME_WIDTH)
+                self.height = self.source.get(cv2.CAP_PROP_FRAME_HEIGHT)
         elif srcname in ("0", "1", "2", "3"):
             # camera source
             self.typ = self.CAMERA
             self.source = cv2.VideoCapture(int(srcname)) # open camera stream
+            if fps:
+                self.source.set(cv2.CAP_PROP_FPS, fps)
+            if width:
+                self.source.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+            if height:
+                self.source.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+            self.fps = self.source.get(cv2.CAP_PROP_FPS)
+            self.width = self.source.get(cv2.CAP_PROP_FRAME_WIDTH)
+            self.height = self.source.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
         elif srcname.lower() == 'picam':
             self.typ = self.PICAM
             self.source = PiCamera()
-            if self.width is None or self.height is None:
+            if width is None or height is None:
                 self.width = 640
                 self.height = 480
             self.source.resolution = (self.width, self.height)
+            if fps is not None:
+                self.source.framerate = fps
             time.sleep(0.1)	# wait for camera initialization
         elif srcname.lower() == "picam2":
             self.typ = self.PICAM2
