@@ -65,7 +65,7 @@ class ImageReader(Reader):
             else:
                 self.source = None
         elif isinstance(srcname, str) and \
-                srcname.lower()[-4:] in ("h264", ".mp4", ".avi", "webm"):
+                srcname.lower()[-4:] in ("h264", ".mp4", ".avi", "webm", ".mkv"):
             self.typ = self.VIDEO
             if os.path.exists(srcname):
                 self.source = cv2.VideoCapture(srcname)
