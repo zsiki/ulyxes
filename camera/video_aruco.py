@@ -177,6 +177,9 @@ if __name__ == "__main__":
             help='image width for picam/picam2, default:640')
     parser.add_argument('-e', '--height', type=int,
             help='image height for picam/picam2, default:480')
+    parser.add_argument('--aruco_params', type=str, default=None,
+                        help='JSON file with ArUco detection parameters')
+
     signal.signal(signal.SIGINT, exit_on_ctrl_c)    # catch Ctrl/C
     args = parser.parse_args()                      # process parameters
     V_A = VideoAruco(args)

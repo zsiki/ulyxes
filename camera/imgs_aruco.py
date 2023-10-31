@@ -110,6 +110,8 @@ if __name__ == "__main__":
                         help='Refine corners with subpixels')
     parser.add_argument('-o', '--output', type=str, default='stdout',
                         help='name of output file')
+    parser.add_argument('--aruco_params', type=str, default=None,
+                        help='JSON file with ArUco detection parameters')
 
     args = parser.parse_args()      # process parameters
     I_A = ImgsAruco(args)

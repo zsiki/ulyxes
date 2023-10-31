@@ -11,6 +11,7 @@ import sys
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
+import json
 import yaml
 import cv2
 from aruco_dict import ARUCO_DICT
@@ -42,10 +43,7 @@ class ArucoBase():
 
     def __init__(self, args):
         """ initialize """
-        # prepare aruco
-        # TODO set parameters
-        self.params = cv2.aruco.DetectorParameters()
-        self.params.perspectiveRemoveIgnoredMarginPerCell = 0.25
+        # default values
         self.clip = 3.0
         self.tile = 8
         self.code = None
@@ -60,8 +58,23 @@ class ArucoBase():
         #
         self.clahe = cv2.createCLAHE(clipLimit=self.clip,
                                      tileGridSize=(self.tile, self.tile))
-        if self.refine:
-            self.params.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_SUBPIX
+        # ArUco detection parameters
+        self.params = cv2.aruco.DetectorParameters()
+        if  args.aruco_params is None:
+            self.params.perspectiveRemoveIgnoredMarginPerCell = 0.25
+            if self.refine:
+                self.params.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_SUBPIX
+        else:
+            # read params from json
+            try:
+                with open(args.aruco_params) as f:
+                    data = f.read()
+                js = json.loads(data)
+            except:
+                print('Error loading ArUco parameter file: ', args.aruco_params)
+                sys.exit()
+            for par in js:
+                setattr(self.params, par, js[par])
 
     def json_params(self, fn):
         """ get params from json config
