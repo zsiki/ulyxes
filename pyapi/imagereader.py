@@ -51,7 +51,7 @@ class ImageReader(Reader):
         self.fps = fps
         self.srcname = srcname
         self.ind = 0    # image index
-        self.act = datetime.datetime.now()
+        self.start = datetime.datetime.now()
         self.dt = None
         self.source = None
         self.typ = None
@@ -72,7 +72,7 @@ class ImageReader(Reader):
                 if fps is None:
                     self.fps = self.source.get(cv2.CAP_PROP_FPS)
                 self.dt = datetime.timedelta(0, 1.0 / self.fps)
-                self.act = datetime.datetime.fromtimestamp(os.path.getmtime(srcname))
+                self.start = datetime.datetime.fromtimestamp(os.path.getmtime(srcname))
                 self.width = self.source.get(cv2.CAP_PROP_FRAME_WIDTH)
                 self.height = self.source.get(cv2.CAP_PROP_FRAME_HEIGHT)
         elif srcname in ("0", "1", "2", "3"):
@@ -109,6 +109,7 @@ class ImageReader(Reader):
             self.source.configure(config)
             self.source.start()
             time.sleep(0.1)
+        self.act = self.start
 
     def __del__(self):
         """ release video """
@@ -148,8 +149,12 @@ class ImageReader(Reader):
                 if self.typ == self.CAMERA:
                     t = datetime.datetime.now()
                 else:
-                    self.act += self.dt
+                    # get timestamp from video
+                    tt = self.source.get(cv2.CAP_PROP_POS_MSEC)
+                    if tt > 0:
+                        self.act = self.start + datetime.timedelta(milliseconds=tt)
                     t = self.act
+                    self.act += self.dt
         self.ind += 1
         return frame, t
 
