@@ -102,7 +102,7 @@ class ImageReader(Reader):
         elif srcname.lower() == "picam2":
             self.typ = self.PICAM2
             self.source = Picamera2()
-            if self.width is None or self.height is None:
+            if width is None or height is None:
                 self.width = 640
                 self.height = 480
             config = self.source.create_preview_configuration(main={"size": (self.width, self.height)})
