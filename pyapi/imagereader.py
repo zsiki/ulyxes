@@ -95,6 +95,9 @@ class ImageReader(Reader):
             if width is None or height is None:
                 self.width = 640
                 self.height = 480
+            else:
+                self.width = width
+                self.height = height
             self.source.resolution = (self.width, self.height)
             if fps is not None:
                 self.source.framerate = fps
@@ -105,6 +108,9 @@ class ImageReader(Reader):
             if width is None or height is None:
                 self.width = 640
                 self.height = 480
+            else:
+                self.width = width
+                self.height = height
             config = self.source.create_preview_configuration(main={"size": (self.width, self.height)})
             self.source.configure(config)
             self.source.start()
