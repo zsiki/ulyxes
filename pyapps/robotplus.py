@@ -508,6 +508,8 @@ if __name__ == "__main__":
         logging.fatal("Orientation failed %d", ans['errCode'])
         sys.exit(-1)
 
+    # act_date is used for all observations and coords
+    act_date = datetime.datetime.now()  # start of observations
     if 'fix_list' in cr.json and cr.json['fix_list'] is not None and \
         len(fix_coords) < 2:
         logging.warning('No enough fix points for freestation')
@@ -520,7 +522,6 @@ if __name__ == "__main__":
         observations = og.run()
         # observation to fix points
         print("Measuring fix...")
-        act_date = datetime.datetime.now()  # start of observations
         r = Robot(observations, st_coord, ts, cr.json['max_try'],
                   cr.json['delay_try'], cr.json['dir_limit'],
                   cr.json['dist_limit'])
@@ -590,7 +591,6 @@ if __name__ == "__main__":
                 ts.Move(Angle(0.0), Angle(90, 'DEG'), 0)
                 # set direction to orientation angle
                 ans = ts.SetOri(Angle(st_coord[0]['ori'], 'GON'))
-                #print(Angle(st_coord[0]['ori'], 'GON').GetAngle('DMS'))
                 if 'errCode' in ans:
                     logging.fatal("Cannot upload orientation to instrument")
                     sys.exit(-1)
@@ -625,7 +625,6 @@ if __name__ == "__main__":
         observations = og.run()
         # observation to monitoring points
         print("Measuring mon...")
-        act_date = datetime.datetime.now()  # start of observations
         r = Robot(observations, st_coord, ts, cr.json['max_try'],
                   cr.json['delay_try'], cr.json['dir_limit'],
                   cr.json['dist_limit'])
