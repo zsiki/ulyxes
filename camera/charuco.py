@@ -54,6 +54,8 @@ parser.add_argument('-w', '--width', type=int, default=5,
                     help='Width of board, default 5')
 parser.add_argument('-e', '--height', type=int, default=7,
                     help='Height of board, default 7')
+parser.add_argument('-m', '--multiplier', type=int, default=200,
+                    help='Multiplier for board printingi to set size in pixels, efault 200')
 parser.add_argument('-c', '--camera', action="store_true",
                     help='use first camera or video file to take photos until enter pressed')
 parser.add_argument('-s', '--save', action="store_true",
@@ -78,10 +80,10 @@ if args.dictionary not in ARUCO_DICT:
 dictionary = aruco.getPredefinedDictionary(ARUCO_DICT[args.dictionary])
 if cv2.__version__ < '4.8':
     board = aruco.CharucoBoard_create(args.width, args.height, .025, .0125, dictionary)
-    img = board.draw((200 * args.width, 200 * args.height))
+    img = board.draw((args.multiplier * args.width, args.multiplier * args.height))
 else:
     board = aruco.CharucoBoard((args.width, args.height), .025, .0125, dictionary)
-    img = board.generateImage((200 * args.width, 200 * args.height))
+    img = board.generateImage((args.multiplier * args.width, args.multiplier * args.height))
 
 if args.board:
     # Dump the calibration board to a file
