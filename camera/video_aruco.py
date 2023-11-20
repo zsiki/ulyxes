@@ -69,13 +69,13 @@ class VideoAruco(ArucoBase):
             self.wrt = DbWriter(db=args.output[7:],
                                     table='aruco_coo',
                                     filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
-        if re.match('psql:', args.output):
+        elif re.match('psql:', args.output):
             self.wrt = DbWriter(db=args.output[5:],
                                     table='aruco_coo',
                                     filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
         elif re.match('https?://', args.output):
-            self.wrt = HttpWriter(url=args.output, mode='POST', dist='.4f',
-                                  filt=['id', 'datetime', 'east', 'elev'])
+            self.wrt = HttpWriter(url=args.output, mode='GET', dist='.4f',
+                                  filt=['id', 'datetime', 'east', 'north'])
         else:
             self.wrt = CsvWriter(fname=args.output, dt=self.tformat, mode='w',
                                  filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
@@ -103,23 +103,22 @@ class VideoAruco(ArucoBase):
                     for res in results:
                         if self.code is None or self.code == res['code']:
                             if self.calibration:    # output pose, too
-                                data = {'id': self.rdr.ind, 'datetime': t,
+                                data = {'id': str(res['code']), 'datetime': t,
                                         'east': res["east"],
                                         'north': res["north"],
                                         'width': res['width'],
                                         'height': res['height'],
-                                        'code': res['code'],
                                         'roll': res["euler_angles"][0],
                                         'pitch': res["euler_angles"][1],
                                         'yaw': res["euler_angles"][2]}
                             else:
-                                data = {'id': self.rdr.ind, 'datetime': t,
+                                data = {'id': str(res['code']), 'datetime': t,
                                         'east': res["east"],
                                         'north': res["north"],
                                         'width': res['width'],
-                                        'height': res['height'],
-                                        'code': res['code']}
-                            self.wrt.WriteData(data)
+                                        'height': res['height']}
+                            if self.wrt.WriteData(data) < 0:
+                                print(f"error writing data: {data}")
             else:
                 break
         return 0

@@ -14,10 +14,11 @@ import logging
 try:
     from urllib.request import urlopen, Request # for python 3
     from urllib.parse import urlencode
+    from urllib.error import HTTPError, URLError
 except ImportError:
     from urllib import urlencode
     from urllib2 import urlopen, Request        # for python 2
-from angle import Angle
+    from urllib2 import HTTPError
 from writer import Writer
 
 class HttpWriter(Writer):
@@ -45,7 +46,7 @@ class HttpWriter(Writer):
         """ Write observation data to server
 
             :param data: dictionary with observation data
-            :returns: server answer or None (if error)
+            :returns: server answer or negative error code
         """
         par = {}
         if data is None or self.DropData(data):
@@ -59,20 +60,34 @@ class HttpWriter(Writer):
         if self.mode == 'GET':
             try:
                 res = urlopen(self.url + '?' + urlencode(par)).read()
-            except Exception:
-                res = -1
+                if len(res.strip()) == 0:
+                    res = 0
+                else:
+                    res = int(res)
+            except HTTPError as err:
+                logging.error("http error %d %s ", err.code, err.msg)
+                res = -err.code
+            except URLError:
+                logging.error("URL error")
+                res = -2
         else:
             try:
                 d = urlencode(par).encode('ascii')
                 req = Request(self.url, d)
                 res = urlopen(req).read()
-            except Exception:
-                res = -1
-        return int(res)
+                if len(res.strip()) == 0:
+                    res = 0
+                else:
+                    res = int(res)
+            except HTTPError as err:
+                logging.error("http error %d %s ", err.code, err.msg)
+                res = -err.code
+            except URLError:
+                logging.error("URL error")
+                res = -2
+        return res
 
 if __name__ == "__main__":
-    #myfile = HttpWriter(mode='GET', url="http://www.agt.bme.hu/php/get_tester.php")
-    myfile = HttpWriter(mode='POST', url="http://www.agt.bme.hu/php/get_tester.php")
-    v = Angle(100.2345, 'GON')
-    data = {'id': '1', 'hz': Angle(0.12345), 'v': Angle(100.2365, 'GON'), 'distance': 123.6581}
-    print(myfile.WriteData(data))
+    myfile = HttpWriter(mode='GET', url="http://localhos/get.php")
+    dd = {'id': '111', 'east': 123, 'north': 543, 'datetime': '2023-11-20 17:00:03'}
+    print(myfile.WriteData(dd))
