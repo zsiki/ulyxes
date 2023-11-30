@@ -102,7 +102,7 @@ class VideoAruco(ArucoBase):
                 if results:
                     for res in results:
                         if self.code is None or self.code == res['code']:
-                            if self.calibration:    # output pose, too
+                            if self.pose:    # output pose, too
                                 data = {'id': str(res['code']), 'datetime': t,
                                         'east': res["east"],
                                         'north': res["north"],
@@ -154,6 +154,8 @@ if __name__ == "__main__":
                         help='delay in seconds between frames in debug')
     parser.add_argument('-m', '--calibration', type=str, default=None,
                         help='use camera calibration from file for undistort image and pose estimation')
+    parser.add_argument('-p', '--pose', action='store_true',
+                        help='Estimate pose, too')
     parser.add_argument('-s', '--size', type=float, default=0.28,
                         help='marker size for pose extimation, default: 0.28 m')
     parser.add_argument('--hist', action="store_true",
