@@ -5,6 +5,7 @@
     Virtual base class for template matching
 """
 import sys
+import json
 import yaml
 import matplotlib.pyplot as plt
 import numpy as np
@@ -31,7 +32,7 @@ class TemplateBase():
         self.demo = demo  # to show correlation image in progress
         self.templ = cv2.imread(args.template, cv2.IMREAD_GRAYSCALE)
         if self.templ is None:
-            print("Error reading template: {}".format(args.template))
+            print(f"Error reading template: {args.template}")
             sys.exit(1)
         self.templ_h, self.templ_w = self.templ.shape
         self.last_x = self.last_y = None
@@ -57,10 +58,14 @@ class TemplateBase():
             pass
         self.calibration = args.calibration
         if args.calibration:    # load callibration data
-            with open(args.calibration) as f:
-                c = yaml.load(f, Loader=yaml.FullLoader)
+            with open(args.calibration, encoding='ascii') as f:
+                if args.calibration[-4:].lower() == 'yaml':
+                    c = yaml.load(f, Loader=yaml.FullLoader)
+                else:
+                    c = json.loads("".join(f.readlines()))
                 self.mtx = np.array(c['camera_matrix'])
                 self.dist = np.array(c['dist_coeff'])
+                self.cal_w, self.cal_h = c['img_size']
         else:
             self.mtx = self.dist = None
 
@@ -101,7 +106,7 @@ class TemplateBase():
                     plt.imshow(res, cmap='gray', vmin=0, vmax=255)
                     #plt.show()
                     if i % 20 == 0 and j % 20 == 0:
-                        name = "tmp/{:04d}{:04d}.png".format(i, j)
+                        name = f"tmp/{i:04d}{j:04d}.png"
                         plt.savefig(name)
                     plt.close(fig)
                     # end extra for demonstating
@@ -118,11 +123,12 @@ class TemplateBase():
         """
         if self.calibration:    # undistort image using calibration
             h, w = frame.shape[:2]
-            newmtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist,
-                                                        (w, h), 1, (w, h))
+            if (self.cal_w, self.cal_h) == (w, h):
+                newmtx = self.mtx
+            else:
+                newmtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist,
+                                                            (w, h), 1, (w, h))
             frame = cv2.undistort(frame, self.mtx, self.dist, None, newmtx)
-            # crop image
-            frame = frame[roi[1]:roi[1]+roi[3], roi[0]:roi[0]+roi[2]]
         img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         if self.fast and self.last_x:
             self.off_x = max(0, self.last_x - self.templ_w // 2)

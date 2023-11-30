@@ -7,6 +7,7 @@
 import sys
 import glob
 import argparse
+import json
 import yaml
 import numpy as np
 import cv2
@@ -37,9 +38,10 @@ def show_markers(name, img, corners, ids):
     y = np.zeros(ids.size)
     img1 = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     for j in range(ids.size):
-      x[j] = int(round(np.average(corners[j][0][:, 0])))
-      y[j] = int(round(np.average(corners[j][0][:, 1])))
-      cv2.putText(img1, str(ids[j][0]), (int(x[j]+2), int(y[j])), cv2.FONT_HERSHEY_SIMPLEX, 8, (0, 255, 0), 12)
+        x[j] = int(round(np.average(corners[j][0][:, 0])))
+        y[j] = int(round(np.average(corners[j][0][:, 1])))
+        cv2.putText(img1, str(ids[j][0]), (int(x[j]+2), int(y[j])),
+                    cv2.FONT_HERSHEY_SIMPLEX, 8, (0, 255, 0), 12)
     plt.imshow(img1)
     plt.plot(x, y, "ro")
     plt.title(title)
@@ -54,14 +56,16 @@ parser.add_argument('-w', '--width', type=int, default=5,
                     help='Width of board, default 5')
 parser.add_argument('-e', '--height', type=int, default=7,
                     help='Height of board, default 7')
+parser.add_argument('-f', '--format', choices = ['yaml', 'json', 'YAML', 'JSON'], default='yaml',
+                    help='Format of output file yaml or json')
 parser.add_argument('-m', '--multiplier', type=int, default=200,
-                    help='Multiplier for board printingi to set size in pixels, efault 200')
+                    help='Multiplier for board printing to set size in pixels, default 200')
 parser.add_argument('-c', '--camera', action="store_true",
                     help='use first camera or video file to take photos until enter pressed')
 parser.add_argument('-s', '--save', action="store_true",
                     help='save camera images to file cal0.png, cal1.png if camera is used')
 parser.add_argument('-o', '--output', type=str,
-                    default="calibration_matrix.yaml",
+                    default="calibration_matrix",
                     help='output yaml camera calibration data file, default: calibration_matrix.yaml')
 parser.add_argument('-d', '--dictionary', type=str, default="DICT_4X4_50",
                     help='ArUco dictionary name, default DICT_4X4_50')
@@ -173,7 +177,7 @@ else:
 
 #Calibration fails for lots of reasons. Release the video if we do
 try:
-    imsize = gray.shape
+    imsize = max(gray.shape), min(gray.shape)
     ret, mtx, dist, rvecs, tvecs = aruco.calibrateCameraCharuco(allCorners,
                                                                     allIds,
                                                                     board,
@@ -190,10 +194,17 @@ if args.camera:
     cap.release()
     cv2.destroyAllWindows()
 # transform matrix and distortion to writeable lists
-print('Overall RMS: {}'.format(ret))
+print(f'Overall RMS: {ret}')
 cal = {'camera_matrix': np.asarray(mtx).tolist(),
-       'dist_coeff': np.asarray(dist).tolist()}
+       'dist_coeff': np.asarray(dist).tolist(),
+       'img_size': list(imsize),
+       'rms': ret}
 # and save to file
-with open(args.output, "w") as f:
-    yaml.dump(cal, f)
+if args.output[-4:].lower() != args.format.lower():
+    args.output += '.' + args.format
+with open(args.output, "w", encoding='ascii') as f:
+    if args.format.lower() == 'yaml':
+        yaml.dump(cal, f)
+    else:
+        json.dump(cal, f)
 #print(cal)
