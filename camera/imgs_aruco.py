@@ -37,9 +37,9 @@ class ImgsAruco(ArucoBase):
         # prepare aruco
         super(ImgsAruco, self).__init__(args)
         self.tformat = '%Y-%m-%d %H:%M:%S.%f'
-        if self.calibration:
-            filt = ['id', 'datetime', 'east', 'north', 'width', 'height', 'code']
-                    #'roll', 'pitch', 'yaw']
+        if self.pose:
+            filt = ['id', 'datetime', 'east', 'north', 'width', 'height', 'code',
+                    'roll', 'pitch', 'yaw']
         else:
             filt = ['id', 'datetime', 'east', 'north', 'width', 'height', 'code']
         self.wrt = CsvWriter(fname=args.output, dt=self.tformat, filt=filt)
@@ -58,7 +58,7 @@ class ImgsAruco(ArucoBase):
                 if results:
                     for res in results:
                         if self.code is None or self.code == res['code']:
-                            if self.calibration:    # output pose, too
+                            if self.pose:    # output pose, too
                                 data = {'id': self.rdr.ind, 'name': name1,
                                         'datetime': t,
                                         'east': res["east"],
@@ -86,8 +86,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('names', metavar='file_names', type=str, nargs="+",
                         help='image files to process')
-    parser.add_argument('-d', '--dict', type=int, default=1,
-                        help='marker dictionary id, default=1 (DICT_4X4_100)')
+    parser.add_argument('-d', '--dict', type=str, default="DICT_4X4_50",
+            help='marker dictionary id or name, default:DICT_4X4_50)')
     parser.add_argument('-c', '--code', type=int,
                         help='marker id to search, if not given all found markers are used')
     parser.add_argument('--debug', type=int, default=0,
@@ -96,6 +96,8 @@ if __name__ == "__main__":
                         help='delay in seconds between frames use with debug>0, default 1')
     parser.add_argument('-m', '--calibration', type=str, default=None,
                         help='use camera calibration from file')
+    parser.add_argument('-p', '--pose', action='store_true',
+                        help='Estimate pose, too')
     parser.add_argument('-s', '--size', type=float, default=0.28,
                         help='marker size for pose extimation, default: 0.28 m')
     parser.add_argument('--hist', action="store_true",
