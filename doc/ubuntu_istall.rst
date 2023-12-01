@@ -40,13 +40,17 @@ PySerial (Serial communication to sensor)
 
 	sudo pip3 install pyserial
 
+.. note::
+	You can remove *sudo* before *pip3* if you want install packages
+	for the ctual user only. Using *sudo* all user can access them.
+
 On Linux the serial ports are protected. The root user and those are in the
 dialout group are able to read/write serial ports. To add yourself to the
 dialout group use the following command
 
 .. code:: bash
 
-	sudo usermod -a -G dialout YOUR_USER_NAME
+	sudo usermod -a -G dialout $USER
 
 PyBluez (Bluetooth communication to sensor)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -103,8 +107,8 @@ folder.
 .. code:: bash
 
 	sudo apt-get install libopencv-dev 
-	sudo pip3 install opencv-python==3.4.18.65
-	sudo pip3 install opencv-contrib-python==3.4.18.65
+	sudo pip3 install opencv-python
+	sudo pip3 install opencv-contrib-python
 
 Wifi
 ~~~~
