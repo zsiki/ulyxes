@@ -42,7 +42,7 @@ PySerial (Serial communication to sensor)
 
 .. note::
 	You can remove *sudo* before *pip3* if you want install packages
-	for the ctual user only. Using *sudo* all user can access them.
+	for the actual user only. Using *sudo* all user can access them.
 
 On Linux the serial ports are protected. The root user and those are in the
 dialout group are able to read/write serial ports. To add yourself to the
