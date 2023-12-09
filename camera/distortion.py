@@ -23,15 +23,15 @@ if __name__ == "__main__":
                         help='pixel distance for grid, default=200')
     parser.add_argument('-s', '--scale', type=float, default=5,
                         help='scale for distortion vectors, default=5')
-    parser.add_argument('-w', '--width', type=float, default=None,
+    parser.add_argument('-w', '--width', type=int, default=None,
                         help='image width, default=image width')
-    parser.add_argument('-e', '--height', type=float, default=None,
+    parser.add_argument('-e', '--height', type=int, default=None,
                         help='image height, default=image height')
     parser.add_argument('-o', '--output', type=str, default=None,
                         help='Save image to file ')
 
     parser.add_argument('names', metavar='file_names', type=str, nargs=1,
-                    help='yaml file with calibration data')
+                    help='yaml or json file with calibration data')
     args = parser.parse_args()
     if path.exists(args.names[0]):
         with open(args.names[0], encoding='ascii') as f:
