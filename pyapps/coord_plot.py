@@ -8,7 +8,7 @@ Plot coordinate changes from monitoring coordinate file
 
 Parameters are stored in config file using JSON format::
 
-    log_file: path to log file, file must exist!
+    log_file: path to log file
     log_level: 10/20/30/40/50 for DEBUG/INFO/WARNING/ERROR/FATAL
     log_format: format string for log (default: "%(asctime)s %(levelname)s:%(message)s"), optional
     point_list: list of points to plot
@@ -46,7 +46,7 @@ from georeader import GeoReader
 
 if __name__ == "__main__":
     config_pars = {
-        'log_file': {'required' : True, 'type': 'file'},
+        'log_file': {'required' : True, 'type': 'logfile'},
         'log_level': {'required' : True, 'type': 'int',
             'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
@@ -84,7 +84,6 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     # logging
-    #TODO if the log file does not exist, it causes an error message
     logging.basicConfig(format=cr.json['log_format'], filename=cr.json['log_file'], \
          filemode='w', level=cr.json['log_level'])
     # config warnings

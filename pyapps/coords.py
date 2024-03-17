@@ -8,7 +8,7 @@ Coordinate calculation from monitoring observation file
 
 Parameters are stored in config file using JSON format::
 
-    log_file: path to log file, file must exist!
+    log_file: path to log file
     log_level: 10/20/30/40/50 for DEBUG/INFO/WARNING/ERROR/FATAL
     log_format: format string for log (default: "%(asctime)s %(levelname)s:%(message)s"), optional
     station_type: 1100/1200/1800
@@ -63,7 +63,7 @@ from freestation import Freestation
 
 if __name__ == "__main__":
     config_pars = {
-        'log_file': {'required' : True, 'type': 'file'},
+        'log_file': {'required' : True, 'type': 'logfile'},
         'log_level': {'required' : True, 'type': 'int',
             'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},

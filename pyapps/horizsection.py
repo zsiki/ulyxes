@@ -196,7 +196,7 @@ def cmd_params():
     def_start = None
     def_top = None
     def_max = 359.9
-    def_tmax = None
+    def_tmax = 359.9
     def_tol = 0.01
     def_iter = 10
     def_hlist = None
@@ -206,7 +206,7 @@ def cmd_params():
     if len(sys.argv) == 2 and os.path.exists(sys.argv[1]):
         # process JSON config and drop other switches
         config_pars = {
-            'log_file': {'required' : False, 'type': 'file', 'default': def_logfile},
+            'log_file': {'required' : False, 'type': 'logfile', 'default': def_logfile},
             'log_level': {'required' : False, 'type': 'int',
                           'set': [logging.DEBUG, logging.INFO, logging.WARNING,
                                   logging.ERROR, logging.FATAL],
@@ -375,6 +375,11 @@ if __name__ == "__main__":
     ts.SetStation(params['east'], params['north'], params['elev'])
     levels = params['levels']
     if levels is not None and len(levels) > 1:
+        if params['hz_start'] is None:
+            a = ts.GetAngles()
+            params['hz_start'] = a['hz']
+        if params['hz_top'] is None:
+            params['hz_top'] = params['hz_start']
         dhz = params['hz_top'].GetAngle("DEG") - params['hz_start'].GetAngle("DEG")
         z0 = levels[0]
         z1 = levels[-1]

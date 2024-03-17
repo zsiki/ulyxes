@@ -69,6 +69,15 @@ class ConfReader(JSONReader):
                     not os.path.isfile(self.json[par]):
                     msg_lst.append(f"parameter type mismatch or file does not exist: {self.json[par]}")
                     return 'FATAL', msg_lst
+                if pardef['type'] == 'logfile' and \
+                    type(self.json[par]) is str and \
+                    not os.path.isfile(self.json[par]):
+                    # create log file
+                    try:
+                        os.close(os.open(self.json[par], os.O_WR))
+                    except:
+                        msg_lst.append(f"cannot create log file {self.json[par]}")
+                        return FATAL, msg_lst
                 # check set for valid values
                 if 'set' in pardef and \
                     self.json[par] not in pardef['set']:
@@ -83,7 +92,7 @@ if __name__ == '__main__':
     from sys import argv
 
     CONFIG_PARS = {
-        'log_file': {'required' : True, 'type': 'file'},
+        'log_file': {'required' : True, 'type': 'logfile'},
         'log_level': {'required' : True, 'type': 'int',
                       'set':[logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},

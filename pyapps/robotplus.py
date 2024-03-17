@@ -9,7 +9,7 @@ Different prism constants can be set with code 20/pc in input
 
 Parameters are stored in config file using JSON format::
 
-    log_file: path to log file, file must exist!
+    log_file: path to log file
     log_level: 10/20/30/40/50 for DEBUG/INFO/WARNING/ERROR/FATAL
     log_format: format string for log (default: "%(asctime)s %(levelname)s:%(message)s"), optional
     station_type: 1100/1200/1800
@@ -225,7 +225,7 @@ def avg_obs(obs, face_dir_limit=0.0029, face_dist_limit=0.01):
 
 if __name__ == "__main__":
     config_pars = {
-        'log_file': {'required' : True, 'type': 'file'},
+        'log_file': {'required' : True, 'type': 'logfile'},
         'log_level': {'required' : True, 'type': 'int',
                       'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.FATAL]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
