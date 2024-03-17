@@ -74,10 +74,10 @@ class ConfReader(JSONReader):
                     not os.path.isfile(self.json[par]):
                     # create log file
                     try:
-                        os.close(os.open(self.json[par], os.O_WR))
+                        open(self.json[par], "w").close()   # touch file
                     except:
                         msg_lst.append(f"cannot create log file {self.json[par]}")
-                        return FATAL, msg_lst
+                        return 'FATAL', msg_lst
                 # check set for valid values
                 if 'set' in pardef and \
                     self.json[par] not in pardef['set']:
