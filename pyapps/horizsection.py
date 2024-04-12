@@ -206,6 +206,7 @@ def cmd_params():
     def_logfile = 'stdout'
     def_logging = logging.ERROR
     def_format = "%(asctime)s %(levelname)s:%(message)s"
+    def_type = "1200"
     def_angle = 45.0
     def_east = 0.0
     def_north = 0.0
@@ -233,7 +234,7 @@ def cmd_params():
             'log_format': {'required': False, 'default': def_format},
             'angle_step' : {'required': False, 'type': "float", 'default': def_angle},
 
-            'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1100', '5500']},
+            'station_type': {'required' : False, 'type': 'str', 'set': ['1200', '1100', '5500'], 'default': def_type},
             'station_east': {'required' : False, 'type': 'float', 'default': def_east},
             'station_north': {'required' : False, 'type': 'float', 'default': def_north},
             'station_elev': {'required' : False, 'type': 'float', 'default': def_elev},
@@ -298,8 +299,8 @@ def cmd_params():
                 help='Log format, default: time, level, message')
         parser.add_argument('--step', type=float, default=def_angle,
                 help=f'Angle step in section [DEG], default: {def_angle}')
-        parser.add_argument('--type', type=str, required=True,
-                            help='Total station type')
+        parser.add_argument('--type', type=str, required=False, default=def_type,
+                help=f'Total station type, default: {def_type}')
         parser.add_argument('--east', type=float, default=def_east,
                 help=f'Station east, default: {def_east}')
         parser.add_argument('--north', type=float, default=def_north,
