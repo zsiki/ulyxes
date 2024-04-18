@@ -122,6 +122,7 @@ class Orientation(object):
                             if w is not None:
                                 ans = self.ts.SetOri(w)
                                 return ans
+                    return {'errCode': 998}    # power search failed
         if 'errorCode' not in ans:
             self.ts.Measure()
             obs = self.ts.GetMeasure()
