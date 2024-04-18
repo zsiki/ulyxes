@@ -13,7 +13,12 @@
 import os.path
 import logging
 import sqlite3
-import psycopg2
+
+try:
+    import psycopg2
+except:
+    pass
+
 from angle import Angle
 from writer import Writer
 
