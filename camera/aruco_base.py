@@ -118,11 +118,19 @@ class ArucoBase():
             if cr.json['dict'] in ARUCO_DICT:
                 wid = ARUCO_DICT[cr.json['dict']]
             else:
-                wid = 1
+                wid = -1
         if wid == 99:     # use special 3x3 dictionary
             self.aruco_dict = cv2.aruco.extendDictionary(32, 3)
         else:
-            self.aruco_dict = cv2.aruco.getPredefinedDictionary(wid)
+            if wid in ARUCO_DICT.values():
+                self.aruco_dict = cv2.aruco.getPredefinedDictionary(wid)
+            else:
+                print("Unkonw ArUco dictionary name or index")
+                print("Valid names/indices are:")
+                for key, value in ARUCO_DICT.items():
+                    print(f"{value:2d} {key}")
+                sys.exit()
+
         self.mtx = self.dist = None
         self.calibration = cr.json['calibration']
         self.pose = cr.json['pose']
@@ -164,11 +172,19 @@ class ArucoBase():
             if args.dict in ARUCO_DICT:
                 wid = ARUCO_DICT[args.dict]
             else:
-                wid = 1
+                wid = -1
         if wid == 99:     # use special 3x3 dictionary
             self.aruco_dict = cv2.aruco.extendDictionary(32, 3)
         else:
-            self.aruco_dict = cv2.aruco.getPredefinedDictionary(wid)
+            if wid in ARUCO_DICT.values():
+                self.aruco_dict = cv2.aruco.getPredefinedDictionary(wid)
+            else:
+                print("Unkonw ArUco dictionary name or index")
+                print("Valid names/indices are:")
+                for key, value in ARUCO_DICT.items():
+                    print(f"{value:2d} {key}")
+                sys.exit()
+
         self.mtx = self.dist = self.cal_w = self.cal_h = None
         self.calibration = args.calibration
         self.pose = args.pose if self.calibration else False
