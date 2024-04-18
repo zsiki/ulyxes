@@ -15,6 +15,9 @@ from cv2 import aruco
 import matplotlib.pyplot as plt
 from aruco_dict import ARUCO_DICT
 
+SQUARE_LENGTH = 0.025  # chessboard square side length (normally in meters)
+MARKER_LENGTH = 0.0125 # marker side length (same unit than squareLength)
+
 # handling incompatibility introduced in openCV 4.8
 if cv2.__version__ < '4.8':
     aruco.Dictionary = aruco.Dictionary_create
@@ -66,27 +69,37 @@ parser.add_argument('-s', '--save', action="store_true",
                     help='save camera images to file cal0.png, cal1.png if camera is used')
 parser.add_argument('-o', '--output', type=str,
                     default="calibration_matrix",
-                    help='output yaml camera calibration data file, default: calibration_matrix.yaml')
-parser.add_argument('-d', '--dictionary', type=str, default="DICT_4X4_50",
-                    help='ArUco dictionary name, default DICT_4X4_50')
+                    help='output yaml/json camera calibration data file, default: calibration_matrix.yaml')
+parser.add_argument('-d', '--dictionary', type=str, default="DICT_4X4_100",
+                    help='ArUco dictionary name or index, default DICT_4X4_100')
+parser.add_argument('-m', '--min', type=int, default=20,
+                    help='Minimal number of points on an image, default 20')
 parser.add_argument('--debug', action="store_true",
                     help='Display found ArUco codes')
 
 args = parser.parse_args()
 if sys.platform.startswith('win'):
     args.names = extend_names(args.names)
-if args.dictionary not in ARUCO_DICT:
-    print(f"Unkonw ArUco dictionary name: {args.dictionary}")
-    print("Valid names are:")
-    for key in ARUCO_DICT.keys():
-        print(key)
+wid = -1
+try:
+    wid = int(args.dictionary)
+except ValueError:
+    if args.dictionary in ARUCO_DICT:
+        wid = ARUCO_DICT[args.dictionary]
+if wid not in ARUCO_DICT.values():
+    print("Unkonw ArUco dictionary name or index")
+    print("Valid names/indices are:")
+    for key, value in ARUCO_DICT.items():
+        print(f"{value:2d} {key}")
     sys.exit()
-dictionary = aruco.getPredefinedDictionary(ARUCO_DICT[args.dictionary])
+dictionary = aruco.getPredefinedDictionary(wid)
 if cv2.__version__ < '4.8':
-    board = aruco.CharucoBoard_create(args.width, args.height, .025, .0125, dictionary)
+    board = aruco.CharucoBoard_create(args.width, args.height,
+            SQUARE_LENGTH, MARKER_LENGTH, dictionary)
     img = board.draw((args.multiplier * args.width, args.multiplier * args.height))
 else:
-    board = aruco.CharucoBoard((args.width, args.height), .025, .0125, dictionary)
+    board = aruco.CharucoBoard((args.width, args.height),
+            SQUARE_LENGTH, MARKER_LENGTH, dictionary)
     img = board.generateImage((args.multiplier * args.width, args.multiplier * args.height))
 
 if args.board:
@@ -96,7 +109,7 @@ if args.board:
     sys.exit()
 
 if not args.names and not args.camera:
-    print("neither camera nor input images given")
+    print("neither camera nor input images are given")
     parser.print_help()
     sys.exit(0)
 
@@ -163,27 +176,29 @@ else:
         if ids is not None and len(ids) > 0:
             if cv2.__version__ < '4.8':
                 ret, corners1, ids1 = aruco.interpolateCornersCharuco(corners,
-                                                                          ids,
-                                                                          gray,
-                                                                          board)
+                                                                      ids,
+                                                                      gray,
+                                                                      board)
             else:
                 ch_detector = aruco.CharucoDetector(board)
                 corners1, ids1, _, _ = ch_detector.detectBoard(gray)
                 ret = len(corners1)
-            if ret > 2:
+            if ret > args.min:
                 allCorners.append(corners1)
                 allIds.append(ids1)
                 decimator += 1
+            else:
+                print(f"{fn} skipped")
 
 #Calibration fails for lots of reasons. Release the video if we do
 try:
-    imsize = max(gray.shape), min(gray.shape)
+    imsize = gray.shape[::-1]   #min(gray.shape), max(gray.shape)
     ret, mtx, dist, rvecs, tvecs = aruco.calibrateCameraCharuco(allCorners,
-                                                                    allIds,
-                                                                    board,
-                                                                    imsize,
-                                                                    None,
-                                                                    None)
+                                                                allIds,
+                                                                board,
+                                                                imsize,
+                                                                None,
+                                                                None)
 except:
     if args.camera:
         cap.release()
