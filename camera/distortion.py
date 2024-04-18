@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-""" create a distortion image using calibration data and image size
+""" create a distortion chart using calibration data and image size
 """
 import sys
 from os import path
@@ -24,9 +24,9 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--scale', type=float, default=5,
                         help='scale for distortion vectors, default=5')
     parser.add_argument('-w', '--width', type=int, default=None,
-                        help='image width, default=image width')
+                        help='image width, default=same for calibration')
     parser.add_argument('-e', '--height', type=int, default=None,
-                        help='image height, default=image height')
+                        help='image height, default=same for calibration')
     parser.add_argument('-o', '--output', type=str, default=None,
                         help='Save image to file ')
 
@@ -46,17 +46,14 @@ if __name__ == "__main__":
         print(f'Calibration file not found: {args.names[0]}')
         sys.exit(1)
     # calculate undistorted position of points
-    if args.height is None or args.width is None or \
-            (cal_w, cal_h) == (args.height, args.width):
-        newmtx = mtx
+    if args.height is None or args.width is None: 
         args.width, args.height = cal_w, cal_h
-    else:
-        newmtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist,
-                         (cal_w, cal_h), ALFA, (args.width, args.height))
+    newmtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist,
+                     (args.width, args.height), ALFA)
     # grid point coordinates
     pp = np.array([ (x, y)
-                     for x in range(args.grid, args.width, args.grid)
-                     for y in range(args.grid, args.height, args.grid)],
+                     for x in range(0, args.width, args.grid)
+                     for y in range(0, args.height, args.grid)],
                    dtype=np.float64)
     points = np.zeros((1, pp.shape[0], pp.shape[1]))
     points[0] = pp
