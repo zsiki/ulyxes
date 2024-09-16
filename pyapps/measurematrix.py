@@ -8,10 +8,10 @@
 Sample application of Ulyxes PyAPI to measure within a rectangular area
    :param argv[1] (int): number of horizontal intervals (between measurements), default 1 (perimeter only)
    :param argv[2] (int): number of vertical intervals(between measurements), default 1 (perimeter only)
-   :param argv[3] (sensor): 1100/1800/1200/5500, default 1100
-   :param argv[4] (port): serial port, default COM5
+   :param argv[3] (sensor): 1100/1800/1200/5500/axis10, default 1100
+   :param argv[4] (port): serial port, default /dev/ttyUSB0
    :param argv[5]: output file, default stdout
-   
+
 usage: python measurematrix.py 9 3 1100 COM5
 """
 import re
@@ -35,13 +35,14 @@ from filewriter import FileWriter
 from leicatps1200 import LeicaTPS1200
 from leicatcra1100 import LeicaTCRA1100
 from trimble5500 import Trimble5500
+from axis10 import Axis10
 
 if __name__ == "__main__":
     if sys.version_info[0] > 2:  # Python 3 compatibility
         raw_input = input
 
     if len(sys.argv) == 1:
-        print("Usage: {0:s} [horizontal_step [vertical_step [instrument [port [output_file]]]]]".format(sys.argv[0]))
+        print("Usage: {0:s} [horizontal_steps [vertical_steps [instrument [port [output_file]]]]]".format(sys.argv[0]))
         exit(1)
     # set horizontal stepping interval dh_nr
     dh_nr = 1
@@ -69,6 +70,8 @@ if __name__ == "__main__":
         mu = LeicaTCRA1100()
     elif re.search('550[0-9]$', stationtype):
         mu = Trimble5500()
+    elif stationtype.lower() == "axis10":
+        mu = Axis10()
     else:
         print("unsupported instrument type")
         sys.exit(1)

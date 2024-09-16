@@ -47,6 +47,7 @@ from leicatcra1100 import LeicaTCRA1100
 from leicatca1800 import LeicaTCA1800
 from leicatps1200 import LeicaTPS1200
 from trimble5500 import Trimble5500
+from axis10 import Axis10
 
 def exit_on_ctrl_c(signal, frame):
     """ catch interrupt (Ctrl/C) and exit gracefully """
@@ -69,6 +70,8 @@ if __name__ == "__main__":
             mu = LeicaTPS1200()
         elif re.search('550[0-9]$', sys.argv[1]):
             mu = Trimble5500()
+        elif sys.argv[1]lower() == "axis10":
+            mu = Axis10()
         else:
             mu = LeicaTPS1200()
     else:

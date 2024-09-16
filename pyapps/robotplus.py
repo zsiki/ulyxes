@@ -84,6 +84,7 @@ from freestation import Freestation
 from leicatps1200 import LeicaTPS1200
 from leicatcra1100 import LeicaTCRA1100
 from leicatca1800 import LeicaTCA1800
+from axis10 import Axis10
 from localiface import LocalIface
 
 def get_mu(t):
@@ -98,6 +99,8 @@ def get_mu(t):
         return LeicaTCRA1100()
     if re.search('180[0-9]$', t):
         return LeicaTCA1800()
+    if t.lower() == "axis10":
+        return Axis10()
     if re.search('^local', t):
         return LeicaTPS1200()
     return False
@@ -229,7 +232,7 @@ if __name__ == "__main__":
         'log_level': {'required' : True, 'type': 'int',
                       'set': [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.FATAL]},
         'log_format': {'required': False, 'default': "%(asctime)s %(levelname)s:%(message)s"},
-        'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1800', '1100']},
+        'station_type': {'required' : True, 'type': 'str', 'set': ['1200', '1800', '1100', 'axis10']},
         'station_id': {'required' : True, 'type': 'str'},
         'station_height': {'required': False, 'default': 0, 'type': 'float'},
         'station_coo_limit': {'required': False, 'default': 0.01, 'type': 'float'},

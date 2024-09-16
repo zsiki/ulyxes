@@ -70,6 +70,7 @@ from csvwriter import CsvWriter
 from confreader import ConfReader
 from leicatps1200 import LeicaTPS1200
 from leicatcra1100 import LeicaTCRA1100
+from axis10 import Axis10
 from trimble5500 import Trimble5500
 from totalstation import TotalStation
 
@@ -88,18 +89,21 @@ class HorizontalSection():
         :param levels: more parameters at horizontal cross sections to measure
     """
 
-    def __init__(self, ts, wrt, hoc=0.0, elev=None, hz_start=None,
-                 stepinterval=Angle(45, "DEG"), maxa=Angle(PI2), maxiter=10, tol=0.02):
+    def __init__(self, ts, wrt, st_east=0.0, st_north=0.0, hoc=0.0, elev=None,
+                 hz_start=None, stepinterval=Angle(45, "DEG"), maxa=Angle(PI2),
+                 maxiter=10, tol=0.02):
         """ initialize """
         self.ts = ts
         self.wrt = wrt
+        self.st_east = st_east
+        self.st_north = st_north
+        self.hoc = hoc  # height of collimation
         self.elev = elev
         self.hz_start = hz_start
         self.stepinterval = stepinterval
         self.maxa = maxa
         self.maxiter = maxiter
         self.tol = tol
-        self.hoc = hoc  # height of collimation
 
     def invalid(self, ans):
         """ check observation results are complete
@@ -113,25 +117,38 @@ class HorizontalSection():
                 'hz' not in ans or 'v' not in ans or 'distance' not in ans or \
                 ans['distance'] < 0.1
 
+    def Coords(self, measure):
+        """ calculate target coordinates
+
+            :param measure: disctionary of observations
+            :returns: dictionary of coords
+        """
+        hd = measure['distance'] * math.sin(measure['v'].GetAngle())
+        east = self.st_east + hd * math.sin(measure['hz'].GetAngle())
+        north = self.st_north + hd * math.cos(measure['hz'].GetAngle())
+        elev = self.hoc +  measure['distance'] * math.cos(measure['v'].GetAngle())
+        return {'east': east, 'north': north, 'elev': elev}
+
     def run(self):
         """ do the observations in horizontal section """
         if self.hz_start is not None:
             # rotate to start position, keeping zenith angle
             a = self.ts.GetAngles()
             self.ts.Move(self.hz_start, a['v'])
-        ans = self.ts.Measure()    # initial measurement for startpoint
-        if 'errCode' in ans:
-            print('FATAL Cannot measure startpoint')
-            return 1
         startp0 = None
-        startp = self.ts.GetMeasure()
-        if self.invalid(startp):
-            print('FATAL Cannot measure startpoint')
-            return 1
 
-        # height of startpoint above the horizontal axis
         if self.elev is None:
-            height0 = ts.Coords()['elev']
+            ans = self.ts.Measure()    # initial measurement for startpoint
+            if 'errCode' in ans:
+                print('FATAL Cannot measure startpoint')
+                return 1
+            startp = self.ts.GetMeasure()
+            if self.invalid(startp):
+                print('FATAL Cannot measure startpoint')
+                return 1
+            # coords of startpoint
+            coords = self.Coords(startp)
+            height0 = coords['elev']
         else:
             height0 = self.elev
         w = True
@@ -145,16 +162,21 @@ class HorizontalSection():
             if self.ts.measureIface.state != self.ts.measureIface.IF_OK or \
                     'errCode' in ans:
                 # skip this and move to next point
+                logging.warning('Cannot measure point, skip')
                 self.ts.measureIface.state = self.ts.measureIface.IF_OK
                 self.ts.MoveRel(self.stepinterval, Angle(0))
+                act += self.stepinterval
                 continue
             nextp = self.ts.GetMeasure()  # get observation data
             if self.invalid(nextp):
                 # cannot measure, skip
+                logging.warning('Cannot measure point, skip')
                 self.ts.measureIface.state = self.ts.measureIface.IF_OK
                 self.ts.MoveRel(self.stepinterval, Angle(0))
+                act += self.stepinterval
                 continue
-            height = ts.Coords()['elev']
+            coords = self.Coords(nextp)
+            height = coords['elev']
             index = 0
             while abs(height-height0) > self.tol:  # looking for right elevation
                 w = True
@@ -180,12 +202,13 @@ class HorizontalSection():
                 if self.invalid(nextp):
                     w = False
                     break
-                height = ts.Coords()['elev']
+                coords = self.Coords(nextp)
+                height = coords['elev']
             if 'distance' in nextp and startp0 is None:
                 startp0 = nextp # store first valid point on section
             if 'distance' in nextp and w:
-                coord = self.ts.Coords()
-                res = dict(list(nextp.items()) + list(coord.items()))
+                #coord = self.Coords(nextp)
+                res = dict(list(nextp.items()) + list(coords.items()))
                 self.wrt.WriteData(res)
             self.ts.MoveRel(self.stepinterval, Angle(0))
             act += self.stepinterval
@@ -234,7 +257,7 @@ def cmd_params():
             'log_format': {'required': False, 'default': def_format},
             'angle_step' : {'required': False, 'type': "float", 'default': def_angle},
 
-            'station_type': {'required' : False, 'type': 'str', 'set': ['1200', '1100', '5500'], 'default': def_type},
+            'station_type': {'required' : False, 'type': 'str', 'set': ['1200', '1100', '5500', 'axis10'], 'default': def_type},
             'station_east': {'required' : False, 'type': 'float', 'default': def_east},
             'station_north': {'required' : False, 'type': 'float', 'default': def_north},
             'station_elev': {'required' : False, 'type': 'float', 'default': def_elev},
@@ -259,13 +282,17 @@ def cmd_params():
                 print(msg)
             sys.exit(-1)
 
-        logging.basicConfig(format=cr.json['log_format'],
-                            filename=cr.json['log_file'], filemode='a',
-                            level=cr.json['log_level'])
+        if cr.json['log_file'] == 'stdout':
+            logging.basicConfig(format=cr.json['log_format'],
+                                level=cr.json['log_level'])
+        else:
+            logging.basicConfig(format=cr.json['log_format'],
+                                filename=cr.json['log_file'], filemode='a',
+                                level=cr.json['log_level'])
         # deffered config warnings
         if state == "WARNING":
             for msg in msg_lst:
-                logging.error(msg)
+                logging.warning(msg)
         if cr.json['hz_start'] is not None:
             hz_start = Angle(float(cr.json['hz_start']), 'DEG')
         if cr.json['hz_top'] is not None:
@@ -322,15 +349,19 @@ def cmd_params():
         parser.add_argument('--tol', type=float, default=def_tol,
                 help=f'Height tolerance, default: {def_tol}')
         parser.add_argument('--iter', type=int, default=def_iter,
-                help='Max iteration to find section, default: {def_iter}')
+                help=f'Max iteration to find section, default: {def_iter}')
         parser.add_argument('--heights', type=str, default=def_hlist,
                 help='list of elevations for more sections between double quotes, default: single section at the telescope direction')
         parser.add_argument('--wrt', type=str, default=def_wrt,
                 help=f'Name of output file, default: {def_wrt}')
         args = parser.parse_args()
 
-        logging.basicConfig(format=args.format, filename=args.log, filemode='a',
-                            level=args.level)
+        if args.log == "stdout":
+            logging.basicConfig(format=args.format, filemode='a',
+                                level=args.level)
+        else:
+            logging.basicConfig(format=args.format, filename=args.log, filemode='a',
+                                level=args.level)
         hz_start = None
         if args.start is not None:
             hz_start = Angle(args.start, 'DEG')
@@ -385,6 +416,8 @@ if __name__ == "__main__":
     elif re.search('550[0-9]$', params['stationtype']):
         mu = Trimble5500()
         iface.eomRead = b'>'
+    elif params['stationtype'].lower() == "axis10":
+        mu = Axis10()
     else:
         print("unsupported instrument type")
         sys.exit(1)
@@ -397,7 +430,7 @@ if __name__ == "__main__":
     else:
         ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
     # set station coordinates
-    ts.SetStation(params['east'], params['north'], params['elev'])
+    ts.SetStation(params['east'], params['north'], params['elev'], params['ih'])
     hoc = params['elev'] + params['ih']
     levels = params['levels']
     if levels is not None and len(levels) > 1:
@@ -413,17 +446,20 @@ if __name__ == "__main__":
         for level in levels:
             hz = Angle(params['hz_start'].GetAngle("DEG") + (level - z0) / (z1 - z0) * dhz, "DEG")
             ma = Angle(params['max'].GetAngle("DEG") + (level - z0) / (z1 - z0) * dmax, "DEG")
-            h_sec = HorizontalSection(ts, wrt, hoc, level, hz,
+            h_sec = HorizontalSection(ts, wrt, params['east'], params['north'],
+                                      hoc, level, hz,
                                       params['stepinterval'], ma,
                                       params['iter'], params['tol'])
             h_sec.run()
     else:
         if levels is None or len(levels) == 0:
-            h_sec = HorizontalSection(ts, wrt, hoc, None, params['hz_start'],
+            h_sec = HorizontalSection(ts, wrt, params['east'], params['north'],
+                                      hoc, None, params['hz_start'],
                                       params['stepinterval'], params['max'],
                                       params['iter'], params['tol'])
         else:
-            h_sec = HorizontalSection(ts, wrt, levels[0], params['hz_start'],
+            h_sec = HorizontalSection(ts, wrt, params['east'], params['north'],
+                                      hoc, levels[0], params['hz_start'],
                                       params['stepinterval'], params['max'],
                                       params['iter'], params['tol'])
         h_sec.run()

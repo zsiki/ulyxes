@@ -57,7 +57,6 @@ class LeicaTCRA1100(LeicaMeasureUnit):
         'COORDS': 2082,
         'GETANGLES': 2003,
         'CHANGEFACE': 9028,
-        'CLEARDIST': 2082,
         'SETSEARCHAREA': 9043,
         'POWERSEARCH': 9052,
         'SEARCHNEXT': 9051,
