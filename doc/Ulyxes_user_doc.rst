@@ -657,7 +657,13 @@ FreeStation
 ===========
 
 An application to calculate free station from observations and coordinates.
-A least squares estimation is used based on GNU gama. The horizontal circle have to be oriented.
+A least squares estimation is used based on GNU gama.
+It is used by robotplus application but can be used as a standalone application using CLI.
+
+Usage: freestation.py input_file gama-local_path
+
+- input_file: this parameter defines a pair of files observations and coordinates, two types are accepted dmp + cvs or geo + coo. See GeoEasy documentation for dmp, geo, coo formats. Csv file must have four columns: point_id, easting, northing, elevation.
+- gama-local_path: path to gama-local program
 
 Blindorientation
 ================
