@@ -29,12 +29,12 @@ class CsvWriter(FileWriter):
 
     def __init__(self, name='None', angle='GON', dist='.3f',
                  dt='%Y-%m-%d %H:%M:%S', filt=None,
-                 fname=None, mode='a', sep=';', header=None):
+                 fname=None, mode='a', sep=';', header=None, pid=0):
         """ Constructor
         """
         if filt is None or len(filt) == 0:
             raise NameError('Filter is empty -- CSV writer')
-        super().__init__(name, angle, dist, dt, filt, fname, mode)
+        super().__init__(name, angle, dist, dt, filt, fname, mode, pid)
         self.sep = sep
         if header and self.mode == 'w':
             try:
