@@ -82,6 +82,6 @@ class Reader():
                 self.state = self.RD_READ
             if w is None:
                 break
-            if self.Filt(w):
+            if len(w) > 0 and self.Filt(w):
                 res.append(w)   # keep record passed filter
         return res
