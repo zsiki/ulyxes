@@ -24,12 +24,13 @@ class CsvReader(FileReader):
             :param fields: list of field names for columns in CSV if not in the first line
     """
 
-    def __init__(self, name=None, fname=None, separator=';', filt=None, fields=None):
+    def __init__(self, name=None, fname=None, separator=';', filt=None, fields=None, numeric=None):
         """ Constructor
         """
         super().__init__(name, fname, filt)
         self.separator = separator
         self.filt = filt
+        self.numeric = numeric
         if fields is None:
             # get field names from header line
             self.fields = []
@@ -59,7 +60,10 @@ class CsvReader(FileReader):
         res = {}
         for i, item in enumerate(w):
             if self.filt is None or self.fields[i] in self.filt:
-                res[self.fields[i]] = item
+                if self.fields[i] in self.numeric:
+                    res[self.fields[i]] = float(item)
+                else:
+                    res[self.fields[i]] = item
         return res
 
 if __name__ == '__main__':
