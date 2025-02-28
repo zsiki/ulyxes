@@ -28,14 +28,14 @@ class Writer():
     WR_WRITE = -2
 
     def __init__(self, name=None, angle='GON', dist='.3f', \
-                 dt='%Y-%m-%d %H:%M:%S', filt=None):
+                 dt='%Y-%m-%d %H:%M:%S', filt=None, pid = 0):
         """ Constructor
         """
         self.name = name
         self.angleFormat = angle
         self.distFormat = dist
         self.filt = filt
-        self.id = 0  # serial number for records written
+        self.id = pid  # serial number for records written
         self.dtFormat = dt
         self.state = self.WR_OK
 
