@@ -29,10 +29,10 @@ class FileWriter(Writer):
 
     def __init__(self, name='None', angle='GON', dist='.3f',
                  dt='%Y-%m-%d %H:%M:%S', filt=None, fname=None,
-                 mode='a'):
+                 mode='a', pid=0):
         """ Constructor
         """
-        super().__init__(name, angle, dist, dt, filt)
+        super().__init__(name, angle, dist, dt, filt, pid)
         self.fname = fname
         self.mode = mode
         self.fp = None
