@@ -100,29 +100,29 @@ class Orientation(object):
         # instrument targeting on prism?
         ans = self.ts.MoveRel(Angle(0), Angle(0), 1)
         if 'errorCode' in ans:
+            # try powersearch clockwise
+            if 'POWERSEARCH' in self.ts.measureUnit.GetCapabilities():
+                # set telescope into the middle in vertical direction
+                angles = self.ts.GetAngles()
+                self.ts.Move(angles['hz'], Angle((min_v + max_v) / 2.0))
+                # repeat power search to skip false prisms
+                for i in range(len(self.observations)):
+                    ans = self.ts.PowerSearch(1)
+                    if 'errorCode' not in ans:
+                        self.ts.Measure()
+                        obs = self.ts.GetMeasure()
+                        w = self.FindPoint(obs)
+                        if w is not None:
+                            ans = self.ts.SetOri(w)
+                            return ans
+                    self.ts.MoveRel(Angle(3, 'DEG'), Angle(0))  # move from previous prism
+                return {'errCode': 998}    # power search failed stop
             # try to rotate to the second, third, ... point
             i = 2
             while 'errorCode' in ans and i < len(self.observations):
                 ans = self.ts.Move(self.observations[i]['hz'], \
                     self.observations[i]['v'], 1)
                 i += 1
-            if 'errorCode' in ans:
-                # try powersearch clockwise
-                if 'POWERSEARCH' in self.ts.measureUnit.GetCapabilities():
-                    # set telescope into the middle in vertical direction
-                    angles = self.ts.GetAngles()
-                    self.ts.Move(angles['hz'], Angle((min_v + max_v) / 2.0))
-                    # repeat power search to skip false prisms
-                    for i in range(10):
-                        ans = self.ts.PowerSearch(1)
-                        if 'errorCode' not in ans:
-                            self.ts.Measure()
-                            obs = self.ts.GetMeasure()
-                            w = self.FindPoint(obs)
-                            if w is not None:
-                                ans = self.ts.SetOri(w)
-                                return ans
-                    return {'errCode': 998}    # power search failed
         if 'errorCode' not in ans:
             self.ts.Measure()
             obs = self.ts.GetMeasure()
@@ -162,29 +162,40 @@ if __name__ == '__main__':
     from serialiface import SerialIface
     from georeader import GeoReader
     from csvreader import CsvReader
+    from filegen import ObsGen
 
     logging.getLogger().setLevel(logging.WARNING)
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
         ifname = sys.argv[1]
+        station = sys.argv[2]
     else:
         #ifname = 'test.geo'
-        print("Usage: blindorientation.py input_file totalstation port")
+        print("Usage: blindorientation.py coo_file station_name instrument_height totalstation port")
         sys.exit(-1)
-    if ifname[-4:] != '.dmp' and ifname[-4:] != '.geo':
-        ifname += '.geo'
-    if ifname[-4:] == '.geo':
+    _, ext = os.path.splitext(ifname)
+    if ext == '.coo':
         g = GeoReader(fname=ifname)
+    elif ext in ('.csv', 'txt'):
+        g = CsvReader(fname=ifname, fields=['id', 'east', 'north', 'elev'],
+                      numeric=['east', 'north', 'elev']) # csv coordinates
     else:
-        g = CsvReader(fname=ifname)
+        print("Invalid input file")
+        exit()
     if g.state == g.RD_OPEN:
         sys.exit(2)
-    data = g.Load()
-    stationtype = '1100'
-    if len(sys.argv) > 2:
-        stationtype = sys.argv[2]
-    port = '/dev/ttyUSB0'
+    coords = g.Load()
+    ih = 0.0
     if len(sys.argv) > 3:
-        port = sys.argv[3]
+        ih = float(sys.argv[3])
+    # generate observations
+    og = ObsGen(coords, station, ih)
+    obs = og.run()
+    stationtype = '1100'
+    if len(sys.argv) > 4:
+        stationtype = sys.argv[4]
+    port = '/dev/ttyUSB0'
+    if len(sys.argv) > 5:
+        port = sys.argv[5]
     if re.search('120[0-9]$', stationtype):
         from leicatps1200 import LeicaTPS1200
         mu = LeicaTPS1200()
@@ -200,5 +211,5 @@ if __name__ == '__main__':
 
     iface = SerialIface("rs-232", port)
     ts = TotalStation(stationtype, mu, iface)
-    o = Orientation(data, ts)
+    o = Orientation(obs, ts)
     print(o.Search())
