@@ -73,7 +73,10 @@ class ArucoBase():
                 print('Error loading ArUco parameter file: ', args.aruco_params)
                 sys.exit()
             for par in js:
-                setattr(self.params, par, js[par])
+                try:
+                    setattr(self.params, par, js[par])
+                except AttributeError:
+                    print(f"Invalid {par} parameter in aruco config file")
 
     def json_params(self, fn):
         """ get params from json config
@@ -101,6 +104,7 @@ class ArucoBase():
             'coo_wr': {'required': True, 'type': 'str'},
             'debug': {'required': False, 'type': 'int', 'default': 0},
             'delay': {'required': False, 'type': 'float', 'default': 0.01},
+            'aruco_params': {required: False, 'type': 'file', 'default': None},
             '__comment__': {'required': False, 'type': 'str'}
         }
         try:
