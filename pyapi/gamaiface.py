@@ -49,6 +49,13 @@ class GamaIface():
         self.stdev_dist1 = stdev_dist1
         self.points = []
         self.observations = []
+        if not (gama_path.startswith('/') or gama_path.startswith('.')):
+            # search path for file
+            path = os.getenv('PATH')
+            for p in path.split(':'):
+                if os.path.isfile(os.path.join(p, gama_path):
+                    gama_path = os.path.join(p, gama_path)
+                    break
         if not os.path.isfile(gama_path):
             logging.error("GNU gama not found")
             gama_path = None
