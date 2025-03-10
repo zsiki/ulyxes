@@ -7,6 +7,10 @@
 Get orientation for totalstation. Command line parameters::
 
     argv[1]: input coordinate file
+    argv[2]: station name
+    argv[3]: instrument height, default 0.00
+    argv[4]: total station type, default 1200
+    argv[5]: port, default /dev/ttyUSB0
 
 """
 import sys
@@ -108,7 +112,7 @@ class Orientation(object):
                 # repeat power search to skip false prisms
                 for i in range(len(self.observations)):
                     ans = self.ts.PowerSearch(1)
-                    if 'errorCode' not in ans:
+                    if not 'errorCode' in ans:
                         self.ts.Measure()
                         obs = self.ts.GetMeasure()
                         w = self.FindPoint(obs)
@@ -190,7 +194,7 @@ if __name__ == '__main__':
     # generate observations
     og = ObsGen(coords, station, ih)
     obs = og.run()
-    stationtype = '1100'
+    stationtype = '1200'
     if len(sys.argv) > 4:
         stationtype = sys.argv[4]
     port = '/dev/ttyUSB0'
