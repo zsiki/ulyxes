@@ -53,7 +53,7 @@ class GamaIface():
             # search path for file
             path = os.getenv('PATH')
             for p in path.split(':'):
-                if os.path.isfile(os.path.join(p, gama_path):
+                if os.path.isfile(os.path.join(p, gama_path)):
                     gama_path = os.path.join(p, gama_path)
                     break
         if not os.path.isfile(gama_path):
