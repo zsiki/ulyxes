@@ -47,6 +47,7 @@ Command line parameters::
     --iter ITER           Max iteration to find section
     --heights HEIGHTS     list of elevations for more sections
     --wrt WRT             Output file
+    --pid ID              Start of point IDs, default 0
 """
 import sys
 import os.path
@@ -66,6 +67,8 @@ if len([p for p in sys.path if 'pyapi' in p]) == 0:
 
 from angle import Angle, PI2
 from serialiface import SerialIface
+from georeader import GeoReader
+from csvreader import CsvReader
 from csvwriter import CsvWriter
 from confreader import ConfReader
 from leicatps1200 import LeicaTPS1200
@@ -73,6 +76,11 @@ from leicatcra1100 import LeicaTCRA1100
 from axis10 import Axis10
 from trimble5500 import Trimble5500
 from totalstation import TotalStation
+from blindorientation import Orientation
+from filegen import ObsGen
+from robot import Robot
+from freestation import Freestation
+from anystation import AnyStation
 
 class HorizontalSection():
     """ Measure a horizontal section at a given elevation
@@ -86,10 +94,10 @@ class HorizontalSection():
         :param hz_max: end horizontal direction (radians)
         :param maxiter: max iteration to find elevation
         :param tol: tolerance for horizontal angle
-        :param levels: more parameters at horizontal cross sections to measure
+        :param pid: start point id
     """
 
-    def __init__(self, ts, wrt, st_east=0.0, st_north=0.0, hoc=0.0, elev=None,
+    def __init__(self, ts, wrt, st_east=None, st_north=None, hoc=None, elev=None,
                  hz_start=None, stepinterval=Angle(45, "DEG"), maxa=Angle(PI2),
                  maxiter=10, tol=0.02):
         """ initialize """
@@ -231,9 +239,9 @@ def cmd_params():
     def_format = "%(asctime)s %(levelname)s:%(message)s"
     def_type = "1200"
     def_angle = 45.0
-    def_east = 0.0
-    def_north = 0.0
-    def_elev = 0.0
+    def_east = None
+    def_north = None
+    def_elev = None
     def_ih = 0.0    # instrument height
     def_port = '/dev/ttyUSB0'
     def_start = None
@@ -244,6 +252,8 @@ def cmd_params():
     def_iter = 10
     def_hlist = None
     def_wrt = 'stdout'
+    def_coords = None   # coordinates of reference points for blind orientation
+    def_pid = 0
     hz_start = def_start
     levels = None
     if len(sys.argv) == 2 and os.path.exists(sys.argv[1]):
@@ -270,7 +280,9 @@ def cmd_params():
             'tolerance': {'required': False, 'type': "float", 'default': def_tol},
             'iteration': {'required': False, 'type': 'int', 'default': def_iter},
             'height_list': {'required': False, 'type': 'list', 'default': def_hlist},
-            'wrt': {'required' : False, 'default': 'stdout'},
+            'wrt': {'required': False, 'default': 'stdout'},
+            'coords': {'requiered': False, 'default': def_coords},
+            'pid': {'required' : False, 'type': 'int', 'default': def_pid},
             '__comment__': {'required': False, 'type': 'str'}
         }
         cr = ConfReader('HorizontalSection', sys.argv[1], config_pars)
@@ -314,7 +326,9 @@ def cmd_params():
         tol = cr.json['tolerance']
         maxiter = cr.json['iteration']
         wrt_file = cr.json['wrt']
+        coords = cr.json['coords']
         levels = cr.json['height_list']
+        pid = cr.json['pid']
     else:
         # process command line switches
         parser = argparse.ArgumentParser()
@@ -354,6 +368,10 @@ def cmd_params():
                 help='list of elevations for more sections between double quotes, default: single section at the telescope direction')
         parser.add_argument('--wrt', type=str, default=def_wrt,
                 help=f'Name of output file, default: {def_wrt}')
+        parser.add_argument('--coords', type=str, default=def_coords,
+                help=f'Name of coordinate file, default: {def_coords}')
+        parser.add_argument('--pid', type=int, default=def_pid,
+                help=f'Starting point ID, default: {def_pid}')
         args = parser.parse_args()
 
         if args.log == "stdout":
@@ -382,27 +400,26 @@ def cmd_params():
         tol = args.tol
         maxiter = args.iter
         wrt_file = args.wrt
+        coords = args.coords
         try:
             if args.heights is not None:
                 levels = [float(l) for l in args.heights.split()]
         except Exception:
             print("parameter error --heights")
             sys.exit(1)
+        pid = args.pid
 
     return {'hz_start': hz_start, 'hz_top': hz_top,
             'stepinterval': stepinterval,
             'stationtype': stationtype,
             'east': east, 'north': north, 'elev': elev, 'ih': ih, 'port': port,
             'max': maxa, 'maxt': maxt,
-            'tol': tol, 'iter': maxiter, 'wrt': wrt_file, 'levels': levels}
+            'tol': tol, 'iter': maxiter, 'wrt': wrt_file, 'coords': coords,
+            'levels': levels, 'pid': pid}
 
 if __name__ == "__main__":
     # process parameters
     params = cmd_params()
-    # writer for instrument
-    wrt = CsvWriter(angle='DMS', dist='.3f',
-                    filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
-                    fname=params['wrt'], mode='a', sep=';')
     # iface for instrument
     iface = SerialIface("rs-232", params['port'])
     if iface.state != iface.IF_OK:
@@ -423,15 +440,71 @@ if __name__ == "__main__":
         sys.exit(1)
     # create instrument
     ts = TotalStation(params['stationtype'], mu, iface)
+    coords = None
+    ts.SetEDMMode('STANDARD')
+    # orientation
+    if params['coords']:    # use coords for blind orientation
+        if re.search('\.txt$', params['coords']) or re.search('\.csv$', params['coords']):
+            rd = CsvReader(fname=params['coords'], \
+                           filt=['id', 'east', 'north', 'elev'])
+        else:
+            rd = GeoReader(fname=params['coords'], \
+                           filt=['id', 'east', 'north', 'elev'])
+        coords = rd.Load()  # load coordinates of reference points
+        if 'east' in params and 'north' in params and 'elev' in params and \
+                params['east'] is not None and params['north'] is not None and params['elev'] is not None:
+            # know station coords
+            st_coord = [{'id': 'STATION', 'east': params['east'],
+                        'north': params['north'], 'elev': params['elev']}]
+            og = ObsGen(st_coord + coords, 'STATION', params['ih'])
+            observations = og.run()
+            # change to face left
+            if ts.GetFace()['face'] == ts.FACE_RIGHT:
+                a = ts.GetAngles()
+                a['hz'] = (a['hz'] + Angle(180, 'DEG')).Normalize()
+                a['v'] = (Angle(360, 'DEG') - a['v']).Normalize() 
+                ans = ts.Move(a['hz'], a['v'], 0) # no ATR
+                if 'errCode' in ans:
+                    logging.fatal("Rotation to face left failed %d", ans['errCode'])
+                    sys.exit(-1)
+            o = Orientation(observations, ts)   # TODO orientation limit????
+            ans = o.Search()
+            if 'errCode' in ans:
+                logging.fatal("Orientation failed %d", ans['errCode'])
+                sys.exit(-1)
+            # freestation
+            r = Robot(observations, st_coord, ts)
+            obs_out, coo_out = r.run()
+            fs = Freestation(obs_out, st_coord + coords,
+                     '/usr/local/bin/gama-local', 3)    # TODO gama path, stddev
+            st_coord = fs.Adjustment()
+        else:
+            # no station coordinates
+            a_s = AnyStation(coords, ts, 'gama-local', params['ih'])
+            st_coord = a_s.run()
+        ts.SetStation(st_coord[0]['east'], st_coord[0]['north'],
+                      st_coord[0]['elev'], params['ih'])
+        # set exact orientation on instrument
+        ts.Move(Angle(0.0), Angle(math.pi/2), 0)
+        ts.SetOri(Angle(st_coord[0]['ori'], 'GON'))
+        hoc = st_coord[0]['elev'] + params['ih']
+        params['east'] = st_coord[0]['east']
+        params['north'] = st_coord[0]['north']
+        params['elev'] = st_coord[0]['elev']
+    else:
+        ts.SetStation(params['east'], params['north'], params['elev'], params['ih'])
+        hoc = params['elev'] + params['ih']
+    # writer for coordinates and observations
+    wrt = CsvWriter(angle='DMS', dist='.3f',
+                    filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
+                    fname=params['wrt'], mode='a', sep=';', pid=params['pid'])
+    # set station coordinates
     if isinstance(mu, Trimble5500):
         print("Please change to reflectorless EDM mode (MNU 722 from keyboard)")
         print("and turn on red laser (MNU 741 from keyboard) and press enter!")
         input()
     else:
         ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
-    # set station coordinates
-    ts.SetStation(params['east'], params['north'], params['elev'], params['ih'])
-    hoc = params['elev'] + params['ih']
     levels = params['levels']
     if levels is not None and len(levels) > 1:
         if params['hz_start'] is None:
