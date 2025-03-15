@@ -160,10 +160,6 @@ class HorizontalSection():
         else:
             height0 = self.elev
         w = True
-        try:
-            self.ts.SetRedLaser(1)       # turn on red laser if possible
-        except Exception:
-            pass
         act = Angle(0)  # actual angle from startpoint
         while act.GetAngle() < self.maxa.GetAngle(): # go around the whole section
             ans = self.ts.Measure() # measure distance
@@ -256,6 +252,7 @@ def cmd_params():
     def_pid = 0
     hz_start = def_start
     levels = None
+    def_gama = 'gama-local'
     if len(sys.argv) == 2 and os.path.exists(sys.argv[1]):
         # process JSON config and drop other switches
         config_pars = {
@@ -281,8 +278,12 @@ def cmd_params():
             'iteration': {'required': False, 'type': 'int', 'default': def_iter},
             'height_list': {'required': False, 'type': 'list', 'default': def_hlist},
             'wrt': {'required': False, 'default': 'stdout'},
-            'coords': {'requiered': False, 'default': def_coords},
+            'coords': {'required': False, 'default': def_coords},
             'pid': {'required' : False, 'type': 'int', 'default': def_pid},
+            'center_east': {'required' : False, 'type': 'float', 'default': None},
+            'center_north': {'required' : False, 'type': 'float', 'default': None},
+            'radius': {'required' : False, 'type': 'float', 'default': None},
+            'gama': {'required' : False, 'type': 'str', 'default': None},
             '__comment__': {'required': False, 'type': 'str'}
         }
         cr = ConfReader('HorizontalSection', sys.argv[1], config_pars)
@@ -329,14 +330,18 @@ def cmd_params():
         coords = cr.json['coords']
         levels = cr.json['height_list']
         pid = cr.json['pid']
+        center_east = cr.json['center_east']
+        center_north = cr.json['center_north']
+        radius = cr.json['radius']
+        gama = cr.json['gama']
     else:
         # process command line switches
         parser = argparse.ArgumentParser()
         parser.add_argument('-l', '--log', type=str, default=def_logfile,
                 help=f'Logfile name, default: {def_logfile}, "stdout" for screen output')
-        parser.add_argument('--level', type=int, default=def_logging,
+        parser.add_argument('--log_level', type=int, default=def_logging,
                 help=f'Log level, default: {def_logging}')
-        parser.add_argument('--format', type=str, default=def_format,
+        parser.add_argument('--log_format', type=str, default=def_format,
                 help='Log format, default: time, level, message')
         parser.add_argument('--step', type=float, default=def_angle,
                 help=f'Angle step in section [DEG], default: {def_angle}')
@@ -372,6 +377,14 @@ def cmd_params():
                 help=f'Name of coordinate file, default: {def_coords}')
         parser.add_argument('--pid', type=int, default=def_pid,
                 help=f'Starting point ID, default: {def_pid}')
+        parser.add_argument('--center_east', type=float, default=None,
+                            help='Center point east of section, default: None')
+        parser.add_argument('--center_north', type=float, default=None,
+                            help='Center point north of section, default: None')
+        parser.add_argument('--radius', type=float, default=None,
+                            help='Radius of section, default: None')
+        parser.add_argument('--gama', type=str, default=def_gama,
+                            help=f'Path to gama-local, default: {def_gama}')
         args = parser.parse_args()
 
         if args.log == "stdout":
@@ -408,6 +421,10 @@ def cmd_params():
             print("parameter error --heights")
             sys.exit(1)
         pid = args.pid
+        center_east = args.center_east
+        center_north = args.center_north
+        radius = args.radius
+        gama = args.gama
 
     return {'hz_start': hz_start, 'hz_top': hz_top,
             'stepinterval': stepinterval,
@@ -415,7 +432,9 @@ def cmd_params():
             'east': east, 'north': north, 'elev': elev, 'ih': ih, 'port': port,
             'max': maxa, 'maxt': maxt,
             'tol': tol, 'iter': maxiter, 'wrt': wrt_file, 'coords': coords,
-            'levels': levels, 'pid': pid}
+            'levels': levels, 'pid': pid,
+            'center_east': center_east, 'center_north': center_north,
+            'radius': radius, 'gama': gama}
 
 if __name__ == "__main__":
     # process parameters
@@ -442,9 +461,10 @@ if __name__ == "__main__":
     ts = TotalStation(params['stationtype'], mu, iface)
     coords = None
     ts.SetEDMMode('STANDARD')
+    orig_dir = ts.GetAngles()   # save original direction
     # orientation
     if params['coords']:    # use coords for blind orientation
-        if re.search('\.txt$', params['coords']) or re.search('\.csv$', params['coords']):
+        if re.search(r'\.txt$', params['coords']) or re.search(r'\.csv$', params['coords']):
             rd = CsvReader(fname=params['coords'], \
                            filt=['id', 'east', 'north', 'elev'])
         else:
@@ -492,19 +512,37 @@ if __name__ == "__main__":
         params['north'] = st_coord[0]['north']
         params['elev'] = st_coord[0]['elev']
     else:
-        ts.SetStation(params['east'], params['north'], params['elev'], params['ih'])
+        # set station coordinates
+        ts.SetStation(params['east'], params['north'],
+                      params['elev'], params['ih'])
         hoc = params['elev'] + params['ih']
     # writer for coordinates and observations
     wrt = CsvWriter(angle='DMS', dist='.3f',
                     filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
                     fname=params['wrt'], mode='a', sep=';', pid=params['pid'])
-    # set station coordinates
     if isinstance(mu, Trimble5500):
         print("Please change to reflectorless EDM mode (MNU 722 from keyboard)")
         print("and turn on red laser (MNU 741 from keyboard) and press enter!")
         input()
     else:
         ts.SetEDMMode('RLSTANDARD') # reflectorless distance measurement
+        try:
+            ts.SetRedLaser(1)       # turn on red laser if possible
+        except Exception:
+            pass
+    if params['center_east'] is not None and params['center_north'] is not None and params['radius'] is not None:
+        center_dir = math.atan2(params['center_north']-params['north'],
+                                params['center_east']-params['east'])
+        center_dist = math.hypot(params['center_north']-params['north'],
+                                 params['center_east']-params['east'])
+        alpha = math.atan(params['radius'] / center_dist)
+        params['hz_start'] = Angle(center_dir-alpha)
+        params['max'] = Angle(alpha * 2)
+        params['hz_top'] = None
+        params['tmax'] = None
+    else:
+    # turn instrument back to original direction
+        ts.Move(orig_dir["hz"].GetAngle(), orig_dir["v"].GetAngle(), 0)
     levels = params['levels']
     if levels is not None and len(levels) > 1:
         if params['hz_start'] is None:
