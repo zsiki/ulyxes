@@ -162,7 +162,7 @@ class AnyStation(object):
         obs = [{'station': 'STATION', 'ih': self.ih}] + obs
         # add station to coords
         coords = [{'id': 'STATION'}] + self.coords
-        fs = Freestation(obs, coords, self.gama, 3)   ## TODO gama path, stddev
+        fs = Freestation(obs, coords, self.gama, 3)
         return fs.Adjustment()
 
 if __name__ == "__main__":

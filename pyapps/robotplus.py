@@ -79,6 +79,7 @@ from filegen import ObsGen
 from serialiface import SerialIface
 from totalstation import TotalStation
 from blindorientation import Orientation
+from anystation import AnyStation
 from robot import Robot
 from freestation import Freestation
 from leicatps1200 import LeicaTPS1200
@@ -394,70 +395,6 @@ if __name__ == "__main__":
                     'pressure': pres, 'humidity': humi, 'wettemp': wet}
             if wrtm.WriteData(data) == -1:
                 logging.error('Met data write failed')
-    # get station coordinates
-    print("Loading station coords...")
-    if re.search('^http[s]?://', cr.json['coo_rd']):
-        rd_st = HttpReader(url=cr.json['coo_rd'], ptys=['STA'], \
-                           filt=['id', 'east', 'north', 'elev'])
-    elif re.search('\.txt$', cr.json['coo_rd']) or re.search('\.csv$', cr.json['coo_rd']):
-        rd_st = CsvReader(fname=cr.json['coo_rd'], \
-                          filt=['id', 'east', 'north', 'elev'])
-    else:
-        rd_st = GeoReader(fname=cr.json['coo_rd'], \
-                          filt=['id', 'east', 'north', 'elev'])
-    w = rd_st.Load()
-    st_coord = [x for x in w if x['id'] == cr.json['station_id']]
-    if not st_coord:
-        logging.fatal("Station not found: %s", cr.json['station_id'])
-        sys.exit(-1)
-    # coordinate writer
-    fmt = '.%df' % cr.json['decimals']
-    if re.search('^http[s]?://', cr.json['coo_wr']):
-        wrt = HttpWriter(url=cr.json['coo_wr'], mode='POST', dist=fmt)
-    elif re.search('^sqlite:', cr.json['coo_wr']):
-        wrt = SqLiteWriter(db=cr.json['coo_wr'][7:], dist=fmt,
-                           table='monitoring_coo',
-                           filt=['id', 'east', 'north', 'elev', 'datetime'])
-        if wrt.conn is None:
-            sys.exit(-1)
-    elif re.search('\.csv$', cr.json['coo_wr']):
-        wrt = CsvWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt,
-                        filt=['id', 'east', 'north', 'elev'])
-    else:
-        wrt = GeoWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt)
-    # observation writer
-    if re.search('^http[s]?://', cr.json['obs_wr']):
-        wrt1 = HttpWriter(url=cr.json['obs_wr'], mode='POST', dist=fmt)
-    elif re.search('^sqlite:', cr.json['obs_wr']):
-        wrt1 = SqLiteWriter(db=cr.json['obs_wr'][7:], dist=fmt,
-                            table='monitoring_obs',
-                            filt=['id', 'hz', 'v', 'distance',
-                                  'crossincline', 'lengthincline', 'datetime'])
-        if wrt1.conn is None:
-            exit(-1)
-    elif re.search('\.csv$', cr.json['obs_wr']):
-        wrt1 = CsvWriter(fname=cr.json['obs_wr'], mode='a', dist=fmt,
-                         filt=['station', 'id', 'hz', 'v', 'distance'])
-    else:
-        wrt1 = GeoWriter(fname=cr.json['obs_wr'], mode='a', dist=fmt)
-    # information writer
-    if 'inf_wr' in cr.json:
-        if re.search('^http[s]?://', cr.json['inf_wr']):
-            wrt2 = HttpWriter(url=cr.json['inf_wr'], mode='POST', dist=fmt)
-        elif re.search('^sqlite:', cr.json['inf_wr']):
-            wrt2 = SqLiteWriter(db=cr.json['inf_wr'][7:], dist=fmt,
-                                table='monitoring_inf',
-                                filt=['datetime', 'nref', 'nrefobs', 'nmon',
-                                      'nmonobs', 'maxincl', 'std_east',
-                                      'std_north', 'std_elev', 'std_ori'])
-            if wrt2.conn is None:
-                exit(-1)
-        elif re.search('\.csv$', cr.json['inf_wr']):
-            wrt2 = CsvWriter(fname=cr.json['inf_wr'], mode='a', dist=fmt,
-                             filt=['datetime', 'nref', 'nrefobs', 'std_east',
-                                   'std_north', 'std_elev', 'std_ori'])
-        else:
-            wrt2 = GeoWriter(fname=cr.json['inf_wr'], mode='a', dist=fmt)
     if 'fix_list' in cr.json and cr.json['fix_list'] is not None:
         # get fix coordinates from database
         print("Loading fix coords...")
@@ -474,6 +411,82 @@ if __name__ == "__main__":
     else:
         fix_coords = []
 
+    # get station coordinates
+    st_coord = None
+    if 'station_id' in cr.json:
+        print("Loading station coords...")
+        if re.search('^http[s]?://', cr.json['coo_rd']):
+            rd_st = HttpReader(url=cr.json['coo_rd'], ptys=['STA'], \
+                               filt=['id', 'east', 'north', 'elev'])
+        elif re.search(r'\.txt$', cr.json['coo_rd']) or re.search(r'\.csv$', cr.json['coo_rd']):
+            rd_st = CsvReader(fname=cr.json['coo_rd'], \
+                              filt=['id', 'east', 'north', 'elev'])
+        else:
+            rd_st = GeoReader(fname=cr.json['coo_rd'], \
+                              filt=['id', 'east', 'north', 'elev'])
+        w = rd_st.Load()
+        st_coord = [x for x in w if x['id'] == cr.json['station_id']]
+    if not st_coord and len(fix_coords) > 2 and 'gama_path' in cr.json and \
+        'POWERSEARCH' in ts.measureUnit.GetCapabilities():
+        print("Searching for fix points...")
+        a_s = AnyStation(fix_coords, ts, cr.json['gama_path'],
+                         cr.json['station_height'],
+                         cr.json['station_coo_limit'])
+        st_coord = a_s.run()
+        if st_coord is None or len(st_coord) == 0:
+            logging.fatal("AnyStation failed")
+            sys.exit(-1)
+    else:
+        logging.fatal("Station coordinates not found: %s", cr.json['station_id'])
+        sys.exit(-1)
+    # coordinate writer
+    fmt = '.%df' % cr.json['decimals']
+    if re.search('^http[s]?://', cr.json['coo_wr']):
+        wrt = HttpWriter(url=cr.json['coo_wr'], mode='POST', dist=fmt)
+    elif re.search('^sqlite:', cr.json['coo_wr']):
+        wrt = SqLiteWriter(db=cr.json['coo_wr'][7:], dist=fmt,
+                           table='monitoring_coo',
+                           filt=['id', 'east', 'north', 'elev', 'datetime'])
+        if wrt.conn is None:
+            sys.exit(-1)
+    elif re.search(r'\.csv$', cr.json['coo_wr']):
+        wrt = CsvWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt,
+                        filt=['id', 'east', 'north', 'elev'])
+    else:
+        wrt = GeoWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt)
+    # observation writer
+    if re.search('^http[s]?://', cr.json['obs_wr']):
+        wrt1 = HttpWriter(url=cr.json['obs_wr'], mode='POST', dist=fmt)
+    elif re.search('^sqlite:', cr.json['obs_wr']):
+        wrt1 = SqLiteWriter(db=cr.json['obs_wr'][7:], dist=fmt,
+                            table='monitoring_obs',
+                            filt=['id', 'hz', 'v', 'distance',
+                                  'crossincline', 'lengthincline', 'datetime'])
+        if wrt1.conn is None:
+            sys.exit(-1)
+    elif re.search(r'\.csv$', cr.json['obs_wr']):
+        wrt1 = CsvWriter(fname=cr.json['obs_wr'], mode='a', dist=fmt,
+                         filt=['station', 'id', 'hz', 'v', 'distance'])
+    else:
+        wrt1 = GeoWriter(fname=cr.json['obs_wr'], mode='a', dist=fmt)
+    # information writer
+    if 'inf_wr' in cr.json:
+        if re.search('^http[s]?://', cr.json['inf_wr']):
+            wrt2 = HttpWriter(url=cr.json['inf_wr'], mode='POST', dist=fmt)
+        elif re.search('^sqlite:', cr.json['inf_wr']):
+            wrt2 = SqLiteWriter(db=cr.json['inf_wr'][7:], dist=fmt,
+                                table='monitoring_inf',
+                                filt=['datetime', 'nref', 'nrefobs', 'nmon',
+                                      'nmonobs', 'maxincl', 'std_east',
+                                      'std_north', 'std_elev', 'std_ori'])
+            if wrt2.conn is None:
+                sys.exit(-1)
+        elif re.search(r'\.csv$', cr.json['inf_wr']):
+            wrt2 = CsvWriter(fname=cr.json['inf_wr'], mode='a', dist=fmt,
+                             filt=['datetime', 'nref', 'nrefobs', 'std_east',
+                                   'std_north', 'std_elev', 'std_ori'])
+        else:
+            wrt2 = GeoWriter(fname=cr.json['inf_wr'], mode='a', dist=fmt)
     if 'mon_list' in cr.json and cr.json['mon_list'] is not None:
         # get monitoring coordinates from database
         print("Loading mon coords...")
