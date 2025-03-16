@@ -82,90 +82,6 @@ The system contains two different API independent from each other: the
 **TclAPI** and the **PyAPI**. The TclAPI is the old and its development is 
 finished (depricated). Tha PyAPI is the new and actively developed.
 
-TclAPI (depricated)
-===================
-
-The TclAPI consist of a couple of Tcl (Tool Command Language) files/procs which
-give a higher level interface to drive RTSs and GPSs from computer. The TclAPI 
-is released under GNU GPL V2.0. This API is obsolate and no new functionality
-will be added. It has been already tested with the following type of
-instruments:
-
-    * Leica TCA1800 
-    * Leica TPS120x
-    * Leica TPS110x 
-    * Leica DNA03 
-    * Trimble 550x 
-    * Garmin GPS18 
-    * Leica GPS 500 
-
-Specification
-^^^^^^^^^^^^^
-
-*Supported OS (Operating System):*
-
-    * Linux (probably any distro, tested on Fedora and Ubuntu) 
-    * Windows XP/Vista/7 (32 and 64 bit) (tested on XP/7) 
-    * any other OS with Tcl 8.3 or newer installed (not tested)
-
-|
-
-*Requirements:*
-
-    * Tcl (Tool Command Language) 8.3 or newer must be installed 
-    * at least one serial port or USB to serial converter (tested with Prolific)
-    * serial cabel to connect the instrument to the computer 
-
-How to install Tcl/Tk
-^^^^^^^^^^^^^^^^^^^^^
-
-*Linux (Ubuntu/Debian):*
-
-    1. Open a terminal
-    2. Type: *sudo apt-get install tk8.5 tcl8.5* 
-
-.. note::  The apt-get command is a powerful command-line tool, performing such functions as installation of new software packages, upgrade of existing, so on. For more info, visit: https://help.ubuntu.com/lts/serverguide/apt-get.html
-
-*Windows:*
-
-These steps can be also found at http://trac.osgeo.org/osgeo4w/
-
-    1. Download the 32bit (http://www.activestate.com/activetcl/downloads) or 
-       the 64bit installer
-    2. Run the installer
-
-..Note:
-    * OSGeo4W installer also install Tcl/Tk, you can use it also
-
-How to install TclAPI
-^^^^^^^^^^^^^^^^^^^^^
-
-The TclAPI is a part of Ulyxes system. In order to install the API, the whole Ulyxes project folder has to be installed.
-
-*If you have git client installed on your machine:*
-
-    1. Open a terminal
-    2. Go to or make the desired “MyFolder” you want to install Ulyxes/TclAPI
-    3. Clone the Ulyxes Git directory, so type: git clone https://github.com/zsiki/ulyxes.git
-    4. The TclAPI can be found at: “MyFolder/Ulyxes/TclAPI”
-
-
-*If you have no git client on your machine:*
-
-    #. Open your browser
-    #. Navigate to `Ulyxes Github page <https://github.com/zsiki/ulyxes>`_ 
-    #. Press the **Download ZIP** button (right side, down)
-    #. Uncompress the downloaded file to a suitable directory
-
-.. figure:: img/uly_git.png
-    :align: right
-    :width: 195px
-    :height: 140px
-    :scale: 330
-    :alt: Overview Ulyxes
-
-    Download Ulyxes ZIP folder
-
 PyAPI
 =====
 
@@ -188,6 +104,22 @@ more info, visit https://www.python.org/)
 PyAPI is an Application Programming Interface (API) provides several classes to
 handle different sensors e.g. Totalstations, NMEA GNSS receivers, MEMS sensors,
 web-cameras. The API still only has a beta version.
+
+It has been already tested with the following type of instruments:
+
+    * Leica TS 15i
+    * Leica TCA1800 
+    * Leica TPS120x
+    * Leica TPS110x 
+    * STEC Axis 10
+    * Trimble 550x
+    * Leica DNA03
+    * TopCon HiperPro II
+    * U-blox F9P
+    * Garmin GPS18 
+    * Leica GPS 500 
+    * USB WebCam
+    * RasPi camera
 
 Specification
 ^^^^^^^^^^^^^
@@ -545,39 +477,67 @@ horizontal sections.
 
 .. code:: text
 
-    usage: horizsection.py [-h] [-l LOG] [--level LEVEL] [--format FORMAT]
-                           [--step STEP] [--type TYPE] [--east EAST]
-                           [--north NORTH] [--elev ELEV] [-p PORT]
-                           [--start START] [--top TOP] [--max MAX] [--tmax TMAX]
-                           [--tol TOL] [--iter ITER] [--heights HEIGHTS]
-                           [--wrt WRT]
+    usage: horizsection.py [-h] [-l LOG] [--log_level LOG_LEVEL]
+                       [--log_format LOG_FORMAT] [--step STEP] [--type TYPE]
+                       [--east EAST] [--north NORTH] [--elev ELEV] [--ih IH]
+                       [-p PORT] [--start START] [--top TOP] [--max MAX]
+                       [--tmax TMAX] [--tol TOL] [--iter ITER]
+                       [--heights HEIGHTS] [--wrt WRT] [--coords COORDS]
+                       [--pid PID] [--center_east CENTER_EAST]
+                       [--center_north CENTER_NORTH] [--radius RADIUS]
+                       [--gama GAMA]
 
-    optional arguments:
+    options:
       -h, --help            show this help message and exit
-      -l LOG, --log LOG     Logfile name "stdout" for screen output
-      --level LEVEL         Log level
-      --format FORMAT       Log format
-      --step STEP           Angle step in section
-      --type TYPE           Total station type
-      --east EAST           Station east
-      --north NORTH         Station north
-      --elev ELEV           Station elevation
-      -p PORT, --port PORT  Communication port
-      --start START         Horizontal start direction
-      --top TOP             Horizontal start direction at top
-      --max MAX             Max angle
-      --tmax TMAX           Max angle at top
-      --tol TOL             Height tolerance
-      --iter ITER           Max iteration to find section
-      --heights HEIGHTS     list of elevations for more sections
-      --wrt WRT             Output file
+      -l LOG, --log LOG     Logfile name, default: stdout, "stdout" for screen
+                            output
+      --log_level LOG_LEVEL
+                            Log level, default: 40
+      --log_format LOG_FORMAT
+                            Log format, default: time, level, message
+      --step STEP           Angle step in section [DEG], default: 45.0
+      --type TYPE           Total station type, default: 1200
+      --east EAST           Station east, default: None
+      --north NORTH         Station north, default: None
+      --elev ELEV           Station elevation, default: None
+      --ih IH               Instrument height, default: 0.0
+      -p PORT, --port PORT  Communication port, default: /dev/ttyUSB0
+      --start START         Horizontal start direction, default: actual telescope
+                        direction
+      --top TOP             Horizontal start direction at top, default: same as
+                            start
+      --max MAX             Max angle, default: whole circle
+      --tmax TMAX           Max angle at top, default: same as max
+      --tol TOL             Height tolerance, default: 0.01
+      --iter ITER           Max iteration to find section, default: 10
+      --heights HEIGHTS     list of elevations for more sections between double
+                            quotes, default: single section at the telescope
+                            direction
+      --wrt WRT             Name of output file, default: stdout
+      --coords COORDS       Name of coordinate file, default: None
+      --pid PID             Starting point ID, default: 0
+      --center_east CENTER_EAST
+                            Center point east of section, default: None
+      --center_north CENTER_NORTH
+                            Center point north of section, default: None
+      --radius RADIUS       Radius of section, default: None
+      --gama GAMA           Path to gama-local, default: gama-local
 
 Parameters can be passed in a JSON file.
 
-After heights parameter more value can be given. The range of the sections is given
-by angles. START defines the horizontal direction of first section, MAX is the angle
-range of section to the rigth from the START. TOP and TMAX are the same for the last
-section. Horozsection will interpolate between these values for other sections.
+There are three possible application situations
+
+# No fixed points are given (*--coords*), it is supposed the station is orineted
+# Station coordinates and fixed points (marked by prisms)  are given, orientation is calculated
+# No station coordinates but fixed points (marked by prism) are given, station coordinates and orientation are calculated
+
+After heights parameter more values can be given.
+
+The range of the sections can be given by angles or a target. The two methos are mutual exclusive.
+*--start* defines the horizontal direction of first (bottom) section, *--max* is the angle
+range of section to the rigth from the START. *--top* and *--tmax* are the same for the last
+(top) section. Horozsection will interpolate between these values for other sections.
+The other solution to set the *--center_east* and *--center_north* and *--radius*. Center point is the center of the sections, the radius defines the range to left and right.
 
 Section
 *******
@@ -593,9 +553,10 @@ This block consist of several apps to solve simple tasks for monitoring.
 - *filegen* creates an input file for monitoring from coordinates automaticly
 - *coomaker* creates a GeoEasy format input file for monitoring using manual targeting
 - *blindorientation* searches for a prism from a known station and calculates orientation angle
-- *freestation* calculates station coordinates and orientation using GNU gama
+- *freestation* calculates station coordinates and orientation using GNU gama, approximate station coordinates must be given
+- *anystation* calculates station coordinates and orientation using GNU gama, no approximate coordinates are necessary, the total station must have power search function
 - *robot* makes automatic observation using a file from FileMaker or FileGen (obsolate use robotplus instead)
-- *robotplus* complex monitoring application using FileGen, Blindorientation, FreeStation and Robot
+- *robotplus* complex monitoring application using FileGen, Blindorientation, FreeStation, AnyStation and Robot
 
 FileMaker
 =========
@@ -665,6 +626,13 @@ Usage: freestation.py input_file gama-local_path
 - input_file: this parameter defines a pair of files observations and coordinates, two types are accepted dmp + cvs or geo + coo. See GeoEasy documentation for dmp, geo, coo formats. Csv file must have four columns: point_id, easting, northing, elevation.
 - gama-local_path: path to gama-local program
 
+AnyStation
+==========
+
+Solves the free station task if there are no approximate station coordinates are given.
+The total station searches for prisms using power search and matches them with the given
+coordinate list.
+
 Blindorientation
 ================
 
@@ -674,7 +642,7 @@ If a target found it checks the distance and the zenith angle to find the
 target in the coordinate list and set the orientation angle on the 
 instrument.
 
-If no target found in the actial view it rotates the instrument to the first 
+If no target found in the actual view it rotates the instrument to the first 
 target supposing oriented instrument and set the orientation angle.
 
 Finally it starts search using Power Search if it is available on the total 
@@ -1072,7 +1040,7 @@ Using camera calibration data make an undistorted copy of images.
 Charuco calibration
 *******************
 
-Find camara calibration parameters from 15-20 images from different
+Find camara calibration parameters from 15-20 images taken from different
 direction of a charuco board.
 
 .. code::
@@ -1099,3 +1067,77 @@ direction of a charuco board.
                             output yaml camera calibration data file, default:
                             calibration_matrix.yaml
 
+TclAPI (depricated)
+===================
+
+The TclAPI consist of a couple of Tcl (Tool Command Language) files/procs which
+give a higher level interface to drive RTSs and GPSs from computer. The TclAPI 
+is released under GNU GPL V2.0. This API is obsolate and no new functionality
+will be added.
+
+Specification
+^^^^^^^^^^^^^
+
+*Supported OS (Operating System):*
+
+    * Linux (probably any distro, tested on Fedora and Ubuntu) 
+    * Windows XP/Vista/7 (32 and 64 bit) (tested on XP/7) 
+    * any other OS with Tcl 8.3 or newer installed (not tested)
+
+|
+
+*Requirements:*
+
+    * Tcl (Tool Command Language) 8.3 or newer must be installed 
+    * at least one serial port or USB to serial converter (tested with Prolific)
+    * serial cabel to connect the instrument to the computer 
+
+How to install Tcl/Tk
+^^^^^^^^^^^^^^^^^^^^^
+
+*Linux (Ubuntu/Debian):*
+
+    1. Open a terminal
+    2. Type: *sudo apt-get install tk8.5 tcl8.5* 
+
+.. note::  The apt-get command is a powerful command-line tool, performing such functions as installation of new software packages, upgrade of existing, so on. For more info, visit: https://help.ubuntu.com/lts/serverguide/apt-get.html
+
+*Windows:*
+
+These steps can be also found at http://trac.osgeo.org/osgeo4w/
+
+    1. Download the 32bit (http://www.activestate.com/activetcl/downloads) or 
+       the 64bit installer
+    2. Run the installer
+
+..Note:
+    * OSGeo4W installer also install Tcl/Tk, you can use it also
+
+How to install TclAPI
+^^^^^^^^^^^^^^^^^^^^^
+
+The TclAPI is a part of Ulyxes system. In order to install the API, the whole Ulyxes project folder has to be installed.
+
+*If you have git client installed on your machine:*
+
+    1. Open a terminal
+    2. Go to or make the desired “MyFolder” you want to install Ulyxes/TclAPI
+    3. Clone the Ulyxes Git directory, so type: git clone https://github.com/zsiki/ulyxes.git
+    4. The TclAPI can be found at: “MyFolder/Ulyxes/TclAPI”
+
+
+*If you have no git client on your machine:*
+
+    #. Open your browser
+    #. Navigate to `Ulyxes Github page <https://github.com/zsiki/ulyxes>`_ 
+    #. Press the **Download ZIP** button (right side, down)
+    #. Uncompress the downloaded file to a suitable directory
+
+.. figure:: img/uly_git.png
+    :align: right
+    :width: 195px
+    :height: 140px
+    :scale: 330
+    :alt: Overview Ulyxes
+
+    Download Ulyxes ZIP folder
