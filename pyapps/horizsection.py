@@ -496,12 +496,15 @@ if __name__ == "__main__":
             r = Robot(observations, st_coord, ts)
             obs_out, coo_out = r.run()
             fs = Freestation(obs_out, st_coord + coords,
-                     '/usr/local/bin/gama-local', 3)    # TODO gama path, stddev
+                     params['gama'], 3, blunders=False)    # TODO stdev
             st_coord = fs.Adjustment()
         else:
             # no station coordinates
-            a_s = AnyStation(coords, ts, 'gama-local', params['ih'])
+            a_s = AnyStation(coords, ts, params['gama'], params['ih'])
             st_coord = a_s.run()
+            if not st_coord:
+                print("Cannot calculate station coords")
+                sys.exit()
         ts.SetStation(st_coord[0]['east'], st_coord[0]['north'],
                       st_coord[0]['elev'], params['ih'])
         # set exact orientation on instrument
@@ -536,7 +539,7 @@ if __name__ == "__main__":
         center_dist = math.hypot(params['center_north']-params['north'],
                                  params['center_east']-params['east'])
         alpha = math.atan(params['radius'] / center_dist)
-        params['hz_start'] = Angle(center_dir-alpha)
+        params['hz_start'] = Angle(center_dir-alpha).Positive()
         params['max'] = Angle(alpha * 2)
         params['hz_top'] = None
         params['tmax'] = None
