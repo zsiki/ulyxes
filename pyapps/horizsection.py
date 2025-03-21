@@ -534,12 +534,12 @@ if __name__ == "__main__":
         except Exception:
             pass
     if params['center_east'] is not None and params['center_north'] is not None and params['radius'] is not None:
-        center_dir = math.atan2(params['center_north']-params['north'],
-                                params['center_east']-params['east'])
-        center_dist = math.hypot(params['center_north']-params['north'],
-                                 params['center_east']-params['east'])
+        center_dir = math.atan2(params['center_east']-params['east'],
+                                params['center_north']-params['north'])
+        center_dist = math.hypot(params['center_east']-params['east'],
+                                 params['center_north']-params['north']) 
         alpha = math.atan(params['radius'] / center_dist)
-        params['hz_start'] = Angle(center_dir-alpha).Positive()
+        params['hz_start'] = Angle(center_dir-alpha).Normalize()
         params['max'] = Angle(alpha * 2)
         params['hz_top'] = None
         params['tmax'] = None
