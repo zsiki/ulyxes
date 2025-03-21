@@ -4,11 +4,12 @@
 
 .. moduleauthor:: Zoltan Siki
 
-Get coordinates of station using known prism nearby
+Get coordinates of station using known prisms nearby
 
     argv[1]: input coordinate file
     argv[2]: instrument height, default 0.00
 
+    OBSERVATIONS MADE IN FACE LEFT ONLY
 """
 
 from math import pi, sin, cos, hypot
@@ -110,6 +111,9 @@ class AnyStation(object):
 
     def highest_freq(self, lst):
         """ find highest frequency in list
+
+            :param lst: list to find higest frequency item
+            :returns: tuple higest frequency item and number occurency
         """
         freq = {}
         for item in lst:
@@ -123,7 +127,7 @@ class AnyStation(object):
             if num > max_num:
                 max_num = num
                 max_id = item
-        return max_id
+        return max_id, max_num
 
     def run(self):
         """ power search for prism clockwise and calculate
@@ -153,7 +157,13 @@ class AnyStation(object):
                     ids[j].append(self.coords[ind[0]]['id'])
                     ids[j].append(self.coords[ind[1]]['id'])
         # get point id by highest frequency in ids lists
-        target_ids = [self.highest_freq(i) for i in ids]
+        target_ids = []
+        for i in ids:
+            fr_id, fr_num = self.highest_freq(i)
+            if fr_num > 1:
+                target_ids.append(fr_id)
+            else:
+                target_ids.append(None)
         for i, o in enumerate(obs):
             if target_ids is not None:
                 o['id'] = target_ids[i]
