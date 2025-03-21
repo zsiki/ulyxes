@@ -426,19 +426,20 @@ if __name__ == "__main__":
                               filt=['id', 'east', 'north', 'elev'])
         w = rd_st.Load()
         st_coord = [x for x in w if x['id'] == cr.json['station_id']]
-    if not st_coord and len(fix_coords) > 2 and 'gama_path' in cr.json and \
-        'POWERSEARCH' in ts.measureUnit.GetCapabilities():
-        print("Searching for fix points...")
-        a_s = AnyStation(fix_coords, ts, cr.json['gama_path'],
-                         cr.json['station_height'],
-                         cr.json['station_coo_limit'])
-        st_coord = a_s.run()
-        if st_coord is None or len(st_coord) == 0:
-            logging.fatal("AnyStation failed")
+    if not st_coord:
+        if len(fix_coords) > 2 and 'gama_path' in cr.json and \
+            'POWERSEARCH' in ts.measureUnit.GetCapabilities():
+            print("Searching for fix points...")
+            a_s = AnyStation(fix_coords, ts, cr.json['gama_path'],
+                             cr.json['station_height'],
+                             cr.json['station_coo_limit'])
+            st_coord = a_s.run()
+            if st_coord is None or len(st_coord) == 0:
+                logging.fatal("AnyStation failed")
+                sys.exit(-1)
+        else:
+            logging.fatal("Station coordinates not found: %s", cr.json['station_id'])
             sys.exit(-1)
-    else:
-        logging.fatal("Station coordinates not found: %s", cr.json['station_id'])
-        sys.exit(-1)
     # coordinate writer
     fmt = '.%df' % cr.json['decimals']
     if re.search('^http[s]?://', cr.json['coo_wr']):
