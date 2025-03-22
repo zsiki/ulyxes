@@ -110,24 +110,21 @@ class AnyStation(object):
         return res
 
     def highest_freq(self, lst):
-        """ find highest frequency in list
+        """ find highest frequency item in list
 
             :param lst: list to find higest frequency item
             :returns: tuple higest frequency item and number occurency
         """
         freq = {}
         for item in lst:
-            if item in freq:
-                freq[item] += 1
-            else:
-                freq[item] = 1
-        max_num = 0
-        max_id = None
-        for item, num in freq.items():
-            if num > max_num:
-                max_num = num
-                max_id = item
-        return max_id, max_num
+            freq[item] = freq.get(item, 0) + 1
+        w = sorted(zip(freq.keys(), freq.values()), reverse=True,
+                   key=lambda x: x[1])
+        # if more then one item have the same highest frequency
+        # return false value
+        if len(w) > 1 and w[0][1] == w[1][1]:
+            return None, 0
+        return w[0]
 
     def run(self):
         """ power search for prism clockwise and calculate
@@ -138,7 +135,8 @@ class AnyStation(object):
         obs = self.get_obs()    # measure to prisms
         # -------------------- FOR TESTING -----------------
         #stn = [{'id': '103', 'east': 119.192, 'north': 130.038, 'elev': 120.000}]
-        #og = ObsGen(stn + self.coords, '103', self.ih)
+        #w = self.coords[::2]    # keep every second points
+        #og = ObsGen(stn + w, '103', self.ih)
         #obs = og.run()[1:]
         # --------------------- END FOR TESTING ------------
         rel_coords = self.get_coords(obs)   # calculate relative coordinates to station
