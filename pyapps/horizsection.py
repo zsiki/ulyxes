@@ -541,11 +541,11 @@ if __name__ == "__main__":
         alpha = math.atan(params['radius'] / center_dist)
         params['hz_start'] = Angle(center_dir-alpha).Normalize()
         params['max'] = Angle(alpha * 2)
-        params['hz_top'] = None
-        params['tmax'] = None
+        params['hz_top'] = params['hz_start']
+        params['maxt'] = params['max']
     else:
     # turn instrument back to original direction
-        ts.Move(orig_dir["hz"].GetAngle(), orig_dir["v"].GetAngle(), 0)
+        ts.Move(orig_dir["hz"], orig_dir["v"], 0)
     levels = params['levels']
     if levels is not None and len(levels) > 1:
         if params['hz_start'] is None:
