@@ -393,7 +393,7 @@ if __name__ == "__main__":
                                        'wettemp', 'datetime'], mode='a')
             data = {'id': cr.json['station_id'], 'temp': temp,
                     'pressure': pres, 'humidity': humi, 'wettemp': wet}
-            if wrtm.WriteData(data) == -1:
+            if wrtm.WriteData(data) != 0:
                 logging.error('Met data write failed')
     if 'fix_list' in cr.json and cr.json['fix_list'] is not None:
         # get fix coordinates from database
@@ -554,7 +554,7 @@ if __name__ == "__main__":
             for o in obs_out:
                 o['datetime'] = act_date
                 if 'distance' in o:
-                    if wrt1.WriteData(o) == -1:
+                    if wrt1.WriteData(o) != 0:
                         logging.error('Observation data write failed %s',
                                       o['id'])
                     if 'crossincline' in o and 'lengthincline' in o:
@@ -590,7 +590,7 @@ if __name__ == "__main__":
             logging.info("station stddevs[mm/cc]: %.1f %.1f %.1f %.1f",
                          st_coord[0]['std_east'], st_coord[0]['std_north'],
                          st_coord[0]['std_elev'], st_coord[0]['std_ori'])
-            if wrt.WriteData(st_coord[0]) == -1:
+            if wrt.WriteData(st_coord[0]) != 0:
                 logging.error('Station coords write failed')
             if 'inf_wr' in cr.json:
                 maxincl = max([max(abs(o['crossincline'].GetAngle('GON')),
@@ -602,7 +602,7 @@ if __name__ == "__main__":
                        'std_north': st_coord[0]['std_north'],
                        'std_elev': st_coord[0]['std_elev'],
                        'std_ori': st_coord[0]['std_ori']}
-                if wrt2.WriteData(inf) == -1:
+                if wrt2.WriteData(inf) != 0:
                     logging.error('Station inf write failed')
             if 'ori' in st_coord[0]:
                 # rotate to Hz 0
@@ -655,7 +655,7 @@ if __name__ == "__main__":
         for o in obs_out:
             o['datetime'] = act_date
             if 'distance' in o:
-                if wrt1.WriteData(o) == -1:
+                if wrt1.WriteData(o) != 0:
                     logging.error('Observation data write failed')
         # calculate coordinate average
         if cr.json['avg_faces'] == 1 and \
@@ -664,7 +664,7 @@ if __name__ == "__main__":
         for c in coo_out:
             # add datetime to coords (same as obs)
             c['datetime'] = act_date
-            if wrt.WriteData(c) < 1:
+            if wrt.WriteData(c) != 0:
                 logging.error('Coord data write failed')
         if 'inf_wr' in cr.json:
             maxi = [max(abs(o['crossincline'].GetAngle('GON')),
@@ -676,7 +676,7 @@ if __name__ == "__main__":
                 maxincl = -99
             inf = {'datetime': act_date, 'nmon': len(mon_coords),
                    'nmonobs': len(obs_out)-1, 'maxincl': maxincl}
-            if wrt2.WriteData(inf) == -1:
+            if wrt2.WriteData(inf) != 0:
                 logging.error('Station inf write failed')
     # move telescope to safe position
     ans = ts.Move(Angle(0), Angle(180, "DEG")) # no ATR
