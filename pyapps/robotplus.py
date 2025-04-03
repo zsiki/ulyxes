@@ -443,7 +443,8 @@ if __name__ == "__main__":
     # coordinate writer
     fmt = '.%df' % cr.json['decimals']
     if re.search('^http[s]?://', cr.json['coo_wr']):
-        wrt = HttpWriter(url=cr.json['coo_wr'], mode='POST', dist=fmt)
+        wrt = HttpWriter(url=cr.json['coo_wr'], mode='POST', dist=fmt,
+                         filt=['id', 'east', 'north', 'elev', 'datetime'])
     elif re.search('^sqlite:', cr.json['coo_wr']):
         wrt = SqLiteWriter(db=cr.json['coo_wr'][7:], dist=fmt,
                            table='monitoring_coo',
@@ -452,7 +453,7 @@ if __name__ == "__main__":
             sys.exit(-1)
     elif re.search(r'\.csv$', cr.json['coo_wr']):
         wrt = CsvWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt,
-                        filt=['id', 'east', 'north', 'elev'])
+                        filt=['id', 'east', 'north', 'elev', 'datetime'])
     else:
         wrt = GeoWriter(fname=cr.json['coo_wr'], mode='a', dist=fmt)
     # observation writer
