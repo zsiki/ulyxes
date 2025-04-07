@@ -97,9 +97,9 @@ GNU GaMa is built from sources
 	make
 	sudo make install
 
-.. note:: Please note that the required autoconf version by GNU GaMa is
+.. note:: Please note that the required autoconf version by GNU GaMa may be
    newer then the installed version. To check installed autoconf version
-   use *autoconf -V* command.
+   use ``autoconf -V`` command.
 
 OpenCV
 ~~~~~~
