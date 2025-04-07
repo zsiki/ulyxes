@@ -84,7 +84,7 @@ Matplotlib (to display camera/image ddata)
 GNU GaMa
 ~~~~~~~~
 
-Optional used only by robotplus.py and freestation.py
+Optional used only by robotplus.py, anystation.py and freestation.py.
 GNU GaMa is built from sources
 
 .. code:: bash
@@ -96,6 +96,10 @@ GNU GaMa is built from sources
 	./configure
 	make
 	sudo make install
+
+.. note:: Please note that the required autoconf version by GNU GaMa is
+   newer then the installed version. To check installed autoconf version
+   use *autoconf -V* command.
 
 OpenCV
 ~~~~~~
