@@ -8,6 +8,7 @@
 from math import (sqrt, atan2, hypot)
 from os import path
 import sys
+import re
 import logging
 import json
 import matplotlib.pyplot as plt
@@ -27,7 +28,7 @@ if len([p for p in sys.path if 'pyapi' in p]) == 0:
         sys.exit(1)
 
 # handle incompatibility introduced in openCV 4.8
-if cv2.__version__ < '4.8':
+if float(re.sub(r'^([0-9]+\.[0-9]).*', '\\1', cv2.__version__)) < 4.8:
     cv2.aruco.extendDictionary = cv2.aruco.Dictionary_create
     cv2.aruco.getPredefinedDictionary = cv2.aruco.Dictionary_get
     cv2.aruco.DetectorParameters = cv2.aruco.DetectorParameters_create

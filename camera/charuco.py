@@ -5,6 +5,7 @@
     use DICT_4X4_250 for larger boards
 """
 import sys
+import re
 import glob
 import argparse
 import json
@@ -19,7 +20,7 @@ SQUARE_LENGTH = 0.025  # chessboard square side length (normally in meters)
 MARKER_LENGTH = 0.0125 # marker side length (same unit than squareLength)
 
 # handling incompatibility introduced in openCV 4.8
-if cv2.__version__ < '4.8':
+if float(re.sub(r'^([0-9]+\.[0-9]).*', '\\1', cv2.__version__)) < 4.8:
     aruco.Dictionary = aruco.Dictionary_create
     aruco.getPredefinedDictionary = aruco.Dictionary_get
     aruco.DetectorParameters = aruco.DetectorParameters_create
@@ -93,7 +94,7 @@ if wid not in ARUCO_DICT.values():
         print(f"{value:2d} {key}")
     sys.exit()
 dictionary = aruco.getPredefinedDictionary(wid)
-if cv2.__version__ < '4.8':
+if float(re.sub(r'^([0-9]+\.[0-9]).*', '\\1', cv2.__version__)) < 4.8:
     board = aruco.CharucoBoard_create(args.width, args.height,
             SQUARE_LENGTH, MARKER_LENGTH, dictionary)
     img = board.draw((args.multiplier * args.width, args.multiplier * args.height))
@@ -119,14 +120,14 @@ decimator = 0
 
 if args.camera:
     #Start capturing images for calibration
-    if len(args.names) == 1 and names[0][-4:] in ("h264", ".mp4", ".avi"):
+    if len(args.names) == 1 and args.names[0][-4:] in ("h264", ".mp4", ".avi"):
         cap = cv2.VideoCapture(args.names[0])
     else:
         cap = cv2.VideoCapture(0)
     while True:
         ret, frame = cap.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        if cv2.__version__ < '4.8':
+        if float(re.sub(r'^([0-9]+\.[0-9]).*', '\\1', cv2.__version__)) < 4.8:
             corners, ids, _ = aruco.detectMarkers(gray, dictionary)
         else:
             detector = cv2.aruco.ArucoDetector(dictionary)
@@ -134,7 +135,7 @@ if args.camera:
         if args.debug:
             show_markers("On-line camera", frame, corners, ids)
         if ids is not None and len(ids) > 0:
-            if cv2.__version__ < '4.8':
+            if float(re.sub(r'^([0-9]+\.[0-9]).*', '\\1', cv2.__version__)) < 4.8:
                 ret, corners1, ids1 = aruco.interpolateCornersCharuco(corners,
                                                                       ids,
                                                                       gray,
@@ -165,7 +166,7 @@ else:
             print('error reading image: {}'.format(fn))
             continue
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        if cv2.__version__ < '4.8':
+        if float(re.sub(r'^([0-9]+\.[0-9]).*', '\\1', cv2.__version__)) < 4.8:
             corners, ids, _ = aruco.detectMarkers(gray, dictionary)
         else:
             detector = cv2.aruco.ArucoDetector(dictionary)
@@ -174,7 +175,7 @@ else:
         if args.debug:
             show_markers(fn, frame, corners, ids)
         if ids is not None and len(ids) > 0:
-            if cv2.__version__ < '4.8':
+            if float(re.sub(r'^([0-9]+\.[0-9]).*', '\\1', cv2.__version__)) < 4.8:
                 ret, corners1, ids1 = aruco.interpolateCornersCharuco(corners,
                                                                       ids,
                                                                       gray,
