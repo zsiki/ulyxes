@@ -283,6 +283,7 @@ def cmd_params():
             'center_east': {'required' : False, 'type': 'float', 'default': None},
             'center_north': {'required' : False, 'type': 'float', 'default': None},
             'radius': {'required' : False, 'type': 'float', 'default': None},
+            'radius_top': {'required' : False, 'type': 'float', 'default': None},
             'gama': {'required' : False, 'type': 'str', 'default': None},
             '__comment__': {'required': False, 'type': 'str'}
         }
@@ -382,7 +383,9 @@ def cmd_params():
         parser.add_argument('--center_north', type=float, default=None,
                             help='Center point north of section, default: None')
         parser.add_argument('--radius', type=float, default=None,
-                            help='Radius of section, default: None')
+                            help='Radius of section at bottom section, default: None')
+        parser.add_argument('--radius_top', type=float, default=None,
+                            help='Radius of section at top section, default: None')
         parser.add_argument('--gama', type=str, default=def_gama,
                             help=f'Path to gama-local, default: {def_gama}')
         args = parser.parse_args()
@@ -424,6 +427,11 @@ def cmd_params():
         center_east = args.center_east
         center_north = args.center_north
         radius = args.radius
+        radius_top = args.radius_top
+        if radius is None and radius_top is not None:
+            radius = radius_top
+        if radius_top is None and radius is not None:
+            radius_top = radius
         gama = args.gama
 
     return {'hz_start': hz_start, 'hz_top': hz_top,
@@ -434,7 +442,7 @@ def cmd_params():
             'tol': tol, 'iter': maxiter, 'wrt': wrt_file, 'coords': coords,
             'levels': levels, 'pid': pid,
             'center_east': center_east, 'center_north': center_north,
-            'radius': radius, 'gama': gama}
+            'radius': radius, 'radius_top': radius_top, 'gama': gama}
 
 if __name__ == "__main__":
     # process parameters
@@ -472,7 +480,8 @@ if __name__ == "__main__":
                            filt=['id', 'east', 'north', 'elev'])
         coords = rd.Load()  # load coordinates of reference points
         if 'east' in params and 'north' in params and 'elev' in params and \
-                params['east'] is not None and params['north'] is not None and params['elev'] is not None:
+                params['east'] is not None and params['north'] is not None and \
+                params['elev'] is not None:
             # know station coords
             st_coord = [{'id': 'STATION', 'east': params['east'],
                         'north': params['north'], 'elev': params['elev']}]
@@ -482,7 +491,7 @@ if __name__ == "__main__":
             if ts.GetFace()['face'] == ts.FACE_RIGHT:
                 a = ts.GetAngles()
                 a['hz'] = (a['hz'] + Angle(180, 'DEG')).Normalize()
-                a['v'] = (Angle(360, 'DEG') - a['v']).Normalize() 
+                a['v'] = (Angle(360, 'DEG') - a['v']).Normalize()
                 ans = ts.Move(a['hz'], a['v'], 0) # no ATR
                 if 'errCode' in ans:
                     logging.fatal("Rotation to face left failed %d", ans['errCode'])
@@ -516,6 +525,8 @@ if __name__ == "__main__":
         params['elev'] = st_coord[0]['elev']
     else:
         # set station coordinates
+        st_coord = [{'id': 'STATION', 'east': params['east'],
+                     'north': params['north'], 'elev': params['elev']}]
         ts.SetStation(params['east'], params['north'],
                       params['elev'], params['ih'])
         hoc = params['elev'] + params['ih']
@@ -523,6 +534,7 @@ if __name__ == "__main__":
     wrt = CsvWriter(angle='DMS', dist='.3f',
                     filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
                     fname=params['wrt'], mode='a', sep=';', pid=params['pid'])
+    wrt.WriteData(st_coord[0])  # add station to output
     if isinstance(mu, Trimble5500):
         print("Please change to reflectorless EDM mode (MNU 722 from keyboard)")
         print("and turn on red laser (MNU 741 from keyboard) and press enter!")
@@ -533,16 +545,22 @@ if __name__ == "__main__":
             ts.SetRedLaser(1)       # turn on red laser if possible
         except Exception:
             pass
-    if params['center_east'] is not None and params['center_north'] is not None and params['radius'] is not None:
+    if params['center_east'] is not None and \
+       params['center_north'] is not None and params['radius'] is not None:
         center_dir = math.atan2(params['center_east']-params['east'],
                                 params['center_north']-params['north'])
         center_dist = math.hypot(params['center_east']-params['east'],
-                                 params['center_north']-params['north']) 
+                                 params['center_north']-params['north'])
         alpha = math.atan(params['radius'] / center_dist)
         params['hz_start'] = Angle(center_dir-alpha).Normalize()
         params['max'] = Angle(alpha * 2)
-        params['hz_top'] = params['hz_start']
-        params['maxt'] = params['max']
+        if params['radius'] == params['radius_top'] or params['radius_top'] is None:
+            params['hz_top'] = params['hz_start']
+            params['maxt'] = params['max']
+        else:
+            alpha1 = math.atan(params['radius_top'] / center_dist)
+            params['hz_start'] = Angle(center_dir-alpha1).Normalize()
+            params['maxt'] = Angle(alpha1 * 2)
     else:
     # turn instrument back to original direction
         ts.Move(orig_dir["hz"], orig_dir["v"], 0)
