@@ -232,25 +232,25 @@ def cmd_params():
     # defaults
     def_logfile = 'stdout'
     def_logging = logging.ERROR
-    def_format = "%(asctime)s %(levelname)s:%(message)s"
-    def_type = "1200"
-    def_angle = 45.0
-    def_east = None
-    def_north = None
-    def_elev = None
-    def_ih = 0.0    # instrument height
+    def_log_format = "%(asctime)s %(levelname)s:%(message)s"
+    def_station_type = "1200"
+    def_angle_step = 5.0
+    def_station_east = None
+    def_station_north = None
+    def_station_elev = None
+    def_station_ih = 0.0    # instrument height
     def_port = '/dev/ttyUSB0'
-    def_start = None
-    def_top = None
-    def_max = 359.9
-    def_tmax = 359.9
-    def_tol = 0.01
-    def_iter = 10
-    def_hlist = None
+    def_hz_start = None
+    def_hz_top = None
+    def_max_angle = 359.9
+    def_max_top = 359.9
+    def_tolerance = 0.01
+    def_iteration = 10
+    def_height_list = None
     def_wrt = 'stdout'
     def_coords = None   # coordinates of reference points for blind orientation
     def_pid = 0
-    hz_start = def_start
+    hz_start = def_hz_start
     levels = None
     def_gama = 'gama-local'
     if len(sys.argv) == 2 and os.path.exists(sys.argv[1]):
@@ -342,35 +342,35 @@ def cmd_params():
                 help=f'Logfile name, default: {def_logfile}, "stdout" for screen output')
         parser.add_argument('--log_level', type=int, default=def_logging,
                 help=f'Log level, default: {def_logging}')
-        parser.add_argument('--log_format', type=str, default=def_format,
+        parser.add_argument('--log_format', type=str, default=def_log_format,
                 help='Log format, default: time, level, message')
-        parser.add_argument('--step', type=float, default=def_angle,
-                help=f'Angle step in section [DEG], default: {def_angle}')
-        parser.add_argument('--type', type=str, required=False, default=def_type,
-                help=f'Total station type, default: {def_type}')
-        parser.add_argument('--east', type=float, default=def_east,
-                help=f'Station east, default: {def_east}')
-        parser.add_argument('--north', type=float, default=def_north,
-                help=f'Station north, default: {def_north}')
-        parser.add_argument('--elev', type=float, default=def_elev,
-                help=f'Station elevation, default: {def_elev}')
-        parser.add_argument('--ih', type=float, default=def_ih,
-                help=f'Instrument height, default: {def_ih}')
+        parser.add_argument('--angle_step', type=float, default=def_angle_step,
+                help=f'Angle step in section [DEG], default: {def_angle_step}')
+        parser.add_argument('--station_type', type=str, required=False, default=def_station_type,
+                help=f'Total station type, default: {def_station_type}')
+        parser.add_argument('--station_east', type=float, default=def_station_east,
+                help=f'Station east, default: {def_station_east}')
+        parser.add_argument('--station_north', type=float, default=def_station_north,
+                help=f'Station north, default: {def_station_north}')
+        parser.add_argument('--station_elev', type=float, default=def_station_elev,
+                help=f'Station elevation, default: {def_station_elev}')
+        parser.add_argument('--station_ih', type=float, default=def_station_ih,
+                help=f'Instrument height, default: {def_station_ih}')
         parser.add_argument('-p', '--port', type=str, default=def_port,
                 help=f'Communication port, default: {def_port}')
-        parser.add_argument('--start', type=float, default=def_start,
+        parser.add_argument('--hz_start', type=float, default=def_hz_start,
                 help='Horizontal start direction, default: actual telescope direction')
-        parser.add_argument('--top', type=float, default=def_top,
+        parser.add_argument('--hz_top', type=float, default=def_hz_top,
                 help='Horizontal start direction at top, default: same as start')
-        parser.add_argument('--max', type=float, default=def_max,
+        parser.add_argument('--max_angle', type=float, default=def_max_angle,
                 help='Max angle, default: whole circle')
-        parser.add_argument('--tmax', type=float, default=def_tmax,
+        parser.add_argument('--max_top', type=float, default=def_max_top,
                 help='Max angle at top, default: same as max')
-        parser.add_argument('--tol', type=float, default=def_tol,
-                help=f'Height tolerance, default: {def_tol}')
-        parser.add_argument('--iter', type=int, default=def_iter,
-                help=f'Max iteration to find section, default: {def_iter}')
-        parser.add_argument('--heights', type=str, default=def_hlist,
+        parser.add_argument('--tolerance', type=float, default=def_tolerance,
+                help=f'Height tolerance, default: {def_tolerance}')
+        parser.add_argument('--iteration', type=int, default=def_iteration,
+                help=f'Max iteration to find section, default: {def_iteration}')
+        parser.add_argument('--height_list', type=str, default=def_height_list,
                 help='list of elevations for more sections between double quotes, default: single section at the telescope direction')
         parser.add_argument('--wrt', type=str, default=def_wrt,
                 help=f'Name of output file, default: {def_wrt}')
@@ -391,35 +391,35 @@ def cmd_params():
         args = parser.parse_args()
 
         if args.log == "stdout":
-            logging.basicConfig(format=args.format, filemode='a',
-                                level=args.level)
+            logging.basicConfig(format=args.log_format, filemode='a',
+                                level=args.log_level)
         else:
-            logging.basicConfig(format=args.format, filename=args.log, filemode='a',
-                                level=args.level)
+            logging.basicConfig(format=args.log_format, filename=args.log, filemode='a',
+                                level=args.log_level)
         hz_start = None
-        if args.start is not None:
-            hz_start = Angle(args.start, 'DEG')
-        stepinterval = Angle(args.step, 'DEG')
-        stationtype = args.type
-        east = args.east
-        north = args.north
-        elev = args.elev
-        ih = args.ih
+        if args.hz_start is not None:
+            hz_start = Angle(args.hz_start, 'DEG')
+        stepinterval = Angle(args.angle_step, 'DEG')
+        stationtype = args.station_type
+        east = args.station_east
+        north = args.station_north
+        elev = args.station_elev
+        ih = args.station_ih
         port = args.port
-        maxa = Angle(args.max, "DEG")
+        maxa = Angle(args.max_angle, "DEG")
         hz_top = None
-        if args.top is not None:
-            hz_top = Angle(args.top, 'DEG')
+        if args.hz_top is not None:
+            hz_top = Angle(args.hz_top, 'DEG')
         maxt = None
-        if args.tmax is not None:
-            maxt = Angle(args.tmax, 'DEG')
-        tol = args.tol
-        maxiter = args.iter
+        if args.max_top is not None:
+            maxt = Angle(args.max_top, 'DEG')
+        tol = args.tolerance
+        maxiter = args.iteration
         wrt_file = args.wrt
         coords = args.coords
         try:
-            if args.heights is not None:
-                levels = [float(l) for l in args.heights.split()]
+            if args.height_list is not None:
+                levels = [float(l) for l in args.height_list.split()]
         except Exception:
             print("parameter error --heights")
             sys.exit(1)
