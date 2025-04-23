@@ -261,22 +261,22 @@ def cmd_params():
                           'set': [logging.DEBUG, logging.INFO, logging.WARNING,
                                   logging.ERROR, logging.FATAL],
                           'default': def_logging},
-            'log_format': {'required': False, 'default': def_format},
-            'angle_step' : {'required': False, 'type': "float", 'default': def_angle},
+            'log_format': {'required': False, 'default': def_log_format},
+            'angle_step' : {'required': False, 'type': "float", 'default': def_angle_step},
 
-            'station_type': {'required' : False, 'type': 'str', 'set': ['1200', '1100', '5500', 'axis10'], 'default': def_type},
-            'station_east': {'required' : False, 'type': 'float', 'default': def_east},
-            'station_north': {'required' : False, 'type': 'float', 'default': def_north},
-            'station_elev': {'required' : False, 'type': 'float', 'default': def_elev},
-            'station_ih': {'required' : False, 'type': 'float', 'default': def_ih},
+            'station_type': {'required' : False, 'type': 'str', 'set': ['1200', '1100', '5500', 'axis10'], 'default': def_station_type},
+            'station_east': {'required' : False, 'type': 'float', 'default': def_station_east},
+            'station_north': {'required' : False, 'type': 'float', 'default': def_station_north},
+            'station_elev': {'required' : False, 'type': 'float', 'default': def_station_elev},
+            'station_ih': {'required' : False, 'type': 'float', 'default': def_station_ih},
             'port': {'required' : False, 'type': 'str', 'default': def_port},
-            'hz_start': {"required": False, 'type': "str", 'default': def_start},
-            'hz_top': {"required": False, 'type': "str", 'default': def_top},
-            'max_angle': {'required': False, 'type': "float", 'default': def_max},
-            'max_top': {'required': False, 'type': "float", 'default': def_tmax},
-            'tolerance': {'required': False, 'type': "float", 'default': def_tol},
-            'iteration': {'required': False, 'type': 'int', 'default': def_iter},
-            'height_list': {'required': False, 'type': 'list', 'default': def_hlist},
+            'hz_start': {"required": False, 'type': "str", 'default': def_hz_start},
+            'hz_top': {"required": False, 'type': "str", 'default': def_hz_top},
+            'max_angle': {'required': False, 'type': "float", 'default': def_max_angle},
+            'max_top': {'required': False, 'type': "float", 'default': def_max_top},
+            'tolerance': {'required': False, 'type': "float", 'default': def_tolerance},
+            'iteration': {'required': False, 'type': 'int', 'default': def_iteration},
+            'height_list': {'required': False, 'type': 'list', 'default': def_height_list},
             'wrt': {'required': False, 'default': 'stdout'},
             'coords': {'required': False, 'default': def_coords},
             'pid': {'required' : False, 'type': 'int', 'default': def_pid},
@@ -284,7 +284,7 @@ def cmd_params():
             'center_north': {'required' : False, 'type': 'float', 'default': None},
             'radius': {'required' : False, 'type': 'float', 'default': None},
             'radius_top': {'required' : False, 'type': 'float', 'default': None},
-            'gama': {'required' : False, 'type': 'str', 'default': None},
+            'gama': {'required' : False, 'type': 'str', 'default': def_gama},
             '__comment__': {'required': False, 'type': 'str'}
         }
         cr = ConfReader('HorizontalSection', sys.argv[1], config_pars)
@@ -334,6 +334,7 @@ def cmd_params():
         center_east = cr.json['center_east']
         center_north = cr.json['center_north']
         radius = cr.json['radius']
+        radius_top = cr.json['radius_top']
         gama = cr.json['gama']
     else:
         # process command line switches
@@ -469,16 +470,31 @@ if __name__ == "__main__":
     ts = TotalStation(params['stationtype'], mu, iface)
     coords = None
     ts.SetEDMMode('STANDARD')
+    # change to face left
+    if ts.GetFace()['face'] == ts.FACE_RIGHT:
+        a = ts.GetAngles()
+        a['hz'] = (a['hz'] + Angle(180, 'DEG')).Normalize()
+        a['v'] = (Angle(360, 'DEG') - a['v']).Normalize()
+        ans = ts.Move(a['hz'], a['v'], 0) # no ATR
+        if 'errCode' in ans:
+            logging.fatal("Rotation to face left failed %d", ans['errCode'])
+            sys.exit(-1)
     orig_dir = ts.GetAngles()   # save original direction
     # orientation
     if params['coords']:    # use coords for blind orientation
         if re.search(r'\.txt$', params['coords']) or re.search(r'\.csv$', params['coords']):
             rd = CsvReader(fname=params['coords'], \
-                           filt=['id', 'east', 'north', 'elev'])
+                           filt=['id', 'east', 'north', 'elev'],
+                           numeric=['east', 'north', 'elev'])
         else:
             rd = GeoReader(fname=params['coords'], \
                            filt=['id', 'east', 'north', 'elev'])
         coords = rd.Load()  # load coordinates of reference points
+        if len(coords) < 2:
+            logging.fatal(f"Few coordinates in {params['coords']}")
+            print(f"Few coordinates in {params['coords']}")
+            sys.exit(-1)
+
         if 'east' in params and 'north' in params and 'elev' in params and \
                 params['east'] is not None and params['north'] is not None and \
                 params['elev'] is not None:
@@ -487,15 +503,6 @@ if __name__ == "__main__":
                         'north': params['north'], 'elev': params['elev']}]
             og = ObsGen(st_coord + coords, 'STATION', params['ih'])
             observations = og.run()
-            # change to face left
-            if ts.GetFace()['face'] == ts.FACE_RIGHT:
-                a = ts.GetAngles()
-                a['hz'] = (a['hz'] + Angle(180, 'DEG')).Normalize()
-                a['v'] = (Angle(360, 'DEG') - a['v']).Normalize()
-                ans = ts.Move(a['hz'], a['v'], 0) # no ATR
-                if 'errCode' in ans:
-                    logging.fatal("Rotation to face left failed %d", ans['errCode'])
-                    sys.exit(-1)
             o = Orientation(observations, ts)   # TODO orientation limit????
             ans = o.Search()
             if 'errCode' in ans:
@@ -535,6 +542,11 @@ if __name__ == "__main__":
                     filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
                     fname=params['wrt'], mode='a', sep=';', pid=params['pid'])
     wrt.WriteData(st_coord[0])  # add station to output
+    if 'std_east' in st_coord[0]:
+        st_std = {'id': 'STATION_STD_MM', 'east': st_coord[0]['std_east'],
+               'north': st_coord[0]['std_north'],
+               'elev': st_coord[0]['std_elev']}
+        wrt.WriteData(st_std)  # add station mean errors to output
     if isinstance(mu, Trimble5500):
         print("Please change to reflectorless EDM mode (MNU 722 from keyboard)")
         print("and turn on red laser (MNU 741 from keyboard) and press enter!")
@@ -559,7 +571,7 @@ if __name__ == "__main__":
             params['maxt'] = params['max']
         else:
             alpha1 = math.atan(params['radius_top'] / center_dist)
-            params['hz_start'] = Angle(center_dir-alpha1).Normalize()
+            params['hz_top'] = Angle(center_dir-alpha1).Normalize()
             params['maxt'] = Angle(alpha1 * 2)
     else:
     # turn instrument back to original direction
