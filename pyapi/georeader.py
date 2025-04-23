@@ -49,8 +49,8 @@ class GeoReader(FileReader):
         w = self.GetLine()
         if self.state != self.RD_OK:
             return res
-        w = w.strip('\n\r')
-        buf = re.split('[\{\}]', w)
+        w = w.strip(r'\n\r')
+        buf = re.split(r'[\{\}]', w)
         for ww in buf:
             if len(ww) > 2:
                 www = ww.split(' ')
