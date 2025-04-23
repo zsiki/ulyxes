@@ -53,10 +53,14 @@ class AnyStation(object):
             if not 'errorCode' in ans:
                 self.ts.Measure()
                 o = self.ts.GetMeasure()
-                act_angle = o['hz']
-                if act_angle.GetAngle() < last_angle:
-                    break
-                obs.append(o)
+                if 'errorCode' in o:
+                    o = self.ts.GetAngles()
+                    act_angle = o['hz']
+                else:
+                    act_angle = o['hz']
+                    if act_angle.GetAngle() < last_angle:
+                        break
+                    obs.append(o)
                 self.ts.Move(act_angle+Angle(3, 'DEG'), Angle(pi/2))  # move forward for next
             act += 1
         return obs
