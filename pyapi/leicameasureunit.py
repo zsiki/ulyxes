@@ -92,8 +92,8 @@ class LeicaMeasureUnit(MeasureUnit):
             :param anss: aswers got from instrument
             :returns: dictionary
         """
-        msgList = re.split('\|', msgs)
-        ansList = re.split('\|', anss)
+        msgList = re.split(r'\|', msgs)
+        ansList = re.split(r'\|', anss)
         res = {}
         for msg, ans in zip(msgList, ansList):
             # get command id form message
