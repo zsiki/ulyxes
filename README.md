@@ -15,7 +15,7 @@ Documentation
 * [PyAPI Developer Docs](http://www.agt.bme.hu/ulyxes/pyapi_doc/)
 * [Presentation](https://www.slideshare.net/ZoltanSiki/ulyxes) at OGRS 2018, Lugano
 and a [paper](https://peerj.com/preprints/27226v1) on PeerJ Preprints.
-* [Poster](http://mmk-ggt.hu/konferenciak/20191109/ulyxes_poster3_eng.pdf) presentation on the FOSS4G Hungarian local conference in 2019.
+* [Poster](https://mmk-ggt.hu/files/konferenciak/mg20191109/ulyxes_poster3_eng.pdf) presentation on the FOSS4G Hungarian local conference in 2019.
 * [The project on OpenHub](https://www.openhub.net/p/ulyxes_monitoring)
 ---
 Deprecated modules/APIs
