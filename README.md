@@ -6,7 +6,7 @@ Surveyor's sensor data processing system
 
 * PyAPI - API written in Python using object oriented approache, beta version
 * PyApps - demo Python applications using PyAPI
-* camera - post processing scripts to process video or images
+* camera - processing scripts to process live/recorded video or images
 * server - server side scripts
 
 Documentation
