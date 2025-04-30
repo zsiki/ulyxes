@@ -51,12 +51,12 @@ class AnyStation(object):
         while act < max:
             ans = self.ts.PowerSearch(1)
             if not 'errorCode' in ans:
-                self.ts.Measure()
+                self.ts.Measure()   # TODO if error in measure
                 o = self.ts.GetMeasure()
                 if 'errorCode' in o:
                     o = self.ts.GetAngles()
                     act_angle = o['hz']
-                else:
+                elif 'hz' in o:
                     act_angle = o['hz']
                     if act_angle.GetAngle() < last_angle:
                         break
