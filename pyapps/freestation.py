@@ -46,7 +46,7 @@ class Freestation(object):
     """
 
     def __init__(self, obs, coords, gama_path, dimension=3, probability=0.95,
-                 stdev_angle=1, stdev_dist=1, stdev_dist1=1.5, blunders=True):
+                 stdev_angle=1, stdev_dist=1, stdev_dist1=1.5, blunders=False):
         """ initialize
         """
         # create gama interface
