@@ -221,7 +221,7 @@ Independent modules
 angle.py
 ========
 
-This module stands for storing angle value of numbers in radian internally. Using this class the angle conversions can be easily done. 
+This module stands for storing angle value of numbers in radian internally. Using this class the angle conversions and sum/difference can be easily done. 
 
 |
 
@@ -252,15 +252,17 @@ Readers
 
 reader.py is the base class for all readers (virtual).
 
-configreader.py
+confreader.py
 ^^^^^^^^^^^^^^^
 
-TODO
+ConfReader class can be used to read simple JSON configurations. It can load 
+and validate JSON files based on a definition. It is used by applications
+as a alternative solution to the command line switches.
 
 csvreader.py
 ^^^^^^^^^^^^
 
-Class to read csv file, first line must contain field names.
+Class to read csv file, first line may contain field names.
 Default separator is semicolon (;).
 
 .. code:: python
@@ -269,6 +271,12 @@ Default separator is semicolon (;).
     cr = CsvReader('test', 'test.csv')
     # load the whole file into a list
     lines = cr.Load()
+
+dbreader.py
+^^^^^^^^^^^
+
+DbReader reads observations and/or coordinates fron SQLite or PostgreSQL
+database. Table names are fixed in the code.
 
 filereader.py
 ^^^^^^^^^^^^^
@@ -323,18 +331,90 @@ httpreader.py
 Read data from a remote web server using HTTP protocol and server side service
 for POST/GET requests.
 
-TODO
+On the server side scripts have to be created. For example the query.php in 
+the server folder fetches coodinates from a server side database and sends
+them to the client httpreader.
+
+imagereader.py
+^^^^^^^^^^^^^^
+
+ImageReader reads images from folder(s) or video file or web camera or
+Raspberry Pi camera.
 
 jsonreader.py
 ^^^^^^^^^^^^^
 
-TODO
+Simple JSON reader class used by confreader.py.
+
+queuereader.py
+^^^^^^^^^^^^^^
+
+QueueReader reads data from memory queue.
 
 sqlitereader.py
 ^^^^^^^^^^^^^^^
 
 Load coordinates or observations from a spatialite database.
-TODO
+This class is OBSOLATE, use dbreader.py.
+
+Writers
+=======
+
+All writer class inheriter from Writer virtual base class.
+
+csvwriter.py
+^^^^^^^^^^^^
+
+dbwriter.py
+^^^^^^^^^^^
+
+echowriter.py
+^^^^^^^^^^^^^
+
+filewriter.py
+^^^^^^^^^^^^^
+
+geowriter.py
+^^^^^^^^^^^^
+
+httpwriter.py
+^^^^^^^^^^^^^
+
+imagewriter.py
+^^^^^^^^^^^^^^
+
+queuewriter.py
+^^^^^^^^^^^^^^
+
+sqlitewriter.py
+^^^^^^^^^^^^^^^
+
+Measure units
+=============
+
+gsiunit.py
+^^^^^^^^^^
+
+leicadnaunit.py
+^^^^^^^^^^^^^^^
+
+leicameasureunit.py
+^^^^^^^^^^^^^^^^^^^
+
+lsm9ds0unit.py
+^^^^^^^^^^^^^^
+
+nmeagnssunit.py
+^^^^^^^^^^^^^^^
+
+picameraunit.py
+^^^^^^^^^^^^^^^
+
+webmetmeasureunit.py
+^^^^^^^^^^^^^^^^^^^^
+
+wifiunit.py
+^^^^^^^^^^^
 
 External Python modules
 ***********************
@@ -472,47 +552,64 @@ infinite loop.
 Horizsection
 ************
 
-Scan horizontally around the total station with a given angle step in one or more
-horizontal sections.
+Scan horizontally around the total station with a given angle step in one or
+more horizontal sections.
 
 .. code:: text
 
     usage: horizsection.py [-h] [-l LOG] [--log_level LOG_LEVEL]
-                       [--log_format LOG_FORMAT] [--step STEP] [--type TYPE]
-                       [--east EAST] [--north NORTH] [--elev ELEV] [--ih IH]
-                       [-p PORT] [--start START] [--top TOP] [--max MAX]
-                       [--tmax TMAX] [--tol TOL] [--iter ITER]
-                       [--heights HEIGHTS] [--wrt WRT] [--coords COORDS]
-                       [--pid PID] [--center_east CENTER_EAST]
-                       [--center_north CENTER_NORTH] [--radius RADIUS]
-                       [--gama GAMA]
+                           [--log_format LOG_FORMAT]
+                           [--angle_step ANGLE_STEP]
+                           [--station_type STATION_TYPE]
+                           [--station_east STATION_EAST]
+                           [--station_north STATION_NORTH]
+                           [--station_elev STATION_ELEV]
+                           [--station_ih STATION_IH] [-p PORT]
+                           [--hz_start HZ_START] [--hz_top HZ_TOP]
+                           [--max_angle MAX_ANGLE] [--max_top MAX_TOP]
+                           [--tolerance TOLERANCE] [--iteration ITERATION]
+                           [--height_list HEIGHT_LIST] [--wrt WRT]
+                           [--coords COORDS] [--pid PID]
+                           [--center_east CENTER_EAST]
+                           [--center_north CENTER_NORTH] [--radius RADIUS]
+                           [--radius_top RADIUS_TOP] [--gama GAMA]
 
     options:
       -h, --help            show this help message and exit
-      -l LOG, --log LOG     Logfile name, default: stdout, "stdout" for screen
-                            output
+      -l LOG, --log LOG     Logfile name, default: stdout, "stdout" for
+                            screen output
       --log_level LOG_LEVEL
                             Log level, default: 40
       --log_format LOG_FORMAT
                             Log format, default: time, level, message
-      --step STEP           Angle step in section [DEG], default: 45.0
-      --type TYPE           Total station type, default: 1200
-      --east EAST           Station east, default: None
-      --north NORTH         Station north, default: None
-      --elev ELEV           Station elevation, default: None
-      --ih IH               Instrument height, default: 0.0
+      --angle_step ANGLE_STEP
+                            Angle step in section [DEG], default: 5.0
+      --station_type STATION_TYPE
+                            Total station type, default: 1200
+      --station_east STATION_EAST
+                            Station east, default: None
+      --station_north STATION_NORTH
+                            Station north, default: None
+      --station_elev STATION_ELEV
+                            Station elevation, default: None
+      --station_ih STATION_IH
+                            Instrument height, default: 0.0
       -p PORT, --port PORT  Communication port, default: /dev/ttyUSB0
-      --start START         Horizontal start direction, default: actual telescope
-                        direction
-      --top TOP             Horizontal start direction at top, default: same as
-                            start
-      --max MAX             Max angle, default: whole circle
-      --tmax TMAX           Max angle at top, default: same as max
-      --tol TOL             Height tolerance, default: 0.01
-      --iter ITER           Max iteration to find section, default: 10
-      --heights HEIGHTS     list of elevations for more sections between double
-                            quotes, default: single section at the telescope
-                            direction
+      --hz_start HZ_START   Horizontal start direction, default: actual
+                            telescope direction
+      --hz_top HZ_TOP       Horizontal start direction at top, default: same
+                            as start
+      --max_angle MAX_ANGLE
+                            Max angle, default: whole circle
+      --max_top MAX_TOP     Max angle at top, default: same as max
+      --tolerance TOLERANCE
+                            Height tolerance, default: 0.01
+      --iteration ITERATION
+                            Max iteration to find section, default: 10
+      --height_list HEIGHT_LIST
+                            list of elevations for more sections between
+                            double quotes, default: single section at the
+                            telescope direction
       --wrt WRT             Name of output file, default: stdout
       --coords COORDS       Name of coordinate file, default: None
       --pid PID             Starting point ID, default: 0
@@ -520,24 +617,27 @@ horizontal sections.
                             Center point east of section, default: None
       --center_north CENTER_NORTH
                             Center point north of section, default: None
-      --radius RADIUS       Radius of section, default: None
+      --radius RADIUS       Radius of section at bottom section, default:
+                            None
+      --radius_top RADIUS_TOP
+                            Radius of section at top section, default: None
       --gama GAMA           Path to gama-local, default: gama-local
 
 Parameters can be passed in a JSON file.
 
 There are three possible application situations
 
-# No fixed points are given (*--coords*), it is supposed the station is orineted
+# Station coordinates are given but no fixed points are given (*--coords*), it is supposed the station is orineted
 # Station coordinates and fixed points (marked by prisms)  are given, orientation is calculated
 # No station coordinates but fixed points (marked by prism) are given, station coordinates and orientation are calculated
 
 After heights parameter more values can be given.
 
 The range of the sections can be given by angles or a target. The two methos are mutual exclusive.
-*--start* defines the horizontal direction of first (bottom) section, *--max* is the angle
-range of section to the rigth from the START. *--top* and *--tmax* are the same for the last
-(top) section. Horozsection will interpolate between these values for other sections.
-The other solution to set the *--center_east* and *--center_north* and *--radius*. Center point is the center of the sections, the radius defines the range to left and right.
+*--hz_start* defines the horizontal direction of first (bottom) section, *--max_angle* is the angle range of section to the rigth from the START. *--hz_top* and *--max_top* are the same for the last (top) section. Horozsection will interpolate between these values for other sections.
+The other solution to set the *--center_east* and *--center_north* and *--radius*. Center point is the center of the sections, the radius defines the range to left and right. 
+
+*--center_...* and *--radius** parameters have precedence to *--hz_stat*, *max_angle*, etc.
 
 Section
 *******
