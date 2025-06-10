@@ -135,13 +135,13 @@ class GraphPlot:
         """
         rows = max([len(yi) for yi in self.y])      # number of charts to draw
         fig = plt.figure()
-        fig.canvas.set_window_title(self.main_title)
+        fig.canvas.manager.set_window_title(self.main_title)
         #fig.suptitle(self.main_title) # TODO overlapping
         for ind in range(rows):
             ax = plt.subplot(rows, 1, ind+1)
             for i in range(len(self.x)):
                 if len(self.y[i]) > ind and self.y[i][ind] is not None and len(self.y[i][ind]) > 0:
-                    if isinstance(self.x[i][0], datetime):
+                    if isinstance(self.x[i].iloc[0], datetime):
                         plt.plot_date(self.x[i], self.y[i][ind], self.fmts[i][ind],
                                       label=self.labels[i][ind])
                     else:
