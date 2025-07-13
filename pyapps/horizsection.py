@@ -539,7 +539,7 @@ if __name__ == "__main__":
         hoc = params['elev'] + params['ih']
     # writer for coordinates and observations
     wrt = CsvWriter(angle='DMS', dist='.3f',
-                    filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance'],
+                    filt=['id', 'east', 'north', 'elev', 'hz', 'v', 'distance',                           'datetime'],
                     fname=params['wrt'], mode='a', sep=';', pid=params['pid'])
     wrt.WriteData(st_coord[0])  # add station to output
     if 'std_east' in st_coord[0]:
