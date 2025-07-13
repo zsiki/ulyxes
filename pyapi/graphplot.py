@@ -70,10 +70,14 @@ class GraphPlot:
         :param data_series: list for each data serie, x, ys, formats, labels; formats and labels are optional
     """
 
-    def __init__(self, titles, units, data_series):
+    def __init__(self, titles, units, data_series, font_size=10, width=6.4,
+                 height=4.8):
         """ initialize instance """
         self.titles = titles
         self.units = units
+        self.font_size = font_size
+        self.width = width
+        self.height = height
         self.x = []
         self.y = []
         self.fmts = []
@@ -134,8 +138,9 @@ class GraphPlot:
             :param target: None for screen or a file name (png)
         """
         rows = max([len(yi) for yi in self.y])      # number of charts to draw
-        fig = plt.figure()
+        fig = plt.figure(figsize=(self.width, self.height))
         fig.canvas.manager.set_window_title(self.main_title)
+        plt.rcParams['font.size'] = self.font_size
         #fig.suptitle(self.main_title) # TODO overlapping
         for ind in range(rows):
             ax = plt.subplot(rows, 1, ind+1)

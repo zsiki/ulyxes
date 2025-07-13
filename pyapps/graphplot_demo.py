@@ -56,6 +56,12 @@ parser.add_argument('-e', '--end', type=str, default=None,
                     help='end date YYYY-MM-DD format')
 parser.add_argument('-o', '--output', type=str, default=None,
                     help='output png file')
+parser.add_argument('--fontsize', type=int, default=10,
+                    help='fontsize in points for titles, default: 10')
+parser.add_argument('--width', type=float, default=6.4,
+                    help='image width in inches, default: 6.4')
+parser.add_argument('--height', type=float, default=4.8,
+                    help='image width in inches, default: 4.8')
 args = parser.parse_args()
 
 time_format = '%Y-%m-%d %H:%M:%S'
@@ -104,8 +110,8 @@ else:
     sys.exit()
 t = args.coord + " relative" if args.relative else args.coord
 titles = [t]
-units = ["date", "mm"]
-g = GraphPlot(titles, units, data)
+units = ["date/time", "mm"]
+g = GraphPlot(titles, units, data, args.fontsize, args.width, args.height)
 if g.valid() > 0:
     print("invalid dataset")
     sys.exit()
