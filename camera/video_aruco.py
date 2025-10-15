@@ -144,7 +144,7 @@ if __name__ == "__main__":
                         help='video file to process or camera ID (e.g. 0)')
     parser.add_argument('-f', '--fps', type=int, default=None,
                         help='frame per sec overwrites fps from video file')
-    parser.add_argument('-d', '--dict', type=str, default="DICT_4X4_50",
+    parser.add_argument('-d', '--dict', type=str, default="DICT_4X4_100",
                         help='marker dictionary id or dictionary name, default=1 (DICT_4X4_100)')
     parser.add_argument('-c', '--code', type=int,
                         help='marker id to search, if not given all found markers are detected')
