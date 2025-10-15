@@ -311,10 +311,12 @@ class ArucoBase():
             plt.clf()
             plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
             for r in res:
-                plt.plot(r['east'], r['north'], "o", color="red")
+                plt.plot(r['east'], r['north'], "o", color="red", alpha=0.5,
+                         ms=18)
                 #plt.plot([actCorner[0][0], actCorner[1][0], actCorner[2][0],
                 #          actCorner[3][0], actCorner[0][0]],
                 #         [actCorner[0][1], actCorner[1][1], actCorner[2][1],
-                #          actCorner[3][1], actCorner[0][1]])
+                #          actCorner[3][1], actCorner[0][1]], color="red")
+            #plt.savefig(f'fig_aruco{i:03d}.png')
             plt.pause(self.delay)
         return res
