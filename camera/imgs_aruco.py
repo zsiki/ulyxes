@@ -86,8 +86,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('names', metavar='file_names', type=str, nargs="+",
                         help='image files to process')
-    parser.add_argument('-d', '--dict', type=str, default="DICT_4X4_50",
-            help='marker dictionary id or name, default:DICT_4X4_50)')
+    parser.add_argument('-d', '--dict', type=str, default="DICT_4X4_100",
+            help='marker dictionary id or name, default:DICT_4X4_100)')
     parser.add_argument('-c', '--code', type=int,
                         help='marker id to search, if not given all found markers are used')
     parser.add_argument('--debug', type=int, default=0,
