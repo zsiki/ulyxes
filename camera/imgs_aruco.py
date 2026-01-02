@@ -59,24 +59,22 @@ class ImgsAruco(ArucoBase):
                     for res in results:
                         if self.code is None or self.code == res['code']:
                             if self.pose:    # output pose, too
-                                data = {'id': self.rdr.ind, 'name': name1,
+                                data = {'id': res['id'], 'name': name1,
                                         'datetime': t,
                                         'east': res["east"],
                                         'north': res["north"],
                                         'width': res['width'],
                                         'height': res['height'],
-                                        'code': res['code'],
                                         'roll': res["euler_angles"][0],
                                         'pitch': res["euler_angles"][1],
                                         'yaw': res["euler_angles"][2]}
                             else:
-                                data = {'id': self.rdr.ind, 'name': name1,
+                                data = {'id': res['id'], 'name': name1,
                                         'datetime': t,
                                         'east': res["east"],
                                         'north': res["north"],
                                         'width': res['width'],
-                                        'height': res['height'],
-                                        'code': res['code']}
+                                        'height': res['height']}
                             self.wrt.WriteData(data)
             else:
                 break
