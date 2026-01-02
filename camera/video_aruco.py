@@ -75,6 +75,7 @@ class VideoAruco(ArucoBase):
                                     filt=['id', 'datetime', 'east', 'north', 'width', 'height', 'code'])
         elif re.match('https?://', args.output):
             self.wrt = HttpWriter(url=args.output, mode='GET', dist='.4f',
+                                  dt='%Y-%m-%d %H:%M:%S.%f',
                                   filt=['id', 'datetime', 'east', 'north'])
         else:
             self.wrt = CsvWriter(fname=args.output, dt=self.tformat, mode='w',
@@ -101,20 +102,20 @@ class VideoAruco(ArucoBase):
                 results = self.ProcessImg(frame, self.rdr.ind)
                 if results:
                     for res in results:
-                        if self.code is None or self.code == res['code']:
+                        if self.code is None or self.code == res['id']:
                             if self.pose:    # output pose, too
-                                data = {'id': str(res['code']), 'datetime': t,
+                                data = {'id': str(res['id']), 'datetime': t,
                                         'east': res["east"],
-                                        'north': res["north"],
+                                        'north': 1000 - res["north"],
                                         'width': res['width'],
                                         'height': res['height'],
                                         'roll': res["euler_angles"][0],
                                         'pitch': res["euler_angles"][1],
                                         'yaw': res["euler_angles"][2]}
                             else:
-                                data = {'id': str(res['code']), 'datetime': t,
+                                data = {'id': str(res['id']), 'datetime': t,
                                         'east': res["east"],
-                                        'north': res["north"],
+                                        'north': 1000 - res["north"],
                                         'width': res['width'],
                                         'height': res['height']}
                             if self.wrt.WriteData(data) < 0:
