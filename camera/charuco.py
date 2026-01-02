@@ -74,7 +74,7 @@ parser.add_argument('-o', '--output', type=str,
                     help='output yaml/json camera calibration data file, default: calibration_matrix.yaml')
 parser.add_argument('-d', '--dictionary', type=str, default="DICT_4X4_100",
                     help='ArUco dictionary name or index, default DICT_4X4_100')
-parser.add_argument('-m', '--min', type=int, default=20,
+parser.add_argument('--min', type=int, default=20,
                     help='Minimal number of points on an image, default 20')
 parser.add_argument('--debug', action="store_true",
                     help='Display found ArUco codes')
