@@ -281,8 +281,8 @@ class ArucoBase():
             for j in range(ids.size):
                 if self.code is None or ids[j][0] == self.code:
                     # calculate center of aruco code
-                    x = np.average(corners[j][0][:, 0])
-                    y = np.average(corners[j][0][:, 1])
+                    x = float(np.average(corners[j][0][:, 0]))
+                    y = float(np.average(corners[j][0][:, 1]))
                     marker_w = max(hypot(corners[j][0][0, 0] - corners[j][0][1, 0],
                                          corners[j][0][0, 1] - corners[j][0][1, 1]),
                                    hypot(corners[j][0][2, 0] - corners[j][0][3, 0],
@@ -299,11 +299,11 @@ class ArucoBase():
                         # https://www.learnopencv.com/rotation-matrix-to-euler-angles/
                         euler_angles = self.rotationMatrixToEulerAngles(r)
                     if self.pose:    # output pose, too
-                        res.append({'code': ids[j][0], 'east': x, 'north': y,
+                        res.append({'id': ids[j][0], 'east': x, 'north': y,
                                     'width': marker_w, 'height': marker_h,
                                     'euler_angles': euler_angles})
                     else:
-                        res.append({'code': ids[j][0], 'east': x, 'north': y,
+                        res.append({'id': ids[j][0], 'east': x, 'north': y,
                                     'width': marker_w, 'height': marker_h})
                     if self.code is not None:
                         break   # search for single marker
@@ -313,6 +313,8 @@ class ArucoBase():
             for r in res:
                 plt.plot(r['east'], r['north'], "o", color="red", alpha=0.5,
                          ms=18)
+                plt.text(r['east']+8, r['north']-12, str(r['id']),
+                         fontsize=12, color="red")
                 #plt.plot([actCorner[0][0], actCorner[1][0], actCorner[2][0],
                 #          actCorner[3][0], actCorner[0][0]],
                 #         [actCorner[0][1], actCorner[1][1], actCorner[2][1],
