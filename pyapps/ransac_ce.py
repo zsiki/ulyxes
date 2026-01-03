@@ -33,18 +33,26 @@ def generate_points(x0, y0, ap, bp, phi, npts=100, tmin=0, tmax=2*np.pi):
     y = y0 + ap * np.cos(t) * np.sin(phi) + bp * np.sin(t) * np.cos(phi)
     return x, y
 
-def circle(x, y):
+def circle(xx, yy):
     """ horizontal circle through points using LSM if more than 3 points given
-        x - x coordinates of points, numpy vector
-        y - y coordinates of points, numpy vector
+        xx - x coordinates of points, numpy vector
+        yy - y coordinates of points, numpy vector
         returns tuple of x0, y0, r, rms
     """
+    # move orign to weight point
+    x_mean = np.mean(xx)
+    y_mean = np.mean(yy)
+    x = xx - x_mean
+    y = yy - y_mean
     # coefficients of unknowns
     A = np.c_[x, y, np.ones_like(x)]
     # pure term
     b = -(x * x + y * y)
     # solution for a1, a2, a3
-    Q = np.linalg.inv(A.T @ A)
+    try:
+        Q = np.linalg.inv(A.T @ A)
+    except np.linalg.LinAlgError:
+        raise ValueError('circle')
     par = Q @ (A.T @ b)
     # calculating the original unknowns
     x0 = -0.5 * par[0]
@@ -54,7 +62,7 @@ def circle(x, y):
     res = np.sqrt((x - x0)**2 + (y - y0)**2) - r
     #root mean square error
     rms = sqrt(np.mean(res**2))
-    return x0, y0, r, rms
+    return x0+x_mean, y0+y_mean, r, rms
 
 def sign(x):
     """ signum function """
@@ -141,12 +149,17 @@ def par2geom(A, B, C, D, E, F):
         phi -= np.pi
     return x0, y0, ap, bp, phi
 
-def ellipse(x, y):
+def ellipse(xx, yy):
     """ horizontal ellipse through points using LSM if more than 5 points given
         Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0
         x - x coordinates of points, numpy vector
         returns tuple of x0, y0, a, b, phi 
     """
+    # move origin to weight point
+    x_mean = np.mean(xx)
+    y_mean = np.mean(yy)
+    x = xx - x_mean
+    y = yy - y_mean
     mat = np.c_[x**2, x*y, y**2, x, y, np.ones_like(x)]
     S = mat.T @ mat
     eigvals, eigvecs = np.linalg.eig(S)
@@ -162,7 +175,7 @@ def ellipse(x, y):
     x0, y0, ap, bp, phi = par2geom(A, B, C, D, E, F)
     #root mean square error
     rms = rms_ellipse(x0, y0, ap, bp, phi, x, y)
-    return x0, y0, ap, bp, phi, rms
+    return x0+x_mean, y0+y_mean, ap, bp, phi, rms
 
 def dist_circle(xc, yc, r, x, y):
     """
