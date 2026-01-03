@@ -13,7 +13,7 @@
 """
 
 import sys
-from math import atan, atan2, acos, sin, cos, sqrt, hypot, pi
+from math import atan, atan2, acos, sin, cos, sqrt, hypot, pi, log
 from random import shuffle
 import os.path
 import numpy as np
@@ -192,12 +192,13 @@ def ransac_circle(x, y, r_tol=0.025):
         returns tuple x, y of filtered points
     """
     n = x.shape[0]
-    n_try = 5 * n
+    p, w = 0.99, 0.5
+    n_try = int(log(1 - p) / log(1 - w**3)) # 5 * n
     best = 0
     best_x = np.zeros(1)
     best_y = np.zeros(1)
     indices = list(range(n))
-    for _ in range(n_try):
+    for i in range(n_try):
         shuffle(indices)
         index = indices[:3]
         x3 = x[index]   # three random points
@@ -227,12 +228,13 @@ def ransac_ellipse(x, y, r_tol=0.025):
         returns tuple x, y of filtered points
     """
     n = x.shape[0]
-    n_try = 5 * n
+    p, w = 0.99, 0.5
+    n_try = int(log(1 - p) / log(1 - w**5)) # 5 * n
     best = 0
     best_x = np.zeros(1)
     best_y = np.zeros(1)
     indices = list(range(n))
-    for _ in range(n_try):
+    for i in range(n_try):
         shuffle(indices)
         index = indices[:5]
         x5 = x[index]   # five random points
