@@ -401,6 +401,10 @@ if __name__ == "__main__":
         if re.search('^http[s]?://', cr.json['coo_rd']):
             rd_fix = HttpReader(url=cr.json['coo_rd'], ptys=['FIX'], \
                                 filt=['id', 'east', 'north', 'elev'])
+        elif re.search(r'\.txt$', cr.json['coo_rd']) or \
+             re.search(r'\.csv$', cr.json['coo_rd']):
+            rd_fix = CsvReader(fname=cr.json['coo_rd'], \
+                              filt=['id', 'east', 'north', 'elev'])
         else:
             rd_fix = GeoReader(fname=cr.json['coo_rd'], \
                                filt=['id', 'east', 'north', 'elev'])
@@ -418,7 +422,8 @@ if __name__ == "__main__":
         if re.search('^http[s]?://', cr.json['coo_rd']):
             rd_st = HttpReader(url=cr.json['coo_rd'], ptys=['STA'], \
                                filt=['id', 'east', 'north', 'elev'])
-        elif re.search(r'\.txt$', cr.json['coo_rd']) or re.search(r'\.csv$', cr.json['coo_rd']):
+        elif re.search(r'\.txt$', cr.json['coo_rd']) or \
+             re.search(r'\.csv$', cr.json['coo_rd']):
             rd_st = CsvReader(fname=cr.json['coo_rd'], \
                               filt=['id', 'east', 'north', 'elev'])
         else:
@@ -495,6 +500,10 @@ if __name__ == "__main__":
         if re.search('^http[s]?://', cr.json['coo_rd']):
             rd_mon = HttpReader(url=cr.json['coo_rd'], ptys=['MON'], \
                                 filt=['id', 'east', 'north', 'elev'])
+        elif re.search(r'\.txt$', cr.json['coo_rd']) or \
+             re.search(r'\.csv$', cr.json['coo_rd']):
+            rd_mon = CsvReader(fname=cr.json['coo_rd'], \
+                              filt=['id', 'east', 'north', 'elev'])
         else:
             rd_mon = GeoReader(fname=cr.json['coo_rd'], \
                                filt=['id', 'east', 'north', 'elev'])
