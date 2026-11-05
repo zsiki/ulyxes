@@ -30,7 +30,7 @@ Python 3.x & pip
 .. code:: bash
 
 	sudo apt-get install python3 python3-pip python3-dev
-	sudo pip3 install setuptools
+	 pip install setuptools
 
 
 PySerial (Serial communication to sensor)
@@ -38,11 +38,7 @@ PySerial (Serial communication to sensor)
 
 .. code:: bash
 
-	sudo pip3 install pyserial
-
-.. note::
-	You can remove *sudo* before *pip3* if you want install packages
-	for the actual user only. Using *sudo* all user can access them.
+	pip install pyserial
 
 On Linux the serial ports are protected. The root user and those are in the
 dialout group are able to read/write serial ports. To add yourself to the
@@ -58,21 +54,27 @@ PyBluez (Bluetooth communication to sensor)
 .. code:: bash
 	
 	sudo apt-get install bluetooth libbluetooth-dev
-	sudo pip3 install pybluez
+	pip install pybluez
+
+If pip install of pybluez failed with "error in PyBluez setup command: use_2to3 is invalid", try install from sources.
+
+.. code:: bash
+
+	pip install git+https://github.com/pybluez/pybluez.git#egg=pybluez
 	
 PyYaml (to read camera calibration data)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: bash
 
-	sudo pip3 install pyyaml
+	pip install pyyaml
 
 numpy (for camera applications)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: bash
 
-    sudo pip3 install numpy
+    pip install numpy
 	
 Matplotlib (to display camera/image ddata)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -111,8 +113,8 @@ folder.
 .. code:: bash
 
 	sudo apt-get install libopencv-dev 
-	sudo pip3 install opencv-python
-	sudo pip3 install opencv-contrib-python
+	pip install opencv-python
+	pip install opencv-contrib-python
 
 Wifi
 ~~~~
@@ -121,7 +123,7 @@ Optional used by WifiCollector class.
 
 .. code:: bash
 
-	sudo pip3 install wifi
+	pip install wifi
 	
 I2C interface
 ~~~~~~~~~~~~~
